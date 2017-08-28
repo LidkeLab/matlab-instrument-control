@@ -1,0 +1,686 @@
+classdef MIC_SPTCollect < MIC_Abstract
+    % MIC_SPTCollect Single Particle Tracking/Superresolution data collection
+    % software. Super resolution and Single Particle Tracking data collection
+    % class for SPT microscope Works with Matlab Instrument Control (MIC)
+    % classes since August 2017
+    
+    %  usage: SPT=MIC_SPTCollect();
+    %
+    % REQUIRES:
+    %   Matlab 2014b or higher MIC_Abstract MIC_LightSource_Abstract
+    %   MIC_AndorCamera MIC_TcubeLaserDiode MIC_CrystaLaser561 MIC_IX71Lamp
+    %   MIC_SyringePump MIC_ThorlabsIR MIC_ThorlabLED MIC_MCLNanoDrive
+    %   MIC_Reg3DTrans
+    %
+    % CITATION:
+    %   Hanieh Mazloom-Farsibaf   August 2017 (Keith A. Lidke's lab)
+    
+    properties
+        % Hardware objects
+        CameraObj;      % Andor Camera
+        IRCameraObj;    % Thorlabs IR Camera
+        StageObj;       % MCL Nano Drive
+        Laser638Obj;       % TCubeLaserDiode 638
+        Laser561Obj;       % Crystal Laser 561
+        Lamp850Obj;     % ThorlabLED Lamp for IRCamera
+        LampObj;        % IX71 Lamp
+        SyringePumpObj; % SyringePump for Tracking+Fixation
+        R3DObj;         % Reg3DTrans class
+        
+        % Camera params
+        ExpTime_Focus_Set=.01;          % Exposure time during focus Andor Camera
+        ExpTime_Sequence_Set=.01;       % Exposure time during sequence Andor Camera
+        ExpTime_Sequence_Actual=.002;
+        ExpTime_Capture=.05;
+        NumFrames=2000;                 % Number of frames per sequence
+        NumSequences=20;                % Number of sequences per acquisition
+        CameraGain=1;                   % Flag for adjusting camera Gain
+        CameraEMGainHigh=200;           % High camera gain value
+        CameraEMGainLow=2;              % Low camera gain value
+        CameraROI=1;                    % Camera ROI (see gui for specifics)
+        PixelSize;                      % Pixel size determined from calibration
+        IRExpTime_Focus_Set=0.01;       % Exposure time during focus IR Camera
+        IRExpTime_Sequence_Set=0.01;    % Exposure time during sequence IR Camera
+        IRCameraROI=1;                  % IRCamera ROI (see gui for specifics)
+        
+        % Light source params
+        Laser638Low;          % Low power 638 laser
+        Laser561Low;          % Low power 561 laser
+        Laser638High;         % High power 638 laser
+        Laser561High;         % High power 561 laser
+        LampPower;            % Power of lamp IX71
+        Lamp850Power;         % Power of lamp 850
+        Laser638Aq;           % Flag for using 638 laser during acquisition
+        Laser561Aq;           % Flag for using 561 laser during acquisition
+        LampAq;               % Flag for using lamp during acquisition
+        Lamp850Aq;            % Flag for using lamp 850 during acquisition
+        LampWait=0.5;         % Lamp wait time
+        focus638Flag=0;       % Flag for using 638 laser during focus
+        focus561Flag=0;       % Flag for using 561 laser during focus
+        focusLampFlag=0;      % Flag for using Lamp IX71 during focus
+        focusLamp850Flag=0;   % Flag for using Lamp 850 during focus
+        
+        % Other things
+        SaveDir='Y:\';  % Save Directory
+        BaseFileName='Cell1';   % Base File Name
+        AbortNow=0;     % Flag for aborting acquisition
+        RegType='None'; % Registration type, can be 'None', 'Self' or 'Ref'
+        SaveFileType='mat'  %Save to *.mat or *.h5.  Options are 'mat' or 'h5'
+        
+        
+        TimerAndor;
+        TimerSyringe;
+        TimerIRCamera;
+        tSyring_start
+        tIR_start
+        tIR_end
+        tAndor_start
+        tAndor_end
+        SyringeWaitTime
+        IRSequenceLength
+        sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
+%         or 'SRCollect'
+        
+    end
+    
+    properties (SetAccess = protected)
+        InstrumentName = 'SPTCollect'; % Descriptive name of "instrument"
+    end
+    
+    properties (Hidden)
+        StartGUI=false;       %Defines GUI start mode.  Set to false to prevent gui opening before hardware is initialized.
+    end
+    
+    methods
+        function obj=MIC_SPTCollect()
+            % MIC_SPT_Collect constructor
+            %   Constructs object and initializes all hardware
+            
+            % Enable autonaming feature of MIC_Abstract
+            obj = obj@MIC_Abstract(~nargout);
+            [p,~]=fileparts(which('MIC_SPTCollect'));
+            f=fullfile(p,'SPT_PixelSize.mat');
+            
+            % Initialize hardware objects
+            try
+                % Camera
+                fprintf('Initializing Camera\n')
+                obj.CameraObj=MIC_AndorCamera();
+                CamSet = obj.CameraObj.CameraSetting;
+                CamSet.FrameTransferMode.Bit=1;
+                CamSet.FrameTransferMode.Ind=2;
+                CamSet.BaselineClamp.Bit=1;
+                CamSet.VSSpeed.Bit=4;
+                CamSet.HSSpeed.Bit=0;
+                CamSet.VSAmplitude.Bit=2;
+                CamSet.PreAmpGain.Bit=2;
+                CamSet.EMGain.Value = obj.CameraEMGainHigh;
+                obj.CameraObj.setCamProperties(CamSet);
+                obj.CameraObj.setup_acquisition();
+                obj.CameraObj.ReturnType='matlab';
+                obj.CameraObj.DisplayZoom=4;
+                fprintf('Initializing IRCamera\n')
+                obj.IRCameraObj=MIC_ThorlabsIR();
+                % Stage
+                fprintf('Initializing Stage\n')
+                obj.StageObj=MIC_MCLNanoDrive();
+                % Lasers
+                fprintf('Initializing 638 laser\n')
+                obj.Laser638Obj=MIC_TCubeLaserDiode('64844789','Current',170,0,0)
+                obj.Laser638Low =0;
+                obj.Laser638High =170;
+                fprintf('Initializing 561 laser\n')
+                %                obj.Laser561Obj = MIC_CrystaLaser561('Dev1','Port0/Line0:1');
+                %                 obj.Laser561Low= ; obj.Laser561High= ;
+                % Lamp 850
+                fprintf('Initializing lamp 850\n')
+                obj.Lamp850Obj=MIC_ThorlabsLED('Dev1','ao1');
+                obj.Lamp850Power = 50;
+                % Lamp IX71
+                fprintf('Initializing lamp\n')
+                obj.LampObj=MIC_IX71Lamp('Dev1','ao0','Port0/Line0');
+                obj.LampPower = 50;
+                %Syringe Pump
+                fprintf('Initializing Syringe Pump\n')
+                obj.SyringePumpObj=MIC_SyringePump;
+                                
+                % Registration object
+                fprintf('Initializing Registration object\n')
+                if exist(f,'file')
+                    a=load(f);
+                    obj.PixelSize=a.PixelSize;
+                    clear a;
+                end
+                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
+                obj.R3DObj.LampPower=obj.LampPower;
+                obj.R3DObj.LampWait=2.5;
+                obj.R3DObj.CamShutter=true;
+                obj.R3DObj.ChangeEMgain=true;
+                obj.R3DObj.EMgain=2;
+                obj.R3DObj.ChangeExpTime=true;
+                obj.R3DObj.ExposureTime=0.01;
+            catch ME
+                ME
+                error('hardware startup error');
+                
+            end
+            
+            %Set save directory
+            user_name = java.lang.System.getProperty('user.name');
+            timenow=clock;
+%             obj.SaveDir=sprintf('Y:\\%s%s%02.2g-%02.2g-%02.2g\\',user_name,filesep,timenow(1)-2000,timenow(2),timenow(3));
+            
+            % Start gui (not using StartGUI property because GUI shouldn't
+            % be started before hardware initialization)
+            obj.gui();
+        end
+        
+        function delete(obj)
+            %delete all objects
+            if ishandle(obj.GuiFigure)
+                disp('Closing GUI...');
+                delete(obj.GuiFigure)
+            end
+            disp('Deleting Lamp...');
+            delete(obj.Lamp850Obj);
+            disp('Deleting Laser 638...');
+            delete(obj.LaserObj);
+            disp('Deleting Stage...');
+            delete(obj.StageObj);
+            disp('Deleting Camera...');
+            delete(obj.CameraObj);
+            disp('Deleting IR Camera');
+            delete(obj.IRCameraObj);
+            disp('Deleting Syringe Pump')
+            delete(obj.SyringePumpObj)
+            disp('Turn off MCl Nanodriver and Laser 638 manually!')
+            close all force;
+            clear;
+        end
+        
+        %registration channel function loadref(obj)
+        function loadref(obj)
+            % Load reference image file
+            [a,b]=uigetfile('*.mat','Select Reference File',obj.SaveDir);
+            if ~a
+                return
+            end
+            obj.R3DObj.RefImageFile = fullfile(b,a);
+            tmp=load(obj.R3DObj.RefImageFile,'Image_Reference');
+            obj.R3DObj.Image_Reference=tmp.Image_Reference;
+        end
+    
+    function takecurrent(obj)
+    % captures and displays current image
+    obj.LampObj.setPower(obj.LampPower);
+    obj.R3DObj.getcurrentimage();
+    end
+    
+    function align(obj)
+    % Align to current reference image
+    obj.LampObj.setPower(obj.LampPower);
+    obj.R3DObj.align2imageFit();
+    end
+    
+    function showref(obj)
+    % Displays current reference image
+    dipshow(obj.R3DObj.Image_Reference);
+    end
+    
+    function takeref(obj)
+    % Captures reference image obj.setLampPower();
+    obj.R3DObj.takerefimage();
+    end
+    
+    function saveref(obj)
+    % Saves current reference image obj.R3DObj.saverefimage();
+    end
+    
+    function focusLow(obj)
+    % Focus function using the low laser settings
+    CamSet=obj.CameraObj.CameraSetting;
+    CamSet.EMGain.Value = obj.CameraEMGainHigh;
+    obj.CameraObj.setCamProperties(CamSet);
+    %        Lasers set up to 'low' power setting
+    if obj.focus638Flag
+        obj.Laser638Obj.setPower(obj.Laser638Low);
+        obj.Laser638Obj.on;
+    else
+        obj.Laser638Obj.off;
+    end
+%     if obj.focus561Flag
+%         obj.Laser561Obj.setPower(obj.Laser561Low); 
+%         obj.Laser561Obj.on;
+%     else
+%         obj.Laser561Obj.off;
+%     end
+    %
+    % Aquiring and displaying images
+    obj.CameraObj.ROI=obj.getROI('Andor');
+    obj.CameraObj.ExpTime_Focus=obj.ExpTime_Focus_Set;
+    obj.CameraObj.AcquisitionType = 'focus';
+    obj.CameraObj.setup_acquisition();
+    out=obj.CameraObj.start_focus();
+    % Turning lasers off
+    obj.Laser638Obj.off;
+    %             obj.Laser561.off;
+    obj.LampObj.off;
+    obj.Lamp850Obj.off;
+    end
+    
+    function focusHigh(obj)
+    % Focus function using the high laser settings
+    CamSet=obj.CameraObj.CameraSetting;
+    CamSet.EMGain.Value = obj.CameraEMGainHigh;
+    obj.CameraObj.setCamProperties(CamSet);
+    %        Lasers set up to 'high' power setting
+    if obj.focus638Flag
+        obj.Laser638Obj.setPower(obj.Laser638High);
+        obj.Laser638Obj.on;
+    else
+        obj.Laser638Obj.off;
+    end
+%     if obj.focus561Flag
+%         obj.Laser561Obj.setPower(obj.Laser561High);
+%         obj.Laser561Obj.on;
+%     else
+%         obj.Laser561Obj.off;
+%     end
+    
+    % Aquiring and displaying images
+    obj.CameraObj.ROI=obj.getROI('Andor');
+    obj.CameraObj.ExpTime_Focus=obj.ExpTime_Focus_Set;
+    obj.CameraObj.AcquisitionType = 'focus';
+    obj.CameraObj.setup_acquisition();
+    out=obj.CameraObj.start_focus();
+    % Turning lasers off
+    obj.Laser638Obj.off;
+%     obj.Laser561Obj.off;
+    end
+    
+    function setLampPower(obj,LampPower_in)
+    % sets Lamp power to input value
+    if nargin<2
+        obj.LampObj.setPower(obj.LampPower);
+    else
+        obj.LampObj.setPower(LampPower_in);
+    end
+    obj.LampPower=obj.LampObj.Power;
+    end
+    
+    function focusLamp(obj)
+    % Continuous display of image with lamp on. Useful for focusing
+    % of the microscope.
+    CamSet = obj.CameraObj.CameraSetting;
+    %put Shutter back to auto
+    CamSet.ManualShutter.Bit=0;
+    %obj.CameraObj.setCamProperties(CamSet);
+    CamSet.EMGain.Value = obj.CameraEMGainLow;
+    obj.CameraObj.setCamProperties(CamSet);
+    obj.LampObj.setPower(obj.LampPower);
+    obj.LampObj.on;
+    obj.CameraObj.ROI=obj.getROI('Andor');
+    obj.CameraObj.ExpTime_Focus=obj.ExpTime_Focus_Set;
+    obj.CameraObj.AcquisitionType = 'focus';
+    obj.CameraObj.setup_acquisition();
+    obj.CameraObj.start_focus();
+    %dipshow(out);
+    CamSet.EMGain.Value = obj.CameraEMGainHigh;
+    obj.CameraObj.setCamProperties(CamSet);
+    obj.LampObj.off;
+    %           pause(obj.LampWait);
+    end
+    
+    % this is for Lamp 850 and IRCamera
+    function focusLamp850(obj)
+    % Continuous display of image with lamp on. Useful for focusing
+    % of the microscopeon IRCamera
+    obj.Lamp850Obj.setPower(obj.Lamp850Power);
+    obj.LampObj.on;
+    obj.IRCameraObj.ROI=obj.getROI('IRThorlabs');
+    obj.IRCameraObj.ExpTime_Focus=obj.IRExpTime_Focus_Set;
+    %             obj.IRCameraObj.AcquisitionType = 'focus';
+    obj.IRCameraObj.start_focus();
+    %dipshow(out);
+    obj.Lamp850Obj.off;
+    %           pause(obj.LampWait);
+    end
+    
+    function StartSequence(obj,guihandles)
+    
+    %create save folder and filenames
+    if ~exist(obj.SaveDir,'dir');mkdir(obj.SaveDir);end
+    
+    delete(timerfindall)
+    timenow=clock;
+    s=['-' num2str(timenow(1)) '-' num2str(timenow(2))  '-' num2str(timenow(3)) '-' num2str(timenow(4)) '-' num2str(timenow(5)) '-' num2str(round(timenow(6)))];
+    
+    %first take a reference image or align to image
+    obj.LampObj.setPower(obj.LampPower);
+    switch obj.RegType
+        case 'Self' %take and save the reference image
+            obj.R3DObj.takerefimage();
+            f=fullfile(obj.SaveDir,[obj.BaseFileName s '_ReferenceImage']);
+            Image_Reference=obj.R3DObj.Image_Reference; %#ok<NASGU>
+            save(f,'Image_Reference');
+    end
+    
+    switch obj.SaveFileType
+        case 'mat'
+        case 'h5'
+            FileH5=fullfile(obj.SaveDir,[obj.BaseFileName s '.h5']);
+            MIC_H5.createFile(FileH5);
+            MIC_H5.createGroup(FileH5,'Data');
+            MIC_H5.createGroup(FileH5,'Data/Channel01');
+        otherwise
+            error('StartSequence:: unknown file save type')
+    end
+    
+    %loop over sequences
+    for nn=1:obj.NumSequences
+        if obj.AbortNow; obj.AbortNow=0; break; end
+        
+        nstring=strcat('Acquiring','...',num2str(nn),'/',num2str(obj.NumSequences));
+        set(guihandles.Button_ControlStart, 'String',nstring,'Enable','off');
+        
+        %align to image
+        switch obj.RegType
+            case 'None'
+            otherwise
+                obj.R3DObj.align2imageFit();
+        end
+        
+        %Setup laser for aquisition
+        if obj.Laser638Aq
+            obj.Laser638Obj.setPower(obj.Laser638High);
+            obj.Laser638Obj.on;
+        end
+        if obj.Laser561Aq
+            obj.Laser561Obj.setPower(obj.Laser561High);
+            obj.Laser561Obj.on;
+        end
+        
+        if obj.LampAq
+            obj.LampObj.setPower(obj.LampPower);
+            obj.LampObj.on;
+        end
+        
+        if obj.Lamp850Aq
+            obj.Lamp850Obj.setPower(obj.LampPower);
+            obj.Lamp850Obj.on;
+        end
+        
+        %Setup Camera
+        CamSet = obj.CameraObj.CameraSetting;
+        CamSet.EMGain.Value = obj.CameraEMGainHigh;
+        switch obj.CameraGain
+            case 1 %Low pre-amp gain
+                CamSet.PreAmpGain.Bit=2;
+            case 2 %high pre-amp gain
+               
+        end
+        obj.CameraObj.setCamProperties(CamSet);
+        obj.CameraObj.ExpTime_Sequence=obj.ExpTime_Sequence_Set;
+        obj.CameraObj.SequenceLength=obj.NumFrames;
+        obj.CameraObj.ROI=obj.getROI('Andor');
+        
+        %Collect
+        % For SPT microscope there are two pahses for imaging:
+        % 1)normal SRCollect: for supperresolution and tracking
+        % 2)SPTCollect: for tracking+superresolution in consecutive order
+        % using SyringePump
+        if  strcmp(obj.sequenceType,'SRCollect')
+            sequence=obj.CameraObj.start_sequence();
+            
+            
+        elseif strcmp(obj.sequenceType,'Tracking+SRCollect');
+        
+                    %Setup IRCamera
+                    obj.IRCameraObj.ROI=obj.getROI('IRThorlabs')
+                    obj.IRCameraObj.ExpTime_Sequence=obj.IRExpTime_Sequence_Set;
+                    % time should be long to cover all process after
+                    % syringe pump for 5min=0.01*30000
+                    obj.IRCameraObj.SequenceLength=50;
+                    obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
+                                  
+                    %set timer for IRcamera
+                    obj.TimerIRCamera=timer('StartDelay',0.01);
+                    obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
+%                     obj.TimerAndor=timer('StartDelay',0.001);
+%                     obj.TimerAndor.TimerFcn={@AndorCamerasequenceTimerFcn,obj.CameraObj}
+
+                    %set timer for SyringePump
+                    obj.SyringeWaitTime=obj.ExpTime_Sequence_Set*obj.NumFrames;
+% obj.SyringeWaitTime=1;
+                    obj.TimerSyringe=timer('StartDelay',obj.SyringeWaitTime);
+                    obj.TimerSyringe.TimerFcn={@SyringeTimerRun,obj.SyringePumpObj};
+                    
+%                     
+                    start(obj.TimerSyringe)
+%                     obj.tSyring_start=obj.SyringePumpObj.T_start_syringe;
+%                     
+                    %Collect
+%                     fprintf('Andor is running...\n')
+                    %                     s=obj.TimerSyringe.Running
+                    % if strcmp(s,'off')
+                    %     error ('hi')
+                    % end
+                    %                                         obj.tIR_start=clock();
+                    fprintf('1111111111\n')
+                    
+                    
+                    
+                    obj.tIR_start=clock();
+                    start(obj.TimerIRCamera);
+
+                   obj.tAndor_start=clock();
+                    sequence=obj.CameraObj.start_sequence();
+                                        obj.tAndor_end=clock();
+
+                    fprintf('222222222\n')
+                    %                     start(obj.TimerAndor)
+                    
+                    %                                         sequence=obj.CameraObj.start_sequence();
+
+                                        fprintf('33333333333\n')
+
+%                                         obj.tAndor_start=clock()
+                    %obj.IRCamera.start_sequence();
+                    %start(obj.TimerIRCamera)
+                     
+%                     start(obj.TimerSyringe)
+
+                    obj.tSyring_start=obj.SyringePumpObj.T_start_syringe;
+                    % start(obj.TimerIRCamera)
+                    % obj.IRCamera.start_sequence();
+                    % obj.tAndor_start=clock()
+
+                    %                     sequence=obj.CameraObj.start_sequence();
+                    ;
+                    %                     start(obj.TimerIRCamera)
+                    %                     obj.IRCamera.start_sequence();
+                    fprintf('IRCamera is finished...\n')
+                    %                     start(obj.TimerIRCamera)
+                    % obj.IRCamera.start_sequence();
+                    %                     DataIR=obj.IRCamera.Data;
+
+
+%                                                            obj.tIR_end=clock();
+% 
+                    
+                                        
+
+
+
+
+                    
+
+                    
+                    %                     %turn on the syringe pump
+                    %                     SyringeWaitTime=obj.ExpTime_Sequence_Set*obj.NumFrames;
+                    %                     obj.TimerSyringe=timer('StartDelay',SyringeWaitTime);
+                    %                     %                       obj.TimerSyringe.StartFcn={@SyringeTimerRun,obj.SyringePumpObj};
+                    %                     %                       obj.TimerSyringe.StopFcn={@SyringeTimerStop,obj.SyringePumpObj};
+                    %                     obj.TimerSyringe.TimerFcn={@SyringeTimerRun,obj.SyringePumpObj};
+                    %                     start(obj.TimerSyringe)
+                    
+
+                    %Save
+                   
+                    
+                    
+
+                 
+                    
+
+        end 
+        
+        %Turn off Laser
+        obj.Laser638Obj.off;
+%         obj.Laser561Obj.off;
+        obj.LampObj.off;
+        obj.Lamp850Obj.off;
+        
+          if isempty(sequence)
+                        errordlg('Window was closed before capture complete.  No Data Saved.','Capture Failed');
+                        return;
+                    end
+
+        %Save
+        switch obj.SaveFileType
+            case 'mat'
+                fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
+                Params=exportState(obj); %#ok<NASGU>
+                save(fn,'sequence','Params');
+            case 'h5' %This will become default
+                S=sprintf('Data%04d',nn)
+                MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
+            otherwise
+                error('StartSequence:: unknown SaveFileType')
+        end
+    end
+    
+    switch obj.SaveFileType
+        case 'mat'
+            %Nothing to do
+        case 'h5' %This will become default
+            S='MIC_TIRF_SRcollect';
+            MIC_H5.createGroup(FileH5,S);
+            obj.save2hdf5(FileH5,S);  %Not working yet
+        otherwise
+            error('StartSequence:: unknown SaveFileType')
+    end
+    
+    end
+    
+    
+    function ROI=getROI(obj,CameraIndex)
+    %these could be set from camera size;
+    if nargin <2
+        error('Choose type of Camera')
+    end
+    switch CameraIndex
+        case 'IRThorlabs'
+            DimX=obj.IRCameraObj.XPixels;
+            DimY=obj.IRCameraObj.YPixels;
+            cameraROI=obj.IRCameraROI;
+        case 'Andor'
+            DimX=obj.CameraObj.XPixels;
+            DimY=obj.CameraObj.YPixels;
+            cameraROI=obj.CameraROI;
+    end
+    switch cameraROI
+        
+        case 1
+            ROI=[1 DimX 1 DimY]; %full
+        case 2
+            ROI=[1 round(DimX/2) 1 DimY];%left
+        case 3
+            ROI=[round(DimX/2)+1 DimX 1 DimY];%right
+        case 4  %Center Left
+            ROI=[1 round(DimX/2) round(DimX/4)+1 round(DimX*3/4)];
+        case 5
+            ROI=[round(DimX/2)+1 DimX round(DimX/4)+1 round(DimX*3/4)];% right center
+        case 6
+            ROI=[1 DimX round(DimX/4)+1 round(DimX*3/4)];% center horizontally
+        case 7
+            ROI=[1 DimX round(DimX*3/8)+1 round(DimX*5/8)];% center horizontally half
+        otherwise
+            error('SRcollect: ROI not found')
+    end
+    end
+    
+    function [Attributes,Data,Children] = exportState(obj)
+    % exportState Exports current state of all hardware objects and
+    % SRcollect settings
+    
+    % Children
+    [Children.Camera.Attributes,Children.Camera.Data,Children.Camera.Children]=...
+        obj.CameraObj.exportState();
+    
+    [Children.IRCameraObj.Attributes,Children.IRCameraObj.Data,Children.IRCameraObj.Children]=...
+        obj.IRCameraObj.exportState();
+    
+    [Children.Stage.Attributes,Children.Stage.Data,Children.Stage.Children]=...
+        obj.StageObj.exportState();
+    
+    [Children.Laser638Obj.Attributes,Children.Laser638Obj.Data,Children.Laser638Obj.Children]=...
+        obj.Laser638Obj.exportState();
+    
+%     [Children.Laser561Obj.Attributes,Children.Laser561Obj.Data,Children.Laser561Obj.Children]=...
+%         obj.Laser561Obj.exportState();
+%     
+    [Children.Lamp.Attributes,Children.Lamp.Data,Children.Lamp.Children]=...
+        obj.LampObj.exportState();
+    
+    [Children.Lamp850.Attributes,Children.Lamp850.Data,Children.Lamp850.Children]=...
+        obj.Lamp850Obj.exportState();
+    
+    [Children.Reg3D.Attributes,Children.Reg3D.Data,Children.Reg3D.Children]=...
+        obj.R3DObj.exportState();
+    
+    
+    
+    % Our Properties
+    Attributes.ExpTime_Focus_Set = obj.ExpTime_Focus_Set;
+    Attributes.ExpTime_Sequence_Set = obj.ExpTime_Sequence_Set;
+    Attributes.NumFrames = obj.NumFrames;
+    Attributes.NumSequences = obj.NumSequences;
+    Attributes.CameraGain = obj.CameraGain;
+    Attributes.CameraEMGainHigh = obj.CameraEMGainHigh;
+    Attributes.CameraEMGainLow = obj.CameraEMGainLow;
+    Attributes.CameraROI = obj.getROI('Andor');
+    Attributes.CameraPixelSize=obj.PixelSize;
+    Attributes.IRExpTime_Focus_Set=obj.IRExpTime_Focus_Set;
+    Attributes.IRExpTime_Sequence_Set=obj.IRExpTime_Sequence_Set;
+    Attributes.IRCameraROI=obj.getROI('IRThorlabs');
+        
+    Attributes.SaveDir = obj.SaveDir;
+    Attributes.RegType = obj.RegType;
+    
+    % light source properties
+    Attributes.Laser638Low = obj.Laser638Low;
+%     Attributes.Laser561Low = obj.Laser561Low;
+    Attributes.Laser638High = obj.Laser638High;
+%     Attributes.Laser561High = obj.Laser561High;
+    Attributes.LampPower = obj.LampPower;
+    Attributes.Lamp850Power = obj.Lamp850Power;
+%     Attributes.Laser561Aq = obj.Laser561Aq;
+    Attributes.Laser638Aq = obj.Laser638Aq;
+    Attributes.LampAq = obj.LampAq;
+    Attributes.Lam850pAq = obj.Lamp850Aq;
+    
+    Data=[];
+    end
+end
+
+methods (Static)
+    
+    function State = unitTest()
+        State = obj.exportState();
+    end
+    
+end
+end
+
+
