@@ -300,9 +300,9 @@ properties2gui();
      function Start_SPT(~,~)
         gui2properties();
         [temp status]=obj.CameraObj.call_temperature
-%         if status==2
-%         error('Camera is cooling down! Please wait for a few mintues!')
-%         end 
+        if status==2
+        error('Camera is cooling down! Please wait for a few mintues!')
+        end 
         set(handles.Button_ControlStart, 'String','Acquiring','Enable','off');
         obj.sequenceType='Tracking+SRCollect';
         obj.StartSequence(handles);
