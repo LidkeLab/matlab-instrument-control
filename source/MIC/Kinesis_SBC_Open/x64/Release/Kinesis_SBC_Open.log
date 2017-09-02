@@ -1,0 +1,21 @@
+﻿Build started 5/17/2017 2:35:42 PM.
+     1>Project "C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\Kinesis_SBC_Open.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt mexFunction.cpp
+         mexFunction.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\x64\Release\Kinesis_SBC_Open.mexw64" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\Program Files\Thorlabs\Kinesis" libmex.lib libmat.lib libmx.lib Thorlabs.MotionControl.Benchtop.StepperMotor.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /DEF:"matlab.def" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\x64\Release\Kinesis_SBC_Open.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\x64\Release\Kinesis_SBC_Open.lib" /MACHINE:X64 /DLL x64\Release\mexFunction.obj
+            Creating library C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\x64\Release\Kinesis_SBC_Open.lib and object C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\x64\Release\Kinesis_SBC_Open.exp
+         Generating code
+         Finished generating code
+         Kinesis_SBC_Open.vcxproj -> C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\x64\Release\Kinesis_SBC_Open.mexw64
+       PostBuildEvent:
+         xcopy /y /f  "C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\x64\Release\*.mexw64" "../../../mex64\"
+         :VCEnd
+         C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\x64\Release\Kinesis_SBC_Open.mexw64 -> C:\Users\lidkelab\Documents\MATLAB\MIC\development\mex64\Kinesis_SBC_Open.mexw64
+         1 File(s) copied
+     1>Done Building Project "C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\Kinesis_SBC_Open\Kinesis_SBC_Open.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.57
