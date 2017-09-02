@@ -34,6 +34,7 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	char * input_buf = mxArrayToString(prhs[0]);
 	//mexPrintf("%s\n", input_buf);
 
+	PCC_StopPolling(input_buf);
 	PCC_Close(input_buf);
 	
 
