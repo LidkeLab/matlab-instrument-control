@@ -132,7 +132,7 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.Laser642High = obj.Laser642.MaxPower;
                 % Lamp
                 fprintf('Initializing lamp\n')
-                obj.LampObj=MIC_IX71Lamp('Dev1','ao3');
+                obj.LampObj=MIC_IX71Lamp('Dev1','ao3','Port0/Line12');
                 obj.LampPower = 50;
                 % Registration object
                 fprintf('Initializing Registration object\n')
