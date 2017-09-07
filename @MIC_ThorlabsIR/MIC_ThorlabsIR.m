@@ -222,7 +222,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     out=dip_image(out,'uint8');
                 case 'matlab'
             end
-            dipshow(permute(out,[2 1]));
+%             dipshow(permute(out,[2 1]));
         end
         function start_sequence(obj)
             obj.AcquisitionType='sequence';

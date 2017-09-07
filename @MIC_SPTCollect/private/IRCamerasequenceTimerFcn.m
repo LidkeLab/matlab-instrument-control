@@ -2,7 +2,7 @@ function IRCamerasequenceTimerFcn(obj,event,IRCamera)
 fprintf('IR starts!!!!\n')
 % IRCamera.tIR_start=clock();
 % tic
-                IRCamera.start_sequence_SR();
+                IRCamera.start_sequence();
 % IRCamera.tIR_end=clock();
 % IRCamera.t_period=toc
 % end 

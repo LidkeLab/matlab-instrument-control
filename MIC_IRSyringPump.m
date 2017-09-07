@@ -29,7 +29,7 @@ classdef MIC_IRSyringPump < MIC_ThorlabsIR
             obj.AbortNow=0;
             %init empty array
             for ii=1:obj.SequenceLength
-                ii;
+                ii
                 if ii==obj.SPwaitTime
                     obj.SP.run
                     

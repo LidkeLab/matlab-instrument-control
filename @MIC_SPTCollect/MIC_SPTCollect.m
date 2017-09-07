@@ -158,9 +158,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
                 
-                %Active Stabilization 
-                obj.ActRegObj=MIC_ActiveReg3D_SPT(obj.IRCameraObj,obj.StageObj);
-                obj.ActRegObj.PixelSize=obj.PixelSize;
+               
             catch ME
                 ME
                 error('hardware startup error');
@@ -368,19 +366,26 @@ classdef MIC_SPTCollect < MIC_Abstract
             end
             %define IRCameraObj from different classes if SPT+SR is running
             if strcmp(obj.sequenceType,'Tracking+SRCollect');
-                obj.IRCameraObj.delete;
-                obj.IRCameraObj=MIC_IRSyringPump();
-                obj.ActiveRegCheck=0;
+                if ~isempty(obj.IRCameraObj)
+                    obj.IRCameraObj.delete;
+                end
+             obj.IRCameraObj=MIC_IRSyringPump();
+                    obj.ActiveRegCheck=0;    
             end
             if strcmp(obj.sequenceType,'SRCollect');
-                if isempty(obj.IRCameraObj)
-                    obj.IRCameraObj=MIC_ThorlabsIR();
+                if ~isempty(obj.IRCameraObj)
+                    obj.IRCameraObj.delete;
+                                        obj.IRCameraObj=[];
                 end
+                    obj.IRCameraObj=MIC_ThorlabsIR();
             end
             %
             %set Active Stabilization
             if obj.ActiveRegCheck==1
                 %setup Lamp850
+                 %Active Stabilization 
+                obj.ActRegObj=MIC_ActiveReg3D_SPT(obj.IRCameraObj,obj.StageObj);
+                obj.ActRegObj.PixelSize=obj.PixelSize;
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on
                 obj.ActRegObj.takeRefImageStack;
@@ -515,7 +520,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
                    
                     %set timer for SyringePump
-                    obj.SyringeWaitTime=obj.ExpTime_Sequence_Set*obj.NumFrames;
+                    obj.SyringeWaitTime=obj.ExpTime_Sequence_Set*obj.NumFrames+20;
                     obj.IRCameraObj.SPwaitTime=obj.SyringeWaitTime;
                     start(obj.TimerIRCamera);
                     sequence=obj.CameraObj.start_sequence();
@@ -525,9 +530,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.IRCameraObj.SP.stop
                     fprintf('Syringe Pump is stopped\n')
                     
-                    %clear IRCamera
-                    obj.IRCameraObj.delete();
-                    obj.IRCameraObj=[];
+%                     %clear IRCamera
+%                     obj.IRCameraObj.delete();
+%                     obj.IRCameraObj=[];
                 end
                 
                 %Turn off Laser
