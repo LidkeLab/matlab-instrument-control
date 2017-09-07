@@ -361,11 +361,16 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 Zshift=Zfit-Pos(3);
                 Pos(3)=Pos(3) + (sign(real(Zshift))*min(abs(real(Zshift)),obj.MaxZShift));
                 obj.StageObj.setPosition(Pos);
-                
+                fprintf('Beofre X,Y')
+                Pos
                 %find XY position and adjust
                 [Xshift,Yshift]=findXYShift(obj);
-                Pos(1)=Pos(1)+sign(Xshift)*min(abs(Xshift),obj.MaxXYShift);
-                Pos(2)=Pos(2)+sign(Yshift)*min(abs(Yshift),obj.MaxXYShift);
+                Xshift
+                Yshift
+                Pos(1)=Pos(1)+sign(-Xshift)*min(abs(Xshift),obj.MaxXYShift);
+                Pos(2)=Pos(2)+sign(-Yshift)*min(abs(Yshift),obj.MaxXYShift);
+                fprintf('After X,Y')
+                Pos
                 obj.StageObj.setPosition(Pos);
                 
                 %show overlay
