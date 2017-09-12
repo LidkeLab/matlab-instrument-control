@@ -55,8 +55,8 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         ExposureTimeLaserFocus=.2;
         ExposureTimeSequence=.01;
         ExposureTimeCapture=.2;
-        NumberOfFrames=4000;
-        NumberOfIterations=5; 
+        NumberOfFrames=2000;
+        NumberOfIterations=1; 
         NumberOfPhotoBleachingIterations=8;
         StabPeriod=5;   %Time between stabilization events (seconds)
         GridCorner=[1 1]    %10x10 Full Frame Grid Corner (mm)
@@ -139,7 +139,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.setup_FlipMountTTL('Dev3','Port0/Line0');
             obj.setup_ShutterTTL('Dev3','Port0/Line1');
             obj.Align_Reg=MIC_SeqReg3DTrans(obj.SCMOS,obj.Stage_Piezo_X,obj.Stage_Piezo_Y,obj.Stage_Piezo_Z,obj.Stage_Stepper); %new FF
-            obj.Align_Reg.PixelSize=0.1248;% micron (IR camera)
+            obj.Align_Reg.PixelSize=0.104;% micron (SCMOS camera)
             obj.unloadSample(); % to take the stage down enought so use can mount the sample
             %Open GUIs
                        
@@ -783,7 +783,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                     RefStruct=F.RefStruct;
                     if (obj.UseManualFindCell)&&(nn==StartCell)
                         S=obj.findCoverSlipOffset_Manual(RefStruct);
-                        obj.CoverSlipOffset
+                        obj.CoverSlipOffset;
                         if ~S;return;end
                     end
                     
