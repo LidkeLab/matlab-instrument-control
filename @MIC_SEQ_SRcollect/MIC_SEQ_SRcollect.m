@@ -262,7 +262,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.Stage_Piezo_X.center();
             obj.Stage_Piezo_Y.center();
             obj.Stage_Piezo_Z.center();
-%             obj.gui_Stage();
+            obj.gui_Stage();
             
             P0=RefStruct.StepperPos;
             obj.Stage_Stepper.moveToPosition(2,P0(1)) %new %y
@@ -682,7 +682,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.Lamp_660.setPower(0);
             
             %Setup Stabilization
-            obj.Active_Reg=ActiveReg3D(obj.IRCamera,obj.Stage_Piezo_X,obj.Stage_Piezo_Y,obj.Stage_Piezo_Z); %new
+            obj.Active_Reg=MIC_ActiveReg3D_Seq(obj.IRCamera,obj.Stage_Piezo_X,obj.Stage_Piezo_Y,obj.Stage_Piezo_Z); %new
             obj.Lamp_850.on; 
             obj.Lamp_850.setPower(obj.Lamp_850_Power);
             obj.IRCamera_ExposureTime=obj.IRCamera.ExpTime_Capture;

@@ -1,4 +1,4 @@
-classdef MIC_ActiveReg3D < handle
+classdef ActiveReg3D < handle
    properties
         CameraObj
        % StageObj %old
