@@ -51,8 +51,7 @@ classdef MIC_ActiveReg3D_Seq < handle
     end 
     methods
         
-        %function obj=ActiveReg3D(CameraObj,StageObj) %old
-         function obj=ActiveReg3D(CameraObj,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z) %new
+         function obj=MIC_ActiveReg3D_Seq(CameraObj,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z) %new
             %obj.StageObj=StageObj; old
             obj.Stage_Piezo_X=Stage_Piezo_X; %new
             obj.Stage_Piezo_Y=Stage_Piezo_Y; %new
