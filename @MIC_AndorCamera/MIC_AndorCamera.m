@@ -378,7 +378,9 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                     out=[];
                     break
                 end
-                obj.LastError=WaitForAcquisition;
+                fprintf('about to  WaitForAcquisition\n') 
+                obj.LastError=WaitForAcquisition();
+                fprintf('finished WaitForAcquisition\n')
                 obj.errorcheck('WaitForAcquisition');
                 obj.displaylastimage;
                 [obj.LastError, aqstatus]= AndorGetStatus; 

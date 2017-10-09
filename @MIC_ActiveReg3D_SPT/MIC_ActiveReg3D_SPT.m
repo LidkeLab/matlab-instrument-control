@@ -201,8 +201,8 @@ classdef MIC_ActiveReg3D_SPT < handle     %MIC_Abstract
             %Take new image, find XY position and adjust
             [Xshift,Yshift]=findXYShift(obj);
             obj.ErrorSignal(1:2)=[Xshift,Yshift]; % define error signal
-            obj.Correction(1)=sign(obj.ErrorSignal(1))*min(obj.MaxXYShift,abs(obj.ErrorSignal(1)));
-            obj.Correction(2)=sign(obj.ErrorSignal(2))*min(obj.MaxXYShift,abs(obj.ErrorSignal(2)));
+            obj.Correction(1)=sign(-obj.ErrorSignal(1))*min(obj.MaxXYShift,abs(obj.ErrorSignal(1)));
+            obj.Correction(2)=sign(-obj.ErrorSignal(2))*min(obj.MaxXYShift,abs(obj.ErrorSignal(2)));
             X(1:2)=X(1:2)+obj.Correction(1:2);
             obj.PosPostCorrect=X;
             

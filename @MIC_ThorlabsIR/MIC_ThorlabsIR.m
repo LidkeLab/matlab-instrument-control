@@ -52,7 +52,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
         Binning;            %   [binX binY]
         Data;               %   last acquired data
         ExpTime_Focus=.1;      %   focus mode exposure time
-        ExpTime_Capture=.1;    %   capture mode exposure time
+        ExpTime_Capture=.2;    %   capture mode exposure time
         ExpTime_Sequence=.1;   %   sequence mode expsoure time
         ROI;                %   [Xstart Xend Ystart Yend]
         SequenceLength;     %   Kinetic Series length
@@ -76,19 +76,23 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
             obj.Cam.Acquisition.Stop;
         end
         
-        function out=getlastimage(obj)
+        function out1=getlastimage(obj)
             if isempty(obj.ROI)
                 obj.ROI=[1,obj.XPixels,1,obj.YPixels];
             end
             
             [a,b]=obj.Cam.Memory.CopyToArray(obj.MemID);
             ImageElements=obj.ImageSize(1)*obj.ImageSize(2);
-            bPrime=single(b);
-            bPrime=bPrime(1:ImageElements);
-            out=reshape(bPrime,obj.ImageSize(1),obj.ImageSize(2)); %%% i should
-            %%%change it to reshape (single(b),obj.ROI(2), ...)but I need
-            %%%to chaneg line 126 as well.
-            %   %%%          aa=dip_image(out,'uint8')
+            bPrime=reshape(single(b),[obj.XPixels,obj.YPixels]); 
+            out=bPrime(obj.ROI(1):obj.ROI(2),obj.ROI(3):obj.ROI(4));
+            out1=flip(flip(out,2),1); % to have the same image with Andor, Only in SPT
+            %  
+%             bPrime=single(b);
+%             bPrime=bPrime(1:ImageElements);
+%             out=reshape(bPrime,obj.ImageSize(1),obj.ImageSize(2)); %%% i should
+%             %%%change it to reshape (single(b),obj.ROI(2), ...)but I need
+%             %%%to chaneg line 126 as well.
+%             %   %%%          aa=dip_image(out,'uint8')
         end
         
         function out=getdata(obj)
@@ -222,7 +226,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     out=dip_image(out,'uint8');
                 case 'matlab'
             end
-%             dipshow(permute(out,[2 1]));
+            %dipshow(permute(out,[2 1]));
         end
         function start_sequence(obj)
             obj.AcquisitionType='sequence';
@@ -230,7 +234,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
             if isempty(obj.ROI)
                 obj.ROI=[1,obj.XPixels,1,obj.YPixels];
             end
-            obj.Data=zeros(obj.ROI(2),obj.ROI(4),obj.SequenceLength);
+            obj.Data=zeros(obj.ROI(2)-obj.ROI(1)+1,obj.ROI(4)-obj.ROI(3)+1,obj.SequenceLength);
             %             obj.Data=[];
             obj.AbortNow=0;
             %init empty array
@@ -238,7 +242,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                 s32Wait=uc480.Defines.DeviceParameter.Wait;
                 obj.Cam.Acquisition.Freeze(s32Wait);
                 out=obj.getlastimage;
-                
+                ii
                 
                 if obj.AbortNow
                     obj.AbortNow=0;

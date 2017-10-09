@@ -55,13 +55,16 @@ uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Camera ROI:','Enable
 ROIlist={'Full','Left','Right','Left Center','Right Center','Center Horizontally','Center Horizontally Half'};
 handles.Popup_CameraROI = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',ROIlist,'Enable','on','BackgroundColor',[1 1 1],'Position', [90 php-70 85 20]);
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','IRCamera ROI:','Enable','off','Position', [staticst+180 php-70 80 20]);
-ROIlist={'Full','Left','Right','Left Center','Right Center','Center Horizontally','Center Horizontally Half'};
-handles.Popup_IRCameraROI = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',ROIlist,'Enable','on','BackgroundColor',[1 1 1],'Position', [90+180 php-70 85 20]);
+ROIlist_IR={'Full','Center 256','Center 128'};
+handles.Popup_IRCameraROI = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',ROIlist_IR,'Enable','on','BackgroundColor',[1 1 1],'Position', [90+180 php-70 85 20]);
 
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Exp. Time Focus:','Enable','off','Position', [staticst php-100 100 20]);
 handles.Edit_CameraExpTimeFocusSet = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','0.01','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-100 50 20]);
-uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Actual:','Enable','off','Position', [175 php-100 100 20]);
-handles.Edit_CameraExpTimeFocusActual = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','','Enable','off','Position', [250 php-100 50 20]);
+% uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Actual:','Enable','off','Position', [175 php-100 100 20]);
+% handles.Edit_CameraExpTimeFocusActual = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','','Enable','off','Position', [250 php-100 50 20]);
+uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','IRCamera Zoom:','Enable','off','Position', [staticst+180 php-100 100 20]);
+handles.Popup_CameraDispZoom_IR = uicontrol('Parent',hCameraPanel, 'Style','popupmenu','String',{'50%','100%','200%','400%','1000%'},'Value',2,'Enable','on','BackgroundColor',[1 1 1],'Position', [280 php-100 50 20],'CallBack',@zoom_set_IR);
+
 
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Exp. Time Seq.:','Enable','off','Position', [staticst php-130 100 20]);
 handles.Edit_CameraExpTimeSeqSet = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','0.01','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-130 50 20],'CallBack',@sequence_set);
@@ -114,6 +117,9 @@ handles.ButtonGroup_RegCollectType=uibuttongroup('Parent',hRegPanel, 'Position',
 b1=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio', 'tag','None','String','No Registration','Enable','on','Position', [staticst BGh-30 250 20]);
 b2=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio','tag','Self', 'String','Align to Self (Takes/Saves Reference Image)','Enable','on','Position', [staticst BGh-60 250 20]);
 b3=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio','tag','Ref','String','Align to Reference','Enable','on','Position', [staticst BGh-90 250 20]);
+
+b4=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Active Stabilization','Position',[staticst+115 BGh-34 250 20]);
+b5=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style', 'checkbox', 'Value',0,'Position', [staticst+175 BGh-30 15 20]);
 
 % LIGHTSOURCE Panel
 ph=0.3;
@@ -288,9 +294,9 @@ properties2gui();
     function Start(~,~)
         gui2properties();
         [temp status]=obj.CameraObj.call_temperature
-        if status==2
-        error('Camera is still cooling down! Please wait for a few mintues!')
-        end 
+%         if status==2
+%         error('Camera is still cooling down! Please wait for a few mintues!')
+%         end 
         set(handles.Button_ControlStart, 'String','Acquiring','Enable','off');
         obj.sequenceType='SRCollect';
         obj.StartSequence(handles);
@@ -300,9 +306,9 @@ properties2gui();
      function Start_SPT(~,~)
         gui2properties();
         [temp status]=obj.CameraObj.call_temperature
-%         if status==2
-%         error('Camera is cooling down! Please wait for a few mintues!')
-%         end 
+        if status==2
+        error('Camera is cooling down! Please wait for a few mintues!')
+        end 
         set(handles.Button_ControlStart, 'String','Acquiring','Enable','off');
         obj.sequenceType='Tracking+SRCollect';
         obj.StartSequence(handles);
@@ -349,6 +355,23 @@ properties2gui();
         
     end
 
+function zoom_set_IR(~,~)
+        zoom_val = get(handles.Popup_CameraDispZoom_IR,'Value');
+        switch zoom_val
+            case 1
+                obj.IRCameraObj.DisplayZoom = 0.5;
+            case 2
+                obj.IRCameraObj.DisplayZoom = 1;
+            case 3
+                obj.IRCameraObj.DisplayZoom = 2;
+            case 4
+                obj.IRCameraObj.DisplayZoom = 4;
+            case 5
+                obj.IRCameraObj.DisplayZoom = 10;
+        end
+        
+    end
+
     function gain_set(~,~)
         gain_val=get(handles.Popup_CameraGain,'value');
         switch gain_val
@@ -379,6 +402,7 @@ properties2gui();
         obj.NumFrames=str2double(get(handles.Edit_CameraNumFrames,'string'));
         obj.R3DObj.ExposureTime=str2double(get(handles.Edit_RegExpTime,'string'));
         obj.R3DObj.RefImageFile=get(handles.Edit_RegFileName,'string');
+        obj.ActiveRegCheck=get(b5,'Value')
         obj.focus561Flag=get(handles.Focus561,'Value');
         obj.focus638Flag=get(handles.Focus638,'Value');
         obj.focusLampFlag=get(handles.FocusIX71Lamp,'Value');
@@ -410,6 +434,7 @@ properties2gui();
         set(handles.Edit_RegExpTime,'string',num2str(obj.R3DObj.ExposureTime));
         set(handles.Edit_CameraNumFrames,'string',num2str(obj.NumFrames));
         set(handles.Edit_RegFileName,'string',obj.R3DObj.RefImageFile);
+        set(b5,'value',obj.ActiveRegCheck);
         set(handles.LP561,'string',obj.Laser561Low);
         set(handles.LP638,'string',obj.Laser638Low);
         set(handles.HP561,'string',obj.Laser561High);

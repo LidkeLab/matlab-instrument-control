@@ -25,14 +25,13 @@ classdef MIC_IRSyringPump < MIC_ThorlabsIR
             if isempty(obj.ROI)
                 obj.ROI=[1,obj.XPixels,1,obj.YPixels];
             end
-            obj.Data=zeros(obj.ROI(2),obj.ROI(4),obj.SequenceLength);
+            obj.Data=zeros(obj.ROI(2)-obj.ROI(1)+1,obj.ROI(4)-obj.ROI(3)+1,obj.SequenceLength);
             obj.AbortNow=0;
             %init empty array
             for ii=1:obj.SequenceLength
                 ii
                 if ii==obj.SPwaitTime
                     obj.SP.run
-                    
                 end
                 
                 s32Wait=uc480.Defines.DeviceParameter.Wait;
