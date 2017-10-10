@@ -75,7 +75,8 @@ uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Num Frames:','Enable
 handles.Edit_CameraNumFrames = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','2000','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-160 50 20]);
 
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Zoom:','Enable','off','Position', [175 php-160 100 20]);
-handles.Popup_CameraDispZoom = uicontrol('Parent',hCameraPanel, 'Style','popupmenu','String',{'50%','100%','200%','400%','1000%'},'Value',4,'Enable','on','BackgroundColor',[1 1 1],'Position', [250 php-160 50 20],'CallBack',@zoom_set);
+handles.Popup_CameraDispZoom = uicontrol('Parent',hCameraPanel, 'Style','popupmenu','String',{'50%','100%','200%','400%','1000%'},'Value',4,'Enable','on',...
+    'BackgroundColor',[1 1 1],'Position', [250 php-160 50 20],'CallBack',@zoom_set);
 
 % Registration Panel
 ph=0.213;
@@ -118,8 +119,13 @@ b1=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio', 'tag
 b2=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio','tag','Self', 'String','Align to Self (Takes/Saves Reference Image)','Enable','on','Position', [staticst BGh-60 250 20]);
 b3=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio','tag','Ref','String','Align to Reference','Enable','on','Position', [staticst BGh-90 250 20]);
 
-b4=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Active Stabilization','Position',[staticst+115 BGh-34 250 20]);
-b5=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style', 'checkbox', 'Value',0,'Position', [staticst+175 BGh-30 15 20]);
+
+b4=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','RegCam Type','Position',[staticst+75 BGh-34 250 20]);
+b5 = uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'popupmenu', 'String',{'Andor Camera','IRCamera'},'Value',1,'Enable','on','BackgroundColor',[1 1 1],...
+    'Position', [staticst+240 BGh-30 100 20],'CallBack',@RegCamType_set);
+
+b6=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Active Stabilization','Position',[staticst+105 BGh-94 250 20]);
+b7=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style', 'checkbox', 'Value',0,'Position', [staticst+165 BGh-90 15 20]);
 
 % LIGHTSOURCE Panel
 ph=0.3;
@@ -382,6 +388,16 @@ function zoom_set_IR(~,~)
         end
     end
 
+    function RegCamType_set(~,~)
+        RegType=get(b5,'Value');
+        switch RegType
+            case 1
+                obj.RegCamType='Andor Camera';
+            case 2
+                obj.RegCamType='IRCamera';
+        end
+    end
+
     function sequence_set(~,~)
         gui2properties();
         obj.CameraObj.ExpTime_Sequence = obj.ExpTime_Sequence_Set;        
@@ -402,7 +418,7 @@ function zoom_set_IR(~,~)
         obj.NumFrames=str2double(get(handles.Edit_CameraNumFrames,'string'));
         obj.R3DObj.ExposureTime=str2double(get(handles.Edit_RegExpTime,'string'));
         obj.R3DObj.RefImageFile=get(handles.Edit_RegFileName,'string');
-        obj.ActiveRegCheck=get(b5,'Value')
+        obj.ActiveRegCheck=get(b7,'Value')
         obj.focus561Flag=get(handles.Focus561,'Value');
         obj.focus638Flag=get(handles.Focus638,'Value');
         obj.focusLampFlag=get(handles.FocusIX71Lamp,'Value');
@@ -431,10 +447,10 @@ function zoom_set_IR(~,~)
         set(handles.Popup_IRCameraROI,'value',obj.IRCameraROI);
         set(handles.Edit_CameraExpTimeFocusSet,'string',num2str(obj.ExpTime_Focus_Set));
         set(handles.Edit_CameraExpTimeSeqSet,'string',num2str(obj.ExpTime_Sequence_Set));
-        set(handles.Edit_RegExpTime,'string',num2str(obj.R3DObj.ExposureTime));
+        %         set(handles.Edit_RegExpTime,'string',num2str(obj.R3DObj.ExposureTime));
         set(handles.Edit_CameraNumFrames,'string',num2str(obj.NumFrames));
-        set(handles.Edit_RegFileName,'string',obj.R3DObj.RefImageFile);
-        set(b5,'value',obj.ActiveRegCheck);
+        %         set(handles.Edit_RegFileName,'string',obj.R3DObj.RefImageFile);
+        set(b7,'value',obj.ActiveRegCheck);
         set(handles.LP561,'string',obj.Laser561Low);
         set(handles.LP638,'string',obj.Laser638Low);
         set(handles.HP561,'string',obj.Laser561High);

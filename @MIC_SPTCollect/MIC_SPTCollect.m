@@ -81,8 +81,8 @@ classdef MIC_SPTCollect < MIC_Abstract
         IRSequenceLength
         sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
         ActiveRegCheck=0;
-        RegCamType='Andor'         % Type of Camera Bright Field Registration 
-        
+        RegCamType='Andor Camera'         % Type of Camera Bright Field Registration 
+        CalFilePath
     end
     
     properties (SetAccess = protected)
@@ -101,7 +101,8 @@ classdef MIC_SPTCollect < MIC_Abstract
             % Enable autonaming feature of MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
             [p,~]=fileparts(which('MIC_SPTCollect'));
-            f=fullfile(p,'SPT_PixelSize.mat');
+            obj.CalFilePath=p;
+          
             
             % Initialize hardware objects
             try
@@ -147,8 +148,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 
                 % Registration object
                 fprintf('Initializing Registration object\n')
-                if exist(f,'file')
-                    a=load(f);
+                if exist(obj.CalFilePath,'file')
+                    a=load(obj.CalFilePath);
                     obj.PixelSize=a.PixelSize;
                     clear a;
                 end
@@ -342,6 +343,32 @@ classdef MIC_SPTCollect < MIC_Abstract
             %           pause(obj.LampWait);
         end
         
+        function set_RegCamType(obj)
+            
+            if strcmp(obj.RegCamType,'Andor Camera');
+
+                CalFileName=fullfile(obj.CalFilePath,'SPT_AndorPixelSize.mat');
+
+                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,CalFileName);
+                obj.R3DObj.LampPower=obj.LampPower;
+                obj.R3DObj.LampWait=2.5;
+                obj.R3DObj.CamShutter=true;
+                obj.R3DObj.ChangeEMgain=true;
+                obj.R3DObj.EMgain=2;
+                obj.R3DObj.ChangeExpTime=true;
+                obj.R3DObj.ExposureTime=0.01;
+           elseif strcmp(obj.RegCamType,'IRCamera')
+               CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
+               obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj,obj.CalFileName);
+               obj.R3DObj.LampPower=obj.Lamp850Power;
+                obj.R3DObj.LampWait=2.5;
+                obj.R3DObj.CamShutter=false;
+                obj.R3DObj.ChangeEMgain=false;
+                obj.R3DObj.ChangeExpTime=true;
+                obj.R3DObj.ExposureTime=0.01;
+            end
+            
+        end
         function StartSequence(obj,guihandles)
             
             %create save folder and filenames
@@ -354,18 +381,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             %first take a reference image or align to image
             obj.LampObj.setPower(obj.LampPower);
 
-            if strcmp(obj.RegCamType,'Andor');
-                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj);
-                obj.R3DObj.LampPower=obj.LampPower;
-                obj.R3DObj.LampWait=2.5;
-                obj.R3DObj.CamShutter=true;
-                obj.R3DObj.ChangeEMgain=true;
-                obj.R3DObj.EMgain=2;
-                obj.R3DObj.ChangeExpTime=true;
-                obj.R3DObj.ExposureTime=0.01;
-           elseif strcmp(obj.RegCamType,'IRCamera')
-               obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj);
-            end
+            obj.set_RegCamType();
                 switch obj.RegType
                 case 'Self' %take and save the reference image
                     obj.R3DObj.takerefimage();
@@ -684,10 +700,10 @@ classdef MIC_SPTCollect < MIC_Abstract
             
             [Children.Lamp850.Attributes,Children.Lamp850.Data,Children.Lamp850.Children]=...
                 obj.Lamp850Obj.exportState();
-            
-            [Children.Reg3D.Attributes,Children.Reg3D.Data,Children.Reg3D.Children]=...
-                obj.R3DObj.exportState();
-            
+            if isfield(obj,'Reg3D')
+                [Children.Reg3D.Attributes,Children.Reg3D.Data,Children.Reg3D.Children]=...
+                    obj.R3DObj.exportState();
+            end
             
             
             % Our Properties
