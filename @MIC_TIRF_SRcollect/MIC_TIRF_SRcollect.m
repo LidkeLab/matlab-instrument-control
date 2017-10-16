@@ -490,6 +490,9 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                     
                 case 12
                     ROI=[1 512 257 512];% center horizontally
+                case 13
+                    ROI=[129 384 129 384];% center256
+                    
                 otherwise
                     error('SRcollect: ROI not found')
             end
