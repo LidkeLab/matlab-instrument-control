@@ -52,7 +52,7 @@ refh=refh-ph-psep;
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Camera Gain:','Enable','off','Position', [staticst php-40 100 20]);
 handles.Popup_CameraGain = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',{'Low (Alexa647)','High (FAP/FP)'},'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-40 250 20],'CallBack',@gain_set);
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Camera ROI:','Enable','off','Position', [staticst php-70 100 20]);
-ROIlist={'Full','Left','Right','Left Center','Right Center','Center Horizontally','Left Top','Left Bottom','Right Top','Right Bottom','Top','Bottom'};
+ROIlist={'Full','Left','Right','Left Center','Right Center','Center Horizontally','Left Top','Left Bottom','Right Top','Right Bottom','Top','Bottom','Center256'};
 handles.Popup_CameraROI = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',ROIlist,'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-70 250 20]);
 
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Exp. Time Focus:','Enable','off','Position', [staticst php-100 100 20]);
