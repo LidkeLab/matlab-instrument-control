@@ -61,6 +61,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZFitPos;            % found Z positions
         ZFitModel;          % fitted line though auto correlations
         ZMaxAC;             % autocorrelations of zstack
+        maxACmodel;
     end
     
     properties (SetAccess=protected)
@@ -539,6 +540,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             model = polyval(P,Zpos_fit,S,MU);
             zAtMax=(-sqrt(P(2)^2-3*P(1)*P(3))-P(2))/3/P(1)*MU(2)+MU(1);
             
+            obj.maxACmodel=polyval(P,zAtMax);
             %plot results
             if isempty(obj.PlotFigureHandle)||~ishandle(obj.PlotFigureHandle)
                 obj.PlotFigureHandle=figure;

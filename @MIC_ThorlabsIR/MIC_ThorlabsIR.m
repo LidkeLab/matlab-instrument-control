@@ -120,7 +120,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
         function initialize(obj)
             
             %NET.addAssembly(fullfile(pwd,'uc480DotNet.dll'));
-            NET.addAssembly('C:\Program Files (x86)\Thorlabs\Scientific Imaging\DCx Camera Support\Develop\DotNet\signed\uc480DotNet.dll')
+            NET.addAssembly('C:\Program Files\Thorlabs\Scientific Imaging\DCx Camera Support\Develop\DotNet\signed\uc480DotNet.dll')
             [a,CamList]=uc480.Info.Camera.GetCameraList
             CamList(1)
             CamList(1).Model
@@ -226,7 +226,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     out=dip_image(out,'uint8');
                 case 'matlab'
             end
-            %dipshow(permute(out,[2 1]));
+            dipshow(permute(out,[2 1]));
         end
         function start_sequence(obj)
             obj.AcquisitionType='sequence';

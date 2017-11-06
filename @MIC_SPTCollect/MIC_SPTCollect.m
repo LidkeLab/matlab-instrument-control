@@ -83,6 +83,8 @@ classdef MIC_SPTCollect < MIC_Abstract
         ActiveRegCheck=0;
         RegCamType='Andor Camera'         % Type of Camera Bright Field Registration 
         CalFilePath
+        zPosition
+        MaxCC
     end
     
     properties (SetAccess = protected)
@@ -147,12 +149,12 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.LampPower = 50;
                 
                 % Registration object
-                fprintf('Initializing Registration object\n')
-                if exist(obj.CalFilePath,'file')
-                    a=load(obj.CalFilePath);
-                    obj.PixelSize=a.PixelSize;
-                    clear a;
-                end
+%                 fprintf('Initializing Registration object\n')
+%                 if exist(obj.CalFilePath,'file')
+%                     a=load(obj.CalFilePath);
+%                     obj.PixelSize=a.PixelSize;
+%                     clear a;
+%                 end
                 
 %                 
                 
@@ -215,6 +217,13 @@ classdef MIC_SPTCollect < MIC_Abstract
         
         function align(obj)
             % Align to current reference image
+            obj.set_RegCamType;
+            switch obj.RegType
+                case 'Self'
+                    obj.takeref();
+                otherwise
+                    obj.loadref();
+            end
             obj.LampObj.setPower(obj.LampPower);
             obj.R3DObj.align2imageFit();
         end
@@ -357,9 +366,10 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.R3DObj.EMgain=2;
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
-           elseif strcmp(obj.RegCamType,'IRCamera')
+          
+            elseif strcmp(obj.RegCamType,'IRCamera')
                CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
-               obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj,obj.CalFileName);
+               obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj,CalFileName);
                obj.R3DObj.LampPower=obj.Lamp850Power;
                 obj.R3DObj.LampWait=2.5;
                 obj.R3DObj.CamShutter=false;
@@ -382,12 +392,16 @@ classdef MIC_SPTCollect < MIC_Abstract
             obj.LampObj.setPower(obj.LampPower);
 
             obj.set_RegCamType();
-                switch obj.RegType
+            switch obj.RegType
                 case 'Self' %take and save the reference image
                     obj.R3DObj.takerefimage();
                     f=fullfile(obj.SaveDir,[obj.BaseFileName s '_ReferenceImage']);
                     Image_Reference=obj.R3DObj.Image_Reference; %#ok<NASGU>
                     save(f,'Image_Reference');
+                case 'Ref'
+                    if isempty(obj.R3DObj.Image_Reference)
+                        error ('Load a reference image!')
+                    end
             end
             %define IRCameraObj from different classes if SPT+SR is running
             if strcmp(obj.sequenceType,'Tracking+SRCollect');
@@ -526,6 +540,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                     
                     % collect
                     obj.tAndor_start=clock;
+                    zPosition(nn)=obj.StageObj.Position(3);
+                    MaxCC=obj.R3DObj.maxACmodel;
                     sequence=obj.CameraObj.start_sequence();
                     obj.tAndor_end=clock;
                     %-----------------------------------------wait IR camera version 2------------
@@ -547,7 +563,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.IRCameraObj.ExpTime_Sequence=obj.IRExpTime_Sequence_Set;
                     % time should be long to cover all process after
                     % syringe pump for 5min=0.01*30000
-                    obj.IRCameraObj.SequenceLength=obj.ExpTime_Sequence_Set*obj.NumFrames+70
+                    obj.IRCameraObj.SequenceLength=obj.ExpTime_Sequence_Set*obj.NumFrames+90
                     obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
                     
                     %set timer for IRcamera
@@ -594,7 +610,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                         save(fn,'sequence','Params','IRData');
                        else 
                            [Params ]=exportState(obj); %#ok<NASGU>
-                        save(fn,'sequence','Params');
+                        save(fn,'sequence','Params','zPosition','MaxCC');
                        end
                     case 'h5' %This will become default
                         S=sprintf('Data%04d',nn)
@@ -664,10 +680,12 @@ classdef MIC_SPTCollect < MIC_Abstract
                 switch cameraROI
                     case 1
                         ROI=[1 DimX 1 DimY]; %full
-                    case 2   %Center for SPT setup 256*256
+                    case 2   %Center for SPT setup 350*350
+                        ROI=[468 817 420 769]
+                    case 3   %Center for SPT setup 256*256
                         % This was chosen manually
                         ROI=[515 770 467 722];
-                    case 3   %Center for SPT setup 128*128
+                    case 4   %Center for SPT setup 128*128
                         % This was chosen manually
                         ROI=[579 706 532 659];
                 end

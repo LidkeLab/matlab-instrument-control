@@ -55,7 +55,7 @@ uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Camera ROI:','Enable
 ROIlist={'Full','Left','Right','Left Center','Right Center','Center Horizontally','Center Horizontally Half'};
 handles.Popup_CameraROI = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',ROIlist,'Enable','on','BackgroundColor',[1 1 1],'Position', [90 php-70 85 20]);
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','IRCamera ROI:','Enable','off','Position', [staticst+180 php-70 80 20]);
-ROIlist_IR={'Full','Center 256','Center 128'};
+ROIlist_IR={'Full','Center 350' ,'Center 256','Center 128'};
 handles.Popup_IRCameraROI = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',ROIlist_IR,'Enable','on','BackgroundColor',[1 1 1],'Position', [90+180 php-70 85 20]);
 
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Exp. Time Focus:','Enable','off','Position', [staticst php-100 100 20]);
@@ -120,11 +120,11 @@ b2=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio','tag'
 b3=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio','tag','Ref','String','Align to Reference','Enable','on','Position', [staticst BGh-90 250 20]);
 
 
-b4=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','RegCam Type','Position',[staticst+75 BGh-34 250 20]);
+b4=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Reg Camera Type','Position',[staticst+125 BGh-34 140 20]);
 b5 = uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'popupmenu', 'String',{'Andor Camera','IRCamera'},'Value',1,'Enable','on','BackgroundColor',[1 1 1],...
     'Position', [staticst+240 BGh-30 100 20],'CallBack',@RegCamType_set);
 
-b6=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Active Stabilization','Position',[staticst+105 BGh-94 250 20]);
+b6=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Active Stabilization','Position',[staticst+125 BGh-94 210 20]);
 b7=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style', 'checkbox', 'Value',0,'Position', [staticst+165 BGh-90 15 20]);
 
 % LIGHTSOURCE Panel
@@ -300,9 +300,9 @@ properties2gui();
     function Start(~,~)
         gui2properties();
         [temp status]=obj.CameraObj.call_temperature
-%         if status==2
-%         error('Camera is still cooling down! Please wait for a few mintues!')
-%         end 
+        if status==2
+        error('Camera is cooling down! Please wait for a few mintues!')
+        end 
         set(handles.Button_ControlStart, 'String','Acquiring','Enable','off');
         obj.sequenceType='SRCollect';
         obj.StartSequence(handles);
@@ -389,8 +389,8 @@ function zoom_set_IR(~,~)
     end
 
     function RegCamType_set(~,~)
-        RegType=get(b5,'Value');
-        switch RegType
+        RegCamType=get(b5,'Value');
+        switch RegCamType
             case 1
                 obj.RegCamType='Andor Camera';
             case 2
