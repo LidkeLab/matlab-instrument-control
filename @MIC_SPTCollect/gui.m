@@ -125,7 +125,7 @@ b5 = uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'popupmenu'
     'Position', [staticst+240 BGh-30 100 20],'CallBack',@RegCamType_set);
 
 b6=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Active Stabilization','Position',[staticst+125 BGh-94 210 20]);
-b7=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style', 'checkbox', 'Value',0,'Position', [staticst+165 BGh-90 15 20]);
+b7=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style', 'checkbox', 'Value',0,'Position', [staticst+165 BGh-90 15 20],'Callback',@ActiveStabilization);
 
 % LIGHTSOURCE Panel
 ph=0.3;
@@ -397,6 +397,10 @@ function zoom_set_IR(~,~)
                 obj.RegCamType='IRCamera';
         end
     end
+
+    function ActiveStabilization(~,~)
+        obj.ActiveRegCheck=get(b7,'Value');
+    end 
 
     function sequence_set(~,~)
         gui2properties();

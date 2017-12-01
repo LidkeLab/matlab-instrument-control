@@ -43,7 +43,7 @@ classdef MIC_SPTCollect < MIC_Abstract
         IRExpTime_Focus_Set=0.01;       % Exposure time during focus IR Camera
         IRExpTime_Sequence_Set=0.01;    % Exposure time during sequence IR Camera
         IRCameraROI=2;                  % IRCamera ROI (see gui for specifics)
-        IRPixelSize=0.1027              % PixelSize for IR Camera
+        IRPixelSize;                    % PixelSize for IR Camera
         % Light source params
         Laser638Low;          % Low power 638 laser
         Laser561Low;          % Low power 561 laser
@@ -104,7 +104,18 @@ classdef MIC_SPTCollect < MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
             [p,~]=fileparts(which('MIC_SPTCollect'));
             obj.CalFilePath=p;
-          
+            
+            if exist(fullfile(p,'SPT_AndorPixelSize.mat'),'file')
+                a=load(fullfile(p,'SPT_AndorPixelSize.mat'));
+                obj.PixelSize=a.PixelSize;
+                clear a
+            end
+            
+            if exist(fullfile(p,'SPT_IRPixelSize.mat'),'file')
+                a=load(fullfile(p,'SPT_IRPixelSize.mat'));
+                obj.IRPixelSize=a.PixelSize;
+                clear a
+            end
             
             % Initialize hardware objects
             try
@@ -426,7 +437,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %setup Lamp850
                 %Active Stabilization
                 obj.ActRegObj=MIC_ActiveReg3D_SPT(obj.IRCameraObj,obj.StageObj);
-                obj.ActRegObj.PixelSize=obj.PixelSize;
+                obj.ActRegObj.PixelSize=obj.IRPixelSize;
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on
                 obj.IRCameraObj.ROI=obj.getROI('IRThorlabs');
@@ -681,7 +692,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     case 1
                         ROI=[1 DimX 1 DimY]; %full
                     case 2   %Center for SPT setup 350*350
-                        ROI=[468 817 420 769]
+                        ROI=[468 817 420 769];
                     case 3   %Center for SPT setup 256*256
                         % This was chosen manually
                         ROI=[515 770 467 722];
