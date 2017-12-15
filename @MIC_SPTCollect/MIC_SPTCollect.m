@@ -458,7 +458,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                     error('StartSequence:: unknown file save type')
             end
             
-            
+                            MaxCC=[];
+Image_BF=[];
             %loop over sequences
             for nn=1:obj.NumSequences
                 if obj.AbortNow; obj.AbortNow=0; break; end
@@ -471,6 +472,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                     case 'None'
                     otherwise
                         obj.R3DObj.align2imageFit();
+                        Image_BF{nn}=obj.R3DObj.Image_Current;
+                        MaxCC(nn)=obj.R3DObj.maxACmodel;
                 end
                 
                 %Setup laser for aquisition
@@ -552,7 +555,6 @@ classdef MIC_SPTCollect < MIC_Abstract
                     % collect
                     obj.tAndor_start=clock;
                     zPosition(nn)=obj.StageObj.Position(3);
-                    MaxCC=obj.R3DObj.maxACmodel;
                     sequence=obj.CameraObj.start_sequence();
                     obj.tAndor_end=clock;
                     %-----------------------------------------wait IR camera version 2------------
@@ -620,8 +622,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                         [Params IRData]=exportState(obj); %#ok<NASGU>
                         save(fn,'sequence','Params','IRData');
                        else 
-                           [Params ]=exportState(obj); %#ok<NASGU>
-                        save(fn,'sequence','Params','zPosition','MaxCC');
+                           [Params]=exportState(obj); %#ok<NASGU>
+                        save(fn,'sequence','Params','zPosition','MaxCC','Image_BF');
                        end
                     case 'h5' %This will become default
                         S=sprintf('Data%04d',nn)
