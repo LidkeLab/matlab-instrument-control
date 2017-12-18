@@ -1,24 +1,30 @@
 classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
-    % MIC_CrystaLaser561 Matlab Instrument Class for CrystaLaser 561 nm.
-    % Controls CrystaLaser module; can ON/OFF the laser, but cannot set power. 
-    % Power for this laser is set using the knob on the front panel of
-    % controller.
-    % A TTL input is needed to turn the laser ON/OFF remotely. For this, an STP CAT6 cable connection is needed from the rear board of the
-    % laser controller to the Digital Input/Output channel of a NI card. The
-    % cable configuration: Pins 4-5: paired (for interlock); Pin 3: TTL; Pin6: GND. 
-    % 
+    % MIC_CrystaLaser561: Matlab Instrument Class for control of 
+    % CrystaLaser 561 nm.
+    %
+    % Controls CrystaLaser module; can switch the laser ON/OFF, but cannot  
+    % set power. Power for this laser is set using the knob on the front 
+    % panel of controller.
+    % Requires TTL input from the Digital Input/Output channel of NI card
+    % to turn the laser ON/OFF remotely. STP CAT6 cable connection from 
+    % rear board of laser controller to the NI card should have pin
+    % configuration: Pins 4-5: paired (for interlock); Pin 3: TTL; 
+    % Pin6: GND.
+    %
+    % Example: obj=MIC_CrystaLaser561('Dev1','Port0/Line0:1');
+    % Functions: on, off, delete, shutdown, exportState, setPower 
     %
     % REQUIREMENTS: 
     %   MIC_Abstract.m
     %   MIC_LightSource_Abstract.m
+    %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
-    % Example: obj=MIC_CrystaLaser561('Dev1','Port0/Line0:1');
-    % Functions: on, off, State, delete
+    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
     
     properties (SetAccess=protected)
-        InstrumentName='CrystaLaser561';
+        InstrumentName='CrystaLaser561'; %Name of instrument
     end
     properties (SetAccess=protected)
         MinPower=0; % Minimum Power
@@ -64,7 +70,6 @@ classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
             % Destructor
             obj.shutdown();
             clear obj.DAQ;
-%            delete(obj.gui);
         end
         
         function shutdown(obj)
@@ -77,6 +82,7 @@ classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
         function [Attributes,Data,Children]=exportState(obj)     
             % Export current state of the Laser (ON/OFF == 1/0)
             Attributes.IsOn=obj.IsOn;
+            Attributes.Power=obj.Power;
             Data = [];
             Children = [];
         end
