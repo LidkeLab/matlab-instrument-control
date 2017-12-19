@@ -6,8 +6,8 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
     % set for power measurement, where the range of the wavelength is
     % 400nm < Lambda < 1100nm. The gui shows a movie of the plot of the
     % measured power where the shown period can be modified. It also shows
-    % the current and the maximum measured power. To run this code you need
-    % the power meter to be connected to the machine.
+    % the current power and the maximum measured power. To run this code 
+    % you need the power meter to be connected to the machine.
     %
     % Example: P = MIC_PM100D; P.gui
     % Functions: constructor(), exportState(), send(), minMaxWavelength()
