@@ -301,7 +301,7 @@ properties2gui();
         gui2properties();
         [temp status]=obj.CameraObj.call_temperature
         if status==2
-        error('Camera is cooling down! Please wait for a few mintues!')
+%         error('Camera is cooling down! Please wait for a few mintues!')
         end 
         set(handles.Button_ControlStart, 'String','Acquiring','Enable','off');
         obj.sequenceType='SRCollect';
@@ -313,7 +313,7 @@ properties2gui();
         gui2properties();
         [temp status]=obj.CameraObj.call_temperature
         if status==2
-        error('Camera is cooling down! Please wait for a few mintues!')
+%         error('Camera is cooling down! Please wait for a few mintues!')
         end 
         set(handles.Button_ControlStart, 'String','Acquiring','Enable','off');
         obj.sequenceType='Tracking+SRCollect';
