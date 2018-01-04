@@ -1,26 +1,22 @@
 classdef MIC_ThorlabsIR < MIC_Camera_Abstract
-    % MIC_ThorlabsIR Matlab Instrument Control Class for the Thorlabs IR Camera
-    %   This class controls the DCxCamera via a USB port
-    %   It is required to install the software from the following link
+    % MIC_ThorlabsIR Matlab Instrument Control Class for the Thorlabs IR
+    % Camera
+    %   This class controls the DCxCamera via a USB port It is required to
+    %   install the software from the following link
     %   https://www.thorlabs.com/software_pages/viewsoftwarepage.cfm?code=ThorCam
-    %   and make sure 'uc480DotNet.dll' is in this directory:
-    %   'C:\Program Files (x86)\Thorlabs\Scientific Imaging\DCx Camera
-    %   Support\Develop\DotNet\signed' to run initialize funtion
+    %   and make sure 'uc480DotNet.dll' is in this directory: 'C:\Program
+    %   Files\Thorlabs\Scientific Imaging\DCx Camera
+    %   Support\Develop\DotNet\signed'
+    %     to run initialize funtion
     %
-    %   Constructor requires the Device and Channel details.
-    %   Usage:
-    %           CAM=MIC_ThorlabsIR
-    %           CAM.gui
+    %   Constructor requires the Device and Channel details. Usage:
+    %           CAM=MIC_ThorlabsIR CAM.gui
     %
     % REQUIRES:
-    %   MIC_Abstract.m
-    %   MIC_Camera_Abstract.m
-    %   Data Acquisition Toolbox
-    %   ThorLabs DCx CMOS and CCD Cameras
-    %   Requires uc480DotNet.dll
+    %   MIC_Abstract.m MIC_Camera_Abstract.m Data Acquisition Toolbox
+    %   ThorLabs DCx CMOS and CCD Cameras Requires uc480DotNet.dll
     %
-    % CITATION:
-    % Hanieh Mazloom-Farsibaf   May 2017 (Keith A. Lidke's lab)
+    % CITATION: Hanieh Mazloom-Farsibaf   May 2017 (Keith A. Lidke's lab)
     
     properties(Access=protected, Transient=true)
         AbortNow;           %stop acquisition flag
@@ -29,6 +25,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
         ImageHandle;
         ReadyForAcq=0;;        %If not, call setup_acquisition
         TextHandle;
+        dllPath;
     end
     
     properties(SetAccess=protected)
@@ -66,6 +63,41 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
             obj = obj@MIC_Camera_Abstract(~nargout);
         end
         
+        function initialize(obj)
+            [p,~]=fileparts(which('MIC_ThorlabsIR'));
+            
+            if exist(fullfile(p,'ThorlabsIRCamera_Properties.mat'),'file')
+                a=load(fullfile(p,'ThorlabsIRCamera_Properties.mat'));
+                if exist(a.dllPath,'dir')
+                    obj.dllPath=a.dllPath;
+                else
+                    error('Not a valid path')
+                end
+                clear a;
+            else
+                [dllPath]=uigetdir(matlabroot,'Select IRCamera .dll Directory')
+                obj.dllPath=dllPath;
+                if exist(obj.dllPath,'dir')
+                    save(fullfile(p,'ThorlabsIRCamera_Properties.mat'),'dllPath');
+                else
+                    error('Not a valid path')
+                end
+            end
+            
+            NET.addAssembly(fullfile(obj.dllPath,'uc480DotNet.dll'))
+            [a,CamList]=uc480.Info.Camera.GetCameraList
+            CamList(1)
+            CamList(1).Model
+            CamList(1).SerialNumber
+            obj.Cam=uc480.Camera()
+            obj.Cam.Init();
+            obj.Cam.PixelFormat.Set(uc480.Defines.ColorMode.SensorRaw8);
+            obj.get_properties;
+            obj.ROI=[1 obj.XPixels 1 obj.YPixels];
+            obj.ImageSize=[obj.ROI(2)-obj.ROI(1)+1 obj.ROI(4)-obj.ROI(3)+1];
+            obj.SequenceLength=1;
+        end
+        
         function delete(obj)
             obj.shutdown()
         end
@@ -83,16 +115,15 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
             
             [a,b]=obj.Cam.Memory.CopyToArray(obj.MemID);
             ImageElements=obj.ImageSize(1)*obj.ImageSize(2);
-            bPrime=reshape(single(b),[obj.XPixels,obj.YPixels]); 
+            bPrime=reshape(single(b),[obj.XPixels,obj.YPixels]);
             out=bPrime(obj.ROI(1):obj.ROI(2),obj.ROI(3):obj.ROI(4));
             out1=flip(flip(out,2),1); % to have the same image with Andor, Only in SPT
-            %  
-%             bPrime=single(b);
-%             bPrime=bPrime(1:ImageElements);
-%             out=reshape(bPrime,obj.ImageSize(1),obj.ImageSize(2)); %%% i should
-%             %%%change it to reshape (single(b),obj.ROI(2), ...)but I need
-%             %%%to chaneg line 126 as well.
-%             %   %%%          aa=dip_image(out,'uint8')
+            %
+            %             bPrime=single(b); bPrime=bPrime(1:ImageElements);
+            %             out=reshape(bPrime,obj.ImageSize(1),obj.ImageSize(2)); %%% i
+            %             should %%%change it to reshape (single(b),obj.ROI(2), ...)but
+            %             I need %%%to chaneg line 126 as well. %   %%%
+            %             aa=dip_image(out,'uint8')
         end
         
         function out=getdata(obj)
@@ -117,25 +148,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
         end
         
         
-        function initialize(obj)
-            
-            %NET.addAssembly(fullfile(pwd,'uc480DotNet.dll'));
-            NET.addAssembly('C:\Program Files\Thorlabs\Scientific Imaging\DCx Camera Support\Develop\DotNet\signed\uc480DotNet.dll')
-            [a,CamList]=uc480.Info.Camera.GetCameraList
-            CamList(1)
-            CamList(1).Model
-            CamList(1).SerialNumber
-            %             CamID=1;
-            obj.Cam=uc480.Camera()
-            obj.Cam.Init();
-            obj.Cam.PixelFormat.Set(uc480.Defines.ColorMode.SensorRaw8);
-            obj.get_properties;
-            obj.ROI=[1 obj.XPixels 1 obj.YPixels];
-            obj.ImageSize=[obj.ROI(2)-obj.ROI(1)+1 obj.ROI(4)-obj.ROI(3)+1];
-            obj.SequenceLength=1;
-            
-            
-        end
+        
         
         function setup_acquisition(obj)
             
@@ -172,7 +185,8 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     obj.Cam.Timing.Framerate.Set(1/obj.ExpTime_Sequence);
                     obj.Cam.Timing.Exposure.Set(obj.ExpTime_Sequence*1000);
                     [Stat, ExpTime]=obj.Cam.Timing.Exposure.Get;
-                    %                     fprintf('Expsoure Time: %g\n',ExpTime)
+                    %                     fprintf('Expsoure Time:
+                    %                     %g\n',ExpTime)
                     
             end
             
@@ -226,7 +240,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     out=dip_image(out,'uint8');
                 case 'matlab'
             end
-%             dipshow(permute(out,[2 1]));
+            %             dipshow(permute(out,[2 1]));
         end
         function start_sequence(obj)
             obj.AcquisitionType='sequence';
@@ -258,7 +272,8 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                         out=dip_image(out,'uint8');
                     case 'matlab'
                 end
-                %                                 dipshow(permute(out,[2 1])); %%%?
+                %                                 dipshow(permute(out,[2
+                %                                 1])); %%%?
                 obj.displaylastimage;
             end
             SeqOutput=obj.Data;
