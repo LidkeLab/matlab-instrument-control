@@ -16,20 +16,22 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
     % setup_acquisition, start_focus, start_capture, start_sequence, set.ROI,
     % get_properties, exportState, unitTest  
     %     
-    % REQUIRES:
-    %   MIC_Abstract.m MIC_Camera_Abstract.m Data Acquisition Toolbox
-    %   ThorLabs DCx CMOS and CCD Cameras Requires uc480DotNet.dll
-    %
-    % CITATION: Hanieh Mazloom-Farsibaf   May 2017 (Keith A. Lidke's lab)
+    % REQUIREMENTS: 
+    %   MIC_Abstract.m
+    %   MIC_Camera_Abstract.m
+    %   MATLAB software version R2016b or later
+    %   uc480DotNet.dll file downloaded from the Thorlabs website for DCx cameras
+    % 
+    % CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
     
     properties(Access=protected, Transient=true)
-        AbortNow;           %stop acquisition flag
+        AbortNow;                 %stop acquisition flag
         FigurePos;
         FigureHandle;
         ImageHandle;
-        ReadyForAcq=0;;        %If not, call setup_acquisition
+        ReadyForAcq=0;            %If not, call setup_acquisition
         TextHandle;
-        dllPath;
+        dllPath;                  %path for dll file
     end
     
     properties(SetAccess=protected)
@@ -46,7 +48,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
     end
     
     properties (Hidden)
-        StartGUI=false;       %Defines GUI start mode.  'true' starts GUI on object creation.
+        StartGUI=false;        % Starts GUI
     end
     
     properties
