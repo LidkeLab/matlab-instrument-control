@@ -394,8 +394,7 @@ classdef MIC_SPTCollect < MIC_Abstract
         end
         
         function StartSequence(obj,guihandles)
-            %collect superresolution data
-            
+            %taking data
             %create save folder and filenames
             if ~exist(obj.SaveDir,'dir');mkdir(obj.SaveDir);end
             
@@ -406,8 +405,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             
             %first take a reference image or align to image
             obj.LampObj.setPower(obj.LampPower);
-            
-            %set Registration Channel for one of the camera
+
             obj.set_RegCamType();
             switch obj.RegType
                 case 'Self' %take and save the reference image
