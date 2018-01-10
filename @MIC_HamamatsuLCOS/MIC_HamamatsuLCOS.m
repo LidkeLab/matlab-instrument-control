@@ -1,8 +1,18 @@
 classdef MIC_HamamatsuLCOS < MIC_Abstract
-    %MIC_HamamatsuLCOS Matlab Instrument Control of Hamamatsu LCOS SLM
+    % MIC_HamamatsuLCOS: Matlab Instrument Control of Hamamatsu LCOS SLM
     % This class controls a phase SLM connected through a DVI interface
-    % 
+    %
     % Pupil diameter is 2*NA*f, f=M/180 for olympus objectives
+    %
+    % Example: obj = MIC_HamamatsuLCOS();
+    % Functions: delete, gui, exportState, setupImage, displayImage,
+    %            calcZernikeImage, calcOptimPSFImage, calcPrasadImage,
+    %            calcZernikeStack, calcDisplayImage, calcBlazeImage,
+    %            displayCheckerboard
+    %
+    % REQUIREMENTS:
+    %
+    % CITATION: Lidkelab, 2017.
     
     properties
         HorPixels=1272      %SLM Horizontal Pixels
