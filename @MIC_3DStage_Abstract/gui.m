@@ -19,6 +19,7 @@ bszy=30;
 txsz = 75;
 txszy = 20;
 etxsz = 50;
+PositionUnit=obj.PositionUnit;
 
 %Open figure
 guiFig = figure('Units','pixels','Position',[xst yst xsz ysz],...
@@ -34,11 +35,11 @@ guiFig.WindowButtonDownFcn=@properties2gui;
 
 %top
 uicontrol('Parent',guiFig, 'Style', 'text', 'String', ...
-    'X Position (um)','Position', [10 ysz-(bszy+10) txsz bszy]);
+   ['X Position (' PositionUnit ')'],'Position', [10 ysz-(bszy+10) txsz bszy]);
 uicontrol('Parent',guiFig, 'Style', 'text', 'String', ...
-    'Y Position (um)','Position', [10 ysz-2*(bszy+10) txsz bszy]);
+    ['Y Position (' PositionUnit ')'],'Position', [10 ysz-2*(bszy+10) txsz bszy]);
 uicontrol('Parent',guiFig, 'Style', 'text', 'String', ...
-    'Z Position (um)','Position', [10 ysz-3*(bszy+10) txsz bszy]);
+   ['Z Position (' PositionUnit ')'],'Position', [10 ysz-3*(bszy+10) txsz bszy]);
 
 handles.edit_XCurrent = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
     '','Position', [15+txsz ysz-(bszy+10)+10 etxsz txszy],'enable','off');
@@ -48,17 +49,17 @@ handles.edit_ZCurrent = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ..
     '','Position', [15+txsz ysz-3*(bszy+10)+10 etxsz txszy],'enable','off');
 
 handles.edit_XSet = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
-    '','Position', [50+txsz+etxsz ysz-(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
+    '','Position', [62+txsz+etxsz ysz-(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
 handles.edit_YSet = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
-    '','Position', [50+txsz+etxsz ysz-2*(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
+    '','Position', [62+txsz+etxsz ysz-2*(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
 handles.edit_ZSet = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
-    '','Position', [50+txsz+etxsz ysz-3*(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
+    '','Position', [62+txsz+etxsz ysz-3*(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
 
 properties2gui();
 
 %Step Size
 uicontrol('Parent',guiFig, 'Style', 'text', 'String', ...
-    'Step Size (um)','Position', [10 ysz-4*(bszy+10) txsz bszy]);
+    ['Step Size (' PositionUnit ')'],'Position', [10 ysz-4*(bszy+10) txsz bszy]);
 handles.edit_StepSize = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
     '0.1','Position', [10 ysz-5*(bszy+10)+20 etxsz txszy]);
 

@@ -30,6 +30,7 @@
     properties(Transient, SetAccess = protected)
        Position=[0 0 0];    %Current Position (micron)
        SensorPosition;      %Results of a get Position (micron)
+       PositionUnit='um'    %Units of position parameter (micron)
     end
      
     properties(Access=private)

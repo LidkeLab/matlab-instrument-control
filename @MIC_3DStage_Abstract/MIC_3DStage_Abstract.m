@@ -18,7 +18,8 @@ classdef MIC_3DStage_Abstract < MIC_Abstract
     
     properties (Abstract,SetAccess=protected)
         Position;          % Current position.
-        end
+        PositionUnit;      % Units of position parameter (eg. um/mm)
+    end
     
    
     methods
