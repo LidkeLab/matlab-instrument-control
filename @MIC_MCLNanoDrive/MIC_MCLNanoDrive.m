@@ -1,4 +1,4 @@
- classdef MIC_MCLNanoDrive < MIC_Abstract
+ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     %MIC_MCLNanoDrive MIC controller for the Mad City Labs 3D Piezo Stage
     %   
     %   This class controls a 3D Peizo stage from Mad City Labs.  The class
@@ -44,7 +44,7 @@
         
         function obj=MIC_MCLNanoDrive()
             % Constructor. Takes no arguments and returns the object. 
-            obj=obj@MIC_Abstract(~nargout);
+            obj=obj@MIC_3DStage_Abstract(~nargout);
             
             obj.set_errorcodes(); % set obj.ErrorCode to static values
             
