@@ -46,7 +46,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         IRCamera_ExposureTime;
         IRCamera_ROI=[513 769 385 641];     %IR Camera ROI Center 256
         Lamp_850_Power=7;
-        Lamp_660_Power=6;
+        Lamp_660_Power=12;
         SCMOS_PixelSize=.104;   %microns
         
         %Operational
@@ -56,7 +56,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         ExposureTimeSequence=.01;
         ExposureTimeCapture=.2;
         NumberOfFrames=2000;
-        NumberOfIterations=1; 
+        NumberOfIterations=20; 
         NumberOfPhotoBleachingIterations=8;
         StabPeriod=5;   %Time between stabilization events (seconds)
         GridCorner=[1 1]    %10x10 Full Frame Grid Corner (mm)
@@ -65,7 +65,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         OffsetDZ=5; %Micron
         OffsetSearchZ=25; %Micron
         Use405=0;
-        LaserPowerSequence=175;
+        LaserPowerSequence=185;
         LaserPowerFocus=50;
         LaserPower405Activate=3;
         LaserPower405Bleach=5;
@@ -97,7 +97,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         BaseFileName='Cell1';   % Base File Name
         AbortNow=0;     % Flag for aborting acquisition
         RegType='None'; % Registration type, can be 'None', 'Self' or 'Ref'
-        SaveFileType='mat'  %Save to *.mat or *.h5.  Options are 'mat' or 'h5'
+        SaveFileType='h5'  %Save to *.mat or *.h5.  Options are 'mat' or 'h5'
         
     end
     
@@ -232,20 +232,6 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.Stage_Stepper.moveToPosition(2,2.2780); %new %x
             obj.Stage_Stepper.moveToPosition(3,1.4); %new %z
         end
-        
-        %         %FF: bad programming
-        %         function PSFcollect(obj) % defining Class as a method (acceptable? NO. Change it!)
-        %             a=PSFcollect(obj.SCMOS,obj.Stage_Piezo,obj.Laser_647)
-        %         end
-        
-        %             function delete(obj)  % destructor
-        %                 %Close figures and delete instruments and control classes
-        %                 delete(obj.SCMOS.GuiDialog);
-        %                 delete(obj.Stage_Piezo);
-        %                 delete(obj.Stage_Stepper)
-        %                 obj.Align_Reg=[];
-        %                 delete(obj.GuiFigureStage);
-        %             end
             
         function Success=findCoverSlipOffset_Manual(obj,RefStruct)
             %Allow user to focus and indentify cell
@@ -262,12 +248,12 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.Stage_Piezo_X.center();
             obj.Stage_Piezo_Y.center();
             obj.Stage_Piezo_Z.center();
-            obj.gui_Stage();
+%             obj.gui_Stage();
             
-            P0=RefStruct.StepperPos;
-            obj.Stage_Stepper.moveToPosition(2,P0(1)) %new %y
-            obj.Stage_Stepper.moveToPosition(1,P0(2)) %new %x
-            obj.Stage_Stepper.moveToPosition(3,P0(3)) %new %z
+            P0=RefStruct.StepperPos; %[P0x, P0y, P0z] where P0y=obj.Stage_Stepper.getPosition(1)
+            obj.Stage_Stepper.moveToPosition(1,P0(2)) %y
+            obj.Stage_Stepper.moveToPosition(2,P0(1)) %x
+            obj.Stage_Stepper.moveToPosition(3,P0(3)) %z
             
             obj.SCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
             obj.SCMOS.ROI=obj.SCMOS_ROI_Full;
@@ -292,26 +278,68 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             end
             
             ImSize=obj.SCMOS_ROI_Full(2)-obj.SCMOS_ROI_Full(1)+1;
-            DiffFromCenter_Pixels=ImSize/2-[X,Y];
-            DiffFromCenter_Microns=DiffFromCenter_Pixels*obj.SCMOS_PixelSize;
-%             FocusPos=obj.Stage_Stepper.getPosition; %new
-            FocusPosY=Kinesis_SBC_GetPosition('70850323',1); %y
-            FocusPosX=Kinesis_SBC_GetPosition('70850323',2); %x
-            FocusPosZ=Kinesis_SBC_GetPosition('70850323',3); %z
-            FocusPos=[FocusPosX,FocusPosY,FocusPosZ];%FF
-%             NewPos=[FocusPos(1:2)+[DiffFromCenter_Microns(2) -DiffFromCenter_Microns(1)]/1000 FocusPos(3)];
-            NewPos=[FocusPos(1:2)+[-DiffFromCenter_Microns(2) DiffFromCenter_Microns(1)]/1000 FocusPos(3)];%FF
-            obj.CoverSlipOffset=NewPos-P0;
+%             DiffFromCenter_Pixels=ImSize/2-[X,Y];
+%             DiffFromCenter_Microns=DiffFromCenter_Pixels*obj.SCMOS_PixelSize;
+            FocusPosY=obj.Stage_Stepper.getPosition(1); %y
+            FocusPosX=obj.Stage_Stepper.getPosition(2); %x
+            FocusPosZ=obj.Stage_Stepper.getPosition(3); %z
+            FocusPos=[FocusPosX,FocusPosY,FocusPosZ];
+%             NewPos=[FocusPos(1:2)+[-DiffFromCenter_Microns(2) DiffFromCenter_Microns(1)]/1000 FocusPos(3)];
+deltaX=(abs(ImSize/2-X)*obj.SCMOS_PixelSize)*1/1000; %mm
+deltaY=(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
+if X>1024 & Y<1024
+    NewPos_X=FocusPosX-deltaX; %mm
+    NewPos_Y=FocusPosY-deltaY; %mm
+elseif X>1024 & Y>1024
+    NewPos_X=FocusPosX-deltaX; %mm
+    NewPos_Y=FocusPosY+deltaY; %mm
+elseif X<1024 & Y<1024
+    NewPos_X=FocusPosX+deltaX; %mm
+    NewPos_Y=FocusPosY-deltaY; %mm
+else
+    NewPos_X=FocusPosX+deltaX; %mm
+    NewPos_Y=FocusPosY+deltaY; %mm
+end
+NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
+             obj.CoverSlipOffset=NewPos-P0;
             %Move to position and show cell
 %             obj.Stage_Stepper.moveToPosition(1,P0(2)+obj.CoverSlipOffset(2)) %y
 %             obj.Stage_Stepper.moveToPosition(2,P0(1)+obj.CoverSlipOffset(1)) %x
-            obj.Stage_Stepper.moveToPosition(1,P0(2)+obj.CoverSlipOffset(2)) %y
-            obj.Stage_Stepper.moveToPosition(2,P0(1)+obj.CoverSlipOffset(1)) %x
-            obj.Stage_Stepper.moveToPosition(3,P0(3)+obj.CoverSlipOffset(3)) %z
+%             obj.Stage_Stepper.moveToPosition(3,P0(3)+obj.CoverSlipOffset(3)) %z
+                        obj.Stage_Stepper.moveToPosition(1,NewPos(2)); %new y %units are mm
+                        obj.Stage_Stepper.moveToPosition(2,NewPos(1)); %new x
+                        obj.Stage_Stepper.moveToPosition(3,FocusPosZ); %new z
+            
+            % check with expose grid
+%             OldPos_X=obj.Stage_Stepper.getPosition(2); %new x
+%             OldPos_Y=obj.Stage_Stepper.getPosition(1); %new y
+%             OldPos_Z=obj.Stage_Stepper.getPosition(3); %new z
+%             OldPos=[OldPos_X,OldPos_Y,OldPos_Z]; %new
+%             deltaX=(abs(ImSize/2-X)*obj.SCMOS_PixelSize)*1/1000; %mm 
+%             deltaY=(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
+%             if X>1024 & Y<1024
+%                 NewPos_X=OldPos_X-deltaX; %mm
+%                 NewPos_Y=OldPos_Y-deltaY; %mm
+%             elseif X>1024 & Y>1024
+%                 NewPos_X=OldPos_X-deltaX; %mm
+%                 NewPos_Y=OldPos_Y+deltaY; %mm
+%             elseif X<1024 & Y<1024
+%                 NewPos_X=OldPos_X+deltaX; %mm
+%                 NewPos_Y=OldPos_Y-deltaY; %mm
+%             else
+%                 NewPos_X=OldPos_X+deltaX; %mm
+%                 NewPos_Y=OldPos_Y+deltaY; %mm
+%             end
+%             NewPos=[NewPos_X,NewPos_Y]; %new
+%             obj.Stage_Stepper.moveToPosition(1,NewPos(2)); %new y %units are mm
+%             obj.Stage_Stepper.moveToPosition(2,NewPos(1)); %new x
+%             obj.Stage_Stepper.moveToPosition(3,OldPos(3)); %new z
+            %end of check
+            
             pause(1);
             Data=captureLamp(obj,'ROI');
             
-            obj.CoverSlipOffset=NewPos-P0;
+%             obj.CoverSlipOffset=NewPos-P0;
             FF=figure;
             imshow(Data,[],'Border','tight');
             
@@ -548,13 +576,11 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
              obj.SCMOS.AcquisitionType = 'focus';
              obj.SCMOS.setup_acquisition();
              obj.Laser_647.setPower(obj.LaserPowerFocus);
-%            obj.Laser_647.WaitForLaser=0; %FF for now
              obj.FlipMount.FilterIn; %new
              obj.Shutter.open; % opens shutter for laser
              obj.Laser_647.on();
              obj.Lamp_660.setPower(0); %FF
              obj.SCMOS.start_focus();
-             %obj.Shutter.OpenClose(0); % closes the shutter instead of turning off the laser
              obj.Laser_647.off();
              obj.Shutter.close; %closes shutter in order to prevent photobleaching
              
@@ -643,6 +669,12 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
          function startSequence(obj,RefStruct,LabelID)
             %Collects and saves an SR data Set
             
+            %create save folder and filenames
+%             if ~exist(obj.SaveDir,'dir');mkdir(obj.SaveDir);end
+%             timenow=clock;
+%             s=['-' num2str(timenow(1)) '-' num2str(timenow(2))  '-' num2str(timenow(3)) '-' num2str(timenow(4)) '-' num2str(timenow(5)) '-' num2str(round(timenow(6)))];
+%             
+                   %.........................    
             %Setup file saving
             if ~obj.IsBleach
                 [~,~]=mkdir(obj.TopDir);
@@ -650,10 +682,24 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                 DN=fullfile(obj.TopDir,obj.CoverslipName,sprintf('Cell_%2.2d',RefStruct.CellIdx),sprintf('Label_%2.2d',LabelID));
                 [~,~]=mkdir(DN);
                 TimeNow=clock;
-                DateString=[num2str(TimeNow(1)) '-' num2str(TimeNow(2))  '-' num2str(TimeNow(3)) '-' num2str(TimeNow(4)) '-' num2str(TimeNow(5))];
-                FN=sprintf('Data_%s.mat',DateString);
+                DateString=[num2str(TimeNow(1)) '-' num2str(TimeNow(2))  '-' num2str(TimeNow(3)) '-' num2str(TimeNow(4)) '-' num2str(TimeNow(5)) '-' num2str(round(TimeNow(6)))];
+%                 FN=sprintf('Data_%s.mat',DateString); %FF
+                FN=sprintf('Data_%s.h5',DateString);
                 FileName=fullfile(DN,FN);
-                F=matfile(FileName);
+%                 F=matfile(FileName); %FF
+            end
+       %.........................     
+            % FF test for save h.file
+            switch obj.SaveFileType
+                case 'mat'
+                case 'h5'
+                    FileH5=FileName; %FF
+%                     FileH5=fullfile(obj.SaveDir,[obj.BaseFileName DateString '.h5']); 
+                    MIC_H5.createFile(FileH5);
+                    MIC_H5.createGroup(FileH5,'Data');
+                    MIC_H5.createGroup(FileH5,'Data/Channel01');
+                otherwise
+                    error('StartSequence:: unknown file save type')
             end
             
             %Move to Cell
@@ -671,7 +717,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.SCMOS.ROI=obj.SCMOS_ROI_Collect;
             obj.SCMOS.setup_acquisition();
             obj.Align_Reg.Image_Reference=RefStruct.Image;
-            obj.Align_Reg.MaxIter=10; %new
+            obj.Align_Reg.MaxIter=20; %new
             try %So that if alignment fails, we don't stop auto collect for other cells
                 obj.Align_Reg.align2imageFit(RefStruct); %FF
             catch 
@@ -720,11 +766,22 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                 
                 for nn=1:obj.NumberOfIterations
                     obj.Shutter.open; % opens shutter before the Laser turns on
-                    Data=obj.SCMOS.start_sequence();
+                    
+                    %Collect 
+                    sequence=obj.SCMOS.start_sequence();
                     if ~obj.IsBleach %Append Data
                         obj.Shutter.close;
-                        S=sprintf('F.Data%2.2d=Data;',nn);
-                        eval(S);
+                        switch obj.SaveFileType
+                            case 'mat'
+                                fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
+                                Params=exportState(obj); %#ok<NASGU>
+                                save(fn,'sequence','Params');
+                            case 'h5' %This will become default
+                                S=sprintf('Data%04d',nn)
+                                MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
+                            otherwise
+                                error('StartSequence:: unknown SaveFileType')
+                        end
                         %obj.Shutter.open;
                     end
                     obj.Shutter.close; % closes shutter before the Laser turns on
@@ -745,8 +802,14 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                     Cam.FigureHandle=[];
                     Cam.ImageHandle=[];
                     F.Camera=Cam;
-%                     F.Active=obj.Active_Reg.exportState();
+                    F.Active=obj.Active_Reg.exportState(); %FF
                     F.Align=obj.Align_Reg.exportState();
+%                     Camera=Cam;
+%                     Active=obj.Active_Reg.exportState(); %FF
+%                     Align=obj.Align_Reg.exportState();
+%                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Camera',Camera);
+%                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Active',Active);
+%                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Align',Align);
                 end
                 
                 %delete Active_Reg
@@ -770,11 +833,12 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                 FileList=dir(fullfile(RefDir,'Reference_Cell*'));
                 NumCells=length(FileList);               
                 obj.Shutter.close; % close shutter before the Laser turns on
-                obj.FlipMount.FilterOut; %moves away the ND filter from the beam
+%                 obj.FlipMount.FilterIn; 
                 obj.Laser_647.setPower(obj.LaserPowerSequence);
                 obj.Laser_647.on();
                 
                 %Loop over cells
+
                 for nn=StartCell:NumCells 
                     
                     %Create or load RefImageStruct
@@ -788,6 +852,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                     end
                     
                     obj.startSequence(RefStruct,obj.LabelIdx);
+%                     obj.FlipMount.FilterOut; %FF
                     
                     if nn==StartCell %update coverslip offset
                         %obj.CoverSlipOffset=obj.Stage_Stepper.Position-RefStruct.StepperPos; %old
@@ -798,8 +863,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                         obj.CoverSlipOffset=SP-RefStruct.StepperPos; %new
                     end
 %                     obj.FlipMount.FilterOut;
-%                     obj.Shutter.open;
-%                     obj.SCMOS.start_sequence
+
                 end
                 
                 obj.FlipMount.FilterIn; %moves in the ND filter toward the beam
