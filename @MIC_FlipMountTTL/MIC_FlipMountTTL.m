@@ -1,5 +1,5 @@
 classdef MIC_FlipMountTTL < MIC_Abstract %by FF
-    % MIC_FlipMountTTL Matlab Instrument Control Class for the flipmount
+    % MIC_FlipMountTTL: Matlab Instrument Control Class for the flipmount
     %
     % This class controls a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M
     % controller.  Controller is triggered in via a TTL signal passing from the
@@ -127,16 +127,18 @@ classdef MIC_FlipMountTTL < MIC_Abstract %by FF
        end
         
 
-        function State=exportState(obj)
-            
-            State.IsOpen = obj.IsOpen;
-            State.InstrumentName = obj.InstrumentName;
+        function [Attributes,Data,Children]=exportState(obj)
+            % Exports current state of the instrument
+            Attributes.IsOpen = obj.IsOpen;
+            Attributes.InstrumentName = obj.InstrumentName;
+            Data=[];
+            Children=[];
         end
 
         
     end
     
-    methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
+    methods(Static=true)% 
         % test this class on command line by: MIC_FlipMountTTL.unitTest('Dev1','Port0/Line1')
         function State=unitTest(NIDevice,DOChannel)
             % Unit test of object functionality
