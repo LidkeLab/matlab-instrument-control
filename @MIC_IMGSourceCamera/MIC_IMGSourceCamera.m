@@ -16,7 +16,7 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
     % This was done with imaqtool using Tools menu.
     %
     % Example: obj=MIC_IMGSourceCamera();
-    % Functions: on, off, delete, shutdown, exportState, setPower 
+    % Functions: delete, shutdown, exportState
     %
     % REQUIREMENTS: 
     %   MIC_Abstract.m
