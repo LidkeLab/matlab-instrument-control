@@ -13,7 +13,7 @@ classdef MIC_LinearStage_Abstract < MIC_Abstract
     %   MIC_Abstract.m
     %   MATLAB 2014b or higher
     %
-    % Marjolein Meddens, Lidke Lab 2017
+    % Marjolein Meddens, Lidke Lab, 2017.
     
     properties (Abstract,SetAccess=protected)
         PositionUnit;          % Units of position parameter (eg. um/mm)
