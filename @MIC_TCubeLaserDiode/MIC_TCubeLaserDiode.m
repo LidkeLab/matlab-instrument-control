@@ -1,5 +1,5 @@
 classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
-    % MIC_TCubeLaserDiode Matlab Instrument Control Class for the ThorLabs TCube Laser Diode
+    % MIC_TCubeLaserDiode: Matlab Instrument Control Class for the ThorLabs TCube Laser Diode
     %
     %   This class controls a Laser Diode through us USB connected ThorLabs TCube Laser
     %   Diode Driver TLD001.   Low level commands are via c-API functions
@@ -12,7 +12,10 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
     %   NOTES:
     %       The object should never be cleared with 'clear all'.  Use
     %       'delete' or 'clear'. 
-    %       
+    %    
+    % Example: TLD=MIC_TCubeLaserDiode('64864827','Power',10,100,1)
+    % Functions: on, off, delete, shutdown, setPower, exportState, unitTest
+    %
     % REQUIRES:
     %   MIC_Abstract.m
     %   MIC_LightSource_Abstract.m
@@ -20,18 +23,20 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
     %   Pre-compiled Kinesis_LD_*.mex64 files in path (typically in ../../mex64);
     %   Thorlabs.MotionControl.DeviceManager.dll and Thorlabs.MotionControl.TCube.LaserDiode
     %       must be in system path or in same folder as *.mex64 files.
-    
+    %
     % Serial Numbers:
     %   TIRF 642: 64838719
     %   RB 642: 64844464
     %   RB 405: 64864827
     %   SPT 642: 
     %   SEQ 405: 64841724
-    
+    %
     % Calibrations:
     %   TIRF 642, Feb 28, 2017:  I_LD=150 mA, I_PD=310.7 uA, P_LD=56.7 mW. WperA=182.5  
     %   RB 642, March 22, 2017:  I_LD=155.15 mA, I_PD=340.0 uA, P_LD=76.35 mW. WperA=224.6
     %   RB 405, March 22, 2017:  I_LD=69.99 mA, I_PD=981 uA, P_LD=40.15 mW. WperA=40.93
+    %
+    % CITATION: ,LidkeLab, 2017.
     
     properties (SetAccess=protected)
         InstrumentName='TCubeLaserDiode' % Descriptive Instrument Name
@@ -54,7 +59,6 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
     methods
         function obj=MIC_TCubeLaserDiode(SerialNo,Mode,MaxPower,WperA,TIARange)
             % Creates a MIC_TCubeLaserDiode object and sets output to minimum and turns off LED.
-            % Example: TLD=MIC_TCubeLaserDiode('64864827','Power',10,100,1)
             
             if nargin<5
                 error('MIC_TCubeLaserDiode::SerialNo,Mode,MaxPower,WperA,TIARange must be defined')
