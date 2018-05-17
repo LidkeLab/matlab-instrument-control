@@ -3,6 +3,9 @@ MATLAB Instrument Control (MIC) is a collection of MATLAB classes for automated 
 
 MIC software package uses object-oriented programming where a class defines the capabilities of each instrument. Each instrument class inherits from a common MIC abstract class and therefore has a basic common interface. Common component types (lasers, camera, etc.) have their own further abstract sub-classes to give common interfaces and to facilitate the development of control classes for specific new instruments. Use of the MATLAB environment allows immediate access to data and image analysis even during data collection.  Proficient MATLAB users can also easily extend or modify any of these control classes. 
 
+## Class Structure of MIC
+<p align="center"><img src="ClassStructure.png" width="80%" height="80%"></p>
+
 
 ## Common Features
 Each of the instrument components in MIC have export methods, unit tests and graphical user interfaces with a common format.
