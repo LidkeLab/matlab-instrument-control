@@ -1,2 +1,4 @@
 # matlab-instrument-control
-A collection of MATLAB classes to control various equipment used in fluorescence microscopy
+A collection of MATLAB classes for automated data collection on complex, multi-component custom built microscopes.
+
+
