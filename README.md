@@ -45,3 +45,9 @@ MIC_DynamixelServo.gui
 
 ## Controlling multi-component instruments
 Using MIC, control of multi-component instruments can be acheived by 1) scripting or 2) creating functions or classes that make use of individual components.  
+
+Example of microscope control class:
+```
+MIC_TRIF_SRCollect()
+```
+
