@@ -48,6 +48,6 @@ Using MIC, control of multi-component instruments can be acheived by 1) scriptin
 
 Example of microscope control class:
 ```
-MIC_TRIF_SRCollect()
+MIC_TIRF_SRCollect()
 ```
 
