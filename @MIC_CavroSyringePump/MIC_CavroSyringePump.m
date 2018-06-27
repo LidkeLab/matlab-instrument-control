@@ -22,7 +22,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         DeviceAddress = 1; % ASCII address for device
         DeviceSearchTimeout = 10; % timeout(s) to search for a pump
         DeviceResponseTimeout = 10; % timeout(s) for valid device response
-        SerialPort = 'COM3'; % default COM port for syringe pump
+        SerialPort = '';
     end
     
     
