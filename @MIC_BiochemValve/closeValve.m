@@ -13,7 +13,7 @@ function closeValve(obj, ValveNumber)
 
 
 % Map ValveNumber to the appropriate digital I/O pin on the Arduino.
-PinNumber = obj.IN1Pin + ValveNumber;
+PinNumber = obj.IN1Pin + ValveNumber + 1; % +1 since IN1 and IN2 are power
 
 % Send the HIGH signal to the Arduino digital pin (the valves are wired to
 % be active LOW, i.e. to close the valve we'll need to send a HIGH signal).
