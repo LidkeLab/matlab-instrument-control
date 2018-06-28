@@ -26,7 +26,7 @@ classdef MIC_BiochemValve < MIC_Abstract
     
     
     properties
-        CurrentState = 1; % 1 if 12V connected to valves, 0 otherwise
+        PowerState = 1; % 1 if valves are ready to be powered, 0 otherwise
         DeviceSearchTimeout = 10; % timeout(s) to search for USB device
         DeviceResponseTimeout = 10; % timeout(s) for valid device response
         IN1Pin = 2; % Arduino digital pin number connected to relay IN1
@@ -68,7 +68,7 @@ classdef MIC_BiochemValve < MIC_Abstract
         
         gui(obj); 
         
-        function valvePowerSwitch(obj)
+        function powerSwitch(obj)
             %Power switch for the BIOCHEM flow selection valves.
             %
             % This function will check the most recently known state of the 
@@ -84,11 +84,11 @@ classdef MIC_BiochemValve < MIC_Abstract
             %   2) This assumes that the 12V line is controlled by the 2nd
             %      relay, i.e. the relay controlled by IN2 on the relay
             %      module.  If this changes, modify definition of PinName.
-            PinName = sprintf('D%i', obj.IN1Pin + 1); 
-            writeDigitalPin(obj.Arduino, PinName, ~obj.CurrentState); 
+            PowerPin = sprintf('D%i', obj.IN1Pin + 1); 
+            writeDigitalPin(obj.Arduino, PowerPin, ~obj.PowerState); 
             
             % Update the CurrentState to reflect our switch.
-            obj.CurrentState = ~obj.CurrentState; 
+            obj.PowerState = ~obj.PowerState; 
         end
 
         openValve(obj, ValveNumber); 
