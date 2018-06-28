@@ -36,13 +36,25 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         end
         
         function delete(obj)
-            %Defines a class destructor
-            fclose(obj.SyringePump); % close serial connection
-            delete(obj.SyringePump); % delete from memory
-            clear obj.SyringePump % remove from workspace
+            %Defines a class destructor for the syringe pump.
+            
+            % If the serial object obj.SyringePump exists (i.e. a syringe
+            % pump had been connected to), close the connection to it and
+            % clean up.
+            if ~isempty(obj.SyringePump)
+                fclose(obj.SyringePump); % close serial connection
+                delete(obj.SyringePump); % delete from memory
+                clear obj.SyringePump % remove from workspace
+            end
         end
         
-        exportState(obj); 
+        function [Attributes, Data, Children] = exportState(obj) 
+            % Exports the current state of the insrtument.
+            Attributes.InstrumentName = obj.InstrumentName;
+            Data=[];
+            Children=[];
+        end     
+        
         gui(obj); 
         
         [ASCIIMessage, ReadableMessage] = connectSyringePump(obj);
