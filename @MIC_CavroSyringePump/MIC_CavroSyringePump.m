@@ -13,8 +13,8 @@ classdef MIC_CavroSyringePump < MIC_Abstract
     end
     
     
-    properties % (Access = protected) % would I want this???
-        StartGUI;
+    properties (Hidden)
+        StartGUI = false;
     end
     
     
@@ -22,11 +22,19 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         DeviceAddress = 1; % ASCII address for device
         DeviceSearchTimeout = 10; % timeout(s) to search for a pump
         DeviceResponseTimeout = 10; % timeout(s) for valid device response
-        SerialPort = '';
+        SerialPort = 'COM3'; % default COM port
     end
     
     
     methods
+        function obj = MIC_CavroSyringePump()
+            %Constructor for the Cavro syringe pump object.
+                       
+            % If needed, automatically assign a name to the instance of
+            % this class (i.e. if user forgets to do this).
+            obj = obj@MIC_Abstract(~nargout);
+        end
+        
         function delete(obj)
             %Defines a class destructor
             fclose(obj.SyringePump); % close serial connection
