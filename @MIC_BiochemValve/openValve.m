@@ -13,7 +13,7 @@ function openValve(obj, ValveNumber)
 
 
 % Map ValveNumber to the appropriate digital I/O pin on the Arduino.
-PinNumber = obj.IN1Pin + ValveNumber - 1; % -1 since relay modules are 1-8
+PinNumber = obj.IN1Pin + ValveNumber + 1; % +1 since IN1 and IN2 are power
 
 % Send the LOW signal to the Arduino digital pin (the valves are wired to
 % be active LOW, i.e. the valve is open when a LOW signal, or 0V, is sent
