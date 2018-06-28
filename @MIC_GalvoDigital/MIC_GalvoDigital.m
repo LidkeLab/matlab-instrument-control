@@ -19,7 +19,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
     %  Data Acquisition Toolbox
     %  MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
-    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
+    % CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
     
     properties(SetAccess=protected)
         InstrumentName='GalvoDigital' % Descriptive Instrument Name
@@ -72,7 +72,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
                        
             % 16 channels to change the angles
             obj.DAQsessionAngle.addDigitalChannel(NIDevice,'Port0/Line0:15','OutputOnly');
-            % 4 channels to make the galvo mirror be  enabled to move
+            % 4 channels to make the galvo mirror be enabled to move
             obj.DAQsessionEnable.addDigitalChannel(NIDevice,'Port0/Line24:27','OutputOnly');
             
             obj.NIDevice=NIDevice;
