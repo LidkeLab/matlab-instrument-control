@@ -20,8 +20,8 @@ classdef MIC_BiochemValve < MIC_Abstract
     end
     
     
-    properties % (Access = protected) % would I want this???
-        StartGUI;
+    properties (Hidden)
+        StartGUI = false;
     end
     
     
@@ -39,6 +39,10 @@ classdef MIC_BiochemValve < MIC_Abstract
         function obj = MIC_BiochemValve()
             %Constructor for the BIOCHEM valve object.
             
+            % If needed, automatically assign a name to the instance of
+            % this class (i.e. if user forgets to do this).
+            obj = obj@MIC_Abstract(~nargout);
+            
             % Search for/connect to an Arduino connected via USB.
             if isempty(obj.SerialPort) 
                 % The user did not specify which port to connect to. 
@@ -51,11 +55,17 @@ classdef MIC_BiochemValve < MIC_Abstract
         end
         
         function delete(obj)
-            %Defines a class destructor.
-            clear obj.Arduino % remove from workspace
+            %Defines a class destructor for the BIOCHEM valve.
+            clear obj.Arduino % remove from workspace, close connection
         end
         
-        exportState(obj); 
+        function [Attributes, Data, Children] = exportState(obj) 
+            % Exports the current state of the insrtument.
+            Attributes.InstrumentName = obj.InstrumentName;
+            Data=[];
+            Children=[];
+        end     
+        
         gui(obj); 
         
         function valvePowerSwitch(obj)
