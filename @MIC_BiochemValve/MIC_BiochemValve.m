@@ -32,6 +32,7 @@ classdef MIC_BiochemValve < MIC_Abstract
         IN1Pin = 2; % Arduino digital pin number connected to relay IN1
         SerialPort; % serial port for the Arduino (if needed)
         Board = 'Uno'; % name of Arduino board (if needed)
+        ValveState = [0, 0, 0, 0, 0, 0]; % 6 valves, 0 (closed) or 1 (open)
     end
     
     

@@ -20,5 +20,7 @@ PinNumber = obj.IN1Pin + ValveNumber + 1; % +1 since IN1 and IN2 are power
 PinName = sprintf('D%i', PinNumber); 
 writeDigitalPin(obj.Arduino, PinName, 1); % send 5V to Arduino pin PinName
 
+% Update valve state property.
+obj.ValveState(ValveNumber) = 0; 
 
 end
