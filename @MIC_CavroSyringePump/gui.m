@@ -36,7 +36,7 @@ Create the GUI controls.
 
 % Create a textbox to display the status of the syringe pump.
 StatusText = uicontrol('Parent', guiFig, 'Style', 'edit', ...
-    'Position', [0, 0, FigWidth, 25], 'Tag', 'StatusText');
+    'Position', [0, 0, FigWidth-50, 25], 'Tag', 'StatusText');
 
 % Create a popupmenu to allow for selection of the COM port the syringe pump
 % is connected to. 
@@ -46,12 +46,14 @@ PortList = uicontrol('Parent', guiFig, 'Style', 'popupmenu', ...
 % Create a Connect Syringe Pump button to make a serial connection with the
 % pump.
 ConnectButton = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
-    'String', 'Connect Syringe Pump', 'Position', [0, 300, 150, 50], ...
+    'Position', [0, 300, 150, 50], 'String', 'Connect Syringe Pump', ...
     'Callback', @connectSyringePump);
 
-% Create a pushbutton to query the syringe pump and return the answer.
-
-
+% Create a pushbutton to query the syringe pump and update the StatusText
+% based on the response (i.e. it's a refresh button for StatusText).
+RefreshStatus = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
+    'Position', [FigWidth-50, 0, 50, 25], 'String', 'Refresh', ...
+    'Callback', @refreshStatus);
 
 %{
 Initialize the GUI based on object properties. 
@@ -101,6 +103,14 @@ Define the callback functions for the GUI controls.
         
         % Set obj.SerialPort to the user selection.
         obj.SerialPort = ListItems{Source.Value};
+    end
+
+    function refreshStatus(~, ~)
+        % Callback for the refresh status (query) button.
+        
+        % Query the syringe pump and update the GUI based on response.
+        obj.querySyringePump(); 
+        properties2gui();
     end
 
     function connectSyringePump(~, ~)
