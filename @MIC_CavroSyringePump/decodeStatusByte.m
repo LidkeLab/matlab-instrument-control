@@ -20,6 +20,9 @@ function [PumpStatus, ErrorString] = decodeStatusByte(StatusByte)
 if StatusByte >= 96
     % The syringe pump is ready to accept new commands.
     PumpStatus = 'ready'; 
+elseif StatusByte == 0
+    % The syringe pump has not been connected yet. 
+    PumpStatus = 'Not connected'; 
 else
     % The syringe pump is busy.
     PumpStatus = 'busy';
@@ -30,7 +33,8 @@ end
 % (see Table 3-7 on page 3-44 of the Cavro XP 3000 syringe pump
 % manual for detailed error code descriptions)
 switch StatusByte
-    case {64, 96}
+    case {0, 64, 96}
+        % Note that StatusByte==0 means no device is connected.
         ErrorString = 'No error';
     case {65, 97}
         ErrorString = 'Error Code 1: Initialization error'; 
