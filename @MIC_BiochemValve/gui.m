@@ -33,16 +33,23 @@ obj.GuiFigure.CloseRequestFcn = @closeFigure;
 Create the GUI controls.
 %}
 
-% Create a "power button" that will switch the 24V/12V lines on/off.
-% NOTE: This could be useful as an emergency switch in case a valve was not
-% wired correctly, but it is likely not too useful in the current
-% configuration since only one valve gets powered at a time. 
+% Create "power buttons" that will switch the 24V/12V lines on/off.
+% NOTE: The valves are controlled by the 12V line, however the 12V is
+% controlled by the 24V line (the 24V is tapped by a regulator that steps
+% it down to 12V for the valves), thus both the 12V and 24V lines must be
+% activated to operate the valves. 
 PowerButton12V = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
     'String', '12V Line Deactivated', 'Position', [125, 500, 150, 50], ...
     'BackgroundColor', 'g', 'Callback', @powerSwitch12V);
 PowerButton24V = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
     'String', '24V Line Deactivated', 'Position', [125, 450, 150, 50], ...
     'BackgroundColor', 'g', 'Callback', @powerSwitch24V);
+
+% Create an emergency shutdown button that will attempt to cut both the 12V
+% and 24V lines.
+EmergencyShutdown = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
+    'String', 'Emergency Shutdown', 'Position', [125, 400, 150, 50], ...
+    'BackgroundColor', 'r', 'Callback', @emergencyShutdown); 
 
 % Create the controls for each of the six valves on the BIOCHEM flow
 % selection device. 
@@ -129,29 +136,57 @@ Define the callback functions for the GUI controls.
     end
     
     function powerSwitch12V(~, ~)
-        % This power switch can be used as a sort of emergency power
-        % switch to cut the 12V line that is made available to open valves
-        % on the BIOCHEM flow selection device.
+        % Callback for the 12V button used to switch the 12V line on/off. 
+        % NOTE: The 12V line powers the valves, however the 12V line itself
+        % is powered by the 24V line. 
         
         % Switch the 12V line control relay.
         obj.powerSwitch12V()
         
         % Update the GUI to reflect the changes in the power.
-        properties2gui()
+        properties2gui();
     end
 
     function powerSwitch24V(~, ~)
-        % This power switch can be used as a sort of emergency power
-        % switch to cut power to both the BIOCHEM valves and the Cavro
-        % syringe pump.
+        % Callback for the 24V button used to switch the 24V line on/off. 
+        % NOTE: The 24V line controls both the Cavro syringe pump and the
+        % BIOCHEM flow selection valves. 
         
-        % Switch off the 24V line if it is not already
+        % Switch the 24V line control relay.
         obj.powerSwitch24V()
         
         % Update the GUI to reflect the changes in the power.
-        properties2gui()
+        properties2gui();
     end
     
+    function emergencyShutdown(~, ~)
+        % Callback for an emergency shutdown button, which will attempt to
+        % cut both the 24V and 12V lines.
+        % NOTE: The 12V line is actually controlled by the 24V line but I
+        %       figured it's best to try and cut it anyways.
+        
+        % Attempt to switch off the 24V line (which is active LOW).
+        PowerPin24V = sprintf('D%i', obj.IN1Pin); 
+        writeDigitalPin(obj.Arduino, PowerPin24V, 1);
+        
+        % Attempt to switch off the 12V line (which is active LOW).
+        PowerPin12V = sprintf('D%i', obj.IN1Pin+1);
+        writeDigitalPin(obj.Arduino, PowerPin12V, 1);
+        
+        % Ensure the valve control relays receive a HIGH (valve closed)
+        % signal so that when powered back on, the valves are closed.
+        for ii = 1:6
+            obj.closeValve(ii); 
+        end
+            
+        % Update the object properties to reflect our switches.
+        obj.PowerState24V = 0; 
+        obj.PowerState12V = 0; 
+        
+        % Update the GUI to reflect the above changes.
+        properties2gui();
+    end
+
     function valveControl(Source, ~, ValveNumber)
         % Open/close valve ValveNumber based on state of a togglebutton.
         ButtonState = Source.Value; % state of toggle button
