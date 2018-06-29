@@ -72,9 +72,6 @@ if ~ValidPortGiven && ~isempty(ConnectedDevices)
         obj.DeviceSearchTimeout)
 end
 
-% Initialize the Cavro syringe pump.
-fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'ZR']);
-
 % Set several serial communications properties for the device. 
 obj.SyringePump.BaudRate = 9600;
 obj.SyringePump.DataBits = 8;
@@ -82,6 +79,9 @@ obj.SyringePump.FlowControl = 'none';
 obj.SyringePump.Terminator = 'CR'; % not sure why, but it works..
 obj.SyringePump.Timeout = 1; % default is 10s
 obj.SyringePump.Parity = 'none';
+
+% Initialize the Cavro syringe pump.
+fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'ZR']);
 
 % Do not exit this method until the syringe pump is ready to accept new
 % commands (presumably because the syringe pump was connected and
@@ -95,6 +95,13 @@ while (obj.StatusByte < 96) || (QueryNumber == 1)
     obj.querySyringePump; 
     QueryNumber = QueryNumber + 1; 
 end
+
+% Set default properties based on the (assumed) succesful initialization.
+obj.StartVelocity = 900; 
+obj.TopVelocity = 1400; 
+obj.CutoffVelocity = 900;
+obj.VelocitySlope = 14; 
+obj.PlungerPosition = 0; 
 
 
 end
