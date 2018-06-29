@@ -14,6 +14,8 @@ classdef MIC_CavroSyringePump < MIC_Abstract
     %            unitTest
     %
     % REQUIREMENTS:
+    %   Windows operating system (should work with unix systems with
+    %       modifications only to serial port behaviors)
     %   MATLAB 2014b or later required.
     %   MATLAB R2017a or later recommended. 
     %   MIC_Abstract.m
@@ -22,13 +24,14 @@ classdef MIC_CavroSyringePump < MIC_Abstract
     
     
     properties (SetAccess = protected) % users shouldn't set these
-        InstrumentName = 'CavroSyringePump';
-        StatusByte = 64; % see XP3000 manual p. 3-46, default busy no error
+        InstrumentName = 'CavroSyringePump'; % name of the instrument
+        StatusByte = 0; % status of the pump, 0 if not connected
         SyringePump; % serial object for the connected syringe pump
     end
     
     
     properties (Hidden)
+        MatlabRelease; % version of MATLAB that is using this class
         StartGUI = false;
     end
     
@@ -53,6 +56,9 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
             obj = obj@MIC_Abstract(~nargout);
+            
+            % Determine the current version of MATLAB in use.
+            obj.MatlabRelease = version('-release');
         end
         
         function delete(obj)
@@ -111,14 +117,14 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             [PumpStatus, ErrorString] = ...
                 obj.decodeStatusByte(obj.StatusByte);
             
-            % Store a message summaring PumpStatus and ErrorString.
-            ReadableStatus = sprintf('Syringe Pump Status: %s, %s \n', ...
+            % Store a message summarizing PumpStatus and ErrorString.
+            ReadableStatus = sprintf('Syringe Pump Status: %s, %s', ...
                 PumpStatus, ErrorString);
         end
         
         function obj = set.StatusByte(obj, StatusByte)
-            %Displays a message to the MATLAB Command Window whenever the 
-            %StatusByte is changed. 
+            %Displays a message to the MATLAB Command Window or updates the
+            %GUI whenever the StatusByte property is changed. 
             
             % If the StatusByte has not changed, we don't need to do
             % anything here so return to the calling function/method.
