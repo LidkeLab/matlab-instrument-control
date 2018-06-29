@@ -25,7 +25,7 @@ classdef MIC_BiochemValve < MIC_Abstract
     
     
     properties (SetAccess = protected) % users shouldn't set these
-        InstrumentName = 'BiochemValve';
+        InstrumentName = 'BiochemValve'; % name of instrument
         Arduino; % serial object for the connected syringe pump
     end
     
