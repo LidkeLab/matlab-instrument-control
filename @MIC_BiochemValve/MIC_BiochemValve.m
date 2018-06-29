@@ -26,7 +26,8 @@ classdef MIC_BiochemValve < MIC_Abstract
     
     
     properties
-        PowerState = 1; % 1 if valves are ready to be powered, 0 otherwise
+        PowerState12V = 0; % 1 if 12V line is active, 0 otherwise
+        PowerState24V = 0; % 1 if 24V line is active, 0 otherwise
         DeviceSearchTimeout = 10; % timeout(s) to search for USB device
         DeviceResponseTimeout = 10; % timeout(s) for valid device response
         IN1Pin = 2; % Arduino digital pin number connected to relay IN1
@@ -69,8 +70,8 @@ classdef MIC_BiochemValve < MIC_Abstract
         
         gui(obj); 
         
-        function powerSwitch(obj)
-            %Power switch for the BIOCHEM flow selection valves.
+        function powerSwitch12V(obj)
+            %Power switch for the BIOCHEM flow selection valves (12V line)
             %
             % This function will check the most recently known state of the 
             % relay controlling the 12V line powering the BIOCHEM flow 
@@ -78,18 +79,38 @@ classdef MIC_BiochemValve < MIC_Abstract
             
             % Switch the 12V control relay from it's currently known state.
             % NOTES: 
-            %   1) The relay controlling the 12V line is wired active HIGH
+            %   1) The relay controlling the 12V line is wired active LOW
             %      in the sense that the 12V line is accesible to the valve
-            %      control relays when the Arduino sends a 1 (5V) to the 
-            %      12V line control relay. 
+            %      control relays when the Arduino sends a 0 to the 12V 
+            %      line control relay. 
             %   2) This assumes that the 12V line is controlled by the 2nd
             %      relay, i.e. the relay controlled by IN2 on the relay
-            %      module.  If this changes, modify definition of PinName.
+            %      module.  If this changes, modify definition of PowerPin.
             PowerPin = sprintf('D%i', obj.IN1Pin + 1); 
-            writeDigitalPin(obj.Arduino, PowerPin, ~obj.PowerState); 
+            writeDigitalPin(obj.Arduino, PowerPin, obj.PowerState12V); 
             
             % Update the CurrentState to reflect our switch.
-            obj.PowerState = ~obj.PowerState; 
+            obj.PowerState12V = ~obj.PowerState12V; 
+        end
+        
+        function powerSwitch24V(obj)
+            %Power switch for the 24V line (this powers both the syringe
+            %pump and the BIOCHEM valves after stepping down to 12V).
+            %
+            % This function will check the most recently known state of the 
+            % relay controlling the 24V line and then send the opposite
+            % signal.
+            
+            % Switch the 24V control relay from it's currently known state.
+            % NOTES: 
+            %   1) The relay controlling the 24V line is wired active LOW
+            %      in the sense that the 24V line is live when the Arduino
+            %      sends a 0 to the pin controlling the 24V line relay.
+            PowerPin = sprintf('D%i', obj.IN1Pin); 
+            writeDigitalPin(obj.Arduino, PowerPin, obj.PowerState24V); 
+            
+            % Update the CurrentState to reflect our switch.
+            obj.PowerState24V = ~obj.PowerState24V; 
         end
 
         openValve(obj, ValveNumber); 
