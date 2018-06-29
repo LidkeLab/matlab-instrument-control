@@ -34,15 +34,24 @@ obj.GuiFigure.CloseRequestFcn = @closeFigure;
 Create the GUI controls.
 %}
 
+% Create a textbox to display the status of the syringe pump.
+StatusText = uicontrol('Parent', guiFig, 'Style', 'edit', ...
+    'Position', [0, 0, FigWidth, 25], 'Tag', 'StatusText');
+
+% Create a popupmenu to allow for selection of the COM port the syringe pump
+% is connected to. 
+PortList = uicontrol('Parent', guiFig, 'Style', 'popupmenu', ...
+    'Position', [0, 325, 150, 50], 'Callback', @portListCallback);
+
 % Create a Connect Syringe Pump button to make a serial connection with the
 % pump.
 ConnectButton = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
     'String', 'Connect Syringe Pump', 'Position', [0, 300, 150, 50], ...
     'Callback', @connectSyringePump);
 
-% Create a textbox to display the status of the syringe pump.
-StatusText = uicontrol('Parent', guiFig, 'Style', 'text', ...
-    'Position', [0, 250, 300, 25], 'Tag', 'StatusText'); 
+% Create a pushbutton to query the syringe pump and return the answer.
+
+
 
 %{
 Initialize the GUI based on object properties. 
@@ -66,7 +75,32 @@ Define the callback functions for the GUI controls.
         
         % Set the message text to the most recently known state of the
         % syringe pump.
-        StatusText.String = obj.ReadableStatus; 
+        StatusText.String = obj.ReadableStatus;
+
+        % Provide a list of available COM ports if MATLAB version will
+        % allow for it.
+        if str2double(obj.MatlabRelease(1:4)) >= 2017
+            % The version of MATLAB in use has the seriallist function,
+            % place each serial port available in the PortList menu,
+            % ensuring that obj.SerialPort is the first option shown.
+            ListItems = unique([obj.SerialPort, seriallist], 'stable');
+            PortList.String = cellstr(ListItems); % convert to cell array
+        else
+            % The version of MATLAB in use does not have the seriallist
+            % function, display the default port just for consistency.
+            PortList.String = obj.SerialPort; 
+        end
+    end
+
+    function portListCallback(Source, ~)
+        % Callback for the Port selection popup (dropdown) menu.
+        
+        % Set the serial port property based on the selection made in the
+        % popup menu.
+        ListItems = Source.String; % list of options given in popup menu
+        
+        % Set obj.SerialPort to the user selection.
+        obj.SerialPort = ListItems{Source.Value};
     end
 
     function connectSyringePump(~, ~)
