@@ -1,13 +1,18 @@
 classdef MIC_APTPiezo < MIC_Abstract
-    
-    % Class to control the Thorlabs APT piezo stage on sequential microscope
+    % MIC_APTPiezo: Matlab instrument class for Thorlabs APT piezo
     %
+    % Class controls the Thorlabs APT piezo stage on sequential
+    % microscope.Detailed description on the piezo in the sequential
+    % microscope manual.
     %
+    % Example: APTP=MIC_APTPiezo(SerialPZ,SerialSG)
     %
     % REQUIREMENTS:
+    % MIC_Abstract
     % MATLAB 2014 or higher
-    % MIC_Abstract class.
     % Access to the mexfunctions for this device. (private folder).
+    %
+    % , LidkeLab, 2017
     
     properties
         OneStepPoint=0.0405;% points to move 100 nm

@@ -1,18 +1,24 @@
 classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
    
-    % MIC_DHOMLaser532 Matlab Instrument Class for DHOM Laser 532.
+    % MIC_DHOMLaser532: Matlab Instrument Class for DHOM Laser 532.
+    %
     % Controls DHOM laser module, setting power within the range of 0 to
-    % 200 mW (measured 0 to 400 mW on 2/23/2017). The power modulation is done by providing input analog voltage to the laser controller from a NI card (range 0 to 5V).
+    % 400 mW (measured on 2/23/2017). The power modulation 
+    % is done by providing input analog voltage to the laser controller 
+    % from a NI card (range 0 to 5V).
     % Needs input of NI Device and AO Channel.
+    %
+    % Example: obj=MIC_DHOMLaser532('Dev2','ao1');
+    % Functions: on, off, State, setPower, delete, shutdown, exportState
     %
     % REQUIREMENTS: 
     %   MIC_Abstract.m
     %   MIC_LightSource_Abstract.m
+    %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
-    % Example: obj=MIC_DHOMLaser532('Dev2','ao1');
-    % Functions: on, off, State, setPower, delete
+    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
     
     properties(SetAccess = protected)
         InstrumentName='DHOMLaser532'; %Instrument Name
@@ -67,15 +73,17 @@ classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
         end
 
         function shutdown(obj)
-            % Stus down obj
+            % Shuts down obj
             obj.setPower(0);
             obj.off();
         end
         
-        function State=exportState(obj)     
+        function [Attributes,Data,Children]=exportState(obj)     
             % Export current state of the Laser
-            State.Power=obj.Power;
-            State.IsOn=obj.IsOn;
+            Attributes.IsOn=obj.IsOn;
+            Attributes.Power=obj.Power;
+            Data = [];
+            Children = [];
         end
         
         function setPower(obj,Power_in)

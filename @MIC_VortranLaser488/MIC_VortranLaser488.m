@@ -1,22 +1,27 @@
 classdef MIC_VortranLaser488 < MIC_LightSource_Abstract
    
-    % MIC_VortranLaser488 Matlab Instrument Class for Vortran Laser 488.
+    % MIC_VortranLaser488: Matlab Instrument Class for Vortran Laser 488.
+    %
     % Controls Vortran laser module, setting power within the range of 0 to
-    % 50 mW. This is acheived by providing input voltage to the laser controller from a NI card (range 0 to 5V).
+    % 50 mW. This is acheived by providing input voltage to the laser 
+    % controller from a NI card (range 0 to 5V).
     % Needs input of NI Device and AO Channel.
+    % The "External Control" and Max Power Range" for the laser needs to
+    % be set by connecting the laser to the computer by miniUSB-USB cable
+    % and using the Vortran_Stradus Laser Control Software Version 4.0.0
+    % (CD located in second draw of filing cabinet in room 118)
+    %
+    % Example: obj=MIC_VortranLaser488('Dev1','ao1');
+    % Functions: on, off, exportState, setPower, delete, shutdown
     %
     % REQUIREMENTS: 
     %   MIC_Abstract.m
     %   MIC_LightSource_Abstract.m
+    %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
-    %   The "External Control" and Max Power Range" for the laser needs to
-    %   be set by connecting the laser to the computer by miniUSB-USB cable
-    %   and using the Vortran_Stradus Laser Control Software Version 4.0.0
-    %   (CD located in second draw of filing cabinet in room 118)
     %
-    % Example: obj=MIC_VortranLaser488('Dev1','ao1');
-    % Functions: on, off, State, setPower, delete
+    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
     
     properties(SetAccess = protected)
         InstrumentName='VortranLaser488'; %Instrument Name
@@ -37,7 +42,8 @@ classdef MIC_VortranLaser488 < MIC_LightSource_Abstract
     
     methods
         function obj=MIC_VortranLaser488(NIDevice,AOChannel)
-            %Set up the NI Daq Object
+            % Object constructor
+            % Set up the NI Daq Object
             if nargin<2
                 error('NIDevice and AOChannel must be defined')
             end
@@ -61,14 +67,14 @@ classdef MIC_VortranLaser488 < MIC_LightSource_Abstract
         
 
         function delete(obj)
-            % Destructor
+            % Object Destructor
             obj.shutdown();
             clear obj.DAQ;
             delete(obj);
         end
 
         function shutdown(obj)
-            % Stus down obj
+            % Shuts down obj
             obj.setPower(0);
             obj.off();
         end
@@ -91,7 +97,6 @@ classdef MIC_VortranLaser488 < MIC_LightSource_Abstract
             if obj.IsOn==1
             outputSingleScan(obj.DAQ,NIVolts); % sets voltage at NI card for Power_in
             end
-%            obj.IsOn=1; % Sets laser state to 1
         end
     end
             methods (Static=true)

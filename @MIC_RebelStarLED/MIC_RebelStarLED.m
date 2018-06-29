@@ -1,5 +1,5 @@
 classdef MIC_RebelStarLED < MIC_LightSource_Abstract
-    % MIC_RebelStarLED Matlab Instrument Control Class for the Rebel Star LED
+    % MIC_RebelStarLED: Matlab Instrument Control Class for the Rebel Star LED
     %
     % This class controls a Luxeon Rebel Star LED via a 700 mA 'BUCKPUCK'
     % model 3023-D-E-700.  The power can be set between 0 and 100% as well as
