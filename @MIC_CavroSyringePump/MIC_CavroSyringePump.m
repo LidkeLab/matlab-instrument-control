@@ -1,7 +1,8 @@
 classdef MIC_CavroSyringePump < MIC_Abstract
     % MIC class for control of the Cavro syringe pump PN 20740556 -D. 
     %
-    % MATLAB R2017a or newer recommended. 
+    % MATLAB 2014b or later required.
+    % MATLAB R2017a or later recommended. 
     %
     % CITATION: David Schodt, Lidke Lab, 2018
     
@@ -18,6 +19,11 @@ classdef MIC_CavroSyringePump < MIC_Abstract
     end
     
     
+    properties (Dependent) % determined on demand
+        ReadableStatus; % user readable status of the syringe pump
+    end
+    
+    
     properties
         DeviceAddress = 1; % ASCII address for device
         DeviceSearchTimeout = 10; % timeout(s) to search for a pump
@@ -25,7 +31,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         SerialPort = 'COM3'; % default COM port
     end
     
-    
+  
     methods
         function obj = MIC_CavroSyringePump()
             %Constructor for the Cavro syringe pump object.
@@ -53,7 +59,27 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             Attributes.InstrumentName = obj.InstrumentName;
             Data=[];
             Children=[];
-        end     
+        end
+        
+        function updateGui(obj)
+            % Update the GUI with the current parameters (if one exists).
+            
+            % Check to see if a GUI exists.
+            if isempty(obj.GuiFigure) || ~isvalid(obj.GuiFigure)
+                return
+            end
+            
+            % Search for GUI objects to be updated and update them.
+            for ii = 1:numel(obj.GuiFigure.Children)
+                % Loop through each object within the GUI.
+                if strcmpi(obj.GuiFigure.Children(ii).Tag, 'StatusText')
+                    % This is the textbox displaying the pumps status,
+                    % update the status.
+                    obj.GuiFigure.Children(ii).String = obj.ReadableStatus;
+                    drawnow % ensure the text updates immediately
+                end
+            end
+         end
         
         gui(obj); 
         
@@ -62,6 +88,19 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         executeCommand(obj, Command); 
         querySyringePump(obj);
         [DataBlock] = reportCommand(obj, Command);
+        
+        function ReadableStatus = get.ReadableStatus(obj)
+            %Produces a readable status of the syringe pump upon request.
+            %NOTE: obj.ReadableStatus is a Dependent property.
+            
+            % Decode the StatusByte returned by the syringe pump.
+            [PumpStatus, ErrorString] = ...
+                obj.decodeStatusByte(obj.StatusByte);
+            
+            % Store a message summaring PumpStatus and ErrorString.
+            ReadableStatus = sprintf('Syringe Pump Status: %s, %s \n', ...
+                PumpStatus, ErrorString);
+        end
         
         function obj = set.StatusByte(obj, StatusByte)
             %Displays a message to the MATLAB Command Window whenever the 
@@ -78,14 +117,19 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             
             % Update obj.StatusByte to the new value.
             obj.StatusByte = StatusByte;
-            
+
             % Decode the StatusByte returned by the syringe pump.
             [PumpStatus, ErrorString] = obj.decodeStatusByte(StatusByte);
             
             % Display a message to summarize StatusByte in the Command
-            % Window.
-            fprintf('Syringe Pump Status: %s, %s \n', PumpStatus, ...
-                ErrorString);
+            % Window.  If a GUI exists, update the GUI instead.
+            if isprop(obj, 'GuiFigure')
+                % A GUI exists for the current instance of the class.
+                obj.updateGui; % updates the GUI
+            else
+                fprintf('Syringe Pump Status: %s, %s \n', PumpStatus, ...
+                    ErrorString);
+            end
         end
     end
     
