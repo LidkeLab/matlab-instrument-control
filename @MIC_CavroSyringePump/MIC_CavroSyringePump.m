@@ -85,28 +85,9 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             Data=[];
             Children=[];
         end
-        
-        function updateGui(obj)
-            % Update the GUI with the current parameters (if one exists).
-            
-            % Check to see if a GUI exists.
-            if isempty(obj.GuiFigure) || ~isvalid(obj.GuiFigure)
-                return
-            end
-            
-            % Search for GUI objects to be updated and update them.
-            for ii = 1:numel(obj.GuiFigure.Children)
-                % Loop through each object within the GUI.
-                if strcmpi(obj.GuiFigure.Children(ii).Tag, 'StatusText')
-                    % This is the textbox displaying the pumps status,
-                    % update the status.
-                    obj.GuiFigure.Children(ii).String = obj.ReadableStatus;
-                    drawnow % ensure the text updates immediately
-                end
-            end
-         end
-        
-        gui(obj); 
+                
+        gui(obj);
+        updateGui(obj);
         
         [ASCIIMessage, ReadableMessage] = connectSyringePump(obj);
         [ASCIIMessage, DataBlock] = readAnswerBlock(obj);
