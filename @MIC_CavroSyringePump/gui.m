@@ -95,9 +95,13 @@ NewPositionAbsoluteLabel = uicontrol('Parent', guiFig, 'Style', 'text', ...
     'Position', [FigWidth-175, 175, 125, 20], ...
     'String', 'New Plunger Position:', 'HorizontalAlignment', 'left'); 
 MovePlungerButton = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
-    'Position', [FigWidth-175, 125, 175, 25], ...
+    'Position', [FigWidth-175, 150, 175, 25], ...
     'String', 'Move Plunger to New Position', ...
-    'Callback', @movePlungerAbsolute); 
+    'Callback', @movePlungerAbsolute);
+TerminateMoveButton = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
+    'Position', [FigWidth-175, 125, 175, 25], ...
+    'String', 'Terminate Plunger Move', ...
+    'Callback', @terminatePlungerMove); 
 
 %{
 Initialize the GUI based on object properties. 
@@ -194,10 +198,11 @@ Define the callback functions for the GUI controls.
         properties2gui();
     end
 
-    function initializeSyringePump(Source, ~)
+    function initializeSyringePump(~, ~)
         % Callback for the Re-initialize Syringe Pump button.
 
-        % Attempt to re-initialize the syringe pump.
+        % Attempt to re-initialize the syringe pump directly (without using
+        % obj.executeCommand() method).
         fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'ZR']);
 
         % Set default properties based on the (assumed) succesful initialization.
@@ -322,11 +327,26 @@ Define the callback functions for the GUI controls.
         end
         
         % Attempt to query the syringe pump to report the plunger position
-        % (instead of trusting that it went to the correct place. 
+        % (instead of trusting that it went to the correct place). 
         ReportedPosition = obj.reportCommand('?'); % absolute position char
         obj.PlungerPosition = str2double(ReportedPosition);
         
         % Update GUI to reflect any changes. 
+        properties2gui();
+    end
+
+    function terminatePlungerMove(~, ~)
+        % Callback for the Terminate Plunger Move pushbutton.
+        
+        % Attempt to terminate the plunger move directly (without using
+        % obj.executeCommand() method).
+        fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'TR']);
+        
+        % Attempt to query the syringe pump to report the plunger position. 
+        ReportedPosition = obj.reportCommand('?'); % absolute position char
+        obj.PlungerPosition = str2double(ReportedPosition);
+        
+        % Update GUI to reflect any changes.
         properties2gui();
     end
 
