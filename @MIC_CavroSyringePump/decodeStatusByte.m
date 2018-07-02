@@ -19,13 +19,13 @@ function [PumpStatus, ErrorString] = decodeStatusByte(StatusByte)
 % to accept commands, see Cavro XP3000 manual p. 3-46
 if StatusByte >= 96
     % The syringe pump is ready to accept new commands.
-    PumpStatus = 'ready'; 
+    PumpStatus = 'Ready'; 
 elseif StatusByte == 0
     % The syringe pump has not been connected yet. 
     PumpStatus = 'Not connected'; 
 else
     % The syringe pump is busy.
-    PumpStatus = 'busy';
+    PumpStatus = 'Busy';
 end
 
 % Decode the StatusByte based on Table 3-8 on page 3-46 of the 
