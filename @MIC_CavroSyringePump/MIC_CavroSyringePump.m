@@ -114,6 +114,22 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         querySyringePump(obj);
         [DataBlock] = reportCommand(obj, Command);
         
+        function waitForReadyStatus(obj)
+            %Does not return control to calling function until the syringe
+            %pump is ready to accept new commands.
+
+            % Query the syringe pump until it returns the 'Ready' status.
+            QueryNumber = 1; 
+            while (obj.StatusByte < 96) || (QueryNumber == 1)
+                % If obj.StatusByte < 96, the syringe pump is busy and we 
+                % should query the device.  The OR condition ensures that 
+                % at least one query is performed before exiting this 
+                % method call. 
+                obj.querySyringePump; % updates obj.PumpStatus internally
+                QueryNumber = QueryNumber + 1; 
+            end
+        end
+
         function ReadableStatus = get.ReadableStatus(obj)
             %Produces a readable status of the syringe pump upon request.
             %NOTE: obj.ReadableStatus is a Dependent property.
