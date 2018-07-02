@@ -50,12 +50,12 @@ while toc < obj.DeviceSearchTimeout
     if ValidPortGiven
         % User specified Port was valid so we should attempt to connect to 
         % the device at obj.Port .
-        fprintf('Attempting connection to port %s \n', obj.SerialPort)
+        fprintf('Searching for syringe pump at port %s \n', obj.SerialPort)
         obj.SyringePump = serial(obj.SerialPort); 
         fopen(obj.SyringePump);
         break % exit the while loop, device has been connected
     elseif numel(ConnectedDevices)==0
-        fprintf('Attempting connection to port %s \n', obj.SerialPort)
+        fprintf('Searching for syringe pump at port %s \n', obj.SerialPort)
         warning('MATLAB 2017a recommended for use of this class.')
         obj.SyringePump = serial(obj.SerialPort); 
         fopen(obj.SyringePump);
@@ -95,6 +95,10 @@ while (obj.StatusByte < 96) || (QueryNumber == 1)
     obj.querySyringePump; 
     QueryNumber = QueryNumber + 1; 
 end
+
+% Display a message in the command window to indicate a connection was
+% made.
+fprintf('Syringe pump found at port %s \n', obj.SerialPort)
 
 % Set default properties based on the (assumed) succesful initialization.
 obj.StartVelocity = 900; 
