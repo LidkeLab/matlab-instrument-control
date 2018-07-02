@@ -34,53 +34,51 @@ obj.GuiFigure.CloseRequestFcn = @closeFigure;
 Create the GUI controls.
 %}
 
-% Create a textbox to display the status of the syringe pump.
+% Create a textbox (as well as a refresh button) to display the status of 
+% the syringe pump.
 StatusText = uicontrol('Parent', guiFig, 'Style', 'edit', ...
     'Position', [0, 0, FigWidth-50, 25], 'Tag', 'StatusText', ...
     'Enable', 'off');
-
-% Create a pushbutton to query the syringe pump and update the StatusText
-% based on the response (i.e. it's a refresh button for StatusText).
 RefreshStatus = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
     'Position', [FigWidth-50, 0, 50, 25], 'String', 'Refresh', ...
     'Callback', @refreshStatus);
 
-% Create a popupmenu to allow for selection of the COM port the syringe 
-% pump is connected to. 
+% Create syringe pump connection controls/options.
 PortList = uicontrol('Parent', guiFig, 'Style', 'popupmenu', ...
     'Position', [0, 325, 150, 50], 'Callback', @portListCallback);
-
-% Create a Connect Syringe Pump button to make a serial connection with the
-% pump.
 ConnectButton = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
     'Position', [0, 300, 150, 50], 'String', 'Connect Syringe Pump', ...
     'Callback', @connectSyringePump);
+InitializeButton = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
+    'Position', [0, 275, 150, 25], ...
+    'String', 'Re-initialize Syringe Pump', ...
+    'Callback', @initializeSyringePump);
 
 % Create plunger velocity controls.
 PlungerParamsTitle = uicontrol('Parent', guiFig, 'Style', 'text', ...
-    'Position', [FigWidth-150, 375, 150, 25], ...
+    'Position', [FigWidth-160, 375, 150, 25], ...
     'String', 'Plunger Velocity Parameters');
 VelocitySlope = uicontrol('Parent', guiFig, 'Style', 'edit', ...
     'Position', [FigWidth-50, 350, 50, 25], 'Callback', @setVelocitySlope);
 VSLabel = uicontrol('Parent', guiFig, 'Style', 'text', ...
-    'Position', [FigWidth-150, 350, 100, 27], ...
-    'String', 'Velocity Slope (Hz/s)'); 
+    'Position', [FigWidth-160, 350, 110, 20], ...
+    'String', 'Velocity Slope (Hz/s)', 'HorizontalAlignment', 'left'); 
 StartVelocity = uicontrol('Parent', guiFig, 'Style', 'edit', ...
     'Position', [FigWidth-50, 325, 50, 25], 'Callback', @setStartVelocity); 
 SVLabel = uicontrol('Parent', guiFig, 'Style', 'text', ...
-    'Position', [FigWidth-150, 325, 100, 20], ...
-    'String', 'Start Velocity (Hz)'); 
+    'Position', [FigWidth-160, 325, 100, 20], ...
+    'String', 'Start Velocity (Hz)', 'HorizontalAlignment', 'left'); 
 TopVelocity = uicontrol('Parent', guiFig, 'Style', 'edit', ...
     'Position', [FigWidth-50, 300, 50, 25], 'Callback', @setTopVelocity); 
 TVLabel = uicontrol('Parent', guiFig, 'Style', 'text', ...
-    'Position', [FigWidth-150, 300, 100, 20], ...
-    'String', 'Top Velocity (Hz)'); 
+    'Position', [FigWidth-160, 300, 100, 20], ...
+    'String', 'Top Velocity (Hz)', 'HorizontalAlignment', 'left'); 
 CutoffVelocity = uicontrol('Parent', guiFig, 'Style', 'edit', ...
     'Position', [FigWidth-50, 275, 50, 25], ...
     'Callback', @setCutoffVelocity); 
 CVLabel = uicontrol('Parent', guiFig, 'Style', 'text', ...
-    'Position', [FigWidth-150, 275, 100, 20], ...
-    'String', 'Cutoff Velocity (Hz)');
+    'Position', [FigWidth-160, 275, 100, 20], ...
+    'String', 'Cutoff Velocity (Hz)', 'HorizontalAlignment', 'left');
 
 % Create plunger position controls.
 PlungerPositionTitle = uicontrol('Parent', guiFig, 'Style', 'text', ...
@@ -89,15 +87,17 @@ PlungerPositionTitle = uicontrol('Parent', guiFig, 'Style', 'text', ...
 CurrentPositionDisplay = uicontrol('Parent', guiFig, 'Style', 'text', ...
     'Position', [FigWidth-50, 200, 50, 25]); 
 CurrentPositionLabel = uicontrol('Parent', guiFig, 'Style', 'text', ...
-    'Position', [FigWidth-150, 200, 100, 25], ...
-    'String', 'Plunger Position:');
-MovePlungerAbsolute = uicontrol('Parent', guiFig, 'Style', 'edit', ...
-    'Position', [FigWidth-50, 175, 50, 25], ...
-    'Callback', @movePlungerAbsolute);
-MovePlungerAbsoluteLabel = uicontrol('Parent', guiFig, 'Style', 'text', ...
-    'Position', [FigWidth-150, 175, 100, 20], ...
-    'String', 'Move Plunger to:'); 
-    
+    'Position', [FigWidth-175, 200, 125, 25], ...
+    'String', 'Current Plunger Position:', 'HorizontalAlignment', 'left');
+NewPositionAbsolute = uicontrol('Parent', guiFig, 'Style', 'edit', ...
+    'Position', [FigWidth-50, 175, 50, 25]);
+NewPositionAbsoluteLabel = uicontrol('Parent', guiFig, 'Style', 'text', ...
+    'Position', [FigWidth-175, 175, 125, 20], ...
+    'String', 'New Plunger Position:', 'HorizontalAlignment', 'left'); 
+MovePlungerButton = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
+    'Position', [FigWidth-175, 125, 175, 25], ...
+    'String', 'Move Plunger to New Position', ...
+    'Callback', @movePlungerAbsolute); 
 
 %{
 Initialize the GUI based on object properties. 
@@ -122,7 +122,7 @@ Define the callback functions for the GUI controls.
         obj.CutoffVelocity = str2double(CutoffVelocity.String); 
         
         % Set the properties related to the plungers position.
-        obj.PlungerPosition = str2double(MovePlungerAbsolute.String); 
+        obj.PlungerPosition = str2double(NewPositionAbsolute.String); 
     end
 
     function properties2gui()
@@ -154,7 +154,7 @@ Define the callback functions for the GUI controls.
         
         % Display the most recently known absolute plunger position.
         CurrentPositionDisplay.String = obj.PlungerPosition; 
-        MovePlungerAbsolute.String = obj.PlungerPosition; 
+        NewPositionAbsolute.String = obj.PlungerPosition; 
     end
 
     function portListCallback(Source, ~)
@@ -173,6 +173,39 @@ Define the callback functions for the GUI controls.
         
         % Query the syringe pump and update the GUI based on response.
         obj.querySyringePump(); 
+        
+        % Update GUI properties to reflect any changes to the syringe pump.
+        properties2gui();
+    end
+    
+    function connectSyringePump(Source, ~)
+        % Callback for the Connect Syringe Pump button.
+
+        % Disable the button until control is returned to this callback.
+        Source.Enable = 'off'; 
+
+        % Attempt to make a connection to the syringe pump.
+        obj.connectSyringePump();
+
+        % Re-enable the connect button.
+        Source.Enable = 'on'; 
+
+        % Update GUI properties to reflect any changes to the syringe pump.
+        properties2gui();
+    end
+
+    function initializeSyringePump(Source, ~)
+        % Callback for the Re-initialize Syringe Pump button.
+
+        % Attempt to re-initialize the syringe pump.
+        fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'ZR']);
+
+        % Set default properties based on the (assumed) succesful initialization.
+        obj.StartVelocity = 900; 
+        obj.TopVelocity = 1400; 
+        obj.CutoffVelocity = 900;
+        obj.VelocitySlope = 14; 
+        obj.PlungerPosition = 0;
         
         % Update GUI properties to reflect any changes to the syringe pump.
         properties2gui();
@@ -275,11 +308,11 @@ Define the callback functions for the GUI controls.
         properties2gui();
     end
 
-    function movePlungerAbsolute(Source, ~)
-        % Callback for the Move plunger to: edit box. 
+    function movePlungerAbsolute(~, ~)
+        % Callback for the Move Plunger to New Position pushbutton.
         
         % Ensure a valid position was entered, attempt to move the syringe.
-        ProposedPosition = str2double(Source.String); 
+        ProposedPosition = str2double(NewPositionAbsolute.String); 
         if (ProposedPosition <=3000) && (ProposedPosition >= 0)
             % A valid plunger position has been entered. 
             obj.executeCommand(['A', num2str(ProposedPosition)]); 
@@ -297,19 +330,5 @@ Define the callback functions for the GUI controls.
         properties2gui();
     end
 
-    function connectSyringePump(Source, ~)
-        % Callback for the Connect Syringe Pump button.
-        
-        % Disable the button until control is returned to this callback.
-        Source.Enable = 'off'; 
-        
-        % Attempt to make a connection to the syringe pump.
-        obj.connectSyringePump();
-        
-        % Re-enable the connect button.
-        Source.Enable = 'on'; 
-        
-        % Update GUI properties to reflect any changes to the syringe pump.
-        properties2gui();
-    end
+    
 end
