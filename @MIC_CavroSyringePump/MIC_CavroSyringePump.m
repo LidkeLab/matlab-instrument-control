@@ -27,6 +27,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         InstrumentName = 'CavroSyringePump'; % name of the instrument
         StatusByte = 0; % status of the pump, 0 if not connected
         SyringePump; % serial object for the connected syringe pump
+        PlungerPosition; % absolute plunger position (0-3000)
     end
     
     
@@ -46,6 +47,10 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         DeviceSearchTimeout = 10; % timeout(s) to search for a pump
         DeviceResponseTimeout = 10; % timeout(s) for valid device response
         SerialPort = 'COM3'; % default COM port
+        VelocitySlope; % ramping slope of plunger from StartVelocity->Top
+        StartVelocity; % plunger starting velocity (half-steps/sec)
+        TopVelocity; % max plunger velocity (half-steps/sec)
+        CutoffVelocity; % plunger stop velocity (half-steps/sec)
     end
     
   
