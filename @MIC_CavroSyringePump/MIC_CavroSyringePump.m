@@ -32,7 +32,6 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         StartVelocity; % plunger starting velocity (half-steps/sec)
         TopVelocity; % max plunger velocity (half-steps/sec)
         CutoffVelocity; % plunger stop velocity (half-steps/sec)
-        ValvePosition; % position of valve on pump, 'I' input, 'O' output
     end
     
     
