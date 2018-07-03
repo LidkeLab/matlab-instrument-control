@@ -32,8 +32,8 @@ Pump.querySyringePump();
 % % Test the readAnswerBlock() method independently. 
 % [DataBlock, ASCIIMessage] = readAnswerBlock(obj);
 
-% Test the executeCommand() method.
-Pump.executeCommand('IA3000A0OI')
+% Test the executeCommand() and waitForReadyStatus() methods.
+Pump.executeCommand('IA3000A0OI'); Pump.waitForReadyStatus(); 
 
 % Test the reportCommand() method. 
 PlungerPosition = str2double(Pump.reportCommand('?'));
@@ -44,17 +44,22 @@ else
     % unit test fails.
     error('Invalid plunger position returned: %g', PlungerPosition)
 end
+Pump.waitForReadyStatus()
 
 % Bombard the syringe pump with commands to ensure that wait times/status
 % checks are working correctly (without those, the syringe pump gets
 % overloaded and commands fail to execute/the syringe pump begins to
 % respond with invalid messages).
-Pump.querySyringePump(); Pump.executeCommand('IA3000M500OA0');
-Pump.reportCommand('?'); Pump.executeCommand('IM1000OM1000');
-Pump.reportCommand('?'); Pump.querySyringePump();
-% Pump.executeCommand('A0IA3000OA0IA2500OA500IA2000OA1000IA1500OA0');
-Pump.executeCommand('IM1000OM1000'); Pump.reportCommand('?');
-Pump.executeCommand('IA3000OA0'); Pump.executeCommand('I');
+Pump.querySyringePump(); 
+Pump.executeCommand('IA3000M500OA0'); Pump.waitForReadyStatus()
+Pump.reportCommand('?'); Pump.waitForReadyStatus()
+Pump.executeCommand('IM1000OM1000'); Pump.waitForReadyStatus()
+Pump.reportCommand('?'); Pump.waitForReadyStatus()
+Pump.querySyringePump(); Pump.waitForReadyStatus()
+Pump.executeCommand('IM1000OM1000'); Pump.waitForReadyStatus()
+Pump.reportCommand('?'); Pump.waitForReadyStatus()
+Pump.executeCommand('IA3000OA0'); Pump.waitForReadyStatus()
+Pump.executeCommand('I'); Pump.waitForReadyStatus()
 
 % Perform the destructor method to clean up after the unitTest.
 Pump.delete()
