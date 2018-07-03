@@ -25,7 +25,6 @@ else
 end
 
 % Send the command to the syringe pump. 
-<<<<<<< HEAD
 if ~isempty(obj.SyringePump)
     % A syringe pump serial object exists, send the command.
     fprintf(obj.SyringePump, Command);
@@ -34,9 +33,6 @@ else
     % establish a connection.
     error('Syringe pump not connected.')
 end
-=======
-fprintf(obj.SyringePump, Command);
->>>>>>> f492a225d31b6c0e1ef4e591199ec01a9ec9a14e
     
     
 end
