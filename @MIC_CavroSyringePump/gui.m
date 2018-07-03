@@ -124,7 +124,15 @@ TerminateMoveButton = uicontrol('Parent', PlungerPositionPanel, ...
 % Create syringe pump IN/OUT valve controls.
 ValveControlPanel = uipanel('Parent', guiFig, ...
     'Title', 'Syringe Pump Valve Controls', 'Units', 'pixels', ...
-    'Position', [170, FigHeight-125, 170, 125]);
+    'Position', [170, FigHeight-75, 170, 75]);
+ValveInButton = uicontrol('Parent', ValveControlPanel, ...
+    'Style', 'pushbutton', 'Position', [5, 30, 160, 25], ...
+    'String', 'Move Valve to Input Position', ...
+    'Callback', {@valveControl, 1}); % send numeric 1 for input
+ValveOutButton = uicontrol('Parent', ValveControlPanel, ...
+    'Style', 'pushbutton', 'Position', [5, 5, 160, 25], ...
+    'String', 'Move Valve to Output Position', ...
+    'Callback', {@valveControl, 0}); % send numeric 0 for output
 
 %{
 Initialize the GUI based on object properties. 
@@ -370,6 +378,24 @@ Define the callback functions for the GUI controls.
         
         % Update GUI to reflect any changes.
         properties2gui();
+    end
+
+    function valveControl(~, ~, ValvePosition)
+        % Callback for the Move Valve to Input/Output Position buttons.
+        
+        % Determine which button was clicked, act accordingly.
+        if ValvePosition 
+            % ValvePosition==1 (True) is the Input position, send the
+            % command to the syringe pump to switch valve to Input.
+            obj.executeCommand('I');
+            obj.waitForReadyStatus();
+        else
+            % ValvePosition==0 (False) is the Output position, send the
+            % command to the syringe pump to switch valve to Output. 
+            obj.executeCommand('O');
+            obj.waitForReadyStatus();
+        end
+        
     end
 
     
