@@ -17,7 +17,14 @@ function [ASCIIMessage, DataBlock] = readAnswerBlock(obj)
 % Serial read at the port with which the SyringePump serial object is
 % associated.
 warning('off', 'MATLAB:serial:fread:unsuccessfulRead') % suppress warnings
-RawASCIIMessage = fread(obj.SyringePump);
+if ~isempty(obj.SyringePump)
+    % A syringe pump serial object exists, attempt the serial read.
+    RawASCIIMessage = fread(obj.SyringePump);
+else
+    % No syringe pump serial object exists, tell the user they need to
+    % establish a connection.
+    error('Syringe pump not connected.')
+end
 [ASCIIMessage, IsValid] = obj.cleanAnswerBlock(RawASCIIMessage);
 warning('on', 'MATLAB:serial:fread:unsuccessfulRead') 
 
