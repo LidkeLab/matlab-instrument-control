@@ -9,8 +9,8 @@ classdef MIC_CavroSyringePump < MIC_Abstract
     %
     % Example: Pump = MIC_CavroSyringePump();
     % Functions: delete, exportState, updateGui, gui, connectSyringePump,
-    %            readAnswerBlock, executeCommand, reportCommand, 
-    %            querySyringePump, cleanAnswerBlock, decodeStatusByte, 
+    %            readAnswerBlock, executeCommand, reportCommand,
+    %            querySyringePump, cleanAnswerBlock, decodeStatusByte,
     %            unitTest
     %
     % REQUIREMENTS:
@@ -23,11 +23,28 @@ classdef MIC_CavroSyringePump < MIC_Abstract
     % CITATION: David Schodt, Lidke Lab, 2018
     
     
+    properties
+        DeviceAddress = 1; % ASCII address for device
+        DeviceSearchTimeout = 10; % timeout(s) to search for a pump
+        DeviceResponseTimeout = 10; % timeout(s) for valid device response
+        SerialPort = 'COM3'; % default COM port
+        VelocitySlope; % ramping slope of plunger from StartVelocity->Top
+        StartVelocity; % plunger starting velocity (half-steps/sec)
+        TopVelocity; % max plunger velocity (half-steps/sec)
+        CutoffVelocity; % plunger stop velocity (half-steps/sec)
+        ValvePosition; % position of valve on pump, 'I' input, 'O' output
+    end
+    
+    
     properties (SetAccess = protected) % users shouldn't set these
         InstrumentName = 'CavroSyringePump'; % name of the instrument
-        StatusByte = 0; % status of the pump, 0 if not connected
         SyringePump; % serial object for the connected syringe pump
         PlungerPosition; % absolute plunger position (0-3000)
+    end
+    
+    
+    properties (SetObservable) % can be associated with a listener
+        StatusByte = 0; % status of the pump, 0 if not connected
     end
     
     
@@ -40,20 +57,8 @@ classdef MIC_CavroSyringePump < MIC_Abstract
     properties (Dependent) % determined on demand
         ReadableStatus; % user readable status of the syringe pump
     end
+       
     
-    
-    properties
-        DeviceAddress = 1; % ASCII address for device
-        DeviceSearchTimeout = 10; % timeout(s) to search for a pump
-        DeviceResponseTimeout = 10; % timeout(s) for valid device response
-        SerialPort = 'COM3'; % default COM port
-        VelocitySlope; % ramping slope of plunger from StartVelocity->Top
-        StartVelocity; % plunger starting velocity (half-steps/sec)
-        TopVelocity; % max plunger velocity (half-steps/sec)
-        CutoffVelocity; % plunger stop velocity (half-steps/sec)
-    end
-    
-  
     methods
         function obj = MIC_CavroSyringePump()
             %Constructor for the Cavro syringe pump object.
@@ -61,6 +66,10 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
             obj = obj@MIC_Abstract(~nargout);
+            
+            % Set property listener(s). 
+            addlistener(obj, 'StatusByte', 'PostSet', ...
+                @obj.statusByteChange)
             
             % Determine the current version of MATLAB in use.
             obj.MatlabRelease = version('-release');
@@ -85,28 +94,9 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             Data=[];
             Children=[];
         end
-        
-        function updateGui(obj)
-            % Update the GUI with the current parameters (if one exists).
-            
-            % Check to see if a GUI exists.
-            if isempty(obj.GuiFigure) || ~isvalid(obj.GuiFigure)
-                return
-            end
-            
-            % Search for GUI objects to be updated and update them.
-            for ii = 1:numel(obj.GuiFigure.Children)
-                % Loop through each object within the GUI.
-                if strcmpi(obj.GuiFigure.Children(ii).Tag, 'StatusText')
-                    % This is the textbox displaying the pumps status,
-                    % update the status.
-                    obj.GuiFigure.Children(ii).String = obj.ReadableStatus;
-                    drawnow % ensure the text updates immediately
-                end
-            end
-         end
-        
-        gui(obj); 
+                
+        gui(obj);
+        updateGui(obj);
         
         [ASCIIMessage, ReadableMessage] = connectSyringePump(obj);
         [ASCIIMessage, DataBlock] = readAnswerBlock(obj);
@@ -114,6 +104,22 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         querySyringePump(obj);
         [DataBlock] = reportCommand(obj, Command);
         
+        function waitForReadyStatus(obj)
+            %Does not return control to calling function until the syringe
+            %pump is ready to accept new commands.
+
+            % Query the syringe pump until it returns the 'Ready' status.
+            QueryNumber = 1; 
+            while (obj.StatusByte < 96) || (QueryNumber == 1)
+                % If obj.StatusByte < 96, the syringe pump is busy and we 
+                % should query the device.  The OR condition ensures that 
+                % at least one query is performed before exiting this 
+                % method call. 
+                obj.querySyringePump; % updates obj.PumpStatus internally
+                QueryNumber = QueryNumber + 1; 
+            end
+        end
+
         function ReadableStatus = get.ReadableStatus(obj)
             %Produces a readable status of the syringe pump upon request.
             %NOTE: obj.ReadableStatus is a Dependent property.
@@ -127,24 +133,14 @@ classdef MIC_CavroSyringePump < MIC_Abstract
                 PumpStatus, ErrorString);
         end
         
-        function obj = set.StatusByte(obj, StatusByte)
-            %Displays a message to the MATLAB Command Window or updates the
-            %GUI whenever the StatusByte property is changed. 
-            
-            % If the StatusByte has not changed, we don't need to do
-            % anything here so return to the calling function/method.
-            % NOTE: obj.StatusByte is the previously set value, StatusByte
-            % is what the calling function/method was trying to set
-            % obj.StatusByte to.
-            if StatusByte == obj.StatusByte
-                return
-            end
-            
-            % Update obj.StatusByte to the new value.
-            obj.StatusByte = StatusByte;
+        
+        function statusByteChange(obj, ~, ~)
+            % Callback function to execute upon a post-set event of the
+            % obj.StatusByte property
 
-            % Decode the StatusByte returned by the syringe pump.
-            [PumpStatus, ErrorString] = obj.decodeStatusByte(StatusByte);
+            % Decode the new value of obj.StatusByte
+            [PumpStatus, ErrorString] = ...
+                obj.decodeStatusByte(obj.StatusByte);
             
             % Display a message to summarize StatusByte in the Command
             % Window.  If a GUI exists, update the GUI instead.
