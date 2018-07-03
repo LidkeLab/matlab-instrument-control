@@ -14,56 +14,57 @@ if isempty(obj.GuiFigure) || ~isvalid(obj.GuiFigure)
 end
 
 % Search for GUI objects to be updated and update them.
-for ii = 1:numel(obj.GuiFigure.Children)
+GuiFigureChildren = findall(obj.GuiFigure.Children);
+for ii = 1:numel(GuiFigureChildren)
     % Update the StatusText textbox.
-    if strcmpi(obj.GuiFigure.Children(ii).Tag, 'StatusText')
+    if strcmpi(GuiFigureChildren(ii).Tag, 'StatusText')
         % This is the textbox displaying the pumps status,
         % update the status.
-        obj.GuiFigure.Children(ii).String = obj.ReadableStatus;
+        GuiFigureChildren(ii).String = obj.ReadableStatus;
     end
 
     % Ensure Connect Syringe Pump button is enabled/disabled
     % depending on the pump status.
-    if strcmpi(obj.GuiFigure.Children(ii).Tag, ...
+    if strcmpi(GuiFigureChildren(ii).Tag, ...
             'ConnectButton')
         if obj.StatusByte >= 96
             % The syringe pump is ready for commands, enable
             % the Connect Syringe Pump button.
-            obj.GuiFigure.Children(ii).Enable = 'on';
+            GuiFigureChildren(ii).Enable = 'on';
         else
             % The syringe pump is busy, disable the Connect
             % Syringe Pump button.
-            obj.GuiFigure.Children(ii).Enable = 'off';
+            GuiFigureChildren(ii).Enable = 'off';
         end
     end
 
     % Ensure the Move Plunger to New Position button is
     % enabled/disabled depending on the pump status.
-    if strcmpi(obj.GuiFigure.Children(ii).Tag, ...
+    if strcmpi(GuiFigureChildren(ii).Tag, ...
             'MovePlunger')
         if obj.StatusByte >= 96
             % The syringe pump is ready for commands, enable
             % the Move Plunger to New Position button.
-            obj.GuiFigure.Children(ii).Enable = 'on';
+            GuiFigureChildren(ii).Enable = 'on';
         else
             % The syringe pump is busy, disable the Move 
             % Plunger to New Position button.
-            obj.GuiFigure.Children(ii).Enable = 'off';
+            GuiFigureChildren(ii).Enable = 'off';
         end
     end
 
     % Ensure the Re-initialize Syringe Pump button is
     % enabled/disabled depending on the pump status.
-    if strcmpi(obj.GuiFigure.Children(ii).Tag, ...
+    if strcmpi(GuiFigureChildren(ii).Tag, ...
             'InitializePump')
         if obj.StatusByte >= 96
             % The syringe pump is ready for commands, enable
             % the Re-initialize Syringe Pump button.
-            obj.GuiFigure.Children(ii).Enable = 'on';
+            GuiFigureChildren(ii).Enable = 'on';
         else
             % The syringe pump is busy, disable the 
             % Re-initialize Syringe Pump button.
-            obj.GuiFigure.Children(ii).Enable = 'off';
+            GuiFigureChildren(ii).Enable = 'off';
         end
     end
     drawnow % ensure changes happen immediately
