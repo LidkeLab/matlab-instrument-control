@@ -103,6 +103,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         executeCommand(obj, Command); 
         querySyringePump(obj);
         [DataBlock] = reportCommand(obj, Command);
+        generalCommand(obj, Command); 
 
         function ReadableStatus = get.ReadableStatus(obj)
             %Produces a readable status of the syringe pump upon request.
