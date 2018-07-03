@@ -22,6 +22,21 @@ for ii = 1:numel(GuiFigureChildren)
         % update the status.
         GuiFigureChildren(ii).String = obj.ReadableStatus;
     end
+    
+    % Update the PumpActivity textbox.
+    if strcmpi(GuiFigureChildren(ii).Tag, 'PumpActivity')
+        % This is the textbox displaying the pumps current activity, update
+        % to most recently known action being made.
+        if obj.StatusByte >= 96
+            % The syringe pump is ready for commands, no activity is in
+            % progress.
+            GuiFigureChildren(ii).String = ''; 
+        else
+            % The syringe pump is busy, display the most recently known
+            % activity of the syringe pump.
+            GuiFigureChildren(ii).String = obj.ReadableAction; 
+        end
+    end
 
     % Ensure Connect Syringe Pump button is enabled/disabled
     % depending on the pump status.

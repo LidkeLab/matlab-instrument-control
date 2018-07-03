@@ -21,13 +21,17 @@ if strcmp(Command(1), '/') ...
 else
     % Add the start character, device number, and execute
     % character. 
-    Command = ['/', num2str(obj.DeviceAddress), Command, 'R']; 
+    Command = sprintf('/%i%sR', obj.DeviceAddress, Command);
 end
 
 % Send the command to the syringe pump. 
 if ~isempty(obj.SyringePump)
     % A syringe pump serial object exists, send the command.
     fprintf(obj.SyringePump, Command);
+    
+    % Update the ReadableAction property to show that a command is being
+    % executed. 
+    obj.ReadableAction = sprintf('Executing control command %s', Command); 
 else
     % No syringe pump serial object exists, tell the user they need to
     % establish a connection.

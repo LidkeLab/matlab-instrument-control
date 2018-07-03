@@ -39,6 +39,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         InstrumentName = 'CavroSyringePump'; % name of the instrument
         SyringePump; % serial object for the connected syringe pump
         PlungerPosition; % absolute plunger position (0-3000)
+        ReadableAction; % summary of currently known activity of the pump
     end
     
     
@@ -93,7 +94,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             Data=[];
             Children=[];
         end
-                
+        
         gui(obj);
         updateGui(obj);
         
@@ -102,6 +103,19 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         executeCommand(obj, Command); 
         querySyringePump(obj);
         [DataBlock] = reportCommand(obj, Command);
+
+        function ReadableStatus = get.ReadableStatus(obj)
+            %Produces a readable status of the syringe pump upon request.
+            %NOTE: obj.ReadableStatus is a Dependent property.
+            
+            % Decode the StatusByte returned by the syringe pump.
+            [PumpStatus, ErrorString] = ...
+                obj.decodeStatusByte(obj.StatusByte);
+            
+            % Store a message summarizing PumpStatus and ErrorString.
+            ReadableStatus = sprintf('Syringe Pump Status: %s, %s', ...
+                PumpStatus, ErrorString);
+        end
         
         function waitForReadyStatus(obj)
             %Does not return control to calling function until the syringe
@@ -118,20 +132,6 @@ classdef MIC_CavroSyringePump < MIC_Abstract
                 QueryNumber = QueryNumber + 1; 
             end
         end
-
-        function ReadableStatus = get.ReadableStatus(obj)
-            %Produces a readable status of the syringe pump upon request.
-            %NOTE: obj.ReadableStatus is a Dependent property.
-            
-            % Decode the StatusByte returned by the syringe pump.
-            [PumpStatus, ErrorString] = ...
-                obj.decodeStatusByte(obj.StatusByte);
-            
-            % Store a message summarizing PumpStatus and ErrorString.
-            ReadableStatus = sprintf('Syringe Pump Status: %s, %s', ...
-                PumpStatus, ErrorString);
-        end
-        
         
         function statusByteChange(obj, ~, ~)
             % Callback function to execute upon a post-set event of the
@@ -141,6 +141,12 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             [PumpStatus, ErrorString] = ...
                 obj.decodeStatusByte(obj.StatusByte);
             
+            % If the pump is ready to accept commands, clear
+            % obj.ReadableAction to indicate the pump is no longer active.
+            if obj.StatusByte >= 96
+                obj.ReadableAction = ''; 
+            end
+            
             % Display a message to summarize StatusByte in the Command
             % Window.  If a GUI exists, update the GUI instead.
             if isprop(obj, 'GuiFigure')
@@ -149,6 +155,8 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             else
                 fprintf('Syringe Pump Status: %s, %s \n', PumpStatus, ...
                     ErrorString);
+                disp(obj.ReadableAction)
+                fprintf('_______________________________________________');
             end
         end
     end

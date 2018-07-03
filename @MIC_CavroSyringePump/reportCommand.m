@@ -22,15 +22,19 @@ if strcmp(Command(1), '/') ...
         && strcmp(Command(2), num2str(obj.DeviceAddress)) ...
     % Command is formatted correctly, do nothing. 
 else
-    % Add the start character, device number, and execute
-    % character. 
-    Command = ['/', num2str(obj.DeviceAddress), Command]; 
+    % Add the start character, device number (no execute character R needed
+    % for report commands).
+    Command = sprintf('/%i%s', obj.DeviceAddress, Command); 
 end
 
 % Send the command to the syringe pump. 
 if ~isempty(obj.SyringePump)
     % A syringe pump serial object exists, send the command.
     fprintf(obj.SyringePump, Command);
+    
+    % Update the ReadableAction property to show that a command is being
+    % executed. 
+    obj.ReadableAction = sprintf('Executing report command %s', Command); 
 else
     % No syringe pump serial object exists, tell the user they need to
     % establish a connection.

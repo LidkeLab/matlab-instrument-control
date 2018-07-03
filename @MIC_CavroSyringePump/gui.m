@@ -14,8 +14,8 @@ end
 
 % Create a figure for the GUI.
 ScreenSize = get(groot, 'ScreenSize'); % screen size
-FigWidth = 600;
-FigHeight = 400;
+FigWidth = 350;
+FigHeight = 350;
 BottomLeftX = floor(ScreenSize(3)/2 - FigWidth/2); % ~centers the figure
 BottomLeftY = floor(ScreenSize(4)/2 - FigHeight/2); % ~centers the figure
 guiFig = figure('Position', ...
@@ -34,10 +34,13 @@ obj.GuiFigure.CloseRequestFcn = @closeFigure;
 Create the GUI controls.
 %}
 
-% Create a textbox (as well as a refresh button) to display the status of 
-% the syringe pump.
+% Create textboxes to display the syringe pump status/current activity.
+% Also create a refresh button to force update of the status messages.
 StatusText = uicontrol('Parent', guiFig, 'Style', 'edit', ...
     'Position', [0, 0, FigWidth-50, 25], 'Tag', 'StatusText', ...
+    'Enable', 'off');
+PumpActivity = uicontrol('Parent', guiFig, 'Style', 'edit', ...
+    'Position', [0, 25, FigWidth-50, 25], 'Tag', 'PumpActivity', ...
     'Enable', 'off');
 RefreshStatus = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
     'Position', [FigWidth-50, 0, 50, 25], 'String', 'Refresh', ...
@@ -45,7 +48,7 @@ RefreshStatus = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
 
 % Create syringe pump connection controls/options.
 ConnectionPanel = uipanel('Parent', guiFig, 'Title', 'Pump Connection', ...
-    'Units', 'pixels', 'Position', [5, FigHeight-125, 160, 125]);
+    'Units', 'pixels', 'Position', [5, FigHeight-125, 170, 125]);
 PortList = uicontrol('Parent', ConnectionPanel, 'Style', 'popupmenu', ...
     'Position', [5, 55, 150, 50], 'Callback', @portListCallback);
 ConnectButton = uicontrol('Parent', ConnectionPanel, 'Style', 'pushbutton', ...
@@ -60,7 +63,7 @@ InitializeButton = uicontrol('Parent', ConnectionPanel, 'Style', 'pushbutton', .
 % Create plunger velocity controls.
 PlungerParamPanel = uipanel('Parent', guiFig, ...
     'Title', 'Plunger Velocity Parameters', 'Units', 'pixels', ...
-    'Position', [FigWidth-175, FigHeight-125, 170, 125]);
+    'Position', [5, FigHeight-260, 170, 125]);
 VelocitySlope = uicontrol('Parent', PlungerParamPanel, 'Style', 'edit', ...
     'Position', [115, 80, 50, 25], ...
     'TooltipString', 'Select integer in the range [1, 20]', ...
@@ -100,7 +103,7 @@ CVLabel = uicontrol('Parent', PlungerParamPanel, 'Style', 'text', ...
 % Create plunger position controls.
 PlungerPositionPanel = uipanel('Parent', guiFig, ...
     'Title', 'Plunger Position Controls', 'Units', 'pixels', ...
-    'Position', [FigWidth-185, FigHeight-250, 180, 125]);
+    'Position', [180, FigHeight-260, 170, 125]);
 CurrentPositionDisplay = uicontrol('Parent', PlungerPositionPanel, ...
     'Style', 'text', 'Position', [125, 75, 50, 25]); 
 CurrentPositionLabel = uicontrol('Parent', PlungerPositionPanel, ...
@@ -124,7 +127,7 @@ TerminateMoveButton = uicontrol('Parent', PlungerPositionPanel, ...
 % Create syringe pump IN/OUT valve controls.
 ValveControlPanel = uipanel('Parent', guiFig, ...
     'Title', 'Syringe Pump Valve Controls', 'Units', 'pixels', ...
-    'Position', [170, FigHeight-75, 170, 75]);
+    'Position', [180, FigHeight-75, 170, 75]);
 ValveInButton = uicontrol('Parent', ValveControlPanel, ...
     'Style', 'pushbutton', 'Position', [5, 30, 160, 25], ...
     'String', 'Move Valve to Input Position', ...
@@ -166,6 +169,7 @@ Define the callback functions for the GUI controls.
         % Set the message text to the most recently known state of the
         % syringe pump.
         StatusText.String = obj.ReadableStatus;
+        PumpActivity.String = obj.ReadableAction;
 
         % Provide a list of available COM ports if MATLAB version will
         % allow for it.
@@ -229,6 +233,7 @@ Define the callback functions for the GUI controls.
         % Attempt to re-initialize the syringe pump directly (without using
         % obj.executeCommand() method).
         fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'ZR']);
+        obj.waitForReadyStatus();
 
         % Set default properties based on the (assumed) succesful initialization.
         obj.StartVelocity = 900; 
@@ -250,6 +255,7 @@ Define the callback functions for the GUI controls.
         if (ProposedSlope >= 1) && (ProposedSlope <= 20)
             % Set syringe pump to new velocity slope.
             obj.executeCommand(['L', num2str(ProposedSlope)]);
+            obj.waitForReadyStatus();
         else
             error('Velocity slope %g Hz out of range (1-20 Hz/sec)', ...
                 ProposedSlope); 
@@ -274,6 +280,7 @@ Define the callback functions for the GUI controls.
             if ProposedStartVelocity < obj.TopVelocity
                 % Set syringe pump to new start velocity.
                 obj.executeCommand(['v', num2str(ProposedStartVelocity)]);
+                obj.waitForReadyStatus();
             else
                 error('Start velocity must be less than top velocity.')
             end
@@ -301,6 +308,7 @@ Define the callback functions for the GUI controls.
             if ProposedTopVelocity > obj.StartVelocity
                 % Set syringe pump to new top velocity.
                 obj.executeCommand(['V', num2str(ProposedTopVelocity)]);
+                obj.waitForReadyStatus();
             else
                 error('Top velocity must be greater than start velocity')
             end
@@ -326,6 +334,7 @@ Define the callback functions for the GUI controls.
                 && (ProposedCutoffVelocity >= 50)
             % Set syringe pump to new cutoff velocity.
             obj.executeCommand(['c', num2str(ProposedCutoffVelocity)]);
+            obj.waitForReadyStatus();
         else
             error('Cutoff velocity %g Hz out of range (50-2700 Hz)', ...
                 ProposedCutoffVelocity)
@@ -341,8 +350,8 @@ Define the callback functions for the GUI controls.
     function movePlungerAbsolute(~, ~)
         % Callback for the Move Plunger to New Position pushbutton.
         
-        % Ensure that the syringe pump is ready for commands.
-        obj.waitForReadyStatus()
+%         % Ensure that the syringe pump is ready for commands.
+%         obj.waitForReadyStatus()
         
         % Ensure a valid position was entered, attempt to move the syringe.
         ProposedPosition = str2double(NewPositionAbsolute.String); 
@@ -359,6 +368,7 @@ Define the callback functions for the GUI controls.
         % (instead of trusting that it went to the correct place). 
         ReportedPosition = obj.reportCommand('?'); % absolute position char
         obj.PlungerPosition = str2double(ReportedPosition);
+        obj.waitForReadyStatus();
         
         % Update GUI to reflect any changes. 
         properties2gui();
@@ -375,6 +385,7 @@ Define the callback functions for the GUI controls.
         % Attempt to query the syringe pump to report the plunger position. 
         ReportedPosition = obj.reportCommand('?'); % absolute position char
         obj.PlungerPosition = str2double(ReportedPosition);
+        obj.waitForReadyStatus();        
         
         % Update GUI to reflect any changes.
         properties2gui();

@@ -38,6 +38,11 @@ end
 ValidPortGiven = 0;
 tic % begin a timer
 while toc < obj.DeviceSearchTimeout
+    % Set the ReadableAction property to indicate we are trying to connect.
+    obj.ReadableAction = ...
+        sprintf('Searching for syringe pump at port %s \n', ...
+        obj.SerialPort);
+    
     % Continue looking for a serial device connected at Port until
     % DeviceSearchTimeout has been exceeded. 
     for ii = 1:numel(ConnectedDevices)
@@ -50,12 +55,10 @@ while toc < obj.DeviceSearchTimeout
     if ValidPortGiven
         % User specified Port was valid so we should attempt to connect to 
         % the device at obj.Port .
-        fprintf('Searching for syringe pump at port %s \n', obj.SerialPort)
         obj.SyringePump = serial(obj.SerialPort); 
         fopen(obj.SyringePump);
         break % exit the while loop, device has been connected
     elseif numel(ConnectedDevices)==0
-        fprintf('Searching for syringe pump at port %s \n', obj.SerialPort)
         warning('MATLAB 2017a recommended for use of this class.')
         obj.SyringePump = serial(obj.SerialPort); 
         fopen(obj.SyringePump);
