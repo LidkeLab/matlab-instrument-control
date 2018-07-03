@@ -12,9 +12,16 @@ function querySyringePump(obj)
 % or the timeout has been exceeded. 
 IsQueryResponse = 0; 
 tic % start a timer
-while toc < obj.DeviceResponseTimeout   
+while toc < obj.DeviceResponseTimeout
     % Query the syringe pump for status and error codes. 
-    fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'Q']);
+    if ~isempty(obj.SyringePump)
+        % A syringe pump serial object exists, attempt the query.
+        fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'Q']);
+    else
+        % No syringe pump serial object exists, tell the user they need to
+        % establish a connection.
+        error('Syringe pump not connected.')
+    end
 
     % Read the message returned by the Cavro syringe pump in response to 
     % the query request.
