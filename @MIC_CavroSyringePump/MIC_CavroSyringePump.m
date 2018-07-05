@@ -39,7 +39,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         InstrumentName = 'CavroSyringePump'; % name of the instrument
         SyringePump; % serial object for the connected syringe pump
         PlungerPosition; % absolute plunger position (0-3000)
-        ReadableAction; % summary of currently known activity of the pump
+        ReadableAction; % activity of the pump/pump response to a report
     end
     
     
@@ -69,7 +69,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
             
             % Set property listener(s). 
             addlistener(obj, 'StatusByte', 'PostSet', ...
-                @obj.statusByteChange)
+                @obj.statusByteChange);
             
             % Determine the current version of MATLAB in use.
             obj.MatlabRelease = version('-release');
@@ -103,7 +103,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
         executeCommand(obj, Command); 
         querySyringePump(obj);
         [DataBlock] = reportCommand(obj, Command);
-        generalCommand(obj, Command); 
+        [DataBlock] = generalCommand(obj, Command); 
 
         function ReadableStatus = get.ReadableStatus(obj)
             %Produces a readable status of the syringe pump upon request.

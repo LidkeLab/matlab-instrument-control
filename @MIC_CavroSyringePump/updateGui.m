@@ -16,8 +16,8 @@ end
 % Search for GUI objects to be updated and update them.
 GuiFigureChildren = findall(obj.GuiFigure.Children);
 for ii = 1:numel(GuiFigureChildren)
-    % Update the StatusText textbox.
-    if strcmpi(GuiFigureChildren(ii).Tag, 'StatusText')
+    % Update the PumpStatus textbox.
+    if strcmpi(GuiFigureChildren(ii).Tag, 'PumpStatus')
         % This is the textbox displaying the pumps status,
         % update the status.
         GuiFigureChildren(ii).String = obj.ReadableStatus;
