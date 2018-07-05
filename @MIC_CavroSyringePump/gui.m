@@ -173,14 +173,14 @@ Define the callback functions for the GUI controls.
     function gui2properties()
         % Sets the object properties based on the GUI widgets.
         
-        % Set the properties related to the plunger velocity.
-        obj.VelocitySlope = str2double(VelocitySlope.String); 
-        obj.StartVelocity = str2double(StartVelocity.String);
-        obj.TopVelocity = str2double(TopVelocity.String); 
-        obj.CutoffVelocity = str2double(CutoffVelocity.String); 
-        
-        % Set the properties related to the plungers position.
-        obj.PlungerPosition = str2double(NewPositionAbsolute.String); 
+%         % Set the properties related to the plunger velocity.
+%         obj.VelocitySlope = str2double(VelocitySlope.String); 
+%         obj.StartVelocity = str2double(StartVelocity.String);
+%         obj.TopVelocity = str2double(TopVelocity.String); 
+%         obj.CutoffVelocity = str2double(CutoffVelocity.String); 
+%         
+%         % Set the properties related to the plungers position.
+%         obj.PlungerPosition = str2double(NewPositionAbsolute.String);
     end
 
     function properties2gui()
