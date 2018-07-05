@@ -40,8 +40,7 @@ for ii = 1:numel(GuiFigureChildren)
 
     % Ensure Connect Syringe Pump button is enabled/disabled
     % depending on the pump status.
-    if strcmpi(GuiFigureChildren(ii).Tag, ...
-            'ConnectButton')
+    if strcmpi(GuiFigureChildren(ii).Tag, 'ConnectButton')
         if obj.StatusByte >= 96
             % The syringe pump is ready for commands, enable
             % the Connect Syringe Pump button.
@@ -55,8 +54,7 @@ for ii = 1:numel(GuiFigureChildren)
 
     % Ensure the Move Plunger to New Position button is
     % enabled/disabled depending on the pump status.
-    if strcmpi(GuiFigureChildren(ii).Tag, ...
-            'MovePlunger')
+    if strcmpi(GuiFigureChildren(ii).Tag, 'MovePlunger')
         if obj.StatusByte >= 96
             % The syringe pump is ready for commands, enable
             % the Move Plunger to New Position button.
@@ -70,8 +68,7 @@ for ii = 1:numel(GuiFigureChildren)
 
     % Ensure the Re-initialize Syringe Pump button is
     % enabled/disabled depending on the pump status.
-    if strcmpi(GuiFigureChildren(ii).Tag, ...
-            'InitializePump')
+    if strcmpi(GuiFigureChildren(ii).Tag, 'InitializePump')
         if obj.StatusByte >= 96
             % The syringe pump is ready for commands, enable
             % the Re-initialize Syringe Pump button.
@@ -85,8 +82,7 @@ for ii = 1:numel(GuiFigureChildren)
     
     % Ensure the valve control buttons are enabled/disabled depending on
     % pump status.
-    if strcmpi(GuiFigureChildren(ii).Tag, ...
-            'ValveInButton')
+    if strcmpi(GuiFigureChildren(ii).Tag, 'ValveInButton')
         if obj.StatusByte >= 96
             % The syringe pump is ready for commands, enable the input
             % valve control button.
@@ -97,8 +93,7 @@ for ii = 1:numel(GuiFigureChildren)
             GuiFigureChildren(ii).Enable = 'off';
         end
     end
-    if strcmpi(GuiFigureChildren(ii).Tag, ...
-            'ValveOutButton')
+    if strcmpi(GuiFigureChildren(ii).Tag, 'ValveOutButton')
         if obj.StatusByte >= 96
             % The syringe pump is ready for commands, enable the output
             % valve control button.
@@ -109,6 +104,16 @@ for ii = 1:numel(GuiFigureChildren)
             GuiFigureChildren(ii).Enable = 'off';
         end
     end
+    if strcmpi(GuiFigureChildren(ii).Tag, 'CustomCommand')
+        if obj.StatusByte >= 96
+            % The syringe pump is ready for commands, enable the custom
+            % command button.
+            GuiFigureChildren(ii).Enable = 'on';
+        else
+            % The syringe pump is busy, disable the custom command button.
+            GuiFigureChildren(ii).Enable = 'off';
+        end
+    end  
 end
 drawnow % ensure changes to GUI happen immediately
 

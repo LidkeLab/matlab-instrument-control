@@ -147,6 +147,7 @@ CustomCommandPanel = uipanel('Parent', guiFig, ...
     'Position', [FigWidth-175, FigHeight-125, 170, 50]); 
 CustomCommand = uicontrol('Parent', CustomCommandPanel, ...
     'Style', 'edit', 'Position', [5, 5, 100, 25], ...
+    'Tag', 'CustomCommand', ...
     'TooltipString', ['Syringe pump responses will be displayed ', ...
     'in the Pump Communciations section']);
 ExecuteCustomCommand = uicontrol('Parent', CustomCommandPanel, ...
@@ -280,7 +281,7 @@ Define the callback functions for the GUI controls.
             obj.executeCommand(['L', num2str(ProposedSlope)]);
             obj.waitForReadyStatus();
         else
-            error('Velocity slope %g Hz out of range (1-20 Hz/sec)', ...
+            error('Velocity slope %g Hz is out of range (1-20 Hz/sec)', ...
                 ProposedSlope); 
         end
         
@@ -298,22 +299,29 @@ Define the callback functions for the GUI controls.
         % Retrieve the value entered by the user and ensure it is valid. 
         ProposedStartVelocity = str2double(Source.String);
         if (ProposedStartVelocity <= 1000) && (ProposedStartVelocity >= 50)
-            % User entered start velocity is in the valid range, ensure
-            % that it is less than the top velocity.
-            if ProposedStartVelocity < obj.TopVelocity
-                % Set syringe pump to new start velocity.
-                obj.executeCommand(['v', num2str(ProposedStartVelocity)]);
-                obj.waitForReadyStatus();
-                
-                % Attempt to query the syringe pump for its start velocity
-                % (instead of trusting that it was set properly).
-                obj.StartVelocity = str2double(obj.reportCommand('?1'));
-                obj.waitForReadyStatus();
-            else
-                error('Start velocity must be less than top velocity.')
+            % User entered start velocity is in the valid range, attempt to
+            % set the new start velocity.
+            obj.executeCommand(['v', num2str(ProposedStartVelocity)]);
+            obj.waitForReadyStatus();
+
+            % Attempt to query the syringe pump for its start velocity
+            % (instead of trusting that it was set properly).
+            obj.StartVelocity = str2double(obj.reportCommand('?1'));
+            obj.waitForReadyStatus();
+            
+            % If ProposedStartVelocity is >= than obj.TopVelocity,
+            % warn the user the an error might occur (the Cavro XP3000
+            % syringe pump manual is unclear about this, as p. 3-36 states
+            % "...start velocity should always be less than the top 
+            % velocity.", however the top velocity can be set as low as 5 
+            % half-steps/second whereas the start velocity can only be set
+            % as low as 50 half-steps/second). 
+            if ProposedStartVelocity >= obj.TopVelocity
+                warning(['Start Velocity >= Top Velocity may produce ', ...
+                    'unexpected behavior.'])
             end
         else
-            error('Start velocity %g Hz out of range (50-1000 Hz)', ...
+            error('Start velocity %g Hz is out of range (50-1000 Hz)', ...
                 ProposedStartVelocity)
         end
         
@@ -331,22 +339,29 @@ Define the callback functions for the GUI controls.
         % Retrieve the value entered by the user. 
         ProposedTopVelocity = str2double(Source.String);
         if (ProposedTopVelocity <= 5800) && (ProposedTopVelocity >= 5)
-            % User entered top velocity is in the valid range, ensure it is
-            % greater than the start velocity.
-            if ProposedTopVelocity > obj.StartVelocity
-                % Set syringe pump to new top velocity.
-                obj.executeCommand(['V', num2str(ProposedTopVelocity)]);
-                obj.waitForReadyStatus();
-                
-                % Attempt to query the syringe pump for its top velocity
-                % (instead of trusting that it was set properly).
-                obj.TopVelocity = str2double(obj.reportCommand('?2'));
-                obj.waitForReadyStatus();
-            else
-                error('Top velocity must be greater than start velocity')
+            % User entered top velocity is in the valid range, send the set
+            % command.
+            obj.executeCommand(['V', num2str(ProposedTopVelocity)]);
+            obj.waitForReadyStatus();
+
+            % Attempt to query the syringe pump for its top velocity
+            % (instead of trusting that it was set properly).
+            obj.TopVelocity = str2double(obj.reportCommand('?2'));
+            obj.waitForReadyStatus();
+            
+            % If ProposedTopVelocity is <= obj.StartVelocity,
+            % warn the user the an error might occur (the Cavro XP3000
+            % syringe pump manual is unclear about this, as p. 3-36 states
+            % "...start velocity should always be less than the top 
+            % velocity.", however the top velocity can be set as low as 5 
+            % half-steps/second whereas the start velocity can only be set
+            % as low as 50 half-steps/second). 
+            if ProposedTopVelocity <= obj.StartVelocity
+                warning(['Top Velocity <= StartVelocity may produce ', ...
+                    'unexpected behavior.'])
             end
         else
-            error('Top velocity %g Hz out of range (5-5800 Hz)', ...
+            error('Top velocity %g Hz is out of range (5-5800 Hz)', ...
                 ProposedTopVelocity)
         end 
         
@@ -359,20 +374,23 @@ Define the callback functions for the GUI controls.
 
     function setCutoffVelocity(Source, ~)
         % Callback used to set the cutoff velocity property of the syringe
-        % pump.
+        % pump.  DOESN'T SEEM TO BE WORKING! DS 7/5/18
+        warning('Setting cutoff velocity not currently working');
         
         % Retrieve the value entered by the user. 
         ProposedCutoffVelocity = str2double(Source.String);
         if (ProposedCutoffVelocity <= 2700) ...
                 && (ProposedCutoffVelocity >= 50)
-            % Set syringe pump to new cutoff velocity.
-            obj.executeCommand(['c', num2str(ProposedCutoffVelocity)]);
-            obj.waitForReadyStatus();
-            
-            % Attempt to query the syringe pump for its cutoff velocity
-            % (instead of trusting that it was set properly).
-            obj.CutoffVelocity = str2double(obj.reportCommand('?3'));
-            obj.waitForReadyStatus();
+            if ProposedCutoffVelocity < obj.TopVelocity
+                % Set syringe pump to new cutoff velocity.
+                obj.executeCommand(['c', num2str(ProposedCutoffVelocity)]);
+                obj.waitForReadyStatus();
+
+                % Attempt to query the syringe pump for its cutoff velocity
+                % (instead of trusting that it was set properly).
+                obj.CutoffVelocity = str2double(obj.reportCommand('?3'));
+                obj.waitForReadyStatus();
+            end
         else
             error('Cutoff velocity %g Hz out of range (50-2700 Hz)', ...
                 ProposedCutoffVelocity)
@@ -443,8 +461,15 @@ Define the callback functions for the GUI controls.
         end
     end
 
-    function executeCustomCommand(~, ~)
+    function executeCustomCommand(Source, ~)
         % Callback for the Custom Command Interface execute button.
+        
+        % Turn off the execute button to indicate something is happening.
+        % NOTE: I'm doing this here because user entered Report commands
+        % are executing too fast to allow for the PumpStatus textbox to
+        % update, but too slow for the user to realize something is
+        % happening...
+        Source.Enable = 'off'; drawnow;
         
         % Grab the command the user has entered in the textbox.
         Command = CustomCommand.String;
@@ -474,6 +499,9 @@ Define the callback functions for the GUI controls.
         
         % Update GUI to reflect any changes.
         properties2gui(); 
+        
+        % Turn on the execute button to indicate completion.
+        Source.Enable = 'on'; drawnow;
     end
 
     
