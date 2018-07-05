@@ -109,8 +109,8 @@ for ii = 1:numel(GuiFigureChildren)
             GuiFigureChildren(ii).Enable = 'off';
         end
     end
-    drawnow % ensure changes happen immediately
 end
-    
+drawnow % ensure changes to GUI happen immediately
+
     
 end
