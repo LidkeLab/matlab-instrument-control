@@ -40,7 +40,7 @@ tic % begin a timer
 while toc < obj.DeviceSearchTimeout
     % Set the ReadableAction property to indicate we are trying to connect.
     obj.ReadableAction = ...
-        sprintf('Searching for syringe pump at port %s \n', ...
+        sprintf('Searching for syringe pump at port %s', ...
         obj.SerialPort);
     
     % Continue looking for a serial device connected at Port until
@@ -104,11 +104,11 @@ end
 fprintf('Syringe pump found at port %s \n', obj.SerialPort)
 
 % Set default properties based on the (assumed) succesful initialization.
-obj.StartVelocity = 900; 
-obj.TopVelocity = 1400; 
+obj.StartVelocity = 900;
+obj.TopVelocity = 1400;
 obj.CutoffVelocity = 900;
-obj.VelocitySlope = 14; 
-obj.PlungerPosition = 0; 
+obj.VelocitySlope = 14;
+obj.PlungerPosition = 0;
 
 
 end
