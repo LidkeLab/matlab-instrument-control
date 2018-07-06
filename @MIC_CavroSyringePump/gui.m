@@ -166,21 +166,11 @@ properties2gui();
 Define the callback functions for the GUI controls.
 %}
     function closeFigure(~,~)
-        gui2properties(); % update object properties based on GUI
         delete(obj.GuiFigure); % delete the GUI figure
     end
 
     function gui2properties()
         % Sets the object properties based on the GUI widgets.
-        
-%         % Set the properties related to the plunger velocity.
-%         obj.VelocitySlope = str2double(VelocitySlope.String); 
-%         obj.StartVelocity = str2double(StartVelocity.String);
-%         obj.TopVelocity = str2double(TopVelocity.String); 
-%         obj.CutoffVelocity = str2double(CutoffVelocity.String); 
-%         
-%         % Set the properties related to the plungers position.
-%         obj.PlungerPosition = str2double(NewPositionAbsolute.String);
     end
 
     function properties2gui()
@@ -285,9 +275,6 @@ Define the callback functions for the GUI controls.
                 ProposedSlope); 
         end
         
-        % Update class properties to reflect changes (must be done first).
-        gui2properties();
-        
         % Update GUI properties to refelct changes. 
         properties2gui();
     end
@@ -324,9 +311,6 @@ Define the callback functions for the GUI controls.
             error('Start velocity %g Hz is out of range (50-1000 Hz)', ...
                 ProposedStartVelocity)
         end
-        
-        % Update class properties to reflect changes (must be done first).
-        gui2properties();
         
         % Update GUI properties to refelct changes. 
         properties2gui();
@@ -365,9 +349,6 @@ Define the callback functions for the GUI controls.
                 ProposedTopVelocity)
         end 
         
-        % Update class properties to reflect changes (must be done first).
-        gui2properties();
-        
         % Update GUI properties to refelct changes. 
         properties2gui(); 
     end
@@ -395,9 +376,6 @@ Define the callback functions for the GUI controls.
             error('Cutoff velocity %g Hz out of range (50-2700 Hz)', ...
                 ProposedCutoffVelocity)
         end
-        
-        % Update class properties to reflect changes (must be done first).
-        gui2properties();
         
         % Update GUI properties to refelct changes. 
         properties2gui();
