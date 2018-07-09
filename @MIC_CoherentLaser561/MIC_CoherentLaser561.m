@@ -16,8 +16,8 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
     %   MIC_ShutterTTL
     %.  MATLAB 2016b orlater
     %
-    %   CITATION: Sandeep Pallikkuth, LidkeLab, 2017.
-    
+    % CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
+
     
     properties (SetAccess=protected)
         InstrumentName='CoherentLaser561' % Descriptive Instrument Name
