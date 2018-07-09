@@ -1,7 +1,8 @@
 classdef MIC_CrystaLaser405 < MIC_LightSource_Abstract
    
-    % MIC_CrystaLaser405 Matlab Instrument Class for CrystaLaser 405 nm on TIRF table.
-    % Controls CrystaLaser module, setting power within the range of 0 to
+    % MIC_CrystaLaser405: Matlab Instrument Class for CrystaLaser 405 nm.
+    %
+    % Controls CrystaLaser module; setting power within the range of 0 to
     % 10 mW (The values measured on 2/23/2017 are 0.25 to 8.5 mW). 
     % The ON/OFF funtion is controlled by a TTL pulse and the power variation 
     % is acheived by providing analog voltage to the laser controller (range 0 to 10V).
@@ -13,17 +14,20 @@ classdef MIC_CrystaLaser405 < MIC_LightSource_Abstract
     % The power range of the laser is set using the knob on front panel of
     % controller.
     %
-    % * Please check the laser is turned on at the controller before calling funtions in 
-    %   this class
+    % Please check the laser is turned on at the controller before calling funtions in 
+    % this class
+    %
+    % Example: obj=MIC_CrystaLaser405('Dev1','ao1','Port0/Line3');
+    % Functions: on, off, State, setPower, delete, shutdown, unitTest
     %
     % REQUIREMENTS: 
     %   MIC_Abstract.m
     %   MIC_LightSource_Abstract.m
+    %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
-    % Example: obj=MIC_CrystaLaser405('Dev1','ao1','Port0/Line3');
-    % Functions: on, off, State, setPower, delete, shutdown, unitTest
+    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
     
     properties(SetAccess = protected)
         InstrumentName='CrystaLaser405'; % Name of the instrument

@@ -25,6 +25,8 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
     %   Thorlabs.MotionControl.TCube.Piezo.dll
     %   Thorlabs.MotionControl.TCube.StrainGauge.dll
     %   Thorlabs.MotionControl.DeviceManager.dll
+    %
+    % CITATION: Keith Lidke, LidkeLab, 2017.
     
     properties (SetAccess=protected)
         PositionUnit='um';          % Units of position parameter (eg. um/mm)
