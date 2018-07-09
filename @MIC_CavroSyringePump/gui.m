@@ -48,7 +48,8 @@ handles.PumpActivity = uicontrol('Parent', handles.CommPanel, ...
     'Tag', 'PumpActivity', 'Enable', 'off');
 handles.RefreshStatus = uicontrol('Parent', handles.CommPanel, ...
     'Style', 'pushbutton', 'Position', [285, 5, 50, 50], ...
-    'String', 'Refresh', 'Callback', @refreshStatus);
+    'String', 'Refresh', 'Tag', 'RefreshButton', ...
+    'Callback', @refreshStatus);
 
 % Create syringe pump connection controls/options.
 handles.ConnectionPanel = uipanel('Parent', guiFig, ...
@@ -166,6 +167,9 @@ handles.ExecuteCustomCommand = uicontrol(...
     'in the Pump Communciations section'], ...
     'Callback', @executeCustomCommand);
 
+% Store all tagged graphics objects in the handles structure to speed up
+% future activities. 
+handles.TaggedObjects = findobj('-regexp', 'Tag', '[^'']'); 
 
 %{
 Initialize the GUI based on object properties. 
@@ -243,16 +247,29 @@ Define the callback functions for the GUI controls.
     function connectSyringePump(~, ~)
         % Callback for the Connect Syringe Pump button.
 
+        % Disable all tagged graphics objects now (waiting on the
+        % obj.PumpStatus setter method is too slow to be practically useful
+        % in turning off buttons). 
+        set(handles.TaggedObjects, 'Enable', 'off'); drawnow;
+        
         % Attempt to make a connection to the syringe pump.
         obj.connectSyringePump();
 
         % Update GUI properties to reflect any changes to the syringe pump.
         properties2gui();
+        
+        % Re-enable all tagged graphics objects.
+        set(handles.TaggedObjects, 'Enable', 'on'); drawnow;
     end
 
     function initializeSyringePump(~, ~)
         % Callback for the Re-initialize Syringe Pump button.
 
+        % Disable all tagged graphics objects now (waiting on the
+        % obj.PumpStatus setter method is too slow to be practically useful
+        % in turning off buttons). 
+        set(handles.TaggedObjects, 'Enable', 'off'); drawnow;
+        
         % Attempt to re-initialize the syringe pump directly (without using
         % obj.executeCommand() method).
         fprintf(obj.SyringePump, ['/', num2str(obj.DeviceAddress), 'ZR']);
@@ -268,6 +285,9 @@ Define the callback functions for the GUI controls.
         
         % Update GUI properties to reflect any changes to the syringe pump.
         properties2gui();
+        
+        % Re-enable all tagged graphics objects.
+        set(handles.TaggedObjects, 'Enable', 'on'); drawnow;
     end
     
     function setVelocitySlope(Source, ~)
@@ -394,6 +414,11 @@ Define the callback functions for the GUI controls.
     function movePlungerAbsolute(~, ~)
         % Callback for the Move Plunger to New Position pushbutton.
         
+        % Disable all tagged graphics objects now (waiting on the
+        % obj.PumpStatus setter method is too slow to be practically useful
+        % in turning off buttons). 
+        set(handles.TaggedObjects, 'Enable', 'off'); drawnow;
+        
         % Ensure a valid position was entered, attempt to move the syringe.
         ProposedPosition = str2double(handles.NewPositionAbsolute.String); 
         if (ProposedPosition <= 3000) && (ProposedPosition >= 0)
@@ -413,6 +438,9 @@ Define the callback functions for the GUI controls.
         
         % Update GUI to reflect any changes. 
         properties2gui();
+        
+        % Re-enable all tagged graphics objects.
+        set(handles.TaggedObjects, 'Enable', 'on'); drawnow;
     end
 
     function terminatePlungerMove(~, ~)
@@ -435,6 +463,11 @@ Define the callback functions for the GUI controls.
     function valveControl(~, ~, ValvePosition)
         % Callback for the Move Valve to Input/Output Position buttons.
         
+        % Disable all tagged graphics objects now (waiting on the
+        % obj.PumpStatus setter method is too slow to be practically useful
+        % in turning off buttons). 
+        set(handles.TaggedObjects, 'Enable', 'off'); drawnow;
+        
         % Determine which button was clicked, act accordingly.
         if ValvePosition 
             % ValvePosition==1 (True) is the Input position, send the
@@ -447,17 +480,18 @@ Define the callback functions for the GUI controls.
             obj.executeCommand('O');
             obj.waitForReadyStatus();
         end
+        
+        % Re-enable all tagged graphics objects.
+        set(handles.TaggedObjects, 'Enable', 'on'); drawnow;
     end
 
-    function executeCustomCommand(Source, ~)
+    function executeCustomCommand(~, ~)
         % Callback for the Custom Command Interface execute button.
         
-        % Turn off the execute button to indicate something is happening.
-        % NOTE: I'm doing this here because user entered Report commands
-        % are executing too fast to allow for the PumpStatus textbox to
-        % update, but too slow for the user to realize something is
-        % happening...
-        Source.Enable = 'off'; drawnow;
+        % Disable all tagged graphics objects now (waiting on the
+        % obj.PumpStatus setter method is too slow to be practically useful
+        % in turning off buttons). 
+        set(handles.TaggedObjects, 'Enable', 'off'); drawnow;
         
         % Grab the command the user has entered in the textbox.
         Command = handles.CustomCommand.String;
@@ -488,8 +522,8 @@ Define the callback functions for the GUI controls.
         % Update GUI to reflect any changes.
         properties2gui(); 
         
-        % Turn on the execute button to indicate completion.
-        Source.Enable = 'on'; drawnow;
+        % Re-enable all tagged graphics objects.
+        set(handles.TaggedObjects, 'Enable', 'on'); drawnow;
     end
 
     

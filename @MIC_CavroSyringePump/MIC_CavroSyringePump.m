@@ -43,7 +43,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
     end
     
     
-    properties (SetObservable, AbortSet)
+    properties (SetObservable)
         StatusByte = 0; % status of the pump, 0 if not connected
     end
     
