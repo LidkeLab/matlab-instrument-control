@@ -238,7 +238,7 @@ Define the callback functions for the GUI controls.
         % Callback for the refresh status (query) button.
         
         % Query the syringe pump and update the GUI based on response.
-        obj.querySyringePump(); 
+        obj.querySyringePump();
         
         % Update GUI properties to reflect any changes to the syringe pump.
         properties2gui();
