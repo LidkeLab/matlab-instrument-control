@@ -18,6 +18,7 @@ classdef MIC_SPTCollect < MIC_Abstract
     properties
         % Hardware objects
         CameraObj;      % Andor Camera
+        CameraObj2;     % Second Andor Camera
         IRCameraObj;    % Thorlabs IR Camera
         StageObj;       % MCL Nano Drive
         Laser638Obj;       % TCubeLaserDiode 638
@@ -78,7 +79,9 @@ classdef MIC_SPTCollect < MIC_Abstract
         tAndor_start
         tAndor_end
         SyringeWaitTime
+        SyringeWaitTime_offset=-4; % in the unit of frame for IRCamera 
         IRSequenceLength
+        IRsequenceLength_offset=40;%in the unit of frame for IRCamera
         sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
         ActiveRegCheck=0;
         RegCamType='Andor Camera'         % Type of Camera Bright Field Registration 
@@ -144,9 +147,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.StageObj=MIC_MCLNanoDrive();
                 % Lasers
                 fprintf('Initializing 638 laser\n')
-                obj.Laser638Obj=MIC_TCubeLaserDiode('64844789','Current',170,0,0)
+                obj.Laser638Obj=MIC_TCubeLaserDiode('64844789','Current',195,0,0)
                 obj.Laser638Low =0;
-                obj.Laser638High =170;
+                obj.Laser638High =195;
                 fprintf('Initializing 561 laser\n')
                 %                obj.Laser561Obj = MIC_CrystaLaser561('Dev1','Port0/Line0:1');
                 %                 obj.Laser561Low= ; obj.Laser561High= ;
@@ -403,7 +406,11 @@ classdef MIC_SPTCollect < MIC_Abstract
             obj.LampObj.setPower(obj.LampPower);
 
             obj.set_RegCamType();
+            if isempty(obj.IRCameraObj)
+                obj.IRCameraObj=MIC_ThorlabsIR();
+            end
             switch obj.RegType
+                
                 case 'Self' %take and save the reference image
                     obj.R3DObj.takerefimage();
                     f=fullfile(obj.SaveDir,[obj.BaseFileName s '_ReferenceImage']);
@@ -465,7 +472,7 @@ Image_BF=[];
                 if obj.AbortNow; obj.AbortNow=0; break; end
                 
                 nstring=strcat('Acquiring','...',num2str(nn),'/',num2str(obj.NumSequences));
-                set(guihandles.Button_ControlStart, 'String',nstring,'Enable','off');
+                %set(guihandles.Button_ControlStart, 'String',nstring,'Enable','off');
                 
                 %align to image
                 switch obj.RegType
@@ -509,11 +516,11 @@ Image_BF=[];
                 obj.CameraObj.ExpTime_Sequence=obj.ExpTime_Sequence_Set;
                 obj.CameraObj.SequenceLength=obj.NumFrames;
                 obj.CameraObj.ROI=obj.getROI('Andor');
-                fprintf('EM Gain\n')
+%                 fprintf('EM Gain\n')
                 obj.CameraObj.CameraSetting.EMGain
                 CamSet.FrameTransferMode.Ind=2;
                 obj.CameraObj.setCamProperties(CamSet);
-                fprintf('Frame mode\n')
+%                 fprintf('Frame mode\n')
                 obj.CameraObj.CameraSetting.FrameTransferMode
                 %Collect
                 % For SPT microscope there are three options for imaging:
@@ -567,7 +574,8 @@ Image_BF=[];
                         delete(TimerIR);
                     end
                     
-                    
+                elseif strcmp(obj.sequenceType,'TwoTracking');   
+                obj.CameraObj2=MIC_AndorCamera();
                     
                 elseif strcmp(obj.sequenceType,'Tracking+SRCollect');
                     
@@ -576,7 +584,7 @@ Image_BF=[];
                     obj.IRCameraObj.ExpTime_Sequence=obj.IRExpTime_Sequence_Set;
                     % time should be long to cover all process after
                     % syringe pump for 5min=0.01*30000
-                    obj.IRCameraObj.SequenceLength=obj.ExpTime_Sequence_Set*obj.NumFrames+90
+                    obj.IRCameraObj.SequenceLength=obj.ExpTime_Sequence_Set*obj.NumFrames+obj.IRsequenceLength_offset
                     obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
                     
                     %set timer for IRcamera
@@ -584,7 +592,7 @@ Image_BF=[];
                     obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
                     
                     %set timer for SyringePump
-                    obj.SyringeWaitTime=obj.ExpTime_Sequence_Set*obj.NumFrames+15;
+                    obj.SyringeWaitTime=obj.ExpTime_Sequence_Set*obj.NumFrames+obj.SyringeWaitTime_offset;
                     obj.IRCameraObj.SPwaitTime=obj.SyringeWaitTime
                     obj.tIR_start=clock;
                     start(obj.TimerIRCamera);
@@ -595,7 +603,7 @@ Image_BF=[];
                     
                     %Turn off Syringe Pump
                     obj.TimerSyringe=clock;
-                    obj.IRCameraObj.SP.stop
+                    obj.IRCameraObj.SP.stop %(?)
                     fprintf('Syringe Pump is stopped\n')
                     
                     %                     %clear IRCamera

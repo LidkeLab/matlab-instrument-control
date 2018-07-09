@@ -12,6 +12,7 @@ classdef MIC_IRSyringPump < MIC_ThorlabsIR
     properties
         SP          % an obj for MIC_SyringePump to control Syringe pump
         SPwaitTime  % wait time for Syrineg Pump to start after starting IRCamera
+    tIR_end
     end
     
     methods
