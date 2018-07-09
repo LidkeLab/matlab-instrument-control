@@ -13,7 +13,8 @@ if isempty(obj.GuiFigure) || ~isvalid(obj.GuiFigure)
     return
 end
 
-% Search for GUI objects with non-empty tags.
+% Search for GUI objects with non-empty tags, i.e. the regular expression 
+% [^''] will match any tag that contains any character(s) besides '.
 GuiFigureChildren = findobj('-regexp', 'Tag', '[^'']');
 
 % Determine if we need to enable/disable tagged objects based on
