@@ -11,9 +11,10 @@ classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
-    % Example: obj=MIC_DHOMLaser532('Dev2','ao1');
+    % Example: obj=MIC_DHOMLaser532('Dev2','ao0');
     % Functions: on, off, State, setPower, delete
-    
+    % CITATION:  revised by Hanieh Mazloom-Farsibaf, Lidkelab, 2018.
+
     properties(SetAccess = protected)
         InstrumentName='DHOMLaser532'; %Instrument Name
     end
@@ -54,7 +55,7 @@ classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
        
         function off(obj)
             % Turns off Laser. 
-            obj.setPower(0);   % Sets power to 0
+            outputSingleScan(obj.DAQ,0); % sets zero voltage at NI card for Power_in
             obj.IsOn=0;   % Sets laser state to 0
         end
         
@@ -72,10 +73,12 @@ classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
             obj.off();
         end
         
-        function State=exportState(obj)     
-            % Export current state of the Laser
-            State.Power=obj.Power;
-            State.IsOn=obj.IsOn;
+        function [Attributes,Data,Children]=exportState(obj)
+            % Export current state of the Laser (ON/OFF == 1/0)
+            Attributes.IsOn=obj.IsOn;
+            Attributes.Power=obj.Power;
+            Data = [];
+            Children = [];
         end
         
         function setPower(obj,Power_in)
