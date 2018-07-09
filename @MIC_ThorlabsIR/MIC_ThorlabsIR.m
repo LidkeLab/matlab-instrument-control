@@ -48,9 +48,9 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
     properties
         Binning;            %   [binX binY]
         Data;               %   last acquired data
-        ExpTime_Focus=.01;      %   focus mode exposure time
-        ExpTime_Capture=.01;    %   capture mode exposure time
-        ExpTime_Sequence=.01;   %   sequence mode expsoure time
+        ExpTime_Focus=0.01;      %   focus mode exposure time
+        ExpTime_Capture=0.01;    %   capture mode exposure time Min=0.033
+        ExpTime_Sequence=0.01;   %   sequence mode expsoure time
         ROI;                %   [Xstart Xend Ystart Yend]
         SequenceLength;     %   Kinetic Series length
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
@@ -185,8 +185,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     obj.Cam.Timing.Framerate.Set(1/obj.ExpTime_Sequence);
                     obj.Cam.Timing.Exposure.Set(obj.ExpTime_Sequence*1000);
                     [Stat, ExpTime]=obj.Cam.Timing.Exposure.Get;
-                    %                     fprintf('Expsoure Time:
-                    %                     %g\n',ExpTime)
+                    fprintf('Expsoure Time:%g\n',ExpTime)
                     
             end
             
@@ -240,7 +239,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     out=dip_image(out,'uint8');
                 case 'matlab'
             end
-            %             dipshow(permute(out,[2 1]));
+%                         dipshow(permute(out,[2 1]));
         end
         function start_sequence(obj)
             obj.AcquisitionType='sequence';
