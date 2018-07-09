@@ -23,12 +23,12 @@ guiFig = figure('Position', ...
     'MenuBar', 'none', 'ToolBar', 'none'); % figure handle
 obj.GuiFigure = guiFig;
 obj.GuiFigure.Name = obj.InstrumentName;
-
-% Prevent closing after a 'close' or 'close all' command.
-obj.GuiFigure.HandleVisibility = 'off';
+handles.output = guiFig;
+guidata(guiFig, handles); % associate guiFig with a handles struct
 
 % Pass control to closeFigure callback when closing the figure.
 obj.GuiFigure.CloseRequestFcn = @closeFigure;
+
 
 %{ 
 Create the GUI controls.
@@ -36,7 +36,8 @@ Create the GUI controls.
 
 % Create an emergency shutdown button that will attempt to cut both the 12V
 % and 24V power lines.
-EmergencyShutdown = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
+handles.EmergencyShutdown = uicontrol('Parent', guiFig, ...
+    'Style', 'pushbutton', 'String', 'Emergency Shutdown', ...
     'FontWeight', 'bold', 'Position', [0, 300, 150, 50], ...
     'BackgroundColor', 'r', 'Callback', @emergencyShutdown); 
 
@@ -45,12 +46,12 @@ EmergencyShutdown = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
 % controlled by the 24V line (the 24V is tapped by a regulator that steps
 % it down to 12V for the valves), thus both the 12V and 24V lines must be
 % activated to operate the valves. 
-PowerButton12V = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
-   'Position', [0, 225, 150, 50], 'BackgroundColor', 'g', ...
-   'Callback', @powerSwitch12V);
-PowerButton24V = uicontrol('Parent', guiFig, 'Style', 'pushbutton', ...
-    'Position', [0, 175, 150, 50], 'BackgroundColor', 'g', ...
-    'Callback', @powerSwitch24V);
+handles.PowerButton12V = uicontrol('Parent', guiFig, ...
+    'Style', 'pushbutton', 'Position', [0, 225, 150, 50], ...
+    'BackgroundColor', 'g', 'Callback', @powerSwitch12V);
+handles.PowerButton24V = uicontrol('Parent', guiFig, ...
+    'Style', 'pushbutton', 'Position', [0, 175, 150, 50], ...
+    'BackgroundColor', 'g', 'Callback', @powerSwitch24V);
 
 % Create the controls for each of the six valves on the BIOCHEM flow
 % selection device. 
@@ -61,19 +62,20 @@ Valve2Control = uicontrol('Parent', guiFig, 'Style', 'togglebutton', ...
     'Position', [0, 100, 150, 25], 'BackgroundColor', 'g', ...
     'Callback', {@valveControl, 2});
 Valve3Control = uicontrol('Parent', guiFig, 'Style', 'togglebutton', ...
-    'Position', [0, 100, 150, 25], 'BackgroundColor', 'g', ...
+    'Position', [0, 75, 150, 25], 'BackgroundColor', 'g', ...
     'Callback', {@valveControl, 3});
 Valve4Control = uicontrol('Parent', guiFig, 'Style', 'togglebutton', ...
-    'Position', [0, 100, 150, 25], 'BackgroundColor', 'g', ...
+    'Position', [0, 50, 150, 25], 'BackgroundColor', 'g', ...
     'Callback', {@valveControl, 4});
 Valve5Control = uicontrol('Parent', guiFig, 'Style', 'togglebutton', ...
-    'Position', [0, 100, 150, 25], 'BackgroundColor', 'g', ...
+    'Position', [0, 25, 150, 25], 'BackgroundColor', 'g', ...
     'Callback', {@valveControl, 5});
 Valve6Control = uicontrol('Parent', guiFig, 'Style', 'togglebutton', ...
-    'Position', [0, 100, 150, 25], 'BackgroundColor', 'g', ...
+    'Position', [0, 0, 150, 25], 'BackgroundColor', 'g', ...
     'Callback', {@valveControl, 6});
-ValveControlHandles = {Valve1Control, Valve2Control, Valve3Control, ...
-    Valve4Control, Valve5Control, Valve6Control}; % must be ordered!!!
+handles.ValveControlHandles = {Valve1Control, Valve2Control, ...
+    Valve3Control, Valve4Control, Valve5Control, Valve6Control}; 
+
 
 %{
 Initialize the GUI based on object properties. 
@@ -98,39 +100,39 @@ Define the callback functions for the GUI controls.
         % Set the 12V Power Switch background color: red ON, green OFF
         % (red was chosen for on to emphasize a live circuit!)
         if obj.PowerState12V % 12V line is active
-            PowerButton12V.String = '12V Line Activated';
-            PowerButton12V.BackgroundColor = 'r'; 
+            handles.PowerButton12V.String = '12V Line Activated';
+            handles.PowerButton12V.BackgroundColor = 'r'; 
         else % 12V line is not active
-            PowerButton12V.String = '12V Line Deactivated';
-            PowerButton12V.BackgroundColor = 'g';
+            handles.PowerButton12V.String = '12V Line Deactivated';
+            handles.PowerButton12V.BackgroundColor = 'g';
         end
         
         % Set the 24V Power Switch background color: red ON, green OFF
         % (red was chosen for on to emphasize a live circuit!)
         if obj.PowerState24V % 24V line is active
-            PowerButton24V.String = '24V Line Activated';
-            PowerButton24V.BackgroundColor = 'r'; 
+            handles.PowerButton24V.String = '24V Line Activated';
+            handles.PowerButton24V.BackgroundColor = 'r'; 
         else % 24V line is not active
-            PowerButton24V.String = '24V Line Deactivated';
-            PowerButton24V.BackgroundColor = 'g';
+            handles.PowerButton24V.String = '24V Line Deactivated';
+            handles.PowerButton24V.BackgroundColor = 'g';
         end
         
         % Set the valve control togglebuttons to the appropriate state.
-        for ii = 1:numel(ValveControlHandles)
+        for ii = 1:numel(handles.ValveControlHandles)
             % Determine the appropriate state. 
             if obj.ValveState(ii) % the ii-th valve is open
                 % The ii-th valve is open. 
-                ValveControlHandles{ii}.Value = ...
-                    ValveControlHandles{ii}.Max; % depress the button
-                ValveControlHandles{ii}.BackgroundColor = 'r'; 
-                ValveControlHandles{ii}.String = ...
+                handles.ValveControlHandles{ii}.Value = ...
+                    handles.ValveControlHandles{ii}.Max; % depress button
+                handles.ValveControlHandles{ii}.BackgroundColor = 'r'; 
+                handles.ValveControlHandles{ii}.String = ...
                     sprintf('Valve %i OPEN', ii);
             else
                 % The ii-th valve is closed.
-                ValveControlHandles{ii}.Value = ...
-                    ValveControlHandles{ii}.Min; % un-toggle button
-                ValveControlHandles{ii}.BackgroundColor = 'g'; 
-                ValveControlHandles{ii}.String = ...
+                handles.ValveControlHandles{ii}.Value = ...
+                    handles.ValveControlHandles{ii}.Min; % un-toggle button
+                handles.ValveControlHandles{ii}.BackgroundColor = 'g'; 
+                handles.ValveControlHandles{ii}.String = ...
                     sprintf('Valve %i CLOSED', ii);
             end
         end
