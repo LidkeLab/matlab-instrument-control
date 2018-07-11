@@ -32,7 +32,7 @@ classdef MIC_StepperMotor < MIC_Abstract
         function obj = MIC_StepperMotor(SerialNum)
             %constructor start the communications with all three motors and
             %also sets some of the class properties.
-            addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\source\MIC\x64\Release');
+            addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\source\MIC\x64');
             obj=obj@MIC_Abstract(~nargout);
             obj.SerialN = SerialNum;
             Kinesis_SBC_Open(obj.SerialN);
@@ -82,7 +82,7 @@ classdef MIC_StepperMotor < MIC_Abstract
         function closeSBC(obj)
             %called inside the delete function to close the communication ports for all the motors.
             Kinesis_SBC_Close(obj.SerialN);
-            Kinesis_LD_Close('SerialNoString',Channel); %FF
+            %Kinesis_LD_Close('SerialNoString',Channel); %FF
         end
         function delete(obj)
             obj.closeSBC();

@@ -373,7 +373,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         
         function TriggeredCapture(obj)
             DcamFireTrigger(obj.CameraHandle)
-            obj.displaylastimage;
+%             obj.displaylastimage; %FF: not to show the image
         end
         
         function out=FinishTriggeredCapture(obj,numFrames)

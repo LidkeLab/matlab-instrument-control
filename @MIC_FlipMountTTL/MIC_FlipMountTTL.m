@@ -55,14 +55,16 @@ classdef MIC_FlipMountTTL < MIC_Abstract %by FF
            % obj.DAQ = daq.createSession('ni');
            % addDigitalChannel(obj.DAQ,NIDevice,DOChannel,'OutputOnly');
             outputSingleScan(obj.DAQ,1)
-            obj.IsOpen=0;
+            obj.IsOpen=1;
             % obj.Position=0;
 
         end
         
         function FilterOut(obj) %puts out the filter
             outputSingleScan(obj.DAQ,0)
-            obj.IsOpen=1;
+            obj.IsOpen=0;
+%             outputSingleScan(obj.DAQ,0)
+%             obj.IsOpen=1;
             % obj.Position=1;
 
         end

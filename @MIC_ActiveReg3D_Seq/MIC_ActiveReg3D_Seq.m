@@ -183,6 +183,14 @@ classdef MIC_ActiveReg3D_Seq < handle
             end
             obj.Image_ReferenceStack=zstack;
             ind=find(obj.ZStack_Pos==obj.Z_Current);
+            isempty(ind); %FF: populated "ans" in workspace.
+            if abs(ans)==1 %FF: to change "ans" if "ind" is empty
+               ind=10; 
+            end
+            az=size(zstack(:,:,ind(1)));
+            if az(1)==257 %FF: to change value of az if it is 257by257
+             obj.Image_ReferenceInfocus=squeeze(zstack(1:end-1,1:end-1,ind(1)));   
+            end
             obj.Image_ReferenceInfocus=squeeze(zstack(:,:,ind(1)));
             %obj.StageObj.set_position(XYZ); old
             obj.Stage_Piezo_X.setPosition(obj.X_Current); %new
@@ -280,20 +288,22 @@ classdef MIC_ActiveReg3D_Seq < handle
             obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);%FF
             obj.Correction_History=cat(1,obj.Correction_History,obj.Correction);
             obj.PosPostCorrect_History=cat(1,obj.PosPostCorrect_History,obj.PosPostCorrect);
+            
 %             figure
 % %             plot(obj.ErrorSignal_History(:,3)*1000,'r')
 % %             hold on
 %             plot(obj.Correction_History(:,3)*1000,'b')
 %             hold on
-% % % % %             plot(obj.ErrorSignal_History(:,1)*1000,'r')
+% %              plot(obj.ErrorSignal_History(:,1)*1000,'r')
 %             plot(obj.Correction_History(:,1)*1000,'r')
 %             hold on
-% % % %             plot(obj.ErrorSignal_History(:,2),'g*')
-% % %             hold on
+% %              plot(obj.ErrorSignal_History(:,2),'g*')
+% %             hold on
 %             plot(obj.Correction_History(:,2)*1000,'g')
 % %             hold on
-% % %             plot(obj.PosPostCorrect_History(:,2),'y')
+% %              plot(obj.PosPostCorrect_History(:,2),'y')
 %             legend('correctionZ','correctionX','correction Y')
+            
             %Image after all corrections
             obj.Stage_Piezo_X.setPosition(XYZ(1)); %new
             obj.Stage_Piezo_Y.setPosition(XYZ(2)); %new

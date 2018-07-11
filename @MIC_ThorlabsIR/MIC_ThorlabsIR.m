@@ -235,7 +235,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
             for ii=1:obj.SequenceLength
                 s32Wait=uc480.Defines.DeviceParameter.Wait;
             obj.Cam.Acquisition.Freeze(s32Wait);
-                out=obj.getlastimage;
+%                 out=obj.getlastimage; %FF
                 
                 if obj.AbortNow
                     %obj.LastError=AbortAcquisition();

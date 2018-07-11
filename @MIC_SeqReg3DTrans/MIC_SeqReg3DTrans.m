@@ -42,8 +42,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
 %         Tol_Y=.007;         %micron
         Tol_X=0.01; %F
         Tol_Y=0.01; %F
-        Tol_Z=.015;          %micron
-        MaxIter=10;
+        Tol_Z=.05;          %micron
+        MaxIter=20; %FF
         MaxXYShift = 5;     %micron
         MaxZShift  = 1;   %micron
         ZFitPos;
@@ -395,7 +395,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             
             iter=0;
             withintol=0;
-            while (withintol==0)&&(iter<obj.MaxIter/2) %FF
+            while (withintol==0)&&(iter<obj.MaxIter) 
                 X=obj.Stage_Piezo_X.getPosition; %new
                 Y=obj.Stage_Piezo_Y.getPosition; %new
                 Z=obj.Stage_Piezo_Z.getPosition; %new
@@ -405,10 +405,10 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 %find z-position and adjust in Z using Piezo:
                 if iter < 2
                     obj.ZStack_MaxDev=4;
-                    obj.ZStack_Step=0.05; %0.05
+                    obj.ZStack_Step=0.05; %50 nm
                 else
                     obj.ZStack_MaxDev=0.5;
-                    obj.ZStack_Step=0.05; %0.05
+                    obj.ZStack_Step=0.05; %50 nm
                 end
                 [Zfit,mACfit]=obj.findZPos();
                 Zshift=Z-abs(Zfit); %new
@@ -418,51 +418,26 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 obj.Stage_Piezo_Z.setPosition(Z); %new
                 %find XY position and adjust in XY using Piezo:
                 [Xshift,Yshift]=findXYShift(obj); % in um 
-                
-%                 if iter < 2
-                   % in this case, center piezos and adjust position only by Steppers:
-%                     obj.Stage_Piezo_X.setPosition(X0); %new
-%                     obj.Stage_Piezo_Y.setPosition(Y0); %new
-%                     obj.Stage_Piezo_Z.setPosition(Z0); %new
-%                     ym=obj.MotorObj.getPosition(1) %new %y
-%                     xm=obj.MotorObj.getPosition(2) %new %x
-%                     zm=obj.MotorObj.getPosition(3) %new %z
-%                     Xm=[xm,ym,zm]; %new
-%                     RefPos=RefStruct.StepperPos; %new
-%                     deltaX=RefPos(1)-Xm(1); %new
-%                     deltaY=RefPos(2)-Xm(2); %new
-%                     deltaZ=RefPos(3)-Xm(3); %new
-%                     Xm=Xm+[deltaX,deltaY,deltaZ].*1e-3; % in mm
-%                     obj.MotorObj.moveToPosition(1,Xm(2)); %new %y
-%                     obj.MotorObj.moveToPosition(2,Xm(1)); %new %x
-%                     obj.MotorObj.moveToPosition(3,Xm(3)); %new %z
-%                     pause(0.5);
-%                 else
-                   % in this case adjust position only by Piezos:
-%                     obj.Stage_Piezo_X.setPosition(X); 
-%                     obj.Stage_Piezo_Y.setPosition(Y); 
-%                     obj.Stage_Piezo_Z.setPosition(Z);
 
                   % current position on Piezo
-                  CurrentPos_X=obj.Stage_Piezo_X.getPosition; %F
-                  CurrentPos_Y=obj.Stage_Piezo_Y.getPosition; %F
-                  if Xshift<0 & Yshift<0 %F
-                     NewPos_X=CurrentPos_X+Xshift; %F
-                     NewPos_Y=CurrentPos_Y+Yshift; %F
-                  elseif Xshift>0 & Yshift>0 %F
-                     NewPos_X=CurrentPos_X-Xshift; %F
-                     NewPos_Y=CurrentPos_Y-Yshift; %F
-                  elseif Xshift>0 & Yshift<0 %F
-                     NewPos_X=CurrentPos_X+Xshift; %F
-                     NewPos_Y=CurrentPos_Y-Yshift; %F
-                  else %F
-                     NewPos_X=CurrentPos_X-Xshift; %F
-                     NewPos_Y=CurrentPos_Y-Yshift; %F
+                  CurrentPos_X=obj.Stage_Piezo_X.getPosition; 
+                  CurrentPos_Y=obj.Stage_Piezo_Y.getPosition; 
+                  if Xshift<0 & Yshift<0 %Case 1
+                      NewPos_X=CurrentPos_X+abs(Xshift); 
+                      NewPos_Y=CurrentPos_Y+abs(Yshift); 
+                  elseif Xshift>0 & Yshift>0 %Case 2
+                      NewPos_X=CurrentPos_X-abs(Xshift); 
+                      NewPos_Y=CurrentPos_Y-abs(Yshift); 
+                  elseif Xshift>0 & Yshift<0 %Case 4 
+                      NewPos_X=CurrentPos_X-abs(Xshift); 
+                      NewPos_Y=CurrentPos_Y+abs(Yshift); 
+                  else %Case 3
+                      NewPos_X=CurrentPos_X+abs(Xshift); 
+                      NewPos_Y=CurrentPos_Y-abs(Yshift); 
                   end %F
-                  obj.Stage_Piezo_X.setPosition(NewPos_X); %F
-                  obj.Stage_Piezo_Y.setPosition(NewPos_Y); %F
-                  obj.Stage_Piezo_Z.setPosition(Z); %F
-%                 end
+                  obj.Stage_Piezo_X.setPosition(NewPos_X); 
+                  obj.Stage_Piezo_Y.setPosition(NewPos_Y); 
+                  obj.Stage_Piezo_Z.setPosition(Z); 
                 
                 %show overlay
                 obj.Image_Current=obj.capture_single();
@@ -482,13 +457,12 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
 
                 %check convergence
                 
-               withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z);
-%                 withintol=(abs(Xshift)>obj.Tol_X)&(abs(Yshift)>obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z); %FF
-                iter=iter+1;  
+               withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
+                iter=iter+1
             
             end
             if iter==obj.MaxIter
-                error('reached max iterations')
+                warning('reached max iterations')
             end
             
         end
@@ -518,7 +492,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 obj.Stage_Piezo_Y.setPosition(obj.Y_Current); %now
                 obj.Stage_Piezo_Z.setPosition(obj.ZStack_Pos(nn)); %now
                 if nn==1
-                    pause(.5);
+                    pause(.2); %it was 0.5 originally
                 end
                 obj.CameraObj.TriggeredCapture;
             end
