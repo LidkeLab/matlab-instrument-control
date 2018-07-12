@@ -66,11 +66,14 @@ while toc < obj.DeviceSearchTimeout
     else
         warning('No serial device was found at %s.', obj.SerialPort)
     end
-    pause(2) % wait before trying again to avoid cluttering command window
+    pause(5) % wait before trying again to avoid cluttering command window
 end
 
-% Throw an error if no device was found within DeviceSearchTimeout. 
+% Throw an error if no device was found within DeviceSearchTimeout and
+% refresh obj.StatusByte (unchanged) to pass control to the obj.StatusByte
+% setter method.
 if ~ValidPortGiven && ~isempty(ConnectedDevices)
+    obj.StatusByte = obj.StatusByte; % assign to itself to run setter
     error('No serial device found within DeviceSearchTimeout = %g s \n',...
         obj.DeviceSearchTimeout)
 end
