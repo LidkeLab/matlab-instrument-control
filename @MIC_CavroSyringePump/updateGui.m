@@ -14,14 +14,15 @@ if isempty(obj.GuiFigure) || ~isvalid(obj.GuiFigure)
 end
 
 % Search for GUI objects with non-empty tags, i.e. the regular expression 
-% [^''] will match any tag that contains any character(s) besides '.
-GuiFigureChildren = findobj('-regexp', 'Tag', '[^'']');
+% [^''] will match all tags that contain any character(s) besides '.
+GuiFigureChildren = findall(obj.GuiFigure.Children, ...
+    '-regexp', 'Tag', '[^'']');
 
 % Determine if we need to enable/disable tagged objects based on
 % obj.StatusByte. 
-if obj.StatusByte >= 96
-    % The pump is ready to accept new commands, ensure tagged graphics
-    % objects are enabled.
+if (obj.StatusByte >= 96) || (obj.StatusByte == 0)
+    % The pump is either ready to accept new commands or is not yet 
+    % connected.  Ensure tagged graphics objects are enabled.
     set(GuiFigureChildren, 'Enable', 'on'); 
 else
     % The pump is busy, disable tagged graphics objects.
@@ -41,9 +42,9 @@ for ii = 1:numel(GuiFigureChildren)
     if strcmpi(GuiFigureChildren(ii).Tag, 'PumpActivity')
         % This is the textbox displaying the pumps current activity, update
         % to most recently known action being made.
-        if obj.StatusByte >= 96
-            % The syringe pump is ready for commands, no activity is in
-            % progress.
+        if (obj.StatusByte >= 96) || (obj.StatusByte == 0)
+            % The syringe pump is either ready for commands, or has not 
+            % been connected, set the PumpActivity string to empty.
             GuiFigureChildren(ii).String = ''; 
         else
             % The syringe pump is busy, display the most recently known
@@ -52,7 +53,7 @@ for ii = 1:numel(GuiFigureChildren)
         end
     end
 end
-drawnow % ensure changes to GUI happen immediately
+drawnow; % ensure changes to GUI happen immediately
 
     
 end
