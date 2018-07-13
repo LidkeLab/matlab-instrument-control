@@ -44,7 +44,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         
         % Other properties
         PixelSize;          % image pixel size (um)
-        OreintMatrix        % unitary matrix to show orientation between Camera and Stage([a b,c d])
+        OrientMatrix        % unitary matrix to show orientation between Camera and Stage([a b,c d])
         AbortNow=0;         % flag for aborting the alignment
         RefImageFile;       % full path to reference image
         Image_Reference     % reference image
@@ -103,7 +103,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 if exist(obj.CalibrationFile,'file')
                     a=load(CalFileName);
                     obj.PixelSize=a.PixelSize;
-                    obj.OreintMatrix=a.OreintMatrix;
+                    obj.OrientMatrix=a.OrientMatrix;
                     clear a;
                 end
             end
@@ -154,7 +154,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         
         function calibrateOrientation(obj)
             % This function is to obtain elements of rotation matrix between
-            % Camera and Stage OreintMatrix=[A B,C D]
+            % Camera and Stage OrientMatrix=[A B,C D]
             obj.StageObj.center;
             X=obj.StageObj.Position;
             N=10;
@@ -273,7 +273,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             b=round(P_XY(1));
             c=round(P_YX(1));
             d=round(P_YY(1));           
-           obj.OreintMatrix=[a b, c d];
+            obj.OrientMatrix=[a b, c d];
         end 
         
         function calibratePixelSize(obj)
@@ -490,8 +490,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 
                 %find XY position and adjust
                 [Xshift,Yshift]=findXYShift(obj);
-                finalXshift=Xshift.*obj.OreintMatrix(1)+Yshift.*obj.OreintMatrix(2);
-                finalYshift=Xshift.*obj.OreintMatrix(3)+Yshift.*obj.OreintMatrix(4);
+                finalXshift=Xshift.*obj.OrientMatrix(1)+Yshift.*obj.OrientMatrix(2);
+                finalYshift=Xshift.*obj.OrientMatrix(3)+Yshift.*obj.OrientMatrix(4);
                 Pos(1)=Pos(1)+sign(finalXshift)*min(abs(finalXshift),obj.MaxXYShift);
                 Pos(2)=Pos(2)+sign(finalYshift)*min(abs(finalYshift),obj.MaxXYShift);
                 obj.StageObj.setPosition(Pos);
