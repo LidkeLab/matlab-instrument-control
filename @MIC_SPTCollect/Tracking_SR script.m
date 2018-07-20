@@ -3,9 +3,23 @@
 SPT.Lamp850Obj.setPower(50);
 SPT.Lamp850Obj.on;
 SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
-SPT.IRCameraObj.SequenceLength=50;
+SPT.IRCameraObj.SequenceLength=100;
 SPT.IRCameraObj.start_sequence;
-IRCamera=SPT.IRCameraObj.Data;
+STORMbuffer=SPT.IRCameraObj.Data;
+
+SPT.Lamp850Obj.setPower(20);
+SPT.Lamp850Obj.on;
+SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
+SPT.IRCameraObj.start_capture;
+bfTracking=SPT.IRCameraObj.Data;
+
+SPT.Lamp850Obj.setPower(20);
+SPT.Lamp850Obj.on;
+SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
+SPT.IRCameraObj.start_capture;
+afTracking=SPT.IRCameraObj.Data;
+
+
 
 SPT.Lamp850Obj.setPower(50);
 SPT.Lamp850Obj.on;
@@ -32,7 +46,7 @@ SPT.Lamp850Obj.setPower(20);
 SPT.Lamp850Obj.on;
 SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
 SPT.IRCameraObj.start_capture;
-FullImageafTracking=SPT.IRCameraObj.Data;
+bfTracking=SPT.IRCameraObj.Data;
 
 
 SPT.Lamp850Obj.setPower(25);
