@@ -89,12 +89,12 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
             
             ErrSG=Kinesis_SG_Open(obj.SerialNoTSG001);
             if ErrSG
-                error('openDevices::Error opening strain gauge controller')
+                warning('openDevices::Error opening strain gauge controller')
             end
             
             ErrPZ=Kinesis_PCC_Open(obj.SerialNoTPZ001);
             if ErrPZ
-                error('openDevices::Error opening piezo controller')
+                warning('openDevices::Error opening piezo controller')
             end
             Err=(ErrSG==0)&(ErrPZ==0);
             
