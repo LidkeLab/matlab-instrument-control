@@ -38,10 +38,12 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         Y_Current;          %micron
         Z_Current;          %micron
         ZStack_Pos;         %micron
-        Tol_X=.007;         %micron
-        Tol_Y=.007;         %micron
-        Tol_Z=.015;          %micron
-        MaxIter=50;
+%         Tol_X=.007;         %micron
+%         Tol_Y=.007;         %micron
+        Tol_X=0.01; %F
+        Tol_Y=0.01; %F
+        Tol_Z=.05;          %micron
+        MaxIter=20; %FF
         MaxXYShift = 5;     %micron
         MaxZShift  = 1;   %micron
         ZFitPos;
@@ -246,7 +248,6 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         
         function calibrate(obj)
             %move stage over 5 microns and fit line
-%           X=obj.StageObj.Position; %old
             X=obj.Stage_Piezo_X.Position; %new
             Y=obj.Stage_Piezo_Y.Position; %new
             Z=obj.Stage_Piezo_Z.Position; %new
@@ -390,62 +391,53 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         end
         
 
-        function align2imageFit(obj)
+        function align2imageFit(obj,RefStruct)
             
             iter=0;
             withintol=0;
-            while (withintol==0)&&(iter<obj.MaxIter)
-%               X=obj.StageObj.Position;  %old
-                X=obj.Stage_Piezo_X.Position; %new
-                Y=obj.Stage_Piezo_Y.Position; %new
-                Z=obj.Stage_Piezo_Z.Position; %new
-%               X0=X; %old
+            while (withintol==0)&&(iter<obj.MaxIter) 
+                X=obj.Stage_Piezo_X.getPosition; %new
+                Y=obj.Stage_Piezo_Y.getPosition; %new
+                Z=obj.Stage_Piezo_Z.getPosition; %new
                 X0=X; %new
                 Y0=Y; %new
                 Z0=Z; %new
-                %find z-position and adjust
+                %find z-position and adjust in Z using Piezo:
                 if iter < 2
-                    obj.ZStack_MaxDev=3;
-                    obj.ZStack_Step=0.1;
+                    obj.ZStack_MaxDev=4;
+                    obj.ZStack_Step=0.05; %50 nm
                 else
                     obj.ZStack_MaxDev=0.5;
-                    obj.ZStack_Step=0.05;
+                    obj.ZStack_Step=0.05; %50 nm
                 end
-                [Zfit]=obj.findZPos();
-%               Zshift=X(3)-abs(Zfit); %old
+                [Zfit,mACfit]=obj.findZPos();
                 Zshift=Z-abs(Zfit); %new
-%               X(3)=Zfit; %old
                 Z=Zfit; %new
-%               obj.StageObj.set_position(X); %old
-                obj.Stage_Piezo_X.set_position(X); %new
-                obj.Stage_Piezo_Y.set_position(Y); %new
-                obj.Stage_Piezo_Z.set_position(Z); %new
-                
-                %find XY position and adjust
-                [Xshift,Yshift]=findXYShift(obj);
-                
-%               X(1)=X(1)+sign(Xshift)*min(abs(Xshift),obj.MaxXYShift); %old
-                X=X+sign(Xshift)*min(abs(Xshift),obj.MaxXYShift); %new
-%               X(2)=X(2)+sign(Yshift)*min(abs(Yshift),obj.MaxXYShift); %old
-                Y=Y+sign(Yshift)*min(abs(Yshift),obj.MaxXYShift); %new
-                X; %old
-                Y; %new
-                XYZshift=[Xshift,Yshift,Zshift]
-                if iter < 2
-%                   obj.StageObj.set_position(X0); %old
-                    obj.Stage_Piezo_X.set_position(X0); %new
-                    obj.Stage_Piezo_Y.set_position(Y0); %new
-                    obj.Stage_Piezo_Z.set_position(Z0); %new
-                    Xm=obj.MotorObj.Position;
-                    Xm=Xm+[Yshift,Xshift,-Zshift].*1e-3;
-                    obj.MotorObj.set_position(Xm);
-                    pause(0.5);
-                else
-                    obj.StageObj.set_position(X); %old
-                    obj.Stage_Piezo_X.set_position(X); %new
-                    obj.Stage_Piezo_Y.set_position(Y); %new
-                    obj.Stage_Piezo_Z.set_position(Z); %new
-                end
+                obj.Stage_Piezo_X.setPosition(X); %new
+                obj.Stage_Piezo_Y.setPosition(Y); %new
+                obj.Stage_Piezo_Z.setPosition(Z); %new
+                %find XY position and adjust in XY using Piezo:
+                [Xshift,Yshift]=findXYShift(obj); % in um 
+
+                  % current position on Piezo
+                  CurrentPos_X=obj.Stage_Piezo_X.getPosition; 
+                  CurrentPos_Y=obj.Stage_Piezo_Y.getPosition; 
+                  if Xshift<0 & Yshift<0 %Case 1
+                      NewPos_X=CurrentPos_X+abs(Xshift); 
+                      NewPos_Y=CurrentPos_Y+abs(Yshift); 
+                  elseif Xshift>0 & Yshift>0 %Case 2
+                      NewPos_X=CurrentPos_X-abs(Xshift); 
+                      NewPos_Y=CurrentPos_Y-abs(Yshift); 
+                  elseif Xshift>0 & Yshift<0 %Case 4 
+                      NewPos_X=CurrentPos_X-abs(Xshift); 
+                      NewPos_Y=CurrentPos_Y+abs(Yshift); 
+                  else %Case 3
+                      NewPos_X=CurrentPos_X+abs(Xshift); 
+                      NewPos_Y=CurrentPos_Y-abs(Yshift); 
+                  end %F
+                  obj.Stage_Piezo_X.setPosition(NewPos_X); 
+                  obj.Stage_Piezo_Y.setPosition(NewPos_Y); 
+                  obj.Stage_Piezo_Z.setPosition(Z); 
                 
                 %show overlay
                 obj.Image_Current=obj.capture_single();
@@ -465,26 +457,22 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
 
                 %check convergence
                 
-                withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z);
-                iter=iter+1;
-                
+               withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
+                iter=iter+1
+            
             end
             if iter==obj.MaxIter
-                error('reached max iterations')
+                warning('reached max iterations')
             end
             
         end
         
         function collect_zstack(obj)
-%           XYZ=obj.StageObj.Position; %old
-            X=obj.Stage_Piezo_X.Position; %new
-            Y=obj.Stage_Piezo_Y.Position; %new
-            Z=obj.Stage_Piezo_Z.Position; %new
-%           obj.X_Current=XYZ(1); %old
+            X=obj.Stage_Piezo_X.getPosition; %new
+            Y=obj.Stage_Piezo_Y.getPosition; %new
+            Z=obj.Stage_Piezo_Z.getPosition; %new
             obj.X_Current=X; %new
-%           obj.Y_Current=XYZ(2); %old
             obj.Y_Current=Y; %new
-%           obj.Z_Current=XYZ(3); %old
             obj.Z_Current=Z; %new
                       
             Zmax=obj.ZStack_MaxDev;     %micron
@@ -500,52 +488,42 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             obj.CameraObj.setup_fast_acquisition(N);
             %out=single(obj.CameraObj.start_capture);
             for nn=1:N
-%               obj.StageObj.set_position([obj.X_Current,obj.Y_Current,obj.ZStack_Pos(nn)]); %old
-                obj.Stage_Piezo_X.set_position(obj.X_Current); %now
-                obj.Stage_Piezo_Y.set_position(obj.Y_Current); %now
-                obj.Stage_Piezo_Z.set_position(obj.ZStack_Pos(nn)); %now
+                obj.Stage_Piezo_X.setPosition(obj.X_Current); %now
+                obj.Stage_Piezo_Y.setPosition(obj.Y_Current); %now
+                obj.Stage_Piezo_Z.setPosition(obj.ZStack_Pos(nn)); %now
                 if nn==1
-                    pause(.5);
+                    pause(.2); %it was 0.5 originally
                 end
                 obj.CameraObj.TriggeredCapture;
             end
             out=obj.CameraObj.FinishTriggeredCapture(N);
             obj.ZStack=single(out);
-%           obj.StageObj.set_position(XYZ); %old
-            obj.Stage_Piezo_X.set_position(X); %new
-            obj.Stage_Piezo_Y.set_position(Y); %new
-            obj.Stage_Piezo_Z.set_position(Z); %new
-            
+            obj.Stage_Piezo_X.setPosition(X); %new
+            obj.Stage_Piezo_Y.setPosition(Y); %new
+            obj.Stage_Piezo_Z.setPosition(Z); %new
             %put EMGain/Shutter back
         end
         
         function [Xshift,Yshift]=findXYShift(obj)
-            %cut edges
-                        
+            
+            %cut edges                        
             Ref=dip_image(obj.Image_Reference(10:end-10,10:end-10));
             Ref=Ref-mean(Ref);
             Ref=Ref/std(Ref(:));
-
             %get image at current z-position
             Current=obj.capture_single;
             Current=dip_image(Current(10:end-10,10:end-10)); 
-            
             Current=Current-mean(Current);
-            Current=Current/std(Current(:));
-                
+            Current=Current/std(Current(:));                
             %find 2D shift         
-            svec=findshift(Current,Ref,'iter');
+            svec=findshift(Current,Ref,'iter'); % 'iter': doesn't round to integers
             Xshift=svec(1)*obj.PixelSize; %note dipimage permute
-            Yshift=-svec(2)*obj.PixelSize;
-           
-            %dipshow(zs)
-            %dipshow(im)
-            %joinchannels('RGB',Current,Ref)
+            Yshift=-svec(2)*obj.PixelSize;          
             
         end
         
         
-        function [Zfit]=findZPos(obj)
+        function [Zfit,mACfit]=findZPos(obj)
             
             %collect z-data stack
             obj.collect_zstack();
@@ -577,6 +555,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             EndFit=min(N,zindex+4);
             Zpos_fit=obj.ZStack_Pos(StartFit:EndFit);
             maxAC_fit=maxAC(StartFit:EndFit);
+            mACfit=max(maxAC_fit); %FF
             
             %fit
             [P, S MU] = polyfit(Zpos_fit,maxAC_fit,3);
@@ -587,7 +566,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
 %             [val,ind]=max(modelinterp);
             zAtMax=(-sqrt(P(2)^2-3*P(1)*P(3))-P(2))/3/P(1)*MU(2)+MU(1);
             %plot results
-            if isempty(obj.Fig_h_plot)||~ishandle(obj.Fig_h_plot)
+            if isempty(obj.Fig_h_plot)||~ishandle(obj.Fig_h_plot);
                 obj.Fig_h_plot=figure;
             else
                 figure(obj.Fig_h_plot)
