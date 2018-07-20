@@ -419,25 +419,14 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 %find XY position and adjust in XY using Piezo:
                 [Xshift,Yshift]=findXYShift(obj); % in um 
 
-                  % current position on Piezo
-                  CurrentPos_X=obj.Stage_Piezo_X.getPosition; 
-                  CurrentPos_Y=obj.Stage_Piezo_Y.getPosition; 
-                  if Xshift<0 & Yshift<0 %Case 1
-                      NewPos_X=CurrentPos_X+abs(Xshift); 
-                      NewPos_Y=CurrentPos_Y+abs(Yshift); 
-                  elseif Xshift>0 & Yshift>0 %Case 2
-                      NewPos_X=CurrentPos_X-abs(Xshift); 
-                      NewPos_Y=CurrentPos_Y-abs(Yshift); 
-                  elseif Xshift>0 & Yshift<0 %Case 4 
-                      NewPos_X=CurrentPos_X-abs(Xshift); 
-                      NewPos_Y=CurrentPos_Y+abs(Yshift); 
-                  else %Case 3
-                      NewPos_X=CurrentPos_X+abs(Xshift); 
-                      NewPos_Y=CurrentPos_Y-abs(Yshift); 
-                  end %F
-                  obj.Stage_Piezo_X.setPosition(NewPos_X); 
-                  obj.Stage_Piezo_Y.setPosition(NewPos_Y); 
-                  obj.Stage_Piezo_Z.setPosition(Z); 
+                % current position on Piezo
+                CurrentPos_X=obj.Stage_Piezo_X.getPosition;
+                CurrentPos_Y=obj.Stage_Piezo_Y.getPosition;
+                NewPos_X = CurrentPos_X - Xshift;
+                NewPos_Y = CurrentPos_Y - Yshift;
+                obj.Stage_Piezo_X.setPosition(NewPos_X);
+                obj.Stage_Piezo_Y.setPosition(NewPos_Y);
+                obj.Stage_Piezo_Z.setPosition(Z);
                 
                 %show overlay
                 obj.Image_Current=obj.capture_single();
@@ -458,7 +447,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 %check convergence
                 
                withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
-                iter=iter+1
+               iter=iter+1
             
             end
             if iter==obj.MaxIter
