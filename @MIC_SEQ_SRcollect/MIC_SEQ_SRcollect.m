@@ -794,7 +794,7 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
                 obj.Laser_405.setPower(0);
                 
                 %End Active Stabilization:
-                 obj.Active_Reg.stop();
+                obj.Active_Reg.stop();
                 
                 %Save Everything
                 if ~obj.IsBleach %Append Data
@@ -813,7 +813,6 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
                 end
                 
                 %delete Active_Reg
-                obj.Active_Reg.Timer
                 delete(obj.Active_Reg);
             end
          end
