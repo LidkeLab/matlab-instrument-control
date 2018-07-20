@@ -119,7 +119,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             
             %Check for sample (will crash objective if mounted during setup)
             proceedstr=questdlg('Is the sample fixed on the stage?','Warning',...
-                'Yes','No','No');
+                'Yes','No','Yes'); % default selection 'Yes'
             if strcmp('Yes',proceedstr)
                 error('Sample is fixed on the stage!  Remove the sample and restart SeqSRcollect.');
             end
