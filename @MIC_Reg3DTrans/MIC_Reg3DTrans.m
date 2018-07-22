@@ -24,7 +24,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     % TIRF: LampPower=?; LampWait=2.5; CamShutter=true; ChangeEMgain=true; 
     %       EMgain=2; ChangeExpTime=true; ExposureTime=0.01;   
     
-    % Marjolein Meddens, Lidke Lab 2017
+    % Marjolein Meddens,  Lidke Lab 2017
+    % Update:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
     
     properties
         % Input
@@ -109,174 +110,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
         end
         
-        function takerefimage(obj)
-            %takerefimage Takes new reference image
-
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
-            if obj.ChangeExpTime
-                ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
-                obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
-            end
-                        
-            % turn lamp on
-            obj.LampObj.on;
-            
-            obj.Image_Reference=obj.capture;
-            dipshow(obj.Image_Reference);
-            % turn lamp off
-            obj.LampObj.off;
-            
-            % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
-            if obj.ChangeExpTime
-                obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
-            end
-        end
-        
-        function saverefimage(obj)
-            % saverefimage Saves reference image
-
-            [a,b]=uiputfile('*.mat', 'Save Reference Image as');
-            f=fullfile(b,a);
-            Image_Reference=obj.Image_Reference; %#ok<NASGU,PROP> 
-            save(f,'Image_Reference');
-            obj.RefImageFile = f;
-            obj.updateGui();
-        end
-        
-        function calibrateOrientation(obj)
-            % This function is to obtain elements of rotation matrix between
-            % Camera and Stage OrientMatrix=[A B,C D]
-            obj.StageObj.center;
-            X=obj.StageObj.Position;
-            N=10;
-            StepSize=0.1; %micron
-            deltaX=((0:N-1)*StepSize)';
-            ImSz=obj.CameraObj.ImageSize;
-            ImageStack=zeros(ImSz(1),ImSz(2),N);
-            % remember start position
-            Xstart=X;
-            %change EMgain, shutter and exposure time if needed
-            if obj.ChangeEMgain || obj.CamShutter
-                CamSet = obj.CameraObj.CameraSetting;
-            end
-            if obj.ChangeEMgain
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-            end
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=1;
-            end
-            if obj.ChangeExpTime
-                ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
-                obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
-            end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end
-            % setup camera
-            obj.CameraObj.AcquisitionType='capture';
-            obj.CameraObj.setup_acquisition;
-                        
-            % turn lamp on
-            obj.turnLampOn();
-            % open shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(1);
-            end
-            
-            % acquire stack for x_direction
-            obj.StageObj.setPosition(Xstart);
-            for ii=1:N
-                X(1)=Xstart(1)+deltaX(ii);
-                obj.StageObj.setPosition(X);
-                pause(.1);
-                ImageStack_X(:,:,ii)=single(obj.CameraObj.start_capture);
-            end
-            
-            % acquire stack for y_direction
-            obj.StageObj.setPosition(Xstart);
-            X=Xstart;
-            for ii=1:N
-                X(2)=Xstart(2)+deltaX(ii);
-                obj.StageObj.setPosition(X);
-                pause(.1);
-                ImageStack_Y(:,:,ii)=single(obj.CameraObj.start_capture);
-            end
-            % close shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(0);
-            end
-            % turn lamp off
-            obj.turnLampOff();
-            
-            %change back EMgain, shutter and exposure time if needed
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=0;
-            end
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-            end
-            if obj.ChangeExpTime
-                obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
-            end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end            
-           % set stage back to initial position
-            obj.StageObj.setPosition(Xstart);
-            dipshow(ImageStack_X(10:end-10,10:end-10,:));
-            % find shifts for Change in X
-            svec_X=zeros(N,2);
-            refim=squeeze(ImageStack_X(10:end-10,10:end-10,1));
-            for ii=1:N
-                alignim_X=squeeze(ImageStack_X(10:end-10,10:end-10,ii));
-                svec_X(ii,:)=findshift(alignim_X,refim,'iter');
-            end
-            
-            % set stage back to initial position
-            obj.StageObj.setPosition(Xstart);
-            dipshow(ImageStack_Y(10:end-10,10:end-10,:));
-            % find shifts for Change in Y
-            svec_Y=zeros(N,2);
-            refim=squeeze(ImageStack_Y(10:end-10,10:end-10,1));
-            for ii=1:N
-                alignim_Y=squeeze(ImageStack_Y(10:end-10,10:end-10,ii));
-                svec_Y(ii,:)=findshift(alignim_Y,refim,'iter');
-            end
-% Here is the calculation for OrientCoMatrix
-% There are four coefficient: change Stage in x,y direction and calculate 
-% shift for x,y direction in the image
-
-            % fit shifts delta_X, shift in x in image
-            PxSz=obj.PixelSize;
-            
-            P_XX=polyfit(deltaX,PxSz.*svec_X(:,1),1);
-            P_XY=polyfit(deltaX,PxSz.*svec_X(:,2),1);
-            P_YX=polyfit(deltaX,PxSz.*svec_X(:,1),1);
-            P_YY=polyfit(deltaX,PxSz.*svec_X(:,2),1);
-
-            XXfit=P_XX(1)*deltaX+P_XX(2);
-            XYfit=P_XY(1)*deltaX+P_XY(2);
-            YXfit=P_YX(1)*deltaX+P_YX(2);
-            YYfit=P_YY(1)*deltaX+P_YY(2);
-            
-            a=round(P_XX(1));
-            b=round(P_XY(1));
-            c=round(P_YX(1));
-            d=round(P_YY(1));           
-            obj.OrientMatrix=[a b; c d];
-        end 
-        
-        function calibratePixelSize(obj)
+      
+         function calibratePixelSize(obj)
             % calibratePixelSize Calibrates pixel size
             %   Calibrates pixel size by moving the stage over 
             %     5 microns and fitting line to calculated shifts
@@ -390,19 +225,195 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
             obj.PixelSize=PixelSize; %#ok<PROP>
         end
+          
+        function calibrateOrientation(obj)
+            % This function is to obtain elements of rotation matrix between
+            % Camera (x,y) and Stage(X,Y) OrientMatrix=[A B,C D]
+            % It needs PixelSize
+            
+            %Check if the pixelsize is well defined
+            if isempty(obj.PixelSize)|| obj.PixelSize==0
+                obj.calibratePixelSize;
+            end
+            obj.StageObj.center;
+            X=obj.StageObj.Position;
+            N=10;
+            StepSize=0.1; %micron
+            deltaX=((0:N-1)*StepSize)';
+            ImSz=obj.CameraObj.ImageSize;
+            ImageStack=zeros(ImSz(1),ImSz(2),N);
+            % remember start position
+            Xstart=X;
+            %change EMgain, shutter and exposure time if needed
+            if obj.ChangeEMgain || obj.CamShutter
+                CamSet = obj.CameraObj.CameraSetting;
+            end
+            if obj.ChangeEMgain
+                EMGTemp = CamSet.EMGain.Value;
+                CamSet.EMGain.Value = obj.EMgain;
+            end
+            if obj.CamShutter
+                CamSet.ManualShutter.Bit=1;
+            end
+            if obj.ChangeExpTime
+                ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
+                obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
+            end
+            if obj.ChangeEMgain || obj.CamShutter
+                obj.CameraObj.setCamProperties(CamSet);
+            end
+            % setup camera
+            obj.CameraObj.AcquisitionType='capture';
+            obj.CameraObj.setup_acquisition;
+                        
+            % turn lamp on
+            obj.turnLampOn();
+            % open shutter if needed
+            if obj.CamShutter
+                obj.CameraObj.setShutter(1);
+            end
+            
+            % acquire stack for x_direction
+            obj.StageObj.setPosition(Xstart);
+            for ii=1:N
+                X(1)=Xstart(1)+deltaX(ii);
+                obj.StageObj.setPosition(X);
+                pause(.1);
+                ImageStack_X(:,:,ii)=single(obj.CameraObj.start_capture);
+            end
+            
+            % acquire stack for y_direction
+            obj.StageObj.setPosition(Xstart);
+            X=Xstart;
+            deltaY=deltaX;
+            for ii=1:N
+                X(2)=Xstart(2)+deltaY(ii);
+                obj.StageObj.setPosition(X);
+                pause(.1);
+                ImageStack_Y(:,:,ii)=single(obj.CameraObj.start_capture);
+            end
+            % close shutter if needed
+            if obj.CamShutter
+                obj.CameraObj.setShutter(0);
+            end
+            % turn lamp off
+            obj.turnLampOff();
+            
+            %change back EMgain, shutter and exposure time if needed
+            if obj.CamShutter
+                CamSet.ManualShutter.Bit=0;
+            end
+            if obj.ChangeEMgain
+                CamSet.EMGain.Value = EMGTemp; 
+            end
+            if obj.ChangeExpTime
+                obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
+            end
+            if obj.ChangeEMgain || obj.CamShutter
+                obj.CameraObj.setCamProperties(CamSet);
+            end            
+           % set stage back to initial position
+            obj.StageObj.setPosition(Xstart);
+            dipshow(ImageStack_X(10:end-10,10:end-10,:));
+            % find shifts for Change in X
+            svec_X=zeros(N,2);
+            refim=squeeze(ImageStack_X(10:end-10,10:end-10,1));
+            for ii=1:N
+                alignim_X=squeeze(ImageStack_X(10:end-10,10:end-10,ii));
+                svec_X(ii,:)=findshift(alignim_X,refim,'iter');
+            end
+            
+            % set stage back to initial position
+            obj.StageObj.setPosition(Xstart);
+            dipshow(ImageStack_Y(10:end-10,10:end-10,:));
+            % find shifts for Change in Y
+            svec_Y=zeros(N,2);
+            refim=squeeze(ImageStack_Y(10:end-10,10:end-10,1));
+            for ii=1:N
+                alignim_Y=squeeze(ImageStack_Y(10:end-10,10:end-10,ii));
+                svec_Y(ii,:)=findshift(alignim_Y,refim,'iter');
+            end
+% Here is the calculation for OrientCoMatrix
+% There are four coefficient: change Stage in x,y direction and calculate 
+% shift for x,y direction in the image
+
+            % fit shifts delta_X, shift in x in image
+            PxSz=obj.PixelSize;
+            %xy for Image, XY for Stage
+            P_xX=polyfit(deltaX,PxSz.*svec_X(:,1),1);
+            P_xY=polyfit(deltaX,PxSz.*svec_X(:,2),1);
+            P_yX=polyfit(deltaY,PxSz.*svec_Y(:,1),1);
+            P_yY=polyfit(deltaY,PxSz.*svec_Y(:,2),1);
+
+            xXfit=P_xX(1)*deltaX+P_xX(2);
+            xYfit=P_xY(1)*deltaX+P_xY(2);
+            yXfit=P_yX(1)*deltaX+P_yX(2);
+            yYfit=P_yY(1)*deltaX+P_yY(2);
+            
+            a=P_xX(1);
+            b=P_xY(1);
+            c=P_yX(1);
+            d=P_yY(1);
+            %orientation camera vs stage: xy=[a b; c d]XY
+            obj.OrientMatrix=round([a b; c d]);
+        end 
         
-        function turnLampOn(obj)
-            %turnLampOn Turns lamp on using current power and wait properties
+       function takerefimage(obj)
+            %takerefimage Takes new reference image
+
+            if obj.ChangeEMgain
+                CamSet = obj.CameraObj.CameraSetting;
+                EMGTemp = CamSet.EMGain.Value;
+                CamSet.EMGain.Value = obj.EMgain;
+                obj.CameraObj.setCamProperties(CamSet);
+            end
+            if obj.ChangeExpTime
+                ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
+                obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
+            end
+                        
+            % turn lamp on
             obj.LampObj.setPower(obj.LampObj.Power);
             obj.LampObj.on;
-            pause(obj.LampWait);
+            
+            obj.Image_Reference=obj.capture;
+            dipshow(obj.Image_Reference);
+            % turn lamp off
+            obj.LampObj.off;
+            
+            % change back EMgain and exposure time if needed
+            if obj.ChangeEMgain
+                CamSet.EMGain.Value = EMGTemp; 
+                obj.CameraObj.setCamProperties(CamSet);
+            end
+            if obj.ChangeExpTime
+                obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
+            end
         end
         
-        function turnLampOff(obj)
-            %turnLampOn Turns lamp on using current power and wait properties
-            obj.LampObj.off;
-            pause(obj.LampWait);
+        function saverefimage(obj)
+            % saverefimage Saves reference image
+
+            [a,b]=uiputfile('*.mat', 'Save Reference Image as');
+            f=fullfile(b,a);
+            Image_Reference=obj.Image_Reference; %#ok<NASGU,PROP> 
+            save(f,'Image_Reference');
+            obj.RefImageFile = f;
+            obj.updateGui();
         end
+        
+%         function turnLampOn(obj)
+%             %turnLampOn Turns lamp on using current power and wait properties
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on;
+%             pause(obj.LampWait);
+%         end
+        
+%         function turnLampOff(obj)
+%             %turnLampOn Turns lamp on using current power and wait properties
+%             obj.LampObj.off;
+%             pause(obj.LampWait);
+%         end
         
         function c=showoverlay(obj)
             %showoverlay Shows aligned image on top of reference image
@@ -612,7 +623,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             if isempty(obj.PixelSize)
                 error('MIC_Reg3DTrans:noPixelSize', 'no PixelSize given in obj.PixelSize, please calibrate pixelsize first. Run obj.calibratePixelSize')
             end
-            
+            if isempty(obj.OrientMatrix)
+                error('MIC_Reg3DTrans:noOrientMatrix', 'no OrientMatrix given in obj.OrientMatrix, please calibrate OrientMatrix first. Run obj.calibrateOrientation')
+            end
             %cut edges
             Ref=dip_image(obj.Image_Reference(10:end-10,10:end-10));
             Ref=Ref-mean(Ref);
@@ -626,8 +639,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 
             %find 2D shift         
             svec=findshift(Current,Ref,'iter');
-            Xshift=svec(1)*obj.PixelSize; %note dipimage permute
-            Yshift=svec(2)*obj.PixelSize;
+            Xshift=-svec(1)*obj.PixelSize; %note dipimage permute
+            Yshift=-svec(2)*obj.PixelSize;
         end
         
         
