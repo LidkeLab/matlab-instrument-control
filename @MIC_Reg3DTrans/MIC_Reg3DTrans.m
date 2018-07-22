@@ -273,7 +273,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             b=round(P_XY(1));
             c=round(P_YX(1));
             d=round(P_YY(1));           
-            obj.OrientMatrix=[a b, c d];
+            obj.OrientMatrix=[a b; c d];
         end 
         
         function calibratePixelSize(obj)
@@ -363,7 +363,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % fit shifts
             P=polyfit(deltaX,svec(:,2),1);
             Xfit=P(1)*deltaX+P(2);
-            PixelSize=1/P(1);  %#ok<PROP> 
+            PixelSize=abs(1/P(1));  %#ok<PROP> 
             % plot result
             if isempty(obj.PlotFigureHandle)||~ishandle(obj.PlotFigureHandle)
                 obj.PlotFigureHandle=figure;
