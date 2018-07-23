@@ -28,8 +28,8 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
 % documents>MATLAB>Instrumentation>development>SeqAutoCollect
     properties
         %Hardware objects
-        CameraObjSCMOS               %Main Data Collection Camera
-        CameraObjIR;           %Active Stabilization Camera
+        CameraSCMOS               %Main Data Collection Camera
+        CameraIR;           %Active Stabilization Camera
         StagePiezoX;        %Linear Piezo Stage in X direction
         StagePiezoY;        %Linear Piezo Stage in Y direction
         StagePiezoZ;        %Linear Piezo Stage in Z direction
@@ -56,7 +56,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         ExposureTimeSequence=.01;
         ExposureTimeCapture=.2;
         NumberOfFrames=2000;
-        NumberOfIterations=20; 
+        NumberOfSequences=20; 
         NumberOfPhotoBleachingIterations=8;
         StabPeriod=5;   %Time between stabilization events (seconds)
         GridCorner=[1 1]    %10x10 Full Frame Grid Corner (mm)
@@ -138,7 +138,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.setup_Stage_Stepper();
             obj.setup_FlipMountTTL('Dev3','Port0/Line0');
             obj.setup_ShutterTTL('Dev3','Port0/Line1');
-            obj.AlignReg=MIC_SeqReg3DTrans(obj.CameraObjSCMOS,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ,obj.StageStepper); %new FF
+            obj.AlignReg=MIC_SeqReg3DTrans(obj.CameraSCMOS,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ,obj.StageStepper); %new FF
             obj.AlignReg.PixelSize=0.104;% micron (SCMOS camera)
             obj.unloadSample(); % to take the stage down enought so use can mount the sample
             %Open GUIs
@@ -146,19 +146,19 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
        end 
        
        function delete(obj)
-          delete(obj.CameraObjIR); 
+          delete(obj.CameraIR); 
            
        end
        
        function setup_SCMOS(obj)
-           obj.CameraObjSCMOS=MIC_HamamatsuCamera();
-           CamSet = obj.CameraObjSCMOS.CameraSetting;
+           obj.CameraSCMOS=MIC_HamamatsuCamera();
+           CamSet = obj.CameraSCMOS.CameraSetting;
            CamSet.DefectCorrection.Bit=1;
-           obj.CameraObjSCMOS.setCamProperties(CamSet);
-           obj.CameraObjSCMOS.ReturnType='matlab';
-           obj.CameraObjSCMOS.setCamProperties(obj.CameraObjSCMOS.CameraSetting);
-           obj.CameraObjSCMOS.ExpTime_Capture=0.2;
-           obj.CameraObjSCMOS.ExpTime_Sequence=0.01;
+           obj.CameraSCMOS.setCamProperties(CamSet);
+           obj.CameraSCMOS.ReturnType='matlab';
+           obj.CameraSCMOS.setCamProperties(obj.CameraSCMOS.CameraSetting);
+           obj.CameraSCMOS.ExpTime_Capture=0.2;
+           obj.CameraSCMOS.ExpTime_Sequence=0.01;
        end
        
        function setup_Stage_Piezo(obj)
@@ -182,9 +182,9 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         end
         
         function setup_IRCamera(obj)
-            obj.CameraObjIR=MIC_ThorlabsIR(); %FFtest
-            obj.CameraObjIR.ROI=obj.IRCamera_ROI;
-            obj.CameraObjIR.ExpTime_Capture=0.5;
+            obj.CameraIR=MIC_ThorlabsIR(); %FFtest
+            obj.CameraIR.ROI=obj.IRCamera_ROI;
+            obj.CameraIR.ExpTime_Capture=0.5;
             
             %             catch ME
             %                 ME
@@ -255,12 +255,12 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.StageStepper.moveToPosition(2,P0(1)) %x
             obj.StageStepper.moveToPosition(3,P0(3)) %z
             
-            obj.CameraObjSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
-            obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Full;
-            obj.CameraObjSCMOS.AcquisitionType = 'focus';
-            obj.CameraObjSCMOS.setup_acquisition();
+            obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
+            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
+            obj.CameraSCMOS.AcquisitionType = 'focus';
+            obj.CameraSCMOS.setup_acquisition();
             obj.Lamp660.setPower(obj.Lamp660Power);
-            obj.CameraObjSCMOS.start_focus();
+            obj.CameraSCMOS.start_focus();
             obj.Lamp660.setPower(0);
             
             Data=obj.captureLamp('Full');
@@ -415,13 +415,13 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             obj.StagePiezoY.center();
             obj.StagePiezoZ.center();
             obj.gui_Stage();
-            obj.CameraObjSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
-            obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Full;
-            obj.CameraObjSCMOS.AcquisitionType = 'focus';
-            obj.CameraObjSCMOS.setup_acquisition();
+            obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
+            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
+            obj.CameraSCMOS.AcquisitionType = 'focus';
+            obj.CameraSCMOS.setup_acquisition();
             obj.Lamp660.setPower(obj.Lamp660Power);
             obj.Lamp660.on;
-            obj.CameraObjSCMOS.start_focus();
+            obj.CameraSCMOS.start_focus();
             obj.Lamp660.setPower(0);
         end
         
@@ -540,28 +540,28 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
              pause(obj.LampWait);
              switch ROISelect
                  case 'Full'
-                     obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Full;
+                     obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
                  case 'ROI'
-                     obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Collect;
+                     obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
              end
-             obj.CameraObjSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
-             obj.CameraObjSCMOS.AcquisitionType = 'capture';
-             obj.CameraObjSCMOS.setup_acquisition();
-             Data=obj.CameraObjSCMOS.start_capture();
+             obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
+             obj.CameraSCMOS.AcquisitionType = 'capture';
+             obj.CameraSCMOS.setup_acquisition();
+             Data=obj.CameraSCMOS.start_capture();
              obj.Lamp660.setPower(0);
          end
          
          function startROILampFocus(obj)
              %Run SCMOS in focus mode with lamp to allow user to focus             
              obj.gui_Stage();
-             obj.CameraObjSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
-             obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Collect;
-             obj.CameraObjSCMOS.AcquisitionType = 'focus';
-             obj.CameraObjSCMOS.setup_acquisition();
+             obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
+             obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+             obj.CameraSCMOS.AcquisitionType = 'focus';
+             obj.CameraSCMOS.setup_acquisition();
              obj.Lamp660.setPower(obj.Lamp660Power);
              obj.FlipMount.FilterIn; %new
              %obj.startROILaserFocusLow(); % turn on Laser focus low before starting SCMOS focus
-             obj.CameraObjSCMOS.start_focus();
+             obj.CameraSCMOS.start_focus();
              obj.startROILaserFocusLow(); % FF
              obj.Lamp660.setPower(0);             
          end
@@ -571,16 +571,16 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
              %Ask for save as reference. If yes, save reference.
              
              %Run SCMOS in focus mode with High Laser Power to check
-             obj.CameraObjSCMOS.ExpTime_Focus=obj.ExposureTimeLaserFocus;
-             obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Collect;
-             obj.CameraObjSCMOS.AcquisitionType = 'focus';
-             obj.CameraObjSCMOS.setup_acquisition();
+             obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLaserFocus;
+             obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+             obj.CameraSCMOS.AcquisitionType = 'focus';
+             obj.CameraSCMOS.setup_acquisition();
              obj.Laser647.setPower(obj.LaserPowerFocus);
              obj.FlipMount.FilterIn; %new
              obj.Shutter.open; % opens shutter for laser
              obj.Laser647.on();
              obj.Lamp660.setPower(0); %FF
-             obj.CameraObjSCMOS.start_focus();
+             obj.CameraSCMOS.start_focus();
              obj.Laser647.off();
              obj.Shutter.close; %closes shutter in order to prevent photobleaching
              
@@ -599,21 +599,21 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             %Collect ROI Image
             obj.Lamp660.setPower(obj.Lamp660Power);
             pause(obj.LampWait);
-            obj.CameraObjSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
-            obj.CameraObjSCMOS.AcquisitionType = 'capture';
-            obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Collect;
-            obj.CameraObjSCMOS.setup_acquisition();
-            Data=obj.CameraObjSCMOS.start_capture();
+            obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
+            obj.CameraSCMOS.AcquisitionType = 'capture';
+            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+            obj.CameraSCMOS.setup_acquisition();
+            Data=obj.CameraSCMOS.start_capture();
             obj.Lamp660.setPower(0);
             RefStruct.Image=Data;
             %Collect Full Image
             obj.Lamp660.setPower(obj.Lamp660Power);
             pause(obj.LampWait);
-            obj.CameraObjSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
-            obj.CameraObjSCMOS.AcquisitionType = 'capture';
-            obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Full;
-            obj.CameraObjSCMOS.setup_acquisition();
-            Data=obj.CameraObjSCMOS.start_capture();
+            obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
+            obj.CameraSCMOS.AcquisitionType = 'capture';
+            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
+            obj.CameraSCMOS.setup_acquisition();
+            Data=obj.CameraSCMOS.start_capture();
             obj.Lamp660.setPower(0);
             RefStruct.Image_Full=Data;            
             %Center Piezo and add to stepper
@@ -653,16 +653,16 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
          
          function startROILaserFocusHigh(obj)
             %Run SCMOS in focus mode with High Laser Power to check
-            obj.CameraObjSCMOS.ExpTime_Focus=obj.ExposureTimeSequence;
-            obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Collect;
-            obj.CameraObjSCMOS.AcquisitionType = 'focus';
-            obj.CameraObjSCMOS.setup_acquisition();
+            obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeSequence;
+            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+            obj.CameraSCMOS.AcquisitionType = 'focus';
+            obj.CameraSCMOS.setup_acquisition();
             obj.Laser647.setPower(obj.LaserPowerSequence); %new
             obj.Laser647.WaitForLaser=0;
             obj.Shutter.open; %open shutter
             obj.FlipMount.FilterOut; %new
             obj.Laser647.on();
-            obj.CameraObjSCMOS.start_focus();
+            obj.CameraSCMOS.start_focus();
             obj.Laser647.off();
          end
         
@@ -712,10 +712,10 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             %Align
             obj.Lamp660.setPower(obj.Lamp660Power+2);
             pause(obj.LampWait);
-            obj.CameraObjSCMOS.ExpTime_Capture=obj.ExposureTimeCapture; %need to update when changing edit box
-            obj.CameraObjSCMOS.AcquisitionType = 'capture';
-            obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Collect;
-            obj.CameraObjSCMOS.setup_acquisition();
+            obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture; %need to update when changing edit box
+            obj.CameraSCMOS.AcquisitionType = 'capture';
+            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+            obj.CameraSCMOS.setup_acquisition();
             obj.AlignReg.Image_Reference=RefStruct.Image;
             obj.AlignReg.MaxIter=20; %new
             try %So that if alignment fails, we don't stop auto collect for other cells
@@ -728,20 +728,20 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             obj.Lamp660.setPower(0);
             
             %Setup Stabilization
-            obj.ActiveReg=MIC_ActiveReg3D_Seq(obj.CameraObjIR,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ); %new
+            obj.ActiveReg=MIC_ActiveReg3D_Seq(obj.CameraIR,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ); %new
             obj.Lamp850.on; 
             obj.Lamp850.setPower(obj.Lamp850Power);
-            obj.IRCamera_ExposureTime=obj.CameraObjIR.ExpTime_Capture;
+            obj.IRCamera_ExposureTime=obj.CameraIR.ExpTime_Capture;
             obj.ActiveReg.takeRefImageStack(); %takes 21 reference images
             obj.ActiveReg.Period=obj.StabPeriod;
             obj.ActiveReg.start(); 
             
             %Setup sCMOS for Sequence
-            obj.CameraObjSCMOS.ExpTime_Sequence=obj.ExposureTimeSequence;
-            obj.CameraObjSCMOS.SequenceLength=obj.NumberOfFrames;
-            obj.CameraObjSCMOS.ROI=obj.SCMOS_ROI_Collect;
-            obj.CameraObjSCMOS.AcquisitionType = 'sequence';
-            obj.CameraObjSCMOS.setup_acquisition();
+            obj.CameraSCMOS.ExpTime_Sequence=obj.ExposureTimeSequence;
+            obj.CameraSCMOS.SequenceLength=obj.NumberOfFrames;
+            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+            obj.CameraSCMOS.AcquisitionType = 'sequence';
+            obj.CameraSCMOS.setup_acquisition();
             
             %Start Laser
             obj.FlipMount.FilterOut; % moves away the ND filter from the beam
@@ -756,7 +756,7 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             if obj.IsBleach
                 for nn=1:obj.NumberOfPhotoBleachingIterations
                     obj.Shutter.open; % opens shutter before the Laser turns on
-                    Data=obj.CameraObjSCMOS.start_sequence();
+                    Data=obj.CameraSCMOS.start_sequence();
                     S=sprintf('F.Data%2.2d=Data;',nn);
                     eval(S);
                     obj.Shutter.close; % closes shutter before the Laser turns on
@@ -764,11 +764,11 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
                 
             else
                 
-                for nn=1:obj.NumberOfIterations
+                for nn=1:obj.NumberOfSequences
                     obj.Shutter.open; % opens shutter before the Laser turns on
                     
                     %Collect 
-                    sequence=obj.CameraObjSCMOS.start_sequence();
+                    sequence=obj.CameraSCMOS.start_sequence();
                     if ~obj.IsBleach %Append Data
                         obj.Shutter.close;
                         switch obj.SaveFileType
@@ -798,7 +798,7 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
                 
                 %Save Everything
                 if ~obj.IsBleach %Append Data
-                    Cam=struct(obj.CameraObjSCMOS);
+                    Cam=struct(obj.CameraSCMOS);
                     Cam.FigureHandle=[];
                     Cam.ImageHandle=[];
                     F.Camera=Cam;
@@ -912,22 +912,30 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             % exportState Exports current state of all hardware objects
             % and SEQ_SRcollect settings
             % Children:
-            [Children.Camera.Attributes,Children.Camera.Data,Children.Camera.Children]=...
-                obj.CameraObj.exportState();
-            [Children.Stage.Attributes,Children.Stage.Data,Children.Stage.Children]=...
-                obj.StageObj.exportState();
+            [Children.CameraSCMOS.Attributes,Children.CameraSCMOS.Data,Children.CameraSCMOS.Children]=...
+                obj.CameraSCMOS.exportState();
+            [Children.CameraIR.Attributes,Children.CameraIR.Data,Children.CameraIR.Children]=...
+                obj.CameraIR.exportState();
+            [Children.StageStepper.Attributes,Children.StageStepper.Data,Children.StageStepper.Children]=...
+                obj.StageStepper.exportState();
             [Children.Laser405.Attributes,Children.Laser405.Data,Children.Laser405.Children]=...
                 obj.Laser405.exportState();
             [Children.Laser647.Attributes,Children.Laser647.Data,Children.Laser642.Children]=...
                 obj.Laser647.exportState();
-            [Children.Lamp.Attributes,Children.Lamp.Data,Children.Lamp.Children]=...
-                obj.LampObj.exportState();            
+            [Children.Lamp850.Attributes,Children.Lamp850.Data,Children.Lamp850.Children]=...
+                obj.Lamp850.exportState();
+            [Children.Lamp660.Attributes,Children.Lamp660.Data,Children.Lamp660.Children]=...
+                obj.Lamp660.exportState();  
             
             % Our Properties
-            Attributes.ExpTime_Focus_Set = obj.ExpTime_Focus_Set;
-            Attributes.ExpTime_Sequence_Set = obj.ExpTime_Sequence_Set;
-            Attributes.NumFrames = obj.NumFrames;
-            Attributes.NumSequences = obj.NumSequences;
+            Attributes.ExposureTimeLampFocus = obj.ExposureTimeLampFocus;
+            Attributes.ExposureTimeLaserFocus = obj.ExposureTimeLaserFocus;
+            Attributes.ExposureTimeSequence = obj.ExposureTimeSequence;
+            Attributes.ExposureTimeCapture = obj.ExposureTimeCapture;
+            Attributes.NumberOfFrames = obj.NumberOfFrames;
+            Attributes.NumberOfSequences = obj.NumberOfSequences;
+            Attributes.NumberOfPhotoBleachingIterations = ...
+                obj.NumberOfPhotoBleachingIterations; 
             Attributes.CameraGain = obj.CameraGain;
             Attributes.CameraEMGainHigh = obj.CameraEMGainHigh;
             Attributes.CameraEMGainLow = obj.CameraEMGainLow;
@@ -938,12 +946,10 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             Attributes.RegType = obj.RegType;
             
             % light source properties
-            Attributes.Laser405 = obj.Laser405Low;
-            Attributes.Laser647 = obj.Laser642Low;
-            Attributes.LampPower = obj.LampPower;
-            Attributes.Laser405Aq = obj.Laser405Aq;
-            Attributes.Laser642Aq = obj.Laser642Aq;
-            Attributes.LampAq = obj.LampAq;
+            Attributes.LaserPower405Activate = obj.LaserPower405Activate;
+            Attributes.LaserPower405Bleach = obj.LaserPower405Bleach; 
+            Attributes.LaserPowerSequence = obj.LaserPowerSequence;
+            Attributes.LaserPowerFocus = obj.LaserPowerFocus;
             Data=[];
             end
             
