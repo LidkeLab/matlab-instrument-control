@@ -45,7 +45,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         
         % Other properties
         PixelSize;          % image pixel size (um)
-        OrientMatrix        % unitary matrix to show orientation between Camera and Stage([a b,c d])
+        OrientMatrix;       % unitary matrix to show orientation between Camera and Stage([a b,c d])
         AbortNow=0;         % flag for aborting the alignment
         RefImageFile;       % full path to reference image
         Image_Reference     % reference image
@@ -109,132 +109,16 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 end
             end
         end
-        
-      
-         function calibratePixelSize(obj)
-            % calibratePixelSize Calibrates pixel size
-            %   Calibrates pixel size by moving the stage over 
-            %     5 microns and fitting line to calculated shifts
-            %   Result is saved in path in obj.CalibrationFile
-            %   If no path is given, result will only be stored in current
-            %     object
-            
-            X=obj.StageObj.Position;
-            N=10;
-            StepSize=0.1; %micron
-            deltaX=((0:N-1)*StepSize)';
-            ImSz=obj.CameraObj.ImageSize;
-            ImageStack=zeros(ImSz(1),ImSz(2),N);
-            % remember start position
-            Xstart=X;
-            %change EMgain, shutter and exposure time if needed
-            if obj.ChangeEMgain || obj.CamShutter
-                CamSet = obj.CameraObj.CameraSetting;
-            end
-            if obj.ChangeEMgain
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-            end
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=1;
-            end
-            if obj.ChangeExpTime
-                ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
-                obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
-            end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end
-            % setup camera
-            obj.CameraObj.AcquisitionType='capture';
-            obj.CameraObj.setup_acquisition;
-                        
-            % turn lamp on
-            obj.turnLampOn();
-            % open shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(1);
-            end
-            
-            % acquire stack
-            for ii=1:N
-                X(1)=Xstart(1)+deltaX(ii);
-                obj.StageObj.setPosition(X);
-                pause(.1);
-                ImageStack(:,:,ii)=single(obj.CameraObj.start_capture);
-            end
-            
-            % close shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(0);
-            end
-            % turn lamp off
-            obj.turnLampOff();
-            
-            %change back EMgain, shutter and exposure time if needed
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=0;
-            end
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-            end
-            if obj.ChangeExpTime
-                obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
-            end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end            
-            
-            % set stage back to initial position
-            obj.StageObj.setPosition(Xstart);
-            dipshow(ImageStack(10:end-10,10:end-10,:));
-            % find shifts
-            svec=zeros(N,2);
-            refim=squeeze(ImageStack(10:end-10,10:end-10,1));
-            for ii=1:N
-                alignim=squeeze(ImageStack(10:end-10,10:end-10,ii));
-                svec(ii,:)=findshift(alignim,refim,'iter');
-            end
-            % fit shifts
-            P=polyfit(deltaX,svec(:,2),1);
-            Xfit=P(1)*deltaX+P(2);
-            PixelSize=abs(1/P(1));  %#ok<PROP> 
-            % plot result
-            if isempty(obj.PlotFigureHandle)||~ishandle(obj.PlotFigureHandle)
-                obj.PlotFigureHandle=figure;
-            else
-                figure(obj.PlotFigureHandle)
-            end
-            hold off
-            plot(deltaX,svec(:,2),'r.','MarkerSize',14);
-            hold on
-            plot(deltaX,Xfit,'k','LineWidth',2);
-            legend('Found Displacement','Fit');
-            s=sprintf('Pixel Size= %g',PixelSize); %#ok<PROP>
-            text(0.2,5,s);
-            xlabel('Microns')
-            ylabel('Pixels')
-            % save result
-            if isempty(obj.CalibrationFile)
-                warning('MIC_Reg3DTrans:CalPxSz:NotSaving','No CalibrationFile specified in obj.CalibrationFile, not saving calibration')
-            elseif exist(obj.CalibrationFile,'file')
-                warning('MIC_Reg3DTrans:CalPxSz:OverwriteFile','Overwriting previous pixel size calibration file');
-                save(obj.CalibrationFile,'PixelSize');
-            else
-                save(obj.CalibrationFile,'PixelSize');
-            end
-            obj.PixelSize=PixelSize; %#ok<PROP>
-        end
-          
-        function calibrateOrientation(obj)
+                
+        function calibrate(obj)
             % This function is to obtain elements of rotation matrix between
             % Camera (x,y) and Stage(X,Y) OrientMatrix=[A B,C D]
             % It needs PixelSize
             
-            %Check if the pixelsize is well defined
-            if isempty(obj.PixelSize)|| obj.PixelSize==0
-                obj.calibratePixelSize;
-            end
+%             %Check if the pixelsize is well defined
+%             if isempty(obj.PixelSize)|| obj.PixelSize==0
+%                 obj.calibratePixelSize;
+%             end
             obj.StageObj.center;
             X=obj.StageObj.Position;
             N=10;
@@ -267,7 +151,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.CameraObj.setup_acquisition;
                         
             % turn lamp on
-            obj.turnLampOn();
+            obj.LampObj.setPower(obj.LampObj.Power);
+            obj.LampObj.on();
             % open shutter if needed
             if obj.CamShutter
                 obj.CameraObj.setShutter(1);
@@ -297,7 +182,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 obj.CameraObj.setShutter(0);
             end
             % turn lamp off
-            obj.turnLampOff();
+            obj.LampObj.off();
             
             %change back EMgain, shutter and exposure time if needed
             if obj.CamShutter
@@ -340,10 +225,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % fit shifts delta_X, shift in x in image
             PxSz=obj.PixelSize;
             %xy for Image, XY for Stage
-            P_xX=polyfit(deltaX,PxSz.*svec_X(:,1),1);
-            P_xY=polyfit(deltaX,PxSz.*svec_X(:,2),1);
-            P_yX=polyfit(deltaY,PxSz.*svec_Y(:,1),1);
-            P_yY=polyfit(deltaY,PxSz.*svec_Y(:,2),1);
+            P_xX=polyfit(deltaX,svec_X(:,1),1);
+            P_xY=polyfit(deltaY,svec_Y(:,1),1);
+            P_yX=polyfit(deltaX,svec_X(:,2),1);
+            P_yY=polyfit(deltaY,svec_Y(:,2),1);
 
             xXfit=P_xX(1)*deltaX+P_xX(2);
             xYfit=P_xY(1)*deltaX+P_xY(2);
@@ -355,7 +240,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             c=P_yX(1);
             d=P_yY(1);
             %orientation camera vs stage: xy=[a b; c d]XY
-            obj.OrientMatrix=round([a b; c d]);
+            obj.OrientMatrix=[a b; c d];
+            
+            %calculate scalar pixel size
+            obj.PixelSize=2/(sqrt(a^2+c^2)+sqrt(b^2+d^2));
+            
         end 
         
        function takerefimage(obj)
@@ -492,19 +381,20 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     obj.AbortNow = 0;
                     break
                 end
+                
                 %find z-position and adjust
                 [Zfit]=obj.findZPos();
                 Pos=obj.StageObj.Position;
-                Zshift=Zfit-Pos(3);
+                Zshift=Zfit-Pos(3)
                 Pos(3)=Pos(3) + (sign(real(Zshift))*min(abs(real(Zshift)),obj.MaxZShift));
                 obj.StageObj.setPosition(Pos);
                 
                 %find XY position and adjust
-                [Xshift,Yshift]=findXYShift(obj);
-                finalXshift=Xshift.*obj.OrientMatrix(1)+Yshift.*obj.OrientMatrix(2);
-                finalYshift=Xshift.*obj.OrientMatrix(3)+Yshift.*obj.OrientMatrix(4);
-                Pos(1)=Pos(1)+sign(finalXshift)*min(abs(finalXshift),obj.MaxXYShift);
-                Pos(2)=Pos(2)+sign(finalYshift)*min(abs(finalYshift),obj.MaxXYShift);
+                [XYshift]=findXYShift(obj)
+                
+                StageShiftXY=inv(obj.OrientMatrix)*XYshift;
+                Pos(1)=Pos(1)+sign(StageShiftXY(1))*min(abs(StageShiftXY(1)),obj.MaxXYShift);
+                Pos(2)=Pos(2)+sign(StageShiftXY(2))*min(abs(StageShiftXY(2)),obj.MaxXYShift);
                 obj.StageObj.setPosition(Pos);
                 
                 %show overlay
@@ -517,7 +407,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 drawnow;
                 
                 %check convergence
-                withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z);
+                withintol=(abs(XYshift(1))<obj.Tol_X/obj.PixelSize)&...
+                    (abs(XYshift(2))<obj.Tol_Y/obj.PixelSize)&(abs(Zshift)<obj.Tol_Z/obj.PixelSize);
                 iter=iter+1;
             end
             
@@ -615,7 +506,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.StageObj.setPosition(XYZ);
         end
         
-        function [Xshift,Yshift]=findXYShift(obj)
+        function [XYshift]=findXYShift(obj)
             % findXYShift Finds XY shift between reference image and newly 
             % acquired current image
             
@@ -639,8 +530,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 
             %find 2D shift         
             svec=findshift(Current,Ref,'iter');
-            Xshift=-svec(1)*obj.PixelSize; %note dipimage permute
-            Yshift=-svec(2)*obj.PixelSize;
+            XYshift=-svec; % In Pixels
         end
         
         
