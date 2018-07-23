@@ -477,23 +477,23 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 case 4  
                     ROI=[1 256 129 384];%Center Left
                 case 5
-                    ROI=[257 512 129 384];% right center
+                    ROI=[257 512 129 384];% Center right
                 case 6
-                    ROI=[1 512 129 384];% center horizontally
+                    ROI=[1 512 129 384];% center horizontal
                     
                 case 7
-                    ROI=[1 256 1 256];% center horizontally
+                    ROI=[1 256 1 256];% Left Top quadrant
                 case 8
-                    ROI=[1 256 257 512];% center horizontally
+                    ROI=[1 256 257 512];% Left Bottom quadrant
                 case 9
-                    ROI=[257 512 1 256];% center horizontally
+                    ROI=[257 512 1 256];% Right Top quadrant
                 case 10
-                    ROI=[257 512 257 512];% center horizontally
+                    ROI=[257 512 257 512];% Right Bottom quadrant
                 case 11
-                    ROI=[1 512 1 256];% center horizontally
+                    ROI=[1 512 1 256];% Top half
                     
                 case 12
-                    ROI=[1 512 257 512];% center horizontally
+                    ROI=[1 512 257 512];% Bottom half
                 case 13
                     ROI=[129 384 129 384];% center256
                     
