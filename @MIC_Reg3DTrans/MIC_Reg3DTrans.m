@@ -151,6 +151,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.CameraObj.setup_acquisition;
                         
             % turn lamp on
+            if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+                obj.LampObj.Power=obj.LampObj.MaxPower/4;
+            end 
             obj.LampObj.setPower(obj.LampObj.Power);
             obj.LampObj.on();
             % open shutter if needed
