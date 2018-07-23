@@ -144,12 +144,16 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.LampPower = 50;
                 % Registration object
                 fprintf('Initializing Registration object\n')
+                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
+                if ~exist(f,'file')
+                    obj.CameraObj.ROI=[1 256 1 256];
+                    obj.R3DObj.calibratePixelSize;
+                end  
                 if exist(f,'file')
                     a=load(f);
                     obj.PixelSize=a.PixelSize;
                     clear a;
                 end
-                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
                 obj.R3DObj.LampPower=obj.LampPower;
                 obj.R3DObj.LampWait=2.5;
                 obj.R3DObj.CamShutter=true;
