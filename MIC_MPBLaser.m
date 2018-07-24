@@ -156,10 +156,9 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
             %instrument.
             Attributes.Power=obj.Power;
             Attributes.IsOn=obj.IsOn;
-            Attributes.LaserStateText=obj.LaserStateText;
             Attributes.WaveLength=obj.WaveLength;
             Attributes.MinPower=obj.MinPower;
-            Attributes.maxpower=obj.MaxPower;
+            Attributes.MaxPower=obj.MaxPower;
             Attributes.SerialNumber=obj.SerialNumber;
             Data = [];
             Children = [];
