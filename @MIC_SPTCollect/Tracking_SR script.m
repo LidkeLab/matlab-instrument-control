@@ -1,5 +1,5 @@
 %Script for tracking and SR
-
+%test Github
 SPT.Lamp850Obj.setPower(50);
 SPT.Lamp850Obj.on;
 SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
