@@ -71,29 +71,41 @@ properties2gui();
     function properties2gui()
         % Set the GUI widgets based on the object properties 
         
-        Pos_Step=obj.Stage_Stepper.Position;
-        handles.Text_Step_X.String=sprintf('X: %1.4g',Pos_Step(1));
-        handles.Text_Step_Y.String=sprintf('Y: %1.4g',Pos_Step(2));
-        handles.Text_Step_Z.String=sprintf('Z: %1.4g',Pos_Step(3));
+        Pos_Step_Y=obj.Stage_Stepper.getPosition(1);
+        Pos_Step_X=obj.Stage_Stepper.getPosition(2);
+        Pos_Step_Z=obj.Stage_Stepper.getPosition(3);
+        handles.Text_Step_Y.String=sprintf('Y: %1.3g',Pos_Step_Y);
+        handles.Text_Step_X.String=sprintf('X: %1.3g',Pos_Step_X);
+        handles.Text_Step_Z.String=sprintf('Z: %1.3g',Pos_Step_Z);
         
         
-        Pos_Piezo=obj.Stage_Piezo.Position;
-        handles.Text_Piezo_X.String=sprintf('X: %2.5g',Pos_Piezo(1));
-        handles.Text_Piezo_Y.String=sprintf('Y: %2.5g',Pos_Piezo(2));
-        handles.Text_Piezo_Z.String=sprintf('Z: %2.5g',Pos_Piezo(3));
+        Pos_Piezo_Y=obj.Stage_Piezo_Y.getPosition;
+        Pos_Piezo_X=obj.Stage_Piezo_X.getPosition;
+        Pos_Piezo_Z=obj.Stage_Piezo_Z.getPosition;
+        handles.Text_Piezo_Y.String=sprintf('Y: %2.5f',Pos_Piezo_Y);
+        handles.Text_Piezo_X.String=sprintf('X: %2.5f',Pos_Piezo_X);
+        handles.Text_Piezo_Z.String=sprintf('Z: %2.5f',Pos_Piezo_Z);
     end
 
     %function gui_Stepper(Source,Callbackdata)
         function gui_Stepper(Source,~)
         switch Source.String
             case 'UP'
-                obj.moveStepperUpLarge();
+                Pos_Step_Z=obj.Stage_Stepper.getPosition(3); %new
+                Pos_Z=Pos_Step_Z+obj.StepperLargeStep;
+                obj.Stage_Stepper.moveToPosition(3,Pos_Z); %new
             case 'up'
-                obj.moveStepperUpSmall();
+                Pos_Step_Z=obj.Stage_Stepper.getPosition(3); %new
+                Pos_Z=Pos_Step_Z+obj.StepperSmallStep;
+                obj.Stage_Stepper.moveToPosition(3,Pos_Z); %new
             case 'down'
-                obj.moveStepperDownSmall();
+                Pos_Step_Z=obj.Stage_Stepper.getPosition(3); %new
+                Pos_Z=Pos_Step_Z-obj.StepperSmallStep;
+                obj.Stage_Stepper.moveToPosition(3,Pos_Z); %new
             case 'DOWN'
-                obj.moveStepperDownLarge();
+                Pos_Step_Z=obj.Stage_Stepper.getPosition(3); %new
+                Pos_Z=Pos_Step_Z-obj.StepperLargeStep;
+                obj.Stage_Stepper.moveToPosition(3,Pos_Z); %new
         end
         
         
