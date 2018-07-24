@@ -45,7 +45,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         
         % Other properties
         PixelSize;          % image pixel size (um)
-        OrientMatrix;       % unitary matrix to show orientation between Camera and Stage([a b,c d])
+        OrientMatrix;       % unitary matrix to show orientation between Camera and Stage([a b;c d])
         AbortNow=0;         % flag for aborting the alignment
         RefImageFile;       % full path to reference image
         Image_Reference     % reference image
@@ -54,8 +54,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZStack_MaxDev=0.5;  % distance from current zposition where to start and end zstack (um)
         ZStack_Step=0.05;   % z step size for zstack acquisition (um)
         ZStack_Pos;         % z positions where a frame should be acquired in zstack (um)
-        Tol_X=.01;         % max X shift to reach convergence(um)
-        Tol_Y=.01;         % max Y shift to reach convergence(um)
+        Tol_X=.01;          % max X shift to reach convergence(um)
+        Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
         MaxIter=10;         % max number of iterations for finding back reference position 
         MaxXYShift=5;       % max XY distance (um) stage should move, if found shift is larger it will move this distance
@@ -84,8 +84,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             %    LampObj - lamp object
             %  INPUT (optional)
             %    CalFileName - full path to calibration file (.mat) containing
-            %                  'PixelSize' variable, if file doesn't exist calibration 
-            %                  will be saved here
+            %                  'PixelSize' and 'OrientationMatrix' variable, 
+            %                  if file doesn't exist calibration  will be saved here
             
             % pass in input for autonaming feature MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
@@ -113,13 +113,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         function calibrate(obj)
             % This function is to obtain elements of rotation matrix between
             % Camera (x,y) and Stage(X,Y) OrientMatrix=[A B,C D]
-            % It needs PixelSize
             
-%             %Check if the pixelsize is well defined
-%             if isempty(obj.PixelSize)|| obj.PixelSize==0
-%                 obj.calibratePixelSize;
-%             end
-            obj.StageObj.center;
+           obj.StageObj.center;
             X=obj.StageObj.Position;
             N=10;
             StepSize=0.1; %micron
@@ -152,7 +147,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         
             % turn lamp on
             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
-                obj.LampObj.Power=obj.LampObj.MaxPower/4;
+                obj.LampObj.setPower(obj.LampObj.MaxPower/2);
             end 
             obj.LampObj.setPower(obj.LampObj.Power);
             obj.LampObj.on();
@@ -221,9 +216,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 alignim_Y=squeeze(ImageStack_Y(10:end-10,10:end-10,ii));
                 svec_Y(ii,:)=findshift(alignim_Y,refim,'iter');
             end
-% Here is the calculation for OrientCoMatrix
-% There are four coefficient: change Stage in x,y direction and calculate 
-% shift for x,y direction in the image
+            % Here is the calculation for OrientCoMatrix
+            % There are four coefficient: change Stage in x,y direction and calculate
+            % shift for x,y direction in the image
 
             % fit shifts delta_X, shift in x in image
             PxSz=obj.PixelSize;
@@ -243,12 +238,22 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             c=P_yX(1);
             d=P_yY(1);
             %orientation camera vs stage: xy=[a b; c d]XY
-            obj.OrientMatrix=[a b; c d];
+            OrientMatrix=[a b; c d];
             
             %calculate scalar pixel size
-            obj.PixelSize=2/(sqrt(a^2+c^2)+sqrt(b^2+d^2));
+            PixelSize=2/(sqrt(a^2+c^2)+sqrt(b^2+d^2));
             
-        end 
+            if isempty(obj.CalibrationFile)
+                warning('MIC_Reg3DTrans:CalPxSz:NotSaving','No CalibrationFile specified in obj.CalibrationFile, not saving calibration')
+            elseif exist(obj.CalibrationFile,'file')
+                warning('MIC_Reg3DTrans:CalPxSz:OverwriteFile','Overwriting previous PixelSize and OrientationMatrix calibration file');
+                save(obj.CalibrationFile,'PixelSize','OrientMatrix');
+            else
+                save(obj.CalibrationFile,'PixelSize','OrientMatrix');
+            end
+            obj.OrientMatrix=OrientMatrix;
+            obj.PixelSize=PixelSize; 
+        end
         
        function takerefimage(obj)
             %takerefimage Takes new reference image
@@ -265,6 +270,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
                         
             % turn lamp on
+            if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+                obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+            end 
             obj.LampObj.setPower(obj.LampObj.Power);
             obj.LampObj.on;
             
@@ -294,19 +302,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.updateGui();
         end
         
-%         function turnLampOn(obj)
-%             %turnLampOn Turns lamp on using current power and wait properties
-%             obj.LampObj.setPower(obj.LampObj.Power);
-%             obj.LampObj.on;
-%             pause(obj.LampWait);
-%         end
-        
-%         function turnLampOff(obj)
-%             %turnLampOn Turns lamp on using current power and wait properties
-%             obj.LampObj.off;
-%             pause(obj.LampWait);
-%         end
-        
+       
         function c=showoverlay(obj)
             %showoverlay Shows aligned image on top of reference image
             
@@ -340,6 +336,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
                         
             % turn lamp on
+            if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+                obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+            end 
             obj.LampObj.setPower(obj.LampObj.Power);
             obj.LampObj.on;
             obj.Image_Current=obj.capture;;
@@ -374,6 +373,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
                         
             %turn lamp on
+            if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+                obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+            end 
             obj.LampObj.setPower(obj.LampObj.Power);
             obj.LampObj.on;
             
@@ -683,6 +685,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.ChangeExpTime = obj.ChangeExpTime;
             Attribute.ExposureTime = obj.ExposureTime;
             Attribute.PixelSize = obj.PixelSize;
+            Attribute.OrientMatrix = obj.OrientMatrix;
             Attribute.RefImageFile = obj.RefImageFile;
             Attribute.ZStack_MaxDev = obj.ZStack_MaxDev;
             Attribute.ZStack_Step = obj.ZStack_Step;
@@ -745,8 +748,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             RegObj.gui;
             fprintf('* Opening and closing of GUI works, please test GUI manually\n');
             % Calibration
-            fprintf('* Testing pixel size calibration\n')
-            RegObj.calibratePixelSize();
+            fprintf('* Testing calibration function\n')
+            RegObj.calibrate();
             % Get current and reference images
             fprintf('* Testing image acquisition\n')
             RegObj.getcurrentimage();
@@ -763,4 +766,3 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     end
     
 end
-
