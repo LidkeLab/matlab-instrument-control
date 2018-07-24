@@ -97,10 +97,12 @@ classdef MIC_StepperMotor < MIC_Abstract
             delete(obj.GuiFigure);
             clear obj;
         end
-        function State = exportState(obj)
-            %exportState() function
-            State.InstrumentName = obj.InstrumentName;
-            State.SerialN = obj.SerialN;
+        function [Attributes, Data, Children] = exportState(obj)
+            %exportState() method to export current instrument state.
+            Attributes.InstrumentName = obj.InstrumentName;
+            Attributes.SerialN = obj.SerialN;
+            Data = [];
+            Children = [];
         end
     end
     methods (Static)
