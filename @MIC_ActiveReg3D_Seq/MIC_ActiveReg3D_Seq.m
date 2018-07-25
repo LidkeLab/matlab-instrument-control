@@ -70,13 +70,15 @@ classdef MIC_ActiveReg3D_Seq < handle
             end
         end
         
-        function State=exportState(obj)
-           State.ErrorSignal_History =obj.ErrorSignal_History; 
-           State.Correction_History =obj.Correction_History; 
-           State.PosPostCorrect_History =obj.PosPostCorrect_History; 
-           State.Image_ReferenceStack =obj.Image_ReferenceStack; 
-           State.Image_Current =obj.Image_Current;  
-           State.X_position =obj.X_position;  
+        function [Attribute, Data, Children] = exportState(obj)
+           Attribute.ErrorSignal_History =obj.ErrorSignal_History; 
+           Attribute.Correction_History =obj.Correction_History; 
+           Attribute.PosPostCorrect_History =obj.PosPostCorrect_History; 
+           Attribute.X_position =obj.X_position;  
+           Data.Image_ReferenceStack =obj.Image_ReferenceStack; 
+           Data.Image_Current =obj.Image_Current; 
+           Data.Image_preCorrection=obj.Image_preCorrection;
+           Children = [];
         end
         
         function calibrate(obj)
@@ -216,7 +218,7 @@ classdef MIC_ActiveReg3D_Seq < handle
         
         function align2imageFit(obj,varargin)
             %find z-position and adjust
-            [Zfit]=obj.findZPos();
+            [Zfit,Zindex,CurrentImage]=obj.findZPos();
             XYZ1=obj.Stage_Piezo_X.getPosition; %new
             XYZ2=obj.Stage_Piezo_Y.getPosition; %new
             XYZ3=obj.Stage_Piezo_Z.getPosition; %new
@@ -227,15 +229,14 @@ classdef MIC_ActiveReg3D_Seq < handle
             obj.ErrorSignal(3)=Zshift;
             
             %Image before corrections
-            obj.Image_preCorrection=cat(3,obj.Image_preCorrection,obj.capture_single());
+            obj.Image_preCorrection=cat(3,obj.Image_preCorrection,CurrentImage);
             gcf; %FF
             delete(ans); %FF
 
 %            obj.Correction(3)=sign(obj.ErrorSignal(3))*min(obj.MaxZShift,abs(obj.ErrorSignal(3))); % P-only correction
 
-            obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);
             % PI-Control in Z:       
-            obj.ErrorSignal_HistoryZ=obj.ErrorSignal_History(:,3);
+            obj.ErrorSignal_HistoryZ=cat(1,obj.ErrorSignal_History(:,3),Zshift);
             TimeVec=1:length(obj.ErrorSignal_HistoryZ);
             TimeVec=TimeVec-TimeVec(end);
             TauZ=5;   %tuned value
@@ -260,6 +261,8 @@ classdef MIC_ActiveReg3D_Seq < handle
 
             %PI-control in XY 
             % X:
+            obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);
+            
             obj.ErrorSignal_HistoryX=obj.ErrorSignal_History(:,1);
             TimeVec=1:length(obj.ErrorSignal_HistoryX);
             TimeVec=TimeVec-TimeVec(end);
@@ -285,7 +288,7 @@ classdef MIC_ActiveReg3D_Seq < handle
             obj.PosPostCorrect=XYZ; %new
             
             %Keep history of correction
-            obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);%FF
+            
             obj.Correction_History=cat(1,obj.Correction_History,obj.Correction);
             obj.PosPostCorrect_History=cat(1,obj.PosPostCorrect_History,obj.PosPostCorrect);
             
@@ -314,9 +317,9 @@ classdef MIC_ActiveReg3D_Seq < handle
 
         end
         
-        function [Zfit]=findZPos(obj)
-            currentImg=obj.capture_single;
-            Cur=currentImg(10:end-10,10:end-10);
+        function [Zfit,zindex,CurrentImage]=findZPos(obj)
+            CurrentImage=obj.capture_single();
+            Cur=CurrentImage(10:end-10,10:end-10);
             Cur=Cur-mean(Cur(:));
             Cur=Cur/std(Cur(:));
             gcf;%FF

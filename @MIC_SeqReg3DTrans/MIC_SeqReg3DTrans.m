@@ -28,7 +28,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         Stage_Piezo_Z %new
         MotorObj
         PixelSize;          %micron
-        ImageFile
+        RefImageFile
         Image_Reference
         Image_Current
         ZStack
@@ -111,14 +111,40 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             
         end
         
-        function State=exportState(obj)
-            State.Image_Reference = obj.Image_Reference;
-            State.Image_Current = obj.Image_Current;
-            State.ZStack = obj.ZStack;
-            State.ZFitPos = obj.ZFitPos;
-            State.ZFitModel = obj.ZFitModel;
-            State.ZMaxAC = obj.ZMaxAC;
-            State.ZStack_Pos=obj.ZStack_Pos;
+        function [Attribute,Data,Children] = exportState(obj)
+            % exportState Exports current state of object
+            % all relevant object  properties will be returned in State
+            % structure
+
+            Attribute.PixelSize = obj.PixelSize;
+            Attribute.RefImageFile = obj.RefImageFile;
+            Attribute.ZStack_MaxDev = obj.ZStack_MaxDev;
+            Attribute.ZStack_Step = obj.ZStack_Step;
+            Attribute.ZStack_Pos = obj.ZStack_Pos;
+            Attribute.Tol_X = obj.Tol_X;
+            Attribute.Tol_Y = obj.Tol_Y;
+            Attribute.Tol_Z = obj.Tol_Z;
+            Attribute.MaxIter = obj.MaxIter;
+            Attribute.MaxXYShift = obj.MaxXYShift;
+            Attribute.MaxZShift = obj.MaxZShift;
+            
+            %Return 0 as null marker
+            Data.ZFitPos = 0;
+            Data.ZFitModel = 0;
+            Data.ZMaxAC = 0;
+            Data.Image_Reference = 0;
+            Data.Image_Current = 0;
+            Data.ZStack = 0;
+            
+            if ~isempty(obj.ZFitPos);Data.ZFitPos = obj.ZFitPos;end
+            if ~isempty(obj.ZFitModel);Data.ZFitModel = obj.ZFitModel;end
+            if ~isempty(obj.ZMaxAC); Data.ZMaxAC = obj.ZMaxAC;end
+            if ~isempty(obj.Image_Reference);Data.Image_Reference = obj.Image_Reference;end
+            if ~isempty(obj.Image_Current); Data.Image_Current = obj.Image_Current;end
+            if ~isempty(obj.ZStack);Data.ZStack = obj.ZStack;end
+            
+            Children=[];
+            
         end
         
         function gui(obj)
@@ -182,17 +208,17 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         end
         
         function gui_getimagefile(obj,~,~)
-            if isempty(obj.ImageFile)
+            if isempty(obj.RefImageFile)
                 [a,b]=uigetfile();
             else
-                [filepath]=fileparts(obj.ImageFile);
+                [filepath]=fileparts(obj.RefImageFile);
                 [a,b]=uigetfile('*.mat','',filepath);
             end
-            obj.ImageFile = fullfile(b,a);
+            obj.RefImageFile = fullfile(b,a);
             if ishandle(obj.GUIFig)
-                set(obj.GUIhandles.edit_imagefile,'String',obj.ImageFile);
+                set(obj.GUIhandles.edit_imagefile,'String',obj.RefImageFile);
             end
-            tmp=load(obj.ImageFile,'Image_Reference','cellpos');
+            tmp=load(obj.RefImageFile,'Image_Reference','cellpos');
             obj.Image_Reference=tmp.Image_Reference;
             obj.MotorObj.Cellpos=tmp.cellpos;
         end
@@ -234,7 +260,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             obj.Image_Reference=obj.capture_single;
             h=dipshow(obj.Image_Reference);
             dipmapping(h,'lin');
-            obj.ImageFile=[];
+            obj.RefImageFile=[];
         end
         
         function saverefimage(obj)
