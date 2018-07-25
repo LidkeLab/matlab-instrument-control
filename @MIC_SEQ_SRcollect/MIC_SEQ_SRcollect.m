@@ -110,7 +110,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
     end
     
     methods
-       function obj=MIC_SEQ_SRcollect()
+        function obj=MIC_SEQ_SRcollect()
             %Check for sample (will crash objective if mounted during setup)
             proceedstr=questdlg('Is the sample fixed on the stage?', ...
                 'Warning', 'Yes', 'No', 'Yes'); % default selection 'Yes'
@@ -135,15 +135,13 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.AlignReg=MIC_SeqReg3DTrans(obj.CameraSCMOS,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ,obj.StageStepper); %new FF
             obj.AlignReg.PixelSize=0.104;% micron (SCMOS camera)
             obj.unloadSample(); % to take the stage down enought so use can mount the sample
-            %Open GUIs
-                       
-       end 
-       
-       function delete(obj)
-          delete(obj.CameraIR); 
-       end
-       
-       function [Attributes,Data,Children] = exportState(obj)
+        end
+        
+        function delete(obj)
+            delete(obj.CameraIR);
+        end
+        
+        function [Attributes,Data,Children] = exportState(obj)
             % exportState Exports current state of all hardware objects
             % and SEQ_SRcollect settings
             % Children:
@@ -160,7 +158,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             [Children.Lamp850.Attributes,Children.Lamp850.Data,Children.Lamp850.Children]=...
                 obj.Lamp850.exportState();
             [Children.Lamp660.Attributes,Children.Lamp660.Data,Children.Lamp660.Children]=...
-                obj.Lamp660.exportState();  
+                obj.Lamp660.exportState();
             Children = [];
             
             % Our Properties
@@ -171,10 +169,10 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             Attributes.NumberOfFrames = obj.NumberOfFrames;
             Attributes.NumberOfSequences = obj.NumberOfSequences;
             Attributes.NumberOfPhotoBleachingIterations = ...
-                obj.NumberOfPhotoBleachingIterations; 
+                obj.NumberOfPhotoBleachingIterations;
             Attributes.SCMOS_ROI_Collect = obj.SCMOS_ROI_Collect;
-            Attributes.SCMOS_ROI_Full = obj.SCMOS_ROI_Full; 
-            Attributes.IRCamera_ROI = obj.IRCamera_ROI; 
+            Attributes.SCMOS_ROI_Full = obj.SCMOS_ROI_Full;
+            Attributes.IRCamera_ROI = obj.IRCamera_ROI;
             Attributes.SCMOS_PixelSize=obj.SCMOS_PixelSize;
             
             Attributes.SaveDir = obj.SaveDir;
@@ -182,36 +180,44 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             
             % light source properties
             Attributes.LaserPower405Activate = obj.LaserPower405Activate;
-            Attributes.LaserPower405Bleach = obj.LaserPower405Bleach; 
+            Attributes.LaserPower405Bleach = obj.LaserPower405Bleach;
             Attributes.LaserPowerSequence = obj.LaserPowerSequence;
             Attributes.LaserPowerFocus = obj.LaserPowerFocus;
             Data=[];
         end
-       
-       function setup_SCMOS(obj)
-           obj.CameraSCMOS=MIC_HamamatsuCamera();
-           CamSet = obj.CameraSCMOS.CameraSetting;
-           CamSet.DefectCorrection.Bit=1;
-           obj.CameraSCMOS.setCamProperties(CamSet);
-           obj.CameraSCMOS.ReturnType='matlab';
-           obj.CameraSCMOS.setCamProperties(obj.CameraSCMOS.CameraSetting);
-           obj.CameraSCMOS.ExpTime_Capture=0.2;
-           obj.CameraSCMOS.ExpTime_Sequence=0.01;
-       end
-       
-       function setup_Stage_Piezo(obj)
-          obj.StagePiezoX=MIC_TCubePiezo('81850186','84850145','X'); %new
-          obj.StagePiezoY=MIC_TCubePiezo('81850193','84850146','Y'); %new
-          obj.StagePiezoZ=MIC_TCubePiezo('81850176','84850203','Z'); %new
-          obj.StagePiezoX.center(); %new
-          obj.StagePiezoY.center(); %new
-          obj.StagePiezoZ.center(); %new
-       end
+        
+        autoCollect(obj,StartCell,RefDir);
+        exposeCellROI(obj); 
+        exposeGridPoint(obj);
+        findCoverSlipOffset(obj,RefStruct);
+        Success=findCoverSlipOffset_Manual(obj,RefStruct);
+        saveReferenceImage(obj);
+        startSequence(obj,RefStruct,LabelID);
+        
+        function setup_SCMOS(obj)
+            obj.CameraSCMOS=MIC_HamamatsuCamera();
+            CamSet = obj.CameraSCMOS.CameraSetting;
+            CamSet.DefectCorrection.Bit=1;
+            obj.CameraSCMOS.setCamProperties(CamSet);
+            obj.CameraSCMOS.ReturnType='matlab';
+            obj.CameraSCMOS.setCamProperties(obj.CameraSCMOS.CameraSetting);
+            obj.CameraSCMOS.ExpTime_Capture=0.2;
+            obj.CameraSCMOS.ExpTime_Sequence=0.01;
+        end
+        
+        function setup_Stage_Piezo(obj)
+            obj.StagePiezoX=MIC_TCubePiezo('81850186','84850145','X'); %new
+            obj.StagePiezoY=MIC_TCubePiezo('81850193','84850146','Y'); %new
+            obj.StagePiezoZ=MIC_TCubePiezo('81850176','84850203','Z'); %new
+            obj.StagePiezoX.center(); %new
+            obj.StagePiezoY.center(); %new
+            obj.StagePiezoZ.center(); %new
+        end
         
         function setup_Stage_Stepper(obj)
             % for SEQ microscope Serial No is 70850323
             obj.StageStepper=MIC_StepperMotor('70850323'); %new
-            obj.StageStepper.moveToPosition(1,2.0650); %new %y 
+            obj.StageStepper.moveToPosition(1,2.0650); %new %y
             obj.StageStepper.moveToPosition(2,2.2780); %new %x
             obj.StageStepper.moveToPosition(3,2); %new %z
             %NOTE: numbers provided so the center of GUI is the initial
@@ -223,11 +229,6 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.CameraIR=MIC_ThorlabsIR(); %FFtest
             obj.CameraIR.ROI=obj.IRCamera_ROI;
             obj.CameraIR.ExpTime_Capture=0.5;
-            
-            %             catch ME
-            %                 ME
-            %                 error('hardware startup error');
-            %             end
             
             %Set save directory
             user_name = java.lang.System.getProperty('user.name'); %?
@@ -242,7 +243,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         
         function setup_Lasers(obj)
             obj.Laser647=MIC_MPBLaser();
-            obj.Laser405=MIC_TCubeLaserDiode('64841724','Power',45,40.93,1) %new 
+            obj.Laser405=MIC_TCubeLaserDiode('64841724','Power',45,40.93,1) %new
             % Example: TLD=MIC_TCubeLaserDiode('64841724','Power',40,40.93,1)
             %  RB 405: I_LD=69.99 mA, I_PD=981 uA, P_LD=40.15 mW. WperA=40.93
         end
@@ -259,9 +260,9 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         
         function unloadSample(obj)
             %obj.StageStepper.set_position([2,2,4]); %old
-             obj.StageStepper.moveToPosition(1,2.0650); %new %y
-             obj.StageStepper.moveToPosition(2,2.2780); %new %x
-             obj.StageStepper.moveToPosition(3,4); %new %z
+            obj.StageStepper.moveToPosition(1,2.0650); %new %y
+            obj.StageStepper.moveToPosition(2,2.2780); %new %x
+            obj.StageStepper.moveToPosition(3,4); %new %z
         end
         
         function loadSample(obj)
@@ -269,183 +270,6 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.StageStepper.moveToPosition(1,2.0650); %new %y
             obj.StageStepper.moveToPosition(2,2.2780); %new %x
             obj.StageStepper.moveToPosition(3,1.4); %new %z
-        end
-            
-        function Success=findCoverSlipOffset_Manual(obj,RefStruct)
-            %Allow user to focus and indentify cell
-            if nargin<2
-                ref=uigetfile('E:\')
-                myDir=obj.TopDir;
-                myCoverslip=obj.CoverslipName;
-                load(fullfile(myDir,myCoverslip,ref))
-            end
-            
-            F_Ref=figure;
-            imshow(RefStruct.Image,[],'Border','tight');
-            F_Ref.Name='Ref Image';
-            obj.StagePiezoX.center();
-            obj.StagePiezoY.center();
-            obj.StagePiezoZ.center();
-%             obj.gui_Stage();
-            
-            P0=RefStruct.StepperPos; %[P0x, P0y, P0z] where P0y=obj.StageStepper.getPosition(1)
-            obj.StageStepper.moveToPosition(1,P0(2)) %y
-            obj.StageStepper.moveToPosition(2,P0(1)) %x
-            obj.StageStepper.moveToPosition(3,P0(3)) %z
-            
-            obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
-            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
-            obj.CameraSCMOS.AcquisitionType = 'focus';
-            obj.CameraSCMOS.setup_acquisition();
-            obj.Lamp660.setPower(obj.Lamp660Power);
-            obj.CameraSCMOS.start_focus();
-            obj.Lamp660.setPower(0);
-            
-            Data=obj.captureLamp('Full');
-            Fig=figure;
-            Fig.MenuBar='none';
-            imshow(Data,[],'Border','tight');
-            Fig.Name='Click To Center and Proceed';
-            Fig.NumberTitle='off';
-            try
-                [X,Y]=ginput(1) 
-                close(Fig);
-            catch
-                Success=0;
-                return
-            end
-            
-            ImSize=obj.SCMOS_ROI_Full(2)-obj.SCMOS_ROI_Full(1)+1;
-%             DiffFromCenter_Pixels=ImSize/2-[X,Y];
-%             DiffFromCenter_Microns=DiffFromCenter_Pixels*obj.SCMOS_PixelSize;
-            FocusPosY=obj.StageStepper.getPosition(1); %y
-            FocusPosX=obj.StageStepper.getPosition(2); %x
-            FocusPosZ=obj.StageStepper.getPosition(3); %z
-            FocusPos=[FocusPosX,FocusPosY,FocusPosZ];
-%             NewPos=[FocusPos(1:2)+[-DiffFromCenter_Microns(2) DiffFromCenter_Microns(1)]/1000 FocusPos(3)];
-deltaX=(abs(ImSize/2-X)*obj.SCMOS_PixelSize)*1/1000; %mm
-deltaY=(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
-if X>1024 & Y<1024
-    NewPos_X=FocusPosX-deltaX; %mm
-    NewPos_Y=FocusPosY-deltaY; %mm
-elseif X>1024 & Y>1024
-    NewPos_X=FocusPosX-deltaX; %mm
-    NewPos_Y=FocusPosY+deltaY; %mm
-elseif X<1024 & Y<1024
-    NewPos_X=FocusPosX+deltaX; %mm
-    NewPos_Y=FocusPosY-deltaY; %mm
-else
-    NewPos_X=FocusPosX+deltaX; %mm
-    NewPos_Y=FocusPosY+deltaY; %mm
-end
-NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
-             obj.CoverSlipOffset=NewPos-P0;
-            %Move to position and show cell
-%             obj.StageStepper.moveToPosition(1,P0(2)+obj.CoverSlipOffset(2)) %y
-%             obj.StageStepper.moveToPosition(2,P0(1)+obj.CoverSlipOffset(1)) %x
-%             obj.StageStepper.moveToPosition(3,P0(3)+obj.CoverSlipOffset(3)) %z
-                        obj.StageStepper.moveToPosition(1,NewPos(2)); %new y %units are mm
-                        obj.StageStepper.moveToPosition(2,NewPos(1)); %new x
-                        obj.StageStepper.moveToPosition(3,FocusPosZ); %new z
-            
-            % check with expose grid
-%             OldPos_X=obj.StageStepper.getPosition(2); %new x
-%             OldPos_Y=obj.StageStepper.getPosition(1); %new y
-%             OldPos_Z=obj.StageStepper.getPosition(3); %new z
-%             OldPos=[OldPos_X,OldPos_Y,OldPos_Z]; %new
-%             deltaX=(abs(ImSize/2-X)*obj.SCMOS_PixelSize)*1/1000; %mm 
-%             deltaY=(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
-%             if X>1024 & Y<1024
-%                 NewPos_X=OldPos_X-deltaX; %mm
-%                 NewPos_Y=OldPos_Y-deltaY; %mm
-%             elseif X>1024 & Y>1024
-%                 NewPos_X=OldPos_X-deltaX; %mm
-%                 NewPos_Y=OldPos_Y+deltaY; %mm
-%             elseif X<1024 & Y<1024
-%                 NewPos_X=OldPos_X+deltaX; %mm
-%                 NewPos_Y=OldPos_Y-deltaY; %mm
-%             else
-%                 NewPos_X=OldPos_X+deltaX; %mm
-%                 NewPos_Y=OldPos_Y+deltaY; %mm
-%             end
-%             NewPos=[NewPos_X,NewPos_Y]; %new
-%             obj.StageStepper.moveToPosition(1,NewPos(2)); %new y %units are mm
-%             obj.StageStepper.moveToPosition(2,NewPos(1)); %new x
-%             obj.StageStepper.moveToPosition(3,OldPos(3)); %new z
-            %end of check
-            
-            pause(1);
-            Data=captureLamp(obj,'ROI');
-            
-%             obj.CoverSlipOffset=NewPos-P0;
-            FF=figure;
-            imshow(Data,[],'Border','tight');
-            
-            proceedstr=questdlg('Does the Cell Match the Reference Image','Warning',...
-                'Yes','No','No');
-            if strcmp('Yes',proceedstr)
-                Success=1;
-            else
-                Success=0;
-            end
-            close(FF)
-            try
-                close(F_Ref)
-            catch
-            end
-            
-        end
-        
-        function findCoverSlipOffset(obj,RefStruct)
-            %Registration of first cell to find offset after remounting
-            
-            obj.StagePiezoX.center();
-            obj.StagePiezoY.center();
-            obj.StagePiezoZ.center();
-            ROI=RefStruct.Image;
-            ROI=ROI(2:end-1,2:end-1);
-            ImSize=obj.SCMOS_ROI_Full(2)-obj.SCMOS_ROI_Full(1)+1;
-            RE=single(extend(ROI,ImSize,'symmetric',mean(ROI(:))));
-            RE=RE-mean(RE(:));
-            RE=RE/std(RE(:));
-            
-            P0=RefStruct.StepperPos;
-            obj.StageStepper.moveToPosition(1,P0(2)) %new %y
-            obj.StageStepper.moveToPosition(2,P0(1)) %new %x
-            obj.StageStepper.moveToPosition(3,P0(3)) %new %z
-            
-            Z=(-obj.OffsetSearchZ:obj.OffsetDZ:obj.OffsetSearchZ)/1000;
-            clear CC FullStack
-            NP=P0;
-            
-            LampRadius=1000;
-            [X,Y]=meshgrid(1:ImSize,1:ImSize);
-            R=sqrt((X-ImSize/2).^2+(Y-ImSize/2).^2);
-            Mask=R>LampRadius;
-            for zz=1:length(Z)
-                NP(3)=P0(3)+Z(zz);
-                obj.StageStepper.moveToPosition(1,NP(2)) %new %y
-                obj.StageStepper.moveToPosition(2,NP(1)) %new %x
-                obj.StageStepper.moveToPosition(3,NP(3)) %new %z
-                pause(1);
-                FS=single(obj.captureLamp('Full'));
-                FS(Mask)=median(FS(:));
-                
-                FS=FS-mean(FS(:));
-                FS=FS/std(FS(:));
-                FullStack(:,:,zz)=FS;
-                CC(:,:,zz)=ifftshift(ifft2(fft2(RE).*conj(fft2(FS))))/numel(RE);
-                
-            end
-            obj.StageStepper.moveToPosition(1,P0(2)) %new %y
-            obj.StageStepper.moveToPosition(2,P0(1)) %new %x
-            obj.StageStepper.moveToPosition(3,P0(3)) %new %z
-            
-            [v,Zid]=max(max(max(CC,[],1),[],2),[],3);
-            [R,C]=find(v==CC(:,:,Zid));
-            
-            obj.CoverSlipOffset=[-(1024-R)*obj.SCMOS_PixelSize/1000 (1024-C)*obj.SCMOS_PixelSize/1000 Z(Zid)];
-            
         end
         
         function findCoverSlipFocus(obj)
@@ -463,233 +287,66 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             obj.Lamp660.setPower(0);
         end
         
-        function exposeGridPoint(obj)
-            %Move to a grid point, take full cam lamp image, give figure to
-            %click on cell.
-
-            obj.StagePiezoX.center();
-            obj.StagePiezoY.center();
-            obj.StagePiezoZ.center();
-            ImSize=obj.SCMOS_ROI_Full(2)-obj.SCMOS_ROI_Full(1)+1;
-            OldPos_X=obj.StageStepper.getPosition(2); %new
-            OldPos_Y=obj.StageStepper.getPosition(1); %new
-            OldPos_Z=obj.StageStepper.getPosition(3); %new
-            %Move to Grid Point
-            Grid_mm=obj.CurrentGridIdx*ImSize*obj.SCMOS_PixelSize/1000+obj.GridCorner;
-            obj.StageStepper.moveToPosition(1,Grid_mm(2)); %new y %units are mm
-            obj.StageStepper.moveToPosition(2,Grid_mm(1)); %new x
-            obj.StageStepper.moveToPosition(3,OldPos_Z); %new z
-            
-            pause(4)
-            
-            Data=obj.captureLamp('Full');
-            Fig=figure;
-            Fig.MenuBar='none';
-            imshow(Data,[],'Border','tight');
-            Fig.Name='Click To Center and Proceed';
-            Fig.NumberTitle='off';
-            try
-                [X,Y]=ginput(1)% [X,Y] goes from 1 to 2048 for each of the 
-                % ROIs of each of 100 buttons on the GUI. 
-                % NOTE ON ROTATION: this [X,Y] are coordinates calculated on a rotated
-                % and mirror imaged of the live SCMOS 
-                close(Fig);
-            catch
-                return
+        function Data=captureLamp(obj,ROISelect)
+            %Capture an image with Lamp
+            obj.Lamp660.setPower(obj.Lamp660Power);
+            pause(obj.LampWait);
+            switch ROISelect
+                case 'Full'
+                    obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
+                case 'ROI'
+                    obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
             end
-            
-            OldPos_X=obj.StageStepper.getPosition(2); %new x
-            OldPos_Y=obj.StageStepper.getPosition(1); %new y
-            OldPos_Z=obj.StageStepper.getPosition(3); %new z
-            OldPos=[OldPos_X,OldPos_Y,OldPos_Z]; %new
-            %find new position with respect to Motor's (0,0):
-            deltaX=(abs(ImSize/2-X)*obj.SCMOS_PixelSize)*1/1000; %mm 
-            deltaY=(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
-            if X>1024 & Y<1024
-                NewPos_X=OldPos_X-deltaX; %mm
-                NewPos_Y=OldPos_Y-deltaY; %mm
-            elseif X>1024 & Y>1024
-                NewPos_X=OldPos_X-deltaX; %mm
-                NewPos_Y=OldPos_Y+deltaY; %mm
-            elseif X<1024 & Y<1024
-                NewPos_X=OldPos_X+deltaX; %mm
-                NewPos_Y=OldPos_Y-deltaY; %mm
-            else
-                NewPos_X=OldPos_X+deltaX; %mm
-                NewPos_Y=OldPos_Y+deltaY; %mm
-            end
-            
-            NewPos=[NewPos_X,NewPos_Y]; %new
-            obj.StageStepper.moveToPosition(1,NewPos(2)); %new y %units are mm
-            obj.StageStepper.moveToPosition(2,NewPos(1)); %new x
-            obj.StageStepper.moveToPosition(3,OldPos(3)); %new z
-            pause(1)
-            %Move to next step
-            obj.exposeCellROI();
+            obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
+            obj.CameraSCMOS.AcquisitionType = 'capture';
+            obj.CameraSCMOS.setup_acquisition();
+            Data=obj.CameraSCMOS.start_capture();
+            obj.Lamp660.setPower(0);
         end
         
-         function exposeCellROI(obj)
-            %Take ROI lamp image, and allow click on cell, start lamp focus    
-            Data=obj.captureLamp('ROI');
-            Fig=figure;
-            Fig.MenuBar='none';
-            imshow(Data,[],'Border','tight');
-            Fig.Name='Click To Center and Proceed';
-            Fig.NumberTitle='off';
-            try
-                [X,Y]=ginput(1)%coordinates with respect to top left corner of the 256by256 image
-                close(Fig);
-            catch
-                return
-            end
-            
-            ImSize=obj.SCMOS_ROI_Collect(2)-obj.SCMOS_ROI_Collect(1)+1;%256by256ROI
-            OldPos_X=obj.StageStepper.getPosition(2); %new x
-            OldPos_Y=obj.StageStepper.getPosition(1); %new y
-            OldPos_Z=obj.StageStepper.getPosition(3); %new z
-            OldPos=[OldPos_X,OldPos_Y,OldPos_Z]; %new
-            deltaX=(abs(ImSize/2-X)*obj.SCMOS_PixelSize)*1/1000; %mm 
-            deltaY=(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
-            if X>ImSize/2 & Y<ImSize/2
-                NewPos_X=OldPos_X-deltaX; %mm
-                NewPos_Y=OldPos_Y-deltaY; %mm
-            elseif X>ImSize/2 & Y>ImSize/2
-                NewPos_X=OldPos_X-deltaX; %mm
-                NewPos_Y=OldPos_Y+deltaY; %mm
-            elseif X<ImSize/2 & Y<ImSize/2
-                NewPos_X=OldPos_X+deltaX; %mm
-                NewPos_Y=OldPos_Y-deltaY; %mm
-            else
-                NewPos_X=OldPos_X+deltaX; %mm
-                NewPos_Y=OldPos_Y+deltaY; %mm
-            end
-            NewPos=[NewPos_X,NewPos_Y]; %new
-            
-            obj.StageStepper.moveToPosition(1,NewPos(2)); %new y %units are mm
-            obj.StageStepper.moveToPosition(2,NewPos(1)); %new x FF
-            obj.StageStepper.moveToPosition(3,OldPos(3)); %new z FF 
-            %Move to next step
-            obj.startROILampFocus();
-         end
-        
-         function Data=captureLamp(obj,ROISelect)
-             %Capture an image with Lamp
-             obj.Lamp660.setPower(obj.Lamp660Power);
-             pause(obj.LampWait);
-             switch ROISelect
-                 case 'Full'
-                     obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
-                 case 'ROI'
-                     obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
-             end
-             obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
-             obj.CameraSCMOS.AcquisitionType = 'capture';
-             obj.CameraSCMOS.setup_acquisition();
-             Data=obj.CameraSCMOS.start_capture();
-             obj.Lamp660.setPower(0);
-         end
-         
-         function startROILampFocus(obj)
-             %Run SCMOS in focus mode with lamp to allow user to focus             
-             obj.gui_Stage();
-             obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
-             obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
-             obj.CameraSCMOS.AcquisitionType = 'focus';
-             obj.CameraSCMOS.setup_acquisition();
-             obj.Lamp660.setPower(obj.Lamp660Power);
-             obj.FlipMount.FilterIn; %new
-             %obj.startROILaserFocusLow(); % turn on Laser focus low before starting SCMOS focus
-             obj.CameraSCMOS.start_focus();
-             obj.startROILaserFocusLow(); % FF
-             obj.Lamp660.setPower(0);             
-         end
-         
-         function startROILaserFocusLow(obj)
-             %Run SCMOS in focus mode with Low Laser Power to allow user to focus
-             %Ask for save as reference. If yes, save reference.
-             
-             %Run SCMOS in focus mode with High Laser Power to check
-             obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLaserFocus;
-             obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
-             obj.CameraSCMOS.AcquisitionType = 'focus';
-             obj.CameraSCMOS.setup_acquisition();
-             obj.Laser647.setPower(obj.LaserPowerFocus);
-             obj.FlipMount.FilterIn; %new
-             obj.Shutter.open; % opens shutter for laser
-             obj.Laser647.on();
-             obj.Lamp660.setPower(0); %FF
-             obj.CameraSCMOS.start_focus();
-             obj.Laser647.off();
-             obj.Shutter.close; %closes shutter in order to prevent photobleaching
-             
-             UseCell = questdlg('Use this cell and Save Reference Image?','Save and Use','Yes','No','Yes');
-             
-             switch UseCell
-                 case 'Yes'
-                     obj.saveReferenceImage();
-                 case 'No'
-             end
-         end
-         
-         function saveReferenceImage(obj)
-            %Take reference image and save
-            
-            %Collect ROI Image
-            obj.Lamp660.setPower(obj.Lamp660Power);
-            pause(obj.LampWait);
-            obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
-            obj.CameraSCMOS.AcquisitionType = 'capture';
+        function startROILampFocus(obj)
+            %Run SCMOS in focus mode with lamp to allow user to focus
+            obj.gui_Stage();
+            obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLampFocus;
             obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+            obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
-            Data=obj.CameraSCMOS.start_capture();
-            obj.Lamp660.setPower(0);
-            RefStruct.Image=Data;
-            %Collect Full Image
             obj.Lamp660.setPower(obj.Lamp660Power);
-            pause(obj.LampWait);
-            obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
-            obj.CameraSCMOS.AcquisitionType = 'capture';
-            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
-            obj.CameraSCMOS.setup_acquisition();
-            Data=obj.CameraSCMOS.start_capture();
+            obj.FlipMount.FilterIn; %new
+            %obj.startROILaserFocusLow(); % turn on Laser focus low before starting SCMOS focus
+            obj.CameraSCMOS.start_focus();
+            obj.startROILaserFocusLow(); % FF
             obj.Lamp660.setPower(0);
-            RefStruct.Image_Full=Data;            
-            %Center Piezo and add to stepper
-            PPx=obj.StagePiezoX.getPosition; %new
-            PPy=obj.StagePiezoY.getPosition; %new
-            PPz=obj.StagePiezoZ.getPosition; %new
-            PP=[PPx, PPy, PPz];
-            obj.StagePiezoX.center(); %new 
-            obj.StagePiezoY.center(); %new
-            obj.StagePiezoZ.center(); %new
-            PPCx=obj.StagePiezoX.getPosition; %new
-            PPCy=obj.StagePiezoY.getPosition; %new
-            PPCz=obj.StagePiezoZ.getPosition; %new
-            PPC=[PPCx, PPCy, PPCz];
-            OS=PP-PPC; %difference between piezo at center and at current
-            % position of each cell  
-            SPx=Kinesis_SBC_GetPosition('70850323',2); %new
-            SPy=Kinesis_SBC_GetPosition('70850323',1); %new
-            SPz=Kinesis_SBC_GetPosition('70850323',3); %new
-            SP=[SPx,SPy,SPz];
-            SP(3)=SP(3)+OS(3)/1000; 
-            RefStruct.StepperPos=SP; 
-            %This is now just the center position
-            RefStruct.PiezoPos=PPC;            
-            RefStruct.GridIdx=obj.CurrentGridIdx;
-            RefStruct.CellIdx=obj.CurrentCellIdx;            
-            [~,~]=mkdir(obj.TopDir);
-            [~,~]=mkdir(fullfile(obj.TopDir,obj.CoverslipName));            
-            FN = sprintf('Reference_Cell_%2.2d.mat',obj.CurrentCellIdx);
-            FileName=fullfile(obj.TopDir,obj.CoverslipName,FN);
-            F=matfile(FileName);
-            F.Properties.Writable = true; % so we don't get the error "F.Properties.Writable is False." 
-            F.RefStruct=RefStruct;            
-            %Update cell count
-            obj.CurrentCellIdx=obj.CurrentCellIdx+1;
-         end
-         
-         function startROILaserFocusHigh(obj)
+        end
+        
+        function startROILaserFocusLow(obj)
+            %Run SCMOS in focus mode with Low Laser Power to allow user to focus
+            %Ask for save as reference. If yes, save reference.
+            
+            %Run SCMOS in focus mode with High Laser Power to check
+            obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeLaserFocus;
+            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+            obj.CameraSCMOS.AcquisitionType = 'focus';
+            obj.CameraSCMOS.setup_acquisition();
+            obj.Laser647.setPower(obj.LaserPowerFocus);
+            obj.FlipMount.FilterIn; %new
+            obj.Shutter.open; % opens shutter for laser
+            obj.Laser647.on();
+            obj.Lamp660.setPower(0); %FF
+            obj.CameraSCMOS.start_focus();
+            obj.Laser647.off();
+            obj.Shutter.close; %closes shutter in order to prevent photobleaching
+            
+            UseCell = questdlg('Use this cell and Save Reference Image?','Save and Use','Yes','No','Yes');
+            
+            switch UseCell
+                case 'Yes'
+                    obj.saveReferenceImage();
+                case 'No'
+            end
+        end
+
+        function startROILaserFocusHigh(obj)
             %Run SCMOS in focus mode with High Laser Power to check
             obj.CameraSCMOS.ExpTime_Focus=obj.ExposureTimeSequence;
             obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
@@ -702,255 +359,38 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
             obj.Laser647.on();
             obj.CameraSCMOS.start_focus();
             obj.Laser647.off();
-         end
+        end
         
-         function startSequence(obj,RefStruct,LabelID)
-            %Collects and saves an SR data Set
-            
-            %create save folder and filenames
-%             if ~exist(obj.SaveDir,'dir');mkdir(obj.SaveDir);end
-%             timenow=clock;
-%             s=['-' num2str(timenow(1)) '-' num2str(timenow(2))  '-' num2str(timenow(3)) '-' num2str(timenow(4)) '-' num2str(timenow(5)) '-' num2str(round(timenow(6)))];
-%             
-                   %.........................    
-            %Setup file saving
-            if ~obj.IsBleach
-                [~,~]=mkdir(obj.TopDir);
-                [~,~]=mkdir(fullfile(obj.TopDir,obj.CoverslipName));
-                DN=fullfile(obj.TopDir,obj.CoverslipName,sprintf('Cell_%2.2d',RefStruct.CellIdx),sprintf('Label_%2.2d',LabelID));
-                [~,~]=mkdir(DN);
-                TimeNow=clock;
-                DateString=[num2str(TimeNow(1)) '-' num2str(TimeNow(2))  '-' num2str(TimeNow(3)) '-' num2str(TimeNow(4)) '-' num2str(TimeNow(5)) '-' num2str(round(TimeNow(6)))];
-%                 FN=sprintf('Data_%s.mat',DateString); %FF
-                FN=sprintf('Data_%s.h5',DateString);
-                FileName=fullfile(DN,FN);
-%                 F=matfile(FileName); %FF
-            end
-       %.........................     
-            % FF test for save h.file
-            switch obj.SaveFileType
-                case 'mat'
-                case 'h5'
-                    FileH5=FileName; %FF
-                    %FileH5=fullfile(obj.SaveDir,[obj.BaseFileName DateString '.h5']);
-                    MIC_H5.createFile(FileH5);
-                    MIC_H5.createGroup(FileH5,'Channel01');
-                    MIC_H5.createGroup(FileH5,'Channel01/Zposition001');
-                otherwise
-                    error('StartSequence:: unknown file save type')
-            end
-            
-            %Move to Cell
-            obj.StageStepper.moveToPosition(1,RefStruct.StepperPos(2)+obj.CoverSlipOffset(2)); %new %y
-            obj.StageStepper.moveToPosition(2,RefStruct.StepperPos(1)+obj.CoverSlipOffset(1)); %new %x
-            obj.StageStepper.moveToPosition(3,RefStruct.StepperPos(3)+obj.CoverSlipOffset(3)); %new %z
-            obj.StagePiezoX.center(); %new 
-            obj.StagePiezoY.center(); %new
-            obj.StagePiezoZ.center(); %new 
-            %Align
-            obj.Lamp660.setPower(obj.Lamp660Power+2);
-            pause(obj.LampWait);
-            obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture; %need to update when changing edit box
-            obj.CameraSCMOS.AcquisitionType = 'capture';
-            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
-            obj.CameraSCMOS.setup_acquisition();
-            obj.AlignReg.Image_Reference=RefStruct.Image;
-            obj.AlignReg.MaxIter=20; %new
-            try %So that if alignment fails, we don't stop auto collect for other cells
-                obj.AlignReg.align2imageFit(RefStruct); %FF
-            catch 
-                warning('Problem with AlignReg.align2imageFit()')
-                return
-            end
-            
-            obj.Lamp660.setPower(0);
-            
-            %Setup Stabilization
-            obj.ActiveReg=MIC_ActiveReg3D_Seq(obj.CameraIR,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ); %new
-            obj.Lamp850.on; 
-            obj.Lamp850.setPower(obj.Lamp850Power);
-            obj.IRCamera_ExposureTime=obj.CameraIR.ExpTime_Capture;
-            obj.ActiveReg.takeRefImageStack(); %takes 21 reference images
-            obj.ActiveReg.Period=obj.StabPeriod;
-            obj.ActiveReg.start(); 
-            
-            %Setup sCMOS for Sequence
-            obj.CameraSCMOS.ExpTime_Sequence=obj.ExposureTimeSequence;
-            obj.CameraSCMOS.SequenceLength=obj.NumberOfFrames;
-            obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
-            obj.CameraSCMOS.AcquisitionType = 'sequence';
-            obj.CameraSCMOS.setup_acquisition();
-            
-            %Start Laser
-            obj.FlipMount.FilterOut; % moves away the ND filter from the beam
-            if obj.Use405
-                obj.Laser405.setPower(obj.LaserPower405Activate);
-            end
-            if obj.IsBleach
-                obj.Laser405.setPower(obj.LaserPower405Bleach);
-            end
-            
-            %Collect Data
-            if obj.IsBleach
-                for nn=1:obj.NumberOfPhotoBleachingIterations
-                    obj.Shutter.open; % opens shutter before the Laser turns on
-                    Data=obj.CameraSCMOS.start_sequence();
-                    S=sprintf('F.Data%2.2d=Data;',nn);
-                    eval(S);
-                    obj.Shutter.close; % closes shutter before the Laser turns on
-                end
-                
-            else
-                
-                for nn=1:obj.NumberOfSequences
-                    obj.Shutter.open; % opens shutter before the Laser turns on
-                    
-                    %Collect 
-                    sequence=obj.CameraSCMOS.start_sequence();
-                    if ~obj.IsBleach %Append Data
-                        obj.Shutter.close;
-                        switch obj.SaveFileType
-                            case 'mat'
-                                fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
-                                Params=exportState(obj); %#ok<NASGU>
-                                save(fn,'sequence','Params');
-                            case 'h5' %This will become default
-                                S=sprintf('Data%04d',nn)
-                                MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition001',S,sequence);
-                            otherwise
-                                error('StartSequence:: unknown SaveFileType')
-                        end
-                        %obj.Shutter.open;
-                    end
-                    obj.Shutter.close; % closes shutter before the Laser turns on
-                end
-                
-                %End Laser
-                %     obj.Laser647.off();
-                obj.Shutter.close; % closes the shutter instead of turning off the Laser
-                obj.FlipMount.FilterIn; %new
-                obj.Laser405.setPower(0);
-                
-                %End Active Stabilization:
-                obj.ActiveReg.stop();
-                
-                %Save Everything
-                if ~obj.IsBleach %Append Data
-                    switch obj.SaveFileType
-                        case 'mat'
-                            %Nothing to do
-                        case 'h5'
-                            S='Channel01/Zposition001';
-                            MIC_H5.createGroup(FileH5,S);
-                            obj.save2hdf5(FileH5,S);
-                        otherwise
-                            error('StartSequence:: unknown SaveFileType')
-                    end
-%                     Cam=struct(obj.CameraSCMOS);
-%                     Cam.FigureHandle=[];
-%                     Cam.ImageHandle=[];
-%                     F.Camera=Cam;
-%                     F.Active=obj.ActiveReg.exportState(); %FF
-%                     F.Align=obj.AlignReg.exportState();
-% %                     Camera=Cam;
-% %                     Active=obj.ActiveReg.exportState(); %FF
-% %                     Align=obj.AlignReg.exportState();
-% %                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Camera',Camera);
-% %                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Active',Active);
-% %                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Align',Align);
-                end
-                
-                %delete ActiveReg
-                delete(obj.ActiveReg);
-            end
-         end
-            
-         function autoCollect(obj,StartCell,RefDir)
-                %This takes all SR data using saved reference data
-                
-                if nargin<3 %Ask for directory with Reference files
-                    RefDir=uigetdir(obj.TopDir);
-                end
-                
-                if nargin<2 %Ask for directory with Reference files
-                    StartCell=1;
-                end
-                
-                %Find number of cells, filenames, etc
-                FileList=dir(fullfile(RefDir,'Reference_Cell*'));
-                NumCells=length(FileList);               
-                obj.Shutter.close; % close shutter before the Laser turns on
-%                 obj.FlipMount.FilterIn; 
-                obj.Laser647.setPower(obj.LaserPowerSequence);
-                obj.Laser647.on();
-                
-                %Loop over cells
-
-                for nn=StartCell:NumCells 
-                    
-                    %Create or load RefImageStruct
-                    FileName=fullfile(RefDir,FileList(nn).name);
-                    F=matfile(FileName);
-                    RefStruct=F.RefStruct;
-                    if (obj.UseManualFindCell)&&(nn==StartCell)
-                        S=obj.findCoverSlipOffset_Manual(RefStruct);
-                        obj.CoverSlipOffset;
-                        if ~S;return;end
-                    end
-                    
-                    obj.startSequence(RefStruct,obj.LabelIdx);
-%                     obj.FlipMount.FilterOut; %FF
-                    
-                    if nn==StartCell %update coverslip offset
-                        %obj.CoverSlipOffset=obj.StageStepper.Position-RefStruct.StepperPos; %old
-                        SPx=Kinesis_SBC_GetPosition('70850323',2); %new
-                        SPy=Kinesis_SBC_GetPosition('70850323',1); %new
-                        SPz=Kinesis_SBC_GetPosition('70850323',3); %new
-                        SP=[SPx,SPy,SPz];
-                        obj.CoverSlipOffset=SP-RefStruct.StepperPos; %new
-                    end
-%                     obj.FlipMount.FilterOut;
-
-                end
-                
-                obj.FlipMount.FilterIn; %moves in the ND filter toward the beam
-                obj.Shutter.close;
-                obj.Laser647.off();
-         end 
-        
-            %Stage Controls --------------------------------
-            function moveStepperUpLarge(obj)
-                Pos_Step_Z=obj.StageStepper.getPosition(3);%get pos
-                Pos_Step_Z=Pos_Step_Z+obj.StepperLargeStep;%update pos
-                obj.StageStepper.moveToPosition(3,Pos_Step_Z);%set pos
-            end
-            function moveStepperDownLarge(obj)
-                Pos_Step_Z=obj.StageStepper.getPosition(3);%get pos
-                Pos_Step_Z=Pos_Step_Z-obj.StepperLargeStep;%update pos
-                obj.StageStepper.moveToPosition(3,Pos_Step_Z);%set pos
-            end
-            function moveStepperUpSmall(obj)
-                Pos_Step_Z=obj.StageStepper.getPosition(3);%get pos
-                Pos_Step_Z=Pos_Step_Z+obj.StepperSmallStep;%update pos
-                obj.StageStepper.moveToPosition(3,Pos_Step_Z);%set pos
-            end
-            function moveStepperDownSmall(obj)
-                Pos_Step_Z=obj.StageStepper.getPosition(3);%get pos
-                Pos_Step_Z=Pos_Step_Z-obj.StepperSmallStep;%update pos
-                obj.StageStepper.moveToPosition(3,Pos_Step_Z);%set pos
-            end
-            function movePiezoUpSmall(obj)
-                Pos_Piezo_Z=obj.StagePiezoZ.getPosition;%get pos
-                Pos_Piezo_Z=Pos_Piezo_Z+obj.PiezoStep;%update pos
-                obj.StagePiezoZ.setPosition(Pos_Piezo_Z);%set pos
-            end
-            function movePiezoDownSmall(obj)
-                Pos_Piezo_Z=obj.StagePiezoZ.getPosition;%get pos
-                Pos_Piezo_Z=Pos_Piezo_Z-obj.PiezoStep;%update pos
-                obj.StagePiezoZ.setPosition(Pos_Piezo_Z);%set pos
-            end
-            % End Stage Controls ____________________________   
-           
+        function moveStepperUpLarge(obj)
+            Pos_Step_Z=obj.StageStepper.getPosition(3);%get pos
+            Pos_Step_Z=Pos_Step_Z+obj.StepperLargeStep;%update pos
+            obj.StageStepper.moveToPosition(3,Pos_Step_Z);%set pos
+        end
+        function moveStepperDownLarge(obj)
+            Pos_Step_Z=obj.StageStepper.getPosition(3);%get pos
+            Pos_Step_Z=Pos_Step_Z-obj.StepperLargeStep;%update pos
+            obj.StageStepper.moveToPosition(3,Pos_Step_Z);%set pos
+        end
+        function moveStepperUpSmall(obj)
+            Pos_Step_Z=obj.StageStepper.getPosition(3);%get pos
+            Pos_Step_Z=Pos_Step_Z+obj.StepperSmallStep;%update pos
+            obj.StageStepper.moveToPosition(3,Pos_Step_Z);%set pos
+        end
+        function moveStepperDownSmall(obj)
+            Pos_Step_Z=obj.StageStepper.getPosition(3);%get pos
+            Pos_Step_Z=Pos_Step_Z-obj.StepperSmallStep;%update pos
+            obj.StageStepper.moveToPosition(3,Pos_Step_Z);%set pos
+        end
+        function movePiezoUpSmall(obj)
+            Pos_Piezo_Z=obj.StagePiezoZ.getPosition;%get pos
+            Pos_Piezo_Z=Pos_Piezo_Z+obj.PiezoStep;%update pos
+            obj.StagePiezoZ.setPosition(Pos_Piezo_Z);%set pos
+        end
+        function movePiezoDownSmall(obj)
+            Pos_Piezo_Z=obj.StagePiezoZ.getPosition;%get pos
+            Pos_Piezo_Z=Pos_Piezo_Z-obj.PiezoStep;%update pos
+            obj.StagePiezoZ.setPosition(Pos_Piezo_Z);%set pos
+        end
     end
     
     methods (Static)
