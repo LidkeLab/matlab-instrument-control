@@ -111,16 +111,10 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
     
     methods
        function obj=MIC_SEQ_SRcollect()
-            % MIC_TIRF_SRcollect constructor
-            %  Constructs object and initializes all hardware
-            if nargout<1
-                error('MIC_Seq_SRcollect must be assigned to an output variable')
-            end
-            
             %Check for sample (will crash objective if mounted during setup)
-            proceedstr=questdlg('Is the sample fixed on the stage?','Warning',...
-                'Yes','No','Yes'); % default selection 'Yes'
-            if strcmp('Yes',proceedstr)
+            proceedstr=questdlg('Is the sample fixed on the stage?', ...
+                'Warning', 'Yes', 'No', 'Yes'); % default selection 'Yes'
+            if strcmp('Yes', proceedstr)
                 error('Sample is fixed on the stage!  Remove the sample and restart SeqSRcollect.');
             end
             
