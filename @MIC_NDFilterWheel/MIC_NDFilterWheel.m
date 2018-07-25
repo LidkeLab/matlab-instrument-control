@@ -1,6 +1,6 @@
 classdef MIC_NDFilterWheel < MIC_Abstract
-    %  MIC_NDFilterWheel: Matlab Instrument Control for servo operated 
-    %  Filter wheel containing Neutral Density filters
+    %MIC_NDFilterWheel Matlab Instrument Control for servo operated Filter wheel
+    %  containing Neutral Density filters
     %  Filter wheel should be controlled by Dynamixel Servos. See "Z:\Lab 
     %  General Info and Documents\TIRF Microscope\Build Instructions for 
     %  Filter Wheel Setup.doc"
@@ -13,25 +13,12 @@ classdef MIC_NDFilterWheel < MIC_Abstract
     %  specific filter is in the optical path. The Rotation property of the
     %  servo gives the right position value for that filter.
     %
-    %  Example: obj=MIC_NDFilterWheel(ServoId,FracTransmVals,FilterPos);
-    %          ServoId: Id of servo, is written on servo
-    %          FracTransmVals: N-element array of Fractional Transmittance
-    %                   Values for N filters in wheel, order (linear index)
-    %                    should correspond to order in FilterPos input
-    %          FilterPos: N-element array of Rotation (degrees) of servo 
-    %                   corresponding to filter positions, order (linear
-    %                   index should correspond to order in FracTransmVals
-    %  Example for 6 filters:
-    %  FWobj = MIC_NDFilterWheel(1, [1 0.8 0.6 0.4 0.2 0], [0 60 120 180 240 300])
-    %  Functions: setFilter, exportState, setTransmittance
-    %             get.CurrentFilter, get.CurrentTransmittance
-    %
-    %  REQUIRES
+    % REQUIRES
     %   Matlab 2014b or higer
     %   MIC_Abstract.m
     %   MIC_DynamixelServo.m
-    %
-    % CITATION: Marjolein Meddens, Lidke Lab, 2017.
+    
+    % Marjolein Meddens, Lidke Lab 2017
     
     properties (SetAccess=protected)
         InstrumentName = 'NDFilterWheel';
@@ -51,7 +38,18 @@ classdef MIC_NDFilterWheel < MIC_Abstract
     
     methods
         function obj=MIC_NDFilterWheel(ServoId, FracTransmVals, FilterPos)
-            % Object constructor
+            % obj=MIC_NDFilterWheel(ServoId,FracTransmVals,FilterPos) constructor
+            % INPUT (required)
+            %  ServoId - Id of servo, is written on servo 
+            %  FracTransmVals - N-element array of Fractional Transmittance
+            %                   Values for N filters in wheel, order (linear index) should
+            %                   correspond to order in FilterPos input
+            %  FilterPos - N-element array of Rotation (degrees) of servo 
+            %              corresponding to filter positions, order (linear
+            %              index should correspond to order in
+            %              FracTransmVals
+            %  Example for 6 filters:
+            %  FWobj = MIC_NDFilterWheel(1, [1 0.8 0.6 0.4 0.2 0], [0 60 120 180 240 300])
             
             % pass AutoName input into base classes
             obj = obj@MIC_Abstract(~nargout);
@@ -91,7 +89,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
         end
         
         function setFilter(obj,FNum)
-            % Sets filter to FNum
+            % setFilter(FNum) sets filter
             % INPUT
             %   FNum - number of filter to switch to
             
@@ -108,7 +106,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
         end
         
         function setTransmittance(obj,Transm)
-            % Sets filter based on transmittance
+            % setTransmittance(Transm) sets filter based on transmittance
             % INPUT
             %   Transm - transmittance of filter to switch to
             
@@ -147,25 +145,21 @@ classdef MIC_NDFilterWheel < MIC_Abstract
         end
         
         function value = get.CurrentFilter(obj)
-            % Gets current filter information
             value = find(obj.FilterPos==round(obj.Servo.Rotation));
         end
         
         function value = get.CurrentTransmittance(obj)
-            % Gets current transmittance information
             value = obj.TransmissionValues(obj.FilterPos==round(obj.Servo.Rotation));
         end
         
-        function [Attributes,Data,Children] = exportState(obj)
+        function State = exportState(obj)
             % Exports current state of MIC_NDFilterWheel object
-            Attributes.InstrumentName = obj.InstrumentName;
-            Attributes.CurrentFilter = obj.CurrentFilter;
-            Attributes.CurrentTransmittance = obj.CurrentTransmittance;
-            Attributes.FilterPos = obj.FilterPos;
-            Attributes.TransmissionValues = obj.TransmissionValues;
-            Attributes.ServoState = obj.Servo.exportState;
-            Data=[];
-            Children = [];            
+            State.InstrumentName = obj.InstrumentName;
+            State.CurrentFilter = obj.CurrentFilter;
+            State.CurrentTransmittance = obj.CurrentTransmittance;
+            State.FilterPos = obj.FilterPos;
+            State.TransmissionValues = obj.TransmissionValues;
+            State.ServoState = obj.Servo.exportState;
         end
     end
     

@@ -1,28 +1,23 @@
 classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
-    % MIC_ThorlabsLED Matlab Instrument Class for control of the Thorlabs LED
-    %  
-    % This class controls a LED lamp with different wavelength from Thorlabs.
-    % Requires TTL input from the Analogue Input/Output channel of NI card
-    % to turn the laser ON/OFF as well as set the power remotely.
-    % BNC cable is needed to connect to device.
-    % Set Trig=MOD on control device for Lamp and turn on knob manually
-    % more than zero to control from computer.
-    %   
-    % Example: obj=MIC_ThorlabsLED('Dev1','ao1');
-    % Functions: on, off, delete, shutdown, exportState, setPower 
+    % MIC_ThorlabsLED Matlab Instrument Control Class for the Thorlabs LED
+    %   This class controls a LED lamp with different wavelength from Thorlabs.
+    %   The power can be set between 0 and 100% as well as turned off or on.
     %
-    % REQUIREMENTS: 
+    %   The current from the LED driver is regulated by the analog voltage output (0-5V) of a
+    %   NI DAQ card. The Constructor requires the Device and Channel details.
+    %   BNC cable is needed to connect to device.
+    %   Set Trig=MOD on control device for Lamp and turn on knob manually
+    %   more than zero.
+    %
+    % REQUIRES:
     %   MIC_Abstract.m
     %   MIC_LightSource_Abstract.m
-    %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
-    %
-    % CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
-    
+    % by Hanieh Mazloom-Farsibaf 2017
     
     properties (SetAccess=protected)
-        InstrumentName='ThorlabsLED'  %Name of instrument
+        InstrumentName='ThorlabsLED' % Descriptive Instrument Name
         Power=0;            % Currently Set Output Power
         PowerUnit='Percent' % Power Unit
         MinPower=0;         % Minimum Power Setting
@@ -38,13 +33,15 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
         DAQ=[];         % NI DAQ Session
     end
     properties (Hidden)
-        StartGUI=false; % Starts GUI 
+        StartGUI=false; % Start gui when creating instance of class
     end
     
     methods
         function obj=MIC_ThorlabsLED(NIDevice,AOChannel)
+            % [in]
             % Example, NIDevice= 'Dev1', AOChannel='ao0'
             obj=obj@MIC_LightSource_Abstract(~nargout);
+            
             if nargin<2
                 error('MIC_ThorlabsLED::NIDevice and AOChannel must be defined')
             end
@@ -62,7 +59,6 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
             obj.shutdown();
         end
         function setPower(obj,Power_in)
-            % Sets power for the Lamp
             % Check if power_in is in the proper range
             if Power_in<obj.MinPower
                 error('MPBLaser: Set_Power: Requested Power Below Minimum')
@@ -83,18 +79,18 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
             if ~isempty(obj.DAQ) %daq not yet created
                 outputSingleScan(obj.DAQ,V_out);
             end
-            obj.updateGui();  %update gui from current properties
+            obj.updateGui();
             
         end
         
         function on(obj)
-            % Turn on LED lamp
+            % Turn on LED to currently set power.
             obj.IsOn=1;
             obj.setPower(obj.Power);
         end
         
         function off(obj)
-            % Turn off LED lamp
+            % Turn off LED.
             V_out=obj.V_0;
             if ~isempty(obj.DAQ) %daq not yet created
                 outputSingleScan(obj.DAQ,V_out);
@@ -102,15 +98,16 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
             obj.IsOn=0;
         end
         function [Attributes,Data,Children]=exportState(obj)
-            % Export current state of the Laser (ON/OFF == 1/0)
+            % Export the object current state
             Attributes.Power=obj.Power;
             Attributes.IsOn=obj.IsOn;
             % no Data is saved in this class
             Data=[];
             Children=[];
+            
         end
         function shutdown(obj)
-            % Set power to zero and turn it off.
+            % Set power to zero and turn off.
             obj.setPower(0);
             obj.off();
             delete(obj.DAQ); % clear the port
@@ -120,9 +117,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     methods (Static=true)
         function unitTest(NIDevice,AOChannel)
             % Unit test of object functionality
-            % Syntax: MIC_ThorlabsLED.unitTest(NIDevice,DOChannel)
-            % Example:
-            % MIC_ThorlabsLED.unitTest('Dev1','ao1');
+            
             if nargin<2
                 error('MIC_RebelStarLED::NIDevice and AOChannel must be defined')
             end

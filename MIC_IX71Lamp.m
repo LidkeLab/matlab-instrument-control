@@ -1,22 +1,15 @@
 classdef MIC_IX71Lamp < MIC_LightSource_Abstract
-    % MIC_IX71Lamp Matlab Instrument Control Class for the MPB-laser.
-    %
-    % Controls the Olympus lamp, can turn it off and on and change the 
-    % power. 
-    %
-    % Example: RS=MIC_IX71Lamp('Dev1','ao0','Port0/Line0');
-    % Functions: constructor(), setPower(), on(), off(), exportState(),
-    %            shutdown()
+    %   MIC_IX71Lamp Matlab Instrument Control Class for the MPB-laser.
+    %   This class is written to control the Olympus lamp.
     %   
-    % REQUIREMENTS:
+    %   Requirements:
     %   MIC_Abstract.m
     %   MIC_LightSource_Abstract.m
     %   MATLAB 2014 or higher.
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
-    %
     % CITATION:
-    % Mohamadreza Fazel and Hanieh Mazloom-Farsibaf, Lidkelab, 2017
+%   MohammadReza Fazel and Hanieh Mazloom-Farsibaf   Feb 2017 (Keith A. Lidke's lab)
  
     
    properties (SetAccess=protected)
@@ -46,7 +39,7 @@ classdef MIC_IX71Lamp < MIC_LightSource_Abstract
             % Example: RS=MIC_IX71Lamp('Dev1','ao0','Port0/Line0');
             obj=obj@MIC_LightSource_Abstract(~nargout);
             if nargin<2
-                error('MIC_IX71Lamp::NIDevice, AOChannel and DOChannel must be defined.')
+                error('MIC_IX71Lamp::NIDevice, AOChannel and DOChannel must be defined')
             end
             %Set up the NI Daq Object
             obj.DAQ_AC = daq.createSession('ni');

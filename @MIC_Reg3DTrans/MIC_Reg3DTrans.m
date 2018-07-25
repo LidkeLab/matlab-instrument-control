@@ -61,6 +61,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZFitPos;            % found Z positions
         ZFitModel;          % fitted line though auto correlations
         ZMaxAC;             % autocorrelations of zstack
+        maxACmodel;
     end
     
     properties (SetAccess=protected)
@@ -364,8 +365,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 
                 %find XY position and adjust
                 [Xshift,Yshift]=findXYShift(obj);
-                Pos(1)=Pos(1)+sign(Xshift)*min(abs(Xshift),obj.MaxXYShift);
-                Pos(2)=Pos(2)+sign(Yshift)*min(abs(Yshift),obj.MaxXYShift);
+                Pos(1)=Pos(1)+sign(-Xshift)*min(abs(Xshift),obj.MaxXYShift);
+                Pos(2)=Pos(2)+sign(-Yshift)*min(abs(Yshift),obj.MaxXYShift);
                 obj.StageObj.setPosition(Pos);
                 
                 %show overlay
@@ -539,6 +540,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             model = polyval(P,Zpos_fit,S,MU);
             zAtMax=(-sqrt(P(2)^2-3*P(1)*P(3))-P(2))/3/P(1)*MU(2)+MU(1);
             
+            obj.maxACmodel=polyval(P,zAtMax);
             %plot results
             if isempty(obj.PlotFigureHandle)||~ishandle(obj.PlotFigureHandle)
                 obj.PlotFigureHandle=figure;
@@ -660,20 +662,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.MaxXYShift = obj.MaxXYShift;
             Attribute.MaxZShift = obj.MaxZShift;
             
-            %Return 0 as null marker
-            Data.ZFitPos = 0;
-            Data.ZFitModel = 0;
-            Data.ZMaxAC = 0;
-            Data.Image_Reference = 0;
-            Data.Image_Current = 0;
-            Data.ZStack = 0;
-            
-            if ~isempty(obj.ZFitPos);Data.ZFitPos = obj.ZFitPos;end
-            if ~isempty(obj.ZFitModel);Data.ZFitModel = obj.ZFitModel;end
-            if ~isempty(obj.ZMaxAC); Data.ZMaxAC = obj.ZMaxAC;end
-            if ~isempty(obj.Image_Reference);Data.Image_Reference = obj.Image_Reference;end
-            if ~isempty(obj.Image_Current); Data.Image_Current = obj.Image_Current;end
-            if ~isempty(obj.ZStack);Data.ZStack = obj.ZStack;end
+            Data.ZFitPos = obj.ZFitPos;
+            Data.ZFitModel = obj.ZFitModel;
+            Data.ZMaxAC = obj.ZMaxAC;
+            Data.Image_Reference = obj.Image_Reference;
+            Data.Image_Current = obj.Image_Current;
+            Data.ZStack = obj.ZStack;
             
             Children=[];
             

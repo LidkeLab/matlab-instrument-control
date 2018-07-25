@@ -86,11 +86,11 @@ properties2gui()
 
     function resetSCMOS(~,~)
       %  checkLiveview();
-      obj.CameraObjSCMOS.reset();
+      obj.SCMOS.reset();
     end
 
     function abort(~,~)
-       obj.CameraObjSCMOS.abort(); 
+       obj.SCMOS.abort(); 
     end
 
     function photobleach(~,~)
@@ -106,7 +106,7 @@ properties2gui()
     end
 
     function SCMOSgui(~,~)
-       obj.CameraObjSCMOS.gui; 
+       obj.SCMOS.gui; 
     end
 %  All figure have these functions but will be different contents
 

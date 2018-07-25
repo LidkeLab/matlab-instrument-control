@@ -1,25 +1,16 @@
 classdef MIC_GalvoDigital < MIC_Abstract
-    %  MIC_GalvoDigital: Matlab instrument class to control Galvo Mirror
-    %  using digital input
+    %MIC_GalvoDigital controls Galvo Mirror
     %
-    %  This class controls the galvo mirror (Cambridge Technology)on the  
-    %  HSM microscope.It changes the angle of galvo mirror to scan the  
-    %  sample. Input voltage [-10,10] to change the angle in [-15,15], 
-    %  is sent by 16 channels on NI card. There are 4 more
+    %  This is for HSM microscope (Cambridge Technology. It changes the angle
+    %  of galvo mirror to scan the sample. Input voltage [-10,10] to change the
+    %  angle in [-15,15], is sent by 16 channels on NI card. There are 4 more
     %  channels to make the galvo enable to move.
-    %
-    %  Example: obj=MIC_GalvoDigital('Dev1','Port0/Line0:31');
-    %  Funtions: delete, clearSession, enable, disable, reset, setSequence,
-    %  angle2word, word2angle, get.Angle, setAngle, exportState,
-    %  set.Voltage, get.Voltage, updateGui
     %
     %  REQUIREMENTS:
     %  MIC_Abstract.m
-    %  MATLAB software version R2016b or later
-    %  Data Acquisition Toolbox
     %  MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
-    % CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
+    %  Example: obj=MIC_GalvoDigital('Dev1','Port0/Line0:31');
     
     properties(SetAccess=protected)
         InstrumentName='GalvoDigital' % Descriptive Instrument Name
@@ -60,8 +51,9 @@ classdef MIC_GalvoDigital < MIC_Abstract
     end
     
     methods
+        % Constructor 
         function obj=MIC_GalvoDigital(NIDevice,DOChannel)
-            % Object constructor
+            % Example: GMirror=MIC_GalvoDigital('Dev1','Port0/Line0:31');
             obj=obj@MIC_Abstract(~nargout);
             if nargin<2
                 error('NIDevice and DOChannel must be defined')
@@ -72,7 +64,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
                        
             % 16 channels to change the angles
             obj.DAQsessionAngle.addDigitalChannel(NIDevice,'Port0/Line0:15','OutputOnly');
-            % 4 channels to make the galvo mirror be enabled to move
+            % 4 channels to make the galvo mirror be  enabled to move
             obj.DAQsessionEnable.addDigitalChannel(NIDevice,'Port0/Line24:27','OutputOnly');
             
             obj.NIDevice=NIDevice;
@@ -83,15 +75,16 @@ classdef MIC_GalvoDigital < MIC_Abstract
             outputSingleScan(obj.DAQsessionAngle,zeros(1,16));
         end
         
+        % Deconstructor
         function delete(obj)
-            % Object deconstructor
             obj.clearSession;
             clear obj.DAQsessionAngle obj.DAQsessionEnable obj.ClockConnection
         end
         
+        % To clear all channels
         function clearSession(obj)
-            % Clear all channels to stop running obj.DAQsessionAngle 
-            % otherwise you can't send another signal to these channels
+            % to stop running obj.DAQsessionAngle otherwise you can't send another
+            % signal to these channels
             stop(obj.DAQsessionAngle)
             
             % to remove previous clock connections
@@ -107,26 +100,26 @@ classdef MIC_GalvoDigital < MIC_Abstract
         end
         
         function reset(obj)
-            % Completely reset the DAQ device.  Use only in emergencies!
+            % completely reset the DAQ device.  Use only in emergencies!
             daqreset(obj.DAQsession);
             daqreset(obj.DAQsessionEnable);
         end
         
-        function enable(obj)
         % set CLRpin = 1 to be able to move the Galvo
+        function enable(obj)
             outputSingleScan(obj.DAQsessionEnable,[0 0 0 1]);
             obj.IsEnable=1;
         end
         
-        function disable(obj)
         % set CLRpin = 0 to be able not to move the Galvo
+        function disable(obj)
             outputSingleScan(obj.DAQsessionEnable,[0 0 0 0]);
             obj.IsEnable=0;
         end
         
+        % Create and send 16 words in a sequence for the 16 channels to
+        % move the galvo mirror
         function setSequence(obj)
-            % Create and send 16 words in a sequence for the 16 channels to
-            % move the galvo mirror
             % Usage: setSequence(StepSize, NumberOfStepsPerScan, NumberOfScans, Offset)
             % StepSize - the size of each step in degrees
             % NumberOfStepsPerScan - number of steps that occurs in each scan
@@ -201,8 +194,8 @@ classdef MIC_GalvoDigital < MIC_Abstract
             obj.updateGui();
         end
         
+        % Define a Word for TTL channel to specific Angle
         function Word = angle2word(obj,Angle)
-            % Define a Word for TTL channel to specific Angle
             if nargin<2
                 error('enter a valid value for Angle as an input')
             end
@@ -218,8 +211,8 @@ classdef MIC_GalvoDigital < MIC_Abstract
             
         end
         
+        % Create the 16bit Words based on angle
         function Angle = word2angle(obj,value)
-            % Create the 16bit Words based on angle
             if size(value,1) ~= 1
                 error('Galvo:WordOutOfRange', 'Word must be integer between 0 and 65535 or a 1x16 array');
             end
@@ -236,13 +229,13 @@ classdef MIC_GalvoDigital < MIC_Abstract
             Angle = value/65535*(2*obj.Range)  - 15;
         end
         
+        % show the angle of Galvo Mirror based on an input 16bit Word
         function value = get.Angle(obj)
-            % show the angle of Galvo Mirror based on an input 16bit Word
             value = obj.word2angle(obj.Word);
         end
        
+        % set the angle by sending a 16bit Words to NI card
         function obj = setAngle(obj) %#ok<MCHV2>
-            % set the angle by sending a 16bit Words to NI card
             if isempty(obj.Word)
                 error('The Angle is not specified')
             end
@@ -254,15 +247,17 @@ classdef MIC_GalvoDigital < MIC_Abstract
             obj.updateGui();
         end
         
+        % output of this class 
         function [Attributes,Data,Children]=exportState(obj)
             % Export the object current state
             Attributes=[];
+            
+            % no Data is saved in this class
             Data=[];
             Children=[];
         end
         
         function obj = set.Voltage(obj,value)
-            % Sets voltage to value
            if value < -10 || value > 10
                error('Galvo:VoltageOutOfRange', 'Voltage must be between -10 and 10 volts.');
            end
@@ -270,7 +265,6 @@ classdef MIC_GalvoDigital < MIC_Abstract
         end
         
         function value = get.Voltage(obj)
-            % Gets current voltage
            value = (obj.Word/65535*20)-10; 
         end
         
@@ -310,14 +304,8 @@ classdef MIC_GalvoDigital < MIC_Abstract
     
     methods (Static=true)
         function unitTest(obj)
-            % Testing the functionality of the class/instrument
-            fprintf('Creating Object\n')
             G=MIC_GalvoDigital('Dev1','Port0/Line0:31');
-            fprintf('Exporting current sate\n')
-            Expt=G.exportState;
-            disp(Expt);
-            fprintf('Deleting Object\n')
-            G.delete;
+            
         end
     end
     methods(Static)

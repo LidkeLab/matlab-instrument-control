@@ -70,22 +70,22 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     
     methods
 %         function obj=SeqReg3DTrans(CameraObj,StageObj,MotorObj)
-          function obj=MIC_SeqReg3DTrans(SCMOS,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z,Stage_Stepper) %new
+          function obj=SeqReg3DTrans(CameraObj,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z,MotorObj) %new
 
             % pass in input for autonaming feature MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
            
             % check input
             if nargin <5
-                error('MIC_Reg3DTrans:InvInput','You must pass in Camera, Stepper and Piezo Objects')
+                error('MIC_Reg3DTrans:InvInput','You must pass in Camera, Stage and Lamp Objects')
             end
             
             %obj.StageObj=StageObj;
             obj.Stage_Piezo_X=Stage_Piezo_X;
             obj.Stage_Piezo_Y=Stage_Piezo_Y;
             obj.Stage_Piezo_Z=Stage_Piezo_Z;
-            obj.CameraObj=SCMOS;
-            obj.MotorObj=Stage_Stepper;
+            obj.CameraObj=CameraObj;
+            obj.MotorObj=MotorObj;
             [p,~]=fileparts(which('Reg3DTrans'));
             f=fullfile(p,'Reg3DTrans_Properties.mat');
             if exist(f,'file')
@@ -640,9 +640,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             save(f,'Image_Reference','Image_Current','Image_Overlay');
         end
         
-%         function delete(obj)
-%            []; 
-%         end
+        function delete(obj)
+           []; 
+        end
         
         function unitTest(obj)
             [];

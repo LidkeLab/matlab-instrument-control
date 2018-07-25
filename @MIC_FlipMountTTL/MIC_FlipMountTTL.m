@@ -1,29 +1,19 @@
 classdef MIC_FlipMountTTL < MIC_Abstract %by FF
-    % MIC_FlipMountTTL: Matlab Instrument Control Class for the flipmount
-    %
-    % This class controls a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M
-    % controller.  Controller is triggered in via a TTL signal passing from the
-    % computer to the controller through a NI-DAQ card. TTL signal lets the
-    % flipmount to be set in up or down positions, so flipmount is regulated by
-    % the Digital voltage output of the NI-DAQ card.
-    %
-    % Make the object by: obj = MIC_FlipMountTTL('Dev#', 'Port#/Line#') where:
+    % MIC_FlipMountTTL Matlab Instrument Control Class for the flipmount
+    % This class controls a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M controller.
+    % Controller is triggered in via a TTL signal passing from the computer to the
+    % controller through a NI-DAQ card. TTL signal lets the flipmount to be set in up or down positions.
+    % so flipmount is regulated by the Digital voltage output of the NI-DAQ card.
+    % Make the object by: obj=MIC_FlipMountTTL('Dev#','Port#/Line#')where:
     % Dev#  = Device number assigned to DAQ card by computer USB port of the
     % Port# = Port number in use on the DAQ card by your flipmount connection
     % Line# = Line number in use on the DAQ card by the Port
-    %
-    % Example: obj = MIC_FlipMountTTL('Dev1', 'Port0/Line1');
-    % Functions: FilterIn, FilterOut, gui, exportState
-    %
-    % REQUIREMENTS:
+    
+    %   REQUIRES:
     %   MIC_Abstract.m
     %   Data Acquisition Toolbox on MATLAB
-    %   MATLAB NI-DAQmx driver in MATLAB installed via the Support Package
-    %      Installer
-    %   type "SupportPackageInstaller" on command line to install the support
-    %      package for NI-DAQmx
-    %
-    % CITATION: Farzin Farzam, Lidkelab, 2017.
+    %   MATLAB NI-DAQmx driver in MATLAB installed via the Support Package Installer
+    %   type "SupportPackageInstaller" on command line to install the support package for NI-DAQmx
     
     properties (SetAccess=protected)
         InstrumentName = 'FlipMountTTL';
@@ -127,18 +117,16 @@ classdef MIC_FlipMountTTL < MIC_Abstract %by FF
        end
         
 
-        function [Attributes,Data,Children]=exportState(obj)
-            % Exports current state of the instrument
-            Attributes.IsOpen = obj.IsOpen;
-            Attributes.InstrumentName = obj.InstrumentName;
-            Data=[];
-            Children=[];
+        function State=exportState(obj)
+            
+            State.IsOpen = obj.IsOpen;
+            State.InstrumentName = obj.InstrumentName;
         end
 
         
     end
     
-    methods(Static=true)% 
+    methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
         % test this class on command line by: MIC_FlipMountTTL.unitTest('Dev1','Port0/Line1')
         function State=unitTest(NIDevice,DOChannel)
             % Unit test of object functionality

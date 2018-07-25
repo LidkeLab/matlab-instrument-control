@@ -1,13 +1,10 @@
-classdef MIC_ActiveReg3D_Seq < handle
-   properties
+classdef MIC_ActiveReg3D_SPT < handle     %MIC_Abstract
+ 
+    
+    properties
         CameraObj
-       % StageObj %old
-        Stage_Piezo_X %new
-        Stage_Piezo_Y %new
-        Stage_Piezo_Z %new
-        SCMOS_PixelSize;
-%       PixelSize=0.108;            %micron
-        PixelSize=0.124;            % bpp in micron
+        StageObj
+        PixelSize;            %micron
         ImageFile
         Image_ReferenceStack
         Image_ReferenceInfocus
@@ -24,7 +21,7 @@ classdef MIC_ActiveReg3D_Seq < handle
         Tol_Z=.01;                  %micron
         MaxIter=10;
         MaxXYShift = 0.002;         %micron
-        MaxZShift  = 0.1;          %micron
+        MaxZShift  = 0.05;          %micron
         ZFitPos;
         ZFitModel;
         ZMaxAC;
@@ -41,8 +38,11 @@ classdef MIC_ActiveReg3D_Seq < handle
         
         Timer;
         Period=2;
+        PlotFigureHandle
     end
-    
+    properties (SetAccess=protected)
+        InstrumentName = 'Active3DTransmission'; %Descriptive name of instrument.  Must be a valid Matlab varible name. 
+    end
     properties (Access='private')
         ZMax_Adapt;
         ZStep_Adapt;
@@ -50,13 +50,8 @@ classdef MIC_ActiveReg3D_Seq < handle
         Fig_h_ov;
     end 
     methods
-        
-        %function obj=ActiveReg3D(CameraObj,StageObj) %old
-         function obj=ActiveReg3D(CameraObj,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z) %new
-            %obj.StageObj=StageObj; old
-            obj.Stage_Piezo_X=Stage_Piezo_X; %new
-            obj.Stage_Piezo_Y=Stage_Piezo_Y; %new
-            obj.Stage_Piezo_Z=Stage_Piezo_Z; %new
+        function obj=MIC_ActiveReg3D_SPT(CameraObj,StageObj)
+            obj.StageObj=StageObj;
             obj.CameraObj=CameraObj;
             
             [p,~]=fileparts(which('ActiveReg3D'));
@@ -79,31 +74,22 @@ classdef MIC_ActiveReg3D_Seq < handle
         
         function calibrate(obj)
             %move stage over 5 microns and fit line
-            XYZ1=obj.Stage_Piezo_X.getPosition; %new
-            XYZ2=obj.Stage_Piezo_Y.getPosition; %new
-            XYZ3=obj.Stage_Piezo_Z.getPosition; %new
-            XYZ=[XYZ1,XYZ2,XYZ3]; %new
+            X=obj.StageObj.Position;
             N=10;
             StepSize=0.1; %micron
             deltaX=((0:N-1)*StepSize)';
             ImSz=obj.CameraObj.ImageSize;
             ImageStack=zeros(ImSz(1),ImSz(2),N);
             
-            Xstart=XYZ; %new
+            Xstart=X;
             for ii=1:N
-                %X(1)=Xstart(1)+deltaX(ii); old
-                XYZ(1)=Xstart(1)+deltaX(ii); %new
-                %X(2)=Xstart(2)+deltaX(ii);
-                XYZ(2)=Xstart(2)+deltaX(ii); %new
-                %obj.StageObj.set_position(X); old
-                obj.Stage_Piezo_X.setPosition(XYZ(1)); %new
-                obj.Stage_Piezo_Y.setPosition(XYZ(2)); %new
+                X(1)=Xstart(1)+deltaX(ii);
+                X(2)=Xstart(2)+deltaX(ii);
+                obj.StageObj.setPosition(X);
                 pause(.5);
                 ImageStack(:,:,ii)=obj.capture_single;
             end
-             obj.Stage_Piezo_X.setPosition(Xstart(1)); %new
-             obj.Stage_Piezo_Y.setPosition(Xstart(2)); %new
-             obj.Stage_Piezo_Z.setPosition(Xstart(3)); %new
+            obj.StageObj.setPosition(Xstart);
             dipshow(ImageStack);
             
             svec=zeros(N,2);
@@ -148,19 +134,17 @@ classdef MIC_ActiveReg3D_Seq < handle
         
         function takeRefImageStack(obj)
             
-            %Take several images to auto scale
-%             for nn=1:10 
-%                 obj.capture_single();
-%             end
-            
-            XYZ1=obj.Stage_Piezo_X.getPosition; %new
-            XYZ2=obj.Stage_Piezo_Y.getPosition; %new
-            XYZ3=obj.Stage_Piezo_Z.getPosition; %new
-            XYZ=[XYZ1,XYZ2,XYZ3]; %new
-            obj.X_Current=XYZ(1); 
+            %             %Take several images to auto scale ???
+            %             for nn=1:10
+            %                 obj.capture_single();
+            %             end
+            %
+            obj.capture_single();
+            XYZ=obj.StageObj.Position;
+            obj.X_Current=XYZ(1);
             obj.Y_Current=XYZ(2);
             obj.Z_Current=XYZ(3);
-                      
+            
             Zmax=obj.ZStack_MaxDev;     %micron
             Zstep=obj.ZStack_Step;      %micron
         
@@ -168,9 +152,7 @@ classdef MIC_ActiveReg3D_Seq < handle
             N=length(obj.ZStack_Pos);
             zstack=[];
             for nn=1:N
-                obj.Stage_Piezo_X.setPosition(obj.X_Current); %new
-                obj.Stage_Piezo_Y.setPosition(obj.Y_Current); %new
-                obj.Stage_Piezo_Z.setPosition(obj.ZStack_Pos(nn)); %new
+                obj.StageObj.setPosition([obj.X_Current,obj.Y_Current,obj.ZStack_Pos(nn)]);
                 if nn==1
                     pause(0.2);
                 end
@@ -180,11 +162,7 @@ classdef MIC_ActiveReg3D_Seq < handle
             obj.Image_ReferenceStack=zstack;
             ind=find(obj.ZStack_Pos==obj.Z_Current);
             obj.Image_ReferenceInfocus=squeeze(zstack(:,:,ind(1)));
-            %obj.StageObj.set_position(XYZ); old
-            obj.Stage_Piezo_X.setPosition(obj.X_Current); %new
-            obj.Stage_Piezo_Y.setPosition(obj.Y_Current); %new
-            obj.Stage_Piezo_Z.setPosition(obj.Z_Current); %new
-            
+            obj.StageObj.setPosition(XYZ);
             obj.IndexFocus=ind;
             pause(0.2);
         end
@@ -205,10 +183,7 @@ classdef MIC_ActiveReg3D_Seq < handle
         function align2imageFit(obj,varargin)
             %find z-position and adjust
             [Zfit]=obj.findZPos();
-            XYZ1=obj.Stage_Piezo_X.getPosition; %new
-            XYZ2=obj.Stage_Piezo_Y.getPosition; %new
-            XYZ3=obj.Stage_Piezo_Z.getPosition; %new
-            XYZ=[XYZ1,XYZ2,XYZ3]; %new        
+            X=obj.StageObj.Position;
             
             %This is the difference between the reference and current image
             Zshift=real(obj.ZStack_Pos(obj.IndexFocus)-Zfit);
@@ -220,18 +195,16 @@ classdef MIC_ActiveReg3D_Seq < handle
             %Change Z position
             %This restricts movement to obj.MaxZShift
             obj.Correction(3)=sign(obj.ErrorSignal(3))*min(obj.MaxZShift,abs(obj.ErrorSignal(3)));
-            XYZ(3)=XYZ(3)+obj.Correction(3); %new
-            obj.Stage_Piezo_X.setPosition(XYZ(1)); %new
-            obj.Stage_Piezo_Y.setPosition(XYZ(2)); %new
-            obj.Stage_Piezo_Z.setPosition(XYZ(3)); %new
+            X(3)=X(3)+obj.Correction(3);
+            obj.StageObj.setPosition(X);
             
             %Take new image, find XY position and adjust
             [Xshift,Yshift]=findXYShift(obj);
             obj.ErrorSignal(1:2)=[Xshift,Yshift]; % define error signal
-            obj.Correction(1)=sign(obj.ErrorSignal(1))*min(obj.MaxXYShift,abs(obj.ErrorSignal(1)));
-            obj.Correction(2)=sign(obj.ErrorSignal(2))*min(obj.MaxXYShift,abs(obj.ErrorSignal(2)));
-            XYZ(1:2)=XYZ(1:2)+obj.Correction(1:2); %new
-            obj.PosPostCorrect=XYZ; %new
+            obj.Correction(1)=sign(-obj.ErrorSignal(1))*min(obj.MaxXYShift,abs(obj.ErrorSignal(1)));
+            obj.Correction(2)=sign(-obj.ErrorSignal(2))*min(obj.MaxXYShift,abs(obj.ErrorSignal(2)));
+            X(1:2)=X(1:2)+obj.Correction(1:2);
+            obj.PosPostCorrect=X;
             
             %Keep history of correction
             obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);
@@ -239,9 +212,7 @@ classdef MIC_ActiveReg3D_Seq < handle
             obj.PosPostCorrect_History=cat(1,obj.PosPostCorrect_History,obj.PosPostCorrect);
             
             %Image after all corrections
-            obj.Stage_Piezo_X.setPosition(XYZ(1)); %new
-            obj.Stage_Piezo_Y.setPosition(XYZ(2)); %new
-            obj.Stage_Piezo_Z.setPosition(XYZ(3)); %new
+            obj.StageObj.setPosition(X);
             obj.Image_Current=cat(3,obj.Image_Current,obj.capture_single());
 
         end
@@ -276,6 +247,18 @@ classdef MIC_ActiveReg3D_Seq < handle
             model = polyval(P,Zpos_fit,S,MU);
             zAtMax=(-sqrt(P(2)^2-3*P(1)*P(3))-P(2))/3/P(1)*MU(2)+MU(1);
 
+            %plot results
+            if isempty(obj.PlotFigureHandle)||~ishandle(obj.PlotFigureHandle)
+                obj.PlotFigureHandle=figure;
+            else
+                figure(obj.PlotFigureHandle);
+            end
+            hold off
+            plot(obj.ZStack_Pos,maxAC,'ro');hold on
+            plot(Zpos_fit,model,'b','linewidth',2);
+            xlabel('Z position (microns)')
+            ylabel('Max of Crosscorrelation')
+            
             obj.ZFitPos=Zpos_fit;
             obj.ZFitModel=model;
             obj.ZMaxAC=maxAC;
@@ -298,8 +281,8 @@ classdef MIC_ActiveReg3D_Seq < handle
                 
             %find 2D shift         
             svec=findshift(Current,Ref,'iter'); %finds shift between two images
-            Xshift=svec(1)*obj.PixelSize; %note dipimage permute
-            Yshift=svec(2)*obj.PixelSize; % IR camera is mirror reflection in Y with the sCMOS
+            Xshift=svec(2)*obj.PixelSize; %note dipimage permute
+            Yshift=svec(1)*obj.PixelSize; % IR camera is mirror reflection in Y with the sCMOS
         end
         
         function out=capture_single(obj)
