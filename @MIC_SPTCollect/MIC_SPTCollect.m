@@ -41,10 +41,14 @@ classdef MIC_SPTCollect < MIC_Abstract
         CameraEMGainLow=2;              % Low camera gain value
         CameraROI=1;                    % Camera ROI (see gui for specifics)
         PixelSize;                      % Pixel size determined from calibration Andor Camera
+        OrientMatrix;                   % unitary matrix to show orientation between Andor Camera and Stage([a b;c d])
         IRExpTime_Focus_Set=0.01;       % Exposure time during focus IR Camera
         IRExpTime_Sequence_Set=0.01;    % Exposure time during sequence IR Camera
         IRCameraROI=2;                  % IRCamera ROI (see gui for specifics)
         IRPixelSize;                    % PixelSize for IR Camera
+        IROrientMatrix;                 % unitary matrix to show orientation between IR Camera and Stage([a b;c d])
+
+        
         % Light source params
         Laser638Low;          % Low power 638 laser
         Laser561Low;          % Low power 561 laser
@@ -84,7 +88,8 @@ classdef MIC_SPTCollect < MIC_Abstract
         IRsequenceLength_offset=40;%in the unit of frame for IRCamera
         sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
         ActiveRegCheck=0;
-        RegCamType='Andor Camera'         % Type of Camera Bright Field Registration 
+        RegCamType='Andor Camera'  % Type of Camera for Reg3dTrans class 
+                                   %'Andor Camera' or 'IRCamera'
         CalFilePath
         zPosition
         MaxCC
@@ -369,8 +374,8 @@ classdef MIC_SPTCollect < MIC_Abstract
         function set_RegCamType(obj)
             
             if strcmp(obj.RegCamType,'Andor Camera');
-
-                CalFileName=fullfile(obj.CalFilePath,'SPT_AndorPixelSize.mat');
+               
+                CalFileName=fullfile(obj.CalFilePath,'SPT_AndorCalibration.mat');
 
                 obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,CalFileName);
                 obj.R3DObj.LampPower=obj.LampPower;
@@ -380,16 +385,36 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.R3DObj.EMgain=2;
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
+                %check if calibration file exsits
+                if ~exist(CalFileName,'file')
+                    obj.R3DObj.calibrate;
+                end  
+                if exist(CalFileName,'file')
+                    a=load(CalFileName);
+                    obj.PixelSize=a.PixelSize;
+                    clear a;
+                end
           
             elseif strcmp(obj.RegCamType,'IRCamera')
-               CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
-               obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj,CalFileName);
-               obj.R3DObj.LampPower=obj.Lamp850Power;
+               CalFileName=fullfile(obj.CalFilePath,'SPT_IRCalibration.mat');
+                obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj,CalFileName);
+                obj.R3DObj.LampPower=obj.Lamp850Power;
                 obj.R3DObj.LampWait=2.5;
                 obj.R3DObj.CamShutter=false;
                 obj.R3DObj.ChangeEMgain=false;
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
+                %choose 256 by 256 ROI for IRCamera
+                obj.R3DObj.CameraObj.ROI=[515 770 467 722];
+               %check if calibration file exsits
+                if ~exist(CalFileName,'file')
+                    obj.R3DObj.calibrate;
+                end  
+                if exist(CalFileName,'file')
+                    a=load(CalFileName);
+                    obj.PixelSize=a.PixelSize;
+                    clear a;
+                end
             end
             
         end
