@@ -147,8 +147,52 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
        
        function delete(obj)
           delete(obj.CameraIR); 
-           
        end
+       
+       function [Attributes,Data,Children] = exportState(obj)
+            % exportState Exports current state of all hardware objects
+            % and SEQ_SRcollect settings
+            % Children:
+            [Children.CameraSCMOS.Attributes,Children.CameraSCMOS.Data,Children.CameraSCMOS.Children]=...
+                obj.CameraSCMOS.exportState();
+            [Children.CameraIR.Attributes,Children.CameraIR.Data,Children.CameraIR.Children]=...
+                obj.CameraIR.exportState();
+            [Children.StageStepper.Attributes,Children.StageStepper.Data,Children.StageStepper.Children]=...
+                obj.StageStepper.exportState();
+            [Children.Laser405.Attributes,Children.Laser405.Data,Children.Laser405.Children]=...
+                obj.Laser405.exportState();
+            [Children.Laser647.Attributes,Children.Laser647.Data,Children.Laser642.Children]=...
+                obj.Laser647.exportState();
+            [Children.Lamp850.Attributes,Children.Lamp850.Data,Children.Lamp850.Children]=...
+                obj.Lamp850.exportState();
+            [Children.Lamp660.Attributes,Children.Lamp660.Data,Children.Lamp660.Children]=...
+                obj.Lamp660.exportState();  
+            Children = [];
+            
+            % Our Properties
+            Attributes.ExposureTimeLampFocus = obj.ExposureTimeLampFocus;
+            Attributes.ExposureTimeLaserFocus = obj.ExposureTimeLaserFocus;
+            Attributes.ExposureTimeSequence = obj.ExposureTimeSequence;
+            Attributes.ExposureTimeCapture = obj.ExposureTimeCapture;
+            Attributes.NumberOfFrames = obj.NumberOfFrames;
+            Attributes.NumberOfSequences = obj.NumberOfSequences;
+            Attributes.NumberOfPhotoBleachingIterations = ...
+                obj.NumberOfPhotoBleachingIterations; 
+            Attributes.SCMOS_ROI_Collect = obj.SCMOS_ROI_Collect;
+            Attributes.SCMOS_ROI_Full = obj.SCMOS_ROI_Full; 
+            Attributes.IRCamera_ROI = obj.IRCamera_ROI; 
+            Attributes.SCMOS_PixelSize=obj.SCMOS_PixelSize;
+            
+            Attributes.SaveDir = obj.SaveDir;
+            Attributes.RegType = obj.RegType;
+            
+            % light source properties
+            Attributes.LaserPower405Activate = obj.LaserPower405Activate;
+            Attributes.LaserPower405Bleach = obj.LaserPower405Bleach; 
+            Attributes.LaserPowerSequence = obj.LaserPowerSequence;
+            Attributes.LaserPowerFocus = obj.LaserPowerFocus;
+            Data=[];
+        end
        
        function setup_SCMOS(obj)
            obj.CameraSCMOS=MIC_HamamatsuCamera();
@@ -694,10 +738,10 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
                 case 'mat'
                 case 'h5'
                     FileH5=FileName; %FF
-%                     FileH5=fullfile(obj.SaveDir,[obj.BaseFileName DateString '.h5']); 
+                    %FileH5=fullfile(obj.SaveDir,[obj.BaseFileName DateString '.h5']);
                     MIC_H5.createFile(FileH5);
-                    MIC_H5.createGroup(FileH5,'Data');
-                    MIC_H5.createGroup(FileH5,'Data/Channel01');
+                    MIC_H5.createGroup(FileH5,'Channel01');
+                    MIC_H5.createGroup(FileH5,'Channel01/Zposition001');
                 otherwise
                     error('StartSequence:: unknown file save type')
             end
@@ -778,7 +822,7 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
                                 save(fn,'sequence','Params');
                             case 'h5' %This will become default
                                 S=sprintf('Data%04d',nn)
-                                MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
+                                MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition001',S,sequence);
                             otherwise
                                 error('StartSequence:: unknown SaveFileType')
                         end
@@ -798,18 +842,28 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
                 
                 %Save Everything
                 if ~obj.IsBleach %Append Data
-                    Cam=struct(obj.CameraSCMOS);
-                    Cam.FigureHandle=[];
-                    Cam.ImageHandle=[];
-                    F.Camera=Cam;
-                    F.Active=obj.ActiveReg.exportState(); %FF
-                    F.Align=obj.AlignReg.exportState();
-%                     Camera=Cam;
-%                     Active=obj.ActiveReg.exportState(); %FF
-%                     Align=obj.AlignReg.exportState();
-%                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Camera',Camera);
-%                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Active',Active);
-%                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Align',Align);
+                    switch obj.SaveFileType
+                        case 'mat'
+                            %Nothing to do
+                        case 'h5'
+                            S='Channel01/Zposition001';
+                            MIC_H5.createGroup(FileH5,S);
+                            obj.save2hdf5(FileH5,S);
+                        otherwise
+                            error('StartSequence:: unknown SaveFileType')
+                    end
+%                     Cam=struct(obj.CameraSCMOS);
+%                     Cam.FigureHandle=[];
+%                     Cam.ImageHandle=[];
+%                     F.Camera=Cam;
+%                     F.Active=obj.ActiveReg.exportState(); %FF
+%                     F.Align=obj.AlignReg.exportState();
+% %                     Camera=Cam;
+% %                     Active=obj.ActiveReg.exportState(); %FF
+% %                     Align=obj.AlignReg.exportState();
+% %                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Camera',Camera);
+% %                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Active',Active);
+% %                     MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01','Align',Align);
                 end
                 
                 %delete ActiveReg
@@ -906,52 +960,6 @@ NewPos=[NewPos_X,NewPos_Y,FocusPosZ]; %new
     end
     
     methods (Static)
-        
-    function [Attributes,Data,Children] = exportState(obj)
-            % exportState Exports current state of all hardware objects
-            % and SEQ_SRcollect settings
-            % Children:
-            [Children.CameraSCMOS.Attributes,Children.CameraSCMOS.Data,Children.CameraSCMOS.Children]=...
-                obj.CameraSCMOS.exportState();
-            [Children.CameraIR.Attributes,Children.CameraIR.Data,Children.CameraIR.Children]=...
-                obj.CameraIR.exportState();
-            [Children.StageStepper.Attributes,Children.StageStepper.Data,Children.StageStepper.Children]=...
-                obj.StageStepper.exportState();
-            [Children.Laser405.Attributes,Children.Laser405.Data,Children.Laser405.Children]=...
-                obj.Laser405.exportState();
-            [Children.Laser647.Attributes,Children.Laser647.Data,Children.Laser642.Children]=...
-                obj.Laser647.exportState();
-            [Children.Lamp850.Attributes,Children.Lamp850.Data,Children.Lamp850.Children]=...
-                obj.Lamp850.exportState();
-            [Children.Lamp660.Attributes,Children.Lamp660.Data,Children.Lamp660.Children]=...
-                obj.Lamp660.exportState();  
-            
-            % Our Properties
-            Attributes.ExposureTimeLampFocus = obj.ExposureTimeLampFocus;
-            Attributes.ExposureTimeLaserFocus = obj.ExposureTimeLaserFocus;
-            Attributes.ExposureTimeSequence = obj.ExposureTimeSequence;
-            Attributes.ExposureTimeCapture = obj.ExposureTimeCapture;
-            Attributes.NumberOfFrames = obj.NumberOfFrames;
-            Attributes.NumberOfSequences = obj.NumberOfSequences;
-            Attributes.NumberOfPhotoBleachingIterations = ...
-                obj.NumberOfPhotoBleachingIterations; 
-            Attributes.CameraGain = obj.CameraGain;
-            Attributes.CameraEMGainHigh = obj.CameraEMGainHigh;
-            Attributes.CameraEMGainLow = obj.CameraEMGainLow;
-            Attributes.CameraROI = obj.CameraROI;
-            Attributes.CameraPixelSize=obj.PixelSize;
-            
-            Attributes.SaveDir = obj.SaveDir;
-            Attributes.RegType = obj.RegType;
-            
-            % light source properties
-            Attributes.LaserPower405Activate = obj.LaserPower405Activate;
-            Attributes.LaserPower405Bleach = obj.LaserPower405Bleach; 
-            Attributes.LaserPowerSequence = obj.LaserPowerSequence;
-            Attributes.LaserPowerFocus = obj.LaserPowerFocus;
-            Data=[];
-            end
-            
         function State = unitTest()
             State = obj.exportState();
         end
