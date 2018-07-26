@@ -151,12 +151,7 @@ classdef MIC_Abstract < handle
         
         function saveAttAndData(File,Group,Attributes,Data,Children)
             %Save Attributes and data to an existing file in a group
-            IsBusy=H5Write_Async();
-            while IsBusy
-                pause(0.05);
-                IsBusy=H5Write_Async();
-            end
-
+            
             %Create group
             MIC_H5.createGroup(File,Group)
           
@@ -165,8 +160,8 @@ classdef MIC_Abstract < handle
             if isempty(Data)
                 %h5create(File,['/' Group],1);
             else
-                Data_Names = fieldnames(Data)
-                NData=length(Data_Names)
+                Data_Names = fieldnames(Data);
+                NData=length(Data_Names);
                 
                 for nn=1:NData
                     h5create(File,['/' Group '/' Data_Names{nn}],size(Data.(Data_Names{nn})));
@@ -178,9 +173,7 @@ classdef MIC_Abstract < handle
             Att_Names = fieldnames(Attributes);
             NAtt=length(Att_Names);
             for nn=1:NAtt
-                Att=Attributes.(Att_Names{nn});
-                if islogical(Att);Att=single(Att);end
-                h5writeatt(File,['/' Group],Att_Names{nn},Att);
+                h5writeatt(File,['/' Group],Att_Names{nn},Attributes.(Att_Names{nn}));
             end
             
             %Save the Children!

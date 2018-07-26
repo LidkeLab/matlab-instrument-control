@@ -1,6 +1,4 @@
 function gui(obj)
-% gui: Graphical user interface for MIC_MCLNanoDrive
-%
 
 h = findall(0,'tag','MIC_MCLNanoDrive_gui');
 if ~(isempty(h))

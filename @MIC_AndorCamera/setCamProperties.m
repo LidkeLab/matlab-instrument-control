@@ -124,7 +124,10 @@ for ii=1:length(camFields)
         case 'FrameTransferMode'
             obj.LastError = SetFrameTransferMode(CamSetting.FrameTransferMode.Bit);
             obj.errorcheck('SetFrameTransferMode');
+            obj.CameraSetting.FrameTransferMode.Ind=CamSetting.FrameTransferMode.Ind;
             obj.CameraSetting.FrameTransferMode.Bit=CamSetting.FrameTransferMode.Bit;
+            obj.CameraSetting.FrameTransferMode.Desc=CamSetting.FrameTransferMode.Desc;
+
     end
 end
         

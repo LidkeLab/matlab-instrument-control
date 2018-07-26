@@ -16,7 +16,6 @@ guiFig = figure('NumberTitle','off','Resize','off','Units','pixels','MenuBar','n
 handles.output = guiFig;
 guidata(guiFig,handles);
 
-%set the basic prameters
 minPower=obj.MinPower;
 maxPower=obj.MaxPower;
 unitPower=obj.PowerUnit;
@@ -61,14 +60,12 @@ obj.GuiFigure.CloseRequestFcn = @closeFigure;
 properties2gui();
 
     function closeFigure(~,~)
-        %close the figure
         gui2properties();
         delete(obj.GuiFigure);
     end
 
 %Callback function for slider
     function sliderfn(~,~)
-        % drag the slider
         sliderValue=get(handles.sliderPower,'Value');
         set(handles.SetPower,'String',num2str(sliderValue))
         obj.setPower(sliderValue)
@@ -76,7 +73,6 @@ properties2gui();
 
 %Callback function to set Power
     function setPower(~,~)
-        %set the power
         textValue=str2double(get(handles.SetPower,'String'));
         if textValue > obj.MaxPower || isnan(textValue)
             error('Choose a number for Power between [MinPower,MaxPower]')
@@ -87,7 +83,6 @@ properties2gui();
 
 %Callback function for toggle button
     function ToggleLight(~,~)
-        %change On/Off buttom
         state=get(handles.Toggle_Light,'Value');
         if state
          %   obj.Power=str2double(get(handles.SetPower,'String'));
@@ -106,7 +101,6 @@ properties2gui();
 
 
     function gui2properties()
-        % update properties from gui
         obj.Power=str2double(get(handles.SetPower,'String'));
         % change LightState for obj
         state=get(handles.Toggle_Light,'Value');
@@ -118,7 +112,6 @@ properties2gui();
     end
 
     function properties2gui()
-        % update gui from properties
         if isempty(obj.Power) || isnan(obj.Power)
             obj.Power=obj.MinPower;
         end

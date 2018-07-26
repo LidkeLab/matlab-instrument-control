@@ -1,21 +1,9 @@
 classdef MIC_DynamixelServo < MIC_Abstract
-    %   MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
-    %
+    %MIC_DynamixelServo Matlab Instrument Class for Dynamixel Servos
     %   Dynamixel Servos are used to control the rotation of filter wheels
     %   Setup instruction can be found at Z:\Lab General Info and
-    %   Documents\TIRF Microscope\Build Instructions for Filter Wheel
-    %   Setup.doc
-    %
-    %   Example: obj=MIC_DynamixelServo(ServoId,Port,Bps);
-    %           ServoId: Id of servo(is written on servo)
-    %           Port: COM port to which servo is connected (Optional)
-    %           Bps: Baud setting for port (Optional)
-    %   Functions: delete, shutdown, checkCommStatus, exportState, ping, 
-    %              get.Firmware, get.GaolPosition, set.GoalPosition,
-    %              get.Led, set.Led, get.Model, get.Moving,
-    %              get.MovingSpeed, set.MovingSpeed, get.PresentPostion,
-    %              get.PresentSpeed, get.PresentTemperature,
-    %              get.PresentVoltage, get.Rotation, set.Rotation
+    %     Documents\TIRF Microscope\Build Instructions for Filter Wheel
+    %     Setup.doc
     %
     %   REQUIRES:
     %     Matlab 2014b or higher
@@ -28,7 +16,8 @@ classdef MIC_DynamixelServo < MIC_Abstract
     %     All files that are not specifically for the Roboplus software should 
     %       be extracted into C:\Program Files(x86)\ROBOTIS\USB2Dynamixel
     %   
-    %   CITATION: Marjolein Meddens, Lidke Lab, 2017.
+    
+    % Marjolein Meddens, Lidke Lab 2017
 
     properties(SetAccess=protected)
         InstrumentName = 'DynamixelServo'; % MIC instrument name
@@ -125,7 +114,14 @@ classdef MIC_DynamixelServo < MIC_Abstract
     
     methods
         function obj=MIC_DynamixelServo(Id,Port,Bps)
-            % Object constructor
+            % obj=MIC_DynamixelServo(Id,Port,Bps) constructor
+            % INPUT (required)
+            %  Id    Id of servo, is written on servo 
+            % INPUT (optional)
+            %  Port  COM port to which servo is connected, if not given it
+            %        will search for it
+            %  Bps   Baud setting for port, if not given default setting 
+            %        will be used
             obj = obj@MIC_Abstract(~nargout);
             if ~exist('Id','var') || Id < 1 || Id > 255
                 error('MIC_DynamixelServo:Id','Invalid servo Id');
@@ -137,7 +133,8 @@ classdef MIC_DynamixelServo < MIC_Abstract
             obj.Bps = Bps;            
             MIC_DynamixelServo.loadlibrary();
             
-            %Try to find correct com port if not inputed
+            %Try to find correct com port
+            %fprintf('Searching for correct COM Port\n')
             if exist('Port','var')
                 obj.Port = Port;
             else  
@@ -180,19 +177,16 @@ classdef MIC_DynamixelServo < MIC_Abstract
         end
         
         function value = get.Firmware(obj)
-            % Gets firmware data
             value = obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.VERSION_OF_FIRMWARE);
         end
         
         function value = get.GoalPosition(obj)
-            % Gets position
             value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.GOAL_POSITION));
             %fprintf('get goal %d\n', value);
             obj.checkCommStatus();
         end
         
         function set.GoalPosition(obj,value)
-            % Sets position
             if value < 0 || value > 1023
                 error('MIC_DynamixelServo:PosOutofRange','Position must be between 0 and 1023');
             end
@@ -202,13 +196,11 @@ classdef MIC_DynamixelServo < MIC_Abstract
         end
         
         function value = get.Led(obj)
-            % Gets LED information
             value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.LED));
             obj.checkCommStatus();
         end
         
         function set.Led(obj,value)
-            % Sets LED value
             if value ~= 0 && value ~= 1
                 error('MIC_DynamixelServo:Led', 'Led can only be 0 off or 1 on');
             end
@@ -217,25 +209,21 @@ classdef MIC_DynamixelServo < MIC_Abstract
         end
         
         function value = get.Model(obj)
-            % Gets model number
             value = obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.MODEL_NUMBER);
             obj.checkCommStatus();
         end
         
         function value = get.Moving(obj)
-            % Gets moving information
             value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.MOVING));
             obj.checkCommStatus();
         end
         
         function value = get.MovingSpeed(obj)
-            % Gets moving speed
             value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.MOVING_SPEED));
             obj.checkCommStatus();
         end
         
         function set.MovingSpeed(obj,value)
-            % Sets moving speed to value
             if value < obj.minSpeed || value > obj.maxSpeed
                 error('MIC_DynamixelServo:speed', 'Moving speed must be between %i and %i',obj.minSpeed, obj.maxSpeed);
             end
@@ -244,36 +232,30 @@ classdef MIC_DynamixelServo < MIC_Abstract
         end
         
         function value = get.PresentPosition(obj)
-            % Gets current position
             value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.PRESENT_POSITION));
             obj.checkCommStatus();
         end
         
         function value = get.PresentSpeed(obj)
-            % Gets current speed setting
             value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.PRESENT_SPEED));
             obj.checkCommStatus();
         end
         
         function value = get.PresentTemperature(obj)
-            % Gets current temperature information
             value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.PRESENT_TEMPERATURE));
             obj.checkCommStatus();
         end
         
         function value = get.PresentVoltage(obj)
-            % Gets current voltage information
             value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.PRESENT_VOLTAGE));
             obj.checkCommStatus();
         end
         
         function value = get.Rotation(obj)
-            % Gets current rotation information
             value = double(obj.GoalPosition)/1023.0 * MIC_DynamixelServo.MAX_ROTATION;
         end
         
         function set.Rotation(obj,value)
-            % Sets rotation to value
             pos = value/MIC_DynamixelServo.MAX_ROTATION * 1023;
             obj.GoalPosition = round(pos);
         end
