@@ -391,12 +391,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 %find z-position and adjust
                 [Zfit]=obj.findZPos();
                 Pos=obj.StageObj.Position;
-                Zshift=Zfit-Pos(3)
+                Zshift=Zfit-Pos(3);
                 Pos(3)=Pos(3) + (sign(real(Zshift))*min(abs(real(Zshift)),obj.MaxZShift));
                 obj.StageObj.setPosition(Pos);
                 
                 %find XY position and adjust
-                [XYshift]=findXYShift(obj)
+                [XYshift]=findXYShift(obj);
                 
                 StageShiftXY=inv(obj.OrientMatrix)*XYshift;
                 Pos(1)=Pos(1)+sign(StageShiftXY(1))*min(abs(StageShiftXY(1)),obj.MaxXYShift);

@@ -44,7 +44,8 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
         CameraEMGainLow=2;              % Low camera gain value 
         CameraROI=8;                    % Camera ROI (see gui for specifics)
         PixelSize;                       % Pixel size determined from calibration
-        
+        OrientMatrix; % unitary matrix to show orientation between Andor Camera and Stage([a b;c d])
+  
         % Light source params
         Laser405Low;    % Low power 405 laser
         Laser488Low;    % Low power 488 laser
@@ -136,19 +137,6 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.LampPower = 50;
                 % Registration object
                 fprintf('Initializing Registration object\n')
-<<<<<<< HEAD
-                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
-                if ~exist(f,'file')
-                    obj.CameraObj.ROI=[1 256 1 256];
-                    obj.R3DObj.calibrate;
-                end  
-=======
->>>>>>> master
-                if exist(f,'file')
-                    a=load(f);
-                    obj.PixelSize=a.PixelSize;
-                    clear a;
-                end
                 obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
                 obj.R3DObj.LampPower=obj.LampPower;
                 obj.R3DObj.LampWait=2.5;
@@ -157,6 +145,16 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.R3DObj.EMgain=2;
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
+                if ~exist(f,'file')
+                    obj.CameraObj.ROI=[1 256 1 256];
+                    obj.R3DObj.calibrate;
+                end  
+                if exist(f,'file')
+                    a=load(f);
+                    obj.PixelSize=a.PixelSize;
+                    obj.OrientMatrix=a.OrientMatrix;
+                    clear a;
+                end
            catch ME
                ME
                 error('hardware startup error');
