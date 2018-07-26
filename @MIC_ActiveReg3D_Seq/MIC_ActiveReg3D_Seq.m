@@ -7,7 +7,7 @@ classdef MIC_ActiveReg3D_Seq < handle
         Stage_Piezo_Z %new
         SCMOS_PixelSize;
 %       PixelSize=0.108;            %micron
-        PixelSize=0.124;            % IR camera bpp in micron
+        PixelSize=0.124;            % bpp in micron
         ImageFile
         Image_ReferenceStack
         Image_ReferenceInfocus
@@ -22,8 +22,8 @@ classdef MIC_ActiveReg3D_Seq < handle
         Tol_X=.005;                 %micron
         Tol_Y=.005;                 %micron
         Tol_Z=.01;                  %micron
-        MaxIter=20;
-        MaxXYShift = 0.02;         %micron %jump size to correct drift
+        MaxIter=10;
+        MaxXYShift = 0.002;         %micron
         MaxZShift  = 0.1;          %micron
         ZFitPos;
         ZFitModel;
@@ -34,16 +34,13 @@ classdef MIC_ActiveReg3D_Seq < handle
         PosPostCorrect  %Piezo Set Position after correction [X Y Z] in micron
         
         ErrorSignal_History=[]     %Error Signal [X Y Z] in micron
-        ErrorSignal_HistoryZ %FF
-        ErrorSignal_HistoryX %FF
-        ErrorSignal_HistoryY %FF
         Correction_History=[]      %Amount corrected [X Y Z] in micron
         PosPostCorrect_History=[]  %Piezo Set Position after correction [X Y Z] in micron
                 
         X_position=[];
         
         Timer;
-        Period=5;
+        Period=2;
     end
     
     properties (Access='private')
@@ -54,7 +51,8 @@ classdef MIC_ActiveReg3D_Seq < handle
     end 
     methods
         
-         function obj=MIC_ActiveReg3D_Seq(CameraObj,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z) %new
+        %function obj=ActiveReg3D(CameraObj,StageObj) %old
+         function obj=ActiveReg3D(CameraObj,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z) %new
             %obj.StageObj=StageObj; old
             obj.Stage_Piezo_X=Stage_Piezo_X; %new
             obj.Stage_Piezo_Y=Stage_Piezo_Y; %new
@@ -70,15 +68,13 @@ classdef MIC_ActiveReg3D_Seq < handle
             end
         end
         
-        function [Attribute, Data, Children] = exportState(obj)
-           Attribute.ErrorSignal_History =obj.ErrorSignal_History; 
-           Attribute.Correction_History =obj.Correction_History; 
-           Attribute.PosPostCorrect_History =obj.PosPostCorrect_History; 
-           Attribute.X_position =obj.X_position;  
-           Data.Image_ReferenceStack =obj.Image_ReferenceStack; 
-           Data.Image_Current =obj.Image_Current; 
-           Data.Image_preCorrection=obj.Image_preCorrection;
-           Children = [];
+        function State=exportState(obj)
+           State.ErrorSignal_History =obj.ErrorSignal_History; 
+           State.Correction_History =obj.Correction_History; 
+           State.PosPostCorrect_History =obj.PosPostCorrect_History; 
+           State.Image_ReferenceStack =obj.Image_ReferenceStack; 
+           State.Image_Current =obj.Image_Current;  
+           State.X_position =obj.X_position;  
         end
         
         function calibrate(obj)
@@ -179,20 +175,10 @@ classdef MIC_ActiveReg3D_Seq < handle
                     pause(0.2);
                 end
                 out=obj.capture_single;
-                gcf; %FF
-                delete(ans); %FF
                 zstack=cat(3,zstack,out);
             end
             obj.Image_ReferenceStack=zstack;
             ind=find(obj.ZStack_Pos==obj.Z_Current);
-            isempty(ind); %FF: populated "ans" in workspace.
-            if abs(ans)==1 %FF: to change "ans" if "ind" is empty
-               ind=10; 
-            end
-            az=size(zstack(:,:,ind(1)));
-            if az(1)==257 %FF: to change value of az if it is 257by257
-             obj.Image_ReferenceInfocus=squeeze(zstack(1:end-1,1:end-1,ind(1)));   
-            end
             obj.Image_ReferenceInfocus=squeeze(zstack(:,:,ind(1)));
             %obj.StageObj.set_position(XYZ); old
             obj.Stage_Piezo_X.setPosition(obj.X_Current); %new
@@ -218,7 +204,7 @@ classdef MIC_ActiveReg3D_Seq < handle
         
         function align2imageFit(obj,varargin)
             %find z-position and adjust
-            [Zfit,Zindex,CurrentImage]=obj.findZPos();
+            [Zfit]=obj.findZPos();
             XYZ1=obj.Stage_Piezo_X.getPosition; %new
             XYZ2=obj.Stage_Piezo_Y.getPosition; %new
             XYZ3=obj.Stage_Piezo_Z.getPosition; %new
@@ -229,105 +215,47 @@ classdef MIC_ActiveReg3D_Seq < handle
             obj.ErrorSignal(3)=Zshift;
             
             %Image before corrections
-            obj.Image_preCorrection=cat(3,obj.Image_preCorrection,CurrentImage);
-            gcf; %FF
-            delete(ans); %FF
-
-%            obj.Correction(3)=sign(obj.ErrorSignal(3))*min(obj.MaxZShift,abs(obj.ErrorSignal(3))); % P-only correction
-
-            % PI-Control in Z:       
-            obj.ErrorSignal_HistoryZ=cat(1,obj.ErrorSignal_History(:,3),Zshift);
-            TimeVec=1:length(obj.ErrorSignal_HistoryZ);
-            TimeVec=TimeVec-TimeVec(end);
-            TauZ=5;   %tuned value
-            K_Pz=0.2; %tuned value
-            K_Iz=1.1; %tuned value
-            TimeWeights=1/TauZ*exp(TimeVec/TauZ);
-            WIz=sum(TimeWeights'.*obj.ErrorSignal_HistoryZ);%Weighted Integral
-            obj.Correction(3)=K_Pz*obj.ErrorSignal(3)+K_Iz*WIz;
-            XYZ(3)=XYZ(3)+obj.Correction(3); 
-            obj.Stage_Piezo_X.setPosition(XYZ(1)); 
-            obj.Stage_Piezo_Y.setPosition(XYZ(2)); 
-            obj.Stage_Piezo_Z.setPosition(XYZ(3)); 
+            obj.Image_preCorrection=cat(3,obj.Image_preCorrection,obj.capture_single());
+            
+            %Change Z position
+            %This restricts movement to obj.MaxZShift
+            obj.Correction(3)=sign(obj.ErrorSignal(3))*min(obj.MaxZShift,abs(obj.ErrorSignal(3)));
+            XYZ(3)=XYZ(3)+obj.Correction(3); %new
+            obj.Stage_Piezo_X.setPosition(XYZ(1)); %new
+            obj.Stage_Piezo_Y.setPosition(XYZ(2)); %new
+            obj.Stage_Piezo_Z.setPosition(XYZ(3)); %new
             
             %Take new image, find XY position and adjust
             [Xshift,Yshift]=findXYShift(obj);
-            gcf; %FF
-            delete(ans); %FF
             obj.ErrorSignal(1:2)=[Xshift,Yshift]; % define error signal
-           % obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal); %FF
-%             obj.Correction(1)=sign(obj.ErrorSignal(1))*min(obj.MaxXYShift,abs(obj.ErrorSignal(1))); % P-only correction
-%             obj.Correction(2)=sign(obj.ErrorSignal(2))*min(obj.MaxXYShift,abs(obj.ErrorSignal(2))); % P-only correction
-
-            %PI-control in XY 
-            % X:
-            obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);
-            
-            obj.ErrorSignal_HistoryX=obj.ErrorSignal_History(:,1);
-            TimeVec=1:length(obj.ErrorSignal_HistoryX);
-            TimeVec=TimeVec-TimeVec(end);
-            TauX=5; %tuned
-            K_Px=0.9; %tuned
-            K_Ix=0.7;   %tuned
-            TimeWeights=1/TauX*exp(TimeVec/TauX);
-            WIx=sum(TimeWeights'.*obj.ErrorSignal_HistoryX);%Weighted Integral
-            obj.Correction(1)=K_Px*obj.ErrorSignal(1)+K_Ix*WIx;
-            % Y:
-            obj.ErrorSignal_HistoryY=obj.ErrorSignal_History(:,2);
-            TimeVec=1:length(obj.ErrorSignal_HistoryY);
-            TimeVec=TimeVec-TimeVec(end);
-            TauY=5;
-            K_Py=0.9; 
-            K_Iy=0.7;  
-            TimeWeights=1/TauY*exp(TimeVec/TauY);
-            WIy=sum(TimeWeights'.*obj.ErrorSignal_HistoryY);%Weighted Integral
-            obj.Correction(2)=K_Py*obj.ErrorSignal(2)+K_Iy*WIy;
- 
-%             XYZ(1:2)=XYZ(1:2)+obj.Correction(1:2); %P-only
-            XYZ(1:2)=XYZ(1:2)+obj.Correction(1:2); %PI-controller
+            obj.Correction(1)=sign(obj.ErrorSignal(1))*min(obj.MaxXYShift,abs(obj.ErrorSignal(1)));
+            obj.Correction(2)=sign(obj.ErrorSignal(2))*min(obj.MaxXYShift,abs(obj.ErrorSignal(2)));
+            XYZ(1:2)=XYZ(1:2)+obj.Correction(1:2); %new
             obj.PosPostCorrect=XYZ; %new
             
             %Keep history of correction
-            
+            obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);
             obj.Correction_History=cat(1,obj.Correction_History,obj.Correction);
             obj.PosPostCorrect_History=cat(1,obj.PosPostCorrect_History,obj.PosPostCorrect);
-            
-%             figure
-% %             plot(obj.ErrorSignal_History(:,3)*1000,'r')
-% %             hold on
-%             plot(obj.Correction_History(:,3)*1000,'b')
-%             hold on
-% %              plot(obj.ErrorSignal_History(:,1)*1000,'r')
-%             plot(obj.Correction_History(:,1)*1000,'r')
-%             hold on
-% %              plot(obj.ErrorSignal_History(:,2),'g*')
-% %             hold on
-%             plot(obj.Correction_History(:,2)*1000,'g')
-% %             hold on
-% %              plot(obj.PosPostCorrect_History(:,2),'y')
-%             legend('correctionZ','correctionX','correction Y')
             
             %Image after all corrections
             obj.Stage_Piezo_X.setPosition(XYZ(1)); %new
             obj.Stage_Piezo_Y.setPosition(XYZ(2)); %new
             obj.Stage_Piezo_Z.setPosition(XYZ(3)); %new
             obj.Image_Current=cat(3,obj.Image_Current,obj.capture_single());
-            gcf; %FF
-            delete(ans); %FF
 
         end
         
-        function [Zfit,zindex,CurrentImage]=findZPos(obj)
-            CurrentImage=obj.capture_single();
-            Cur=CurrentImage(10:end-10,10:end-10);
+        function [Zfit]=findZPos(obj)
+            currentImg=obj.capture_single;
+            Cur=currentImg(10:end-10,10:end-10);
             Cur=Cur-mean(Cur(:));
             Cur=Cur/std(Cur(:));
-            gcf;%FF
-            delete(ans); %FF
+            
             zs=obj.Image_ReferenceStack(10:end-10,10:end-10,:);
             N=size(zs,3);
             n=numel(Cur);
-
+            
             for ii=1:N
                 %whiten 
                 Refi=squeeze(zs(:,:,ii));
@@ -367,7 +295,7 @@ classdef MIC_ActiveReg3D_Seq < handle
             Current=Current(10:end-10,10:end-10);
             Current=Current-mean(Current(:));
             Current=Current/std(Current(:));
-
+                
             %find 2D shift         
             svec=findshift(Current,Ref,'iter'); %finds shift between two images
             Xshift=svec(1)*obj.PixelSize; %note dipimage permute

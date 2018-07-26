@@ -1,23 +1,17 @@
  classdef MIC_MCLNanoDrive < MIC_Abstract
-    %   MIC_MCLNanoDrive: MIC controller for the Mad City Labs 3D Piezo Stage
+    %MIC_MCLNanoDrive MIC controller for the Mad City Labs 3D Piezo Stage
     %   
     %   This class controls a 3D Peizo stage from Mad City Labs.  The class
-    %   uses 'calllib' to directly call funtions from the madlib.dll.  
-    %   The instument is connected via USB.  
+    %   uses 'calllib' to directly call funtions from the madlib.dll. The instument 
+    %   is attached via USB.  
+    %
     %   The first time an object of this class is created, the user must
     %   direct the object to the 'madlib.h' header file.  This is usually
     %   located here:  C:\Program Files\Mad City Labs\NanoDrive
     %
-    %   Example: obj=MIC_MCLNanoDrive();
-    %   Functions: delete, exportState, setPostition, getdllpath, 
-    %              getSensorPostion, center, callNano
-    %
     %   REQUIRES:
-    %       MIC_Abstract.m
     %       MATLAB 2014b or higher
     %       MCL Drivers installed on system.  
-    %
-    %   CITATION: , Lidkelab, 2017.
     
      properties (SetAccess=protected)
         InstrumentName='MCLNanoDrive'; 
@@ -49,7 +43,7 @@
     methods
         
         function obj=MIC_MCLNanoDrive()
-            % Object Constructor.  
+            % Constructor. Takes no arguments and returns the object. 
             obj=obj@MIC_Abstract(~nargout);
             
             obj.set_errorcodes(); % set obj.ErrorCode to static values
@@ -70,7 +64,7 @@
             end
             % Call the MCL Nano Drive handle, 0 is the error so I set it to -9 to flag towards MISC
             obj.handle = obj.callNano('MCL_InitHandle');
-            obj.LastError = (~obj.handle)*-9;
+           obj.LastError = (~obj.handle)*-9;
             obj.errorcheck('MCL_InitHandle');
             
             % Set the maximum distances for each of the 3-axes
@@ -103,15 +97,13 @@
             obj.center;            
         end
         
-        function delete(obj)  
-            % Object destructor
+        function delete(obj)  % destructor
             obj.callNano('MCL_ReleaseHandle',obj.handle);
             fprintf('Stage released\n');
             obj.handle = 0;
         end
 
         function getdllpath(obj)
-            % Gets library path
             [~,obj.DLLPath]=uigetfile('Select Madlib.h');
             [p,~]=fileparts(which('MIC_MCLNanoDrive'));
             f=fullfile(p,'MIC_MCLNanoDrive_Properties.mat');
@@ -119,8 +111,7 @@
             save(f,'DLLPath');
         end
 
-        function setPosition(obj,Position) 
-            % Sets position to Position
+        function setPosition(obj,Position)            
             x=Position(1);
             y=Position(2);
             z=Position(3);
@@ -213,7 +204,7 @@
         end
         
         function [Attributes,Data,Children]=exportState(obj)
-           % Exports the current state of the instrument
+           % Need to populate this
            Attributes.Position=obj.Position;
            Attributes.Max_X = obj.Max_X;
            Attributes.Max_Y = obj.Max_Y;
@@ -239,7 +230,7 @@
     methods (Static)
         
         function Success=unitTest()
-            % Tests functionality of class/instrument
+            
             try
                 fprintf('Creating Object\n')
                 M=MIC_MCLNanoDrive()

@@ -1,18 +1,6 @@
 classdef MIC_NanoMax < MIC_Abstract
-    %   MIC_NanoMax: Matlab instrument class for NanoMax stage
-    %
-    %   Runs both MIC_TCubePiezo and MIC_StepperMotor.
-    %   
-    %   Example: obj=MIC_NanoMax();
-    %   Functions: setup_Stage_Piezo, setup_Stage_Stepper, exportState 
-    %
-    %   REQUIREMENTS: 
-    %       MIC_Abstract.m
-    %       MIC_TCubePiezo.m
-    %       MIC_StepperMotor.m
-    %       MATLAB software version R2016b or later
-    %
-    %   CITATION: , Lidkelab, 2017.
+    %MIC_NanoMax runs both MIC_TCubePiezo and MIC_StepperMotor
+    %   Detailed explanation goes here
     
     properties
         StartGUI;                   % starting gui
@@ -36,14 +24,15 @@ classdef MIC_NanoMax < MIC_Abstract
         function obj = MIC_NanoMax()
             % Enable autonaming feature of MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
-            obj.setup_Stage_Piezo();    % Setting up Piezo
-            obj.setup_Stage_Stepper();  % Setting up Steppermotor
-            obj.gui();  % Creating gui
+
+            
+            obj.setup_Stage_Piezo();
+            obj.setup_Stage_Stepper();
+            obj.gui();
             
         end
         
         function setup_Stage_Piezo(obj)
-            % Sets up Piezo for the stage
             % PX=MIC_TCubePiezo('TPZserialNo','TSGserialNo','AxisLabel')
             obj.Stage_Piezo_X=MIC_TCubePiezo('81850186','84850145','X');
             obj.Stage_Piezo_Y=MIC_TCubePiezo('81850193','84850146','Y');
@@ -54,7 +43,6 @@ classdef MIC_NanoMax < MIC_Abstract
         end
         
         function setup_Stage_Stepper(obj)
-            % Sets up stepper motors for the stage
             % for SEQ microscope Serial No is 70850323
             obj.Stage_Stepper=MIC_StepperMotor('70850323');
             % obj.Stage_Stepper.set_position([2,2,1]);
@@ -64,26 +52,9 @@ classdef MIC_NanoMax < MIC_Abstract
         end
         
         function exportState(obj)
-            % Export current state of the stage 
-            Attributes=[];
-            Data = [];
-            Children = [];
         end
         
-    end
-    
-    methods (Static=true)
-        function unitTest()
-            % unit test of object functionality
-            % Syntax: MIC_NanoMax.unitTest()
-
-            fprintf('Creating Object\n')
-            NM=MIC_NanoMax();
-            fprintf('State Export\n')
-            A=NM.exportState(); disp(A); pause(1);
-            fprintf('Delete Object\n')
-            clear NM;
-
+        function unitTest(obj)
         end
     end
     

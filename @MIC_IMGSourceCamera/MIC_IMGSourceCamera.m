@@ -1,30 +1,17 @@
 classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
-    % MIC_IMGSourceCamera: Matlab instument class for ImagingSource camera.
-    %
-    % Requires dll to be registered in MATLAB.
+    % class for ImagingSource camera
+    % dll must be registered in MATLAB
+    
     % TISImaq interfaces directly with the IMAQ Toolbox. This allows you to 
-    % bring image data directly into MATLAB for analysis, visualization, 
-    % and modelling.
-    % The plugin allows the access to all camera properties as they are 
-    % known from IC Capture. The plugin works in all Matlab versions 
-    % since 2013a. Last tested version is R2016b.
+    % bring image data directly into MATLAB for analysis, visualization, and modelling.
+
+    % The plugin allows the access to all camera properties as they are known from IC Capture.
+    % The plugin works in all Matlab versions sinces 2013a. Last tested version is R1016b.
     % After installing the plugin it must be registered in Matlab manually.
-    % How to do that is shown in a Readme, that can be displayed after 
-    % installation. 
+    % How to do that is shown in a Readme, that can be displayed after installation.
     % imaqregister('C:\Program Files (x86)\TIS IMAQ for MATLAB R2013b\x64\TISImaq_R2013.dll')
     % http://www.theimagingsource.com/support/downloads-for-windows/extensions/icmatlabr2013b/
-    % This was done with imaqtool using Tools menu.
-    %
-    % Example: obj=MIC_IMGSourceCamera();
-    % Functions: delete, shutdown, exportState
-    %
-    % REQUIREMENTS: 
-    %   MIC_Abstract.m
-    %   MIC_Camera_Abstract.m
-    %   MATLAB software version R2013a or later
-    %
-    % CITATION: , Lidkelab, 2017.
-    
+    % I had to do this with imaqtool using Tools menu
     properties(Access=protected)
         AbortNow;           %stop acquisition flag
         FigurePos;
@@ -70,19 +57,16 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
     
     methods
         
-        function obj=MIC_IMGSourceCamera() 
-            % Object constructor
+        function obj=MIC_IMGSourceCamera() %constructor
             obj = obj@MIC_Camera_Abstract(~nargout);
         end
         
         function abort(obj)
-            % Abort function
             stop(obj.CameraHandle);
             obj.ReadyForAcq=0;
         end
         
         function shutdown(obj)
-            % Object shutdown
             delete(obj.CameraHandle);
             clear obj.CameraHandle;
         end
@@ -91,7 +75,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function initialize(obj)
-            % Initialization
             if isempty(obj.CameraIndex)
                 obj.getcamera;
             end
@@ -127,7 +110,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function setup_acquisition(obj)
-            % Setup acquisition
             obj.abort;
             switch obj.AcquisitionType
                 case 'focus'
@@ -160,7 +142,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function out=getlastimage(obj)
-            % Gets last captured image
             pause(obj.CameraCap.Exposure);
             Img=getsnapshot(obj.CameraHandle);
             roi=obj.ROI;
@@ -169,7 +150,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function out=getdata(obj)
-            % Gets data
             roi=obj.ROI;
             switch obj.AcquisitionType
                 case 'focus'
@@ -184,7 +164,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function out=start_focus(obj)
-            % Starts focus funtion
             obj.AcquisitionType='focus';
             obj.setup_acquisition;
             obj.AbortNow=0;
@@ -216,7 +195,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function out=start_capture(obj)
-            % Starts image capture
             obj.AcquisitionType='capture';
             obj.setup_acquisition;
             flushdata(obj.CameraHandle);
@@ -245,7 +223,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function out=start_sequence(obj)
-            % Starts sequence
             obj.AcquisitionType='sequence';
             obj.setup_acquisition;
             flushdata(obj.CameraHandle);
@@ -273,12 +250,10 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
             end
         end
         function status=getstatus(obj)
-            % Gets current status
             status=double(isrunning(obj.CameraHandle));
         end
         
         function start_sequence_fast(obj)
-            % Starts fast sequence capture
             obj.AcquisitionType='sequence';
             obj.setup_acquisition;
             flushdata(obj.CameraHandle);
@@ -287,7 +262,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function build_guiDialog(obj,GuiCurSel)
-            % gui building
             fieldp=fields(obj.CameraSetting);
             for ii=1:length(fieldp)
                 pInfo=propinfo(obj.CameraCap,fieldp{ii});
@@ -307,7 +281,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function apply_camSetting(obj)
-            % Apply camera settings
             guiFields=fields(obj.GuiDialog);
             for ii=1:length(guiFields)
                 disp(['Writing ',guiFields{ii},' in CameraSetting...']);
@@ -325,14 +298,14 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function [Attributes,Data,Children]=exportState(obj)
-            % Exports current state of camera
+            %Get default properties
             Attributes=obj.exportParameters();
             Data=[];
             Children=[];
+            %Add anything else we want to State here:.
         end
         
         function setCamProperties(obj,Infield)
-            % Set up properties
             fieldp=fields(Infield);
             for ii=1:length(fieldp)
                 pInfo=propinfo(obj.CameraCap,fieldp{ii});
@@ -350,31 +323,26 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
         end
         
         function set.ROI(obj,in)
-            % Sets up ROI
             obj.ROI=in;
             obj.ImageSize=[in(2)-in(1)+1,in(4)-in(3)+1];
         end
         
         function set.ExpTime_Focus(obj,in)
-            % Sets exposure time for focus function
                 obj.ReadyForAcq=0;
                 obj.ExpTime_Focus=in;
         end
 
         function set.ExpTime_Capture(obj,in)
-            % Sets exposure time for image capture
                 obj.ReadyForAcq=0;
                 obj.ExpTime_Capture=in;
         end
         
         function set.ExpTime_Sequence(obj,in)
-            % Sets exposure time for sequence capture
                 obj.ReadyForAcq=0;
                 obj.ExpTime_Sequence=in;
         end
         
         function set.SequenceLength(obj,in)
-            % Sets sequence length
                 obj.ReadyForAcq=0;
                 obj.SequenceLength=in;
         end
@@ -393,7 +361,6 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
     methods (Static)
         
                 function Success=unitTest()
-                    % Test fucntionality of class/instrument
             Success=0;
             %Create object
             try 
