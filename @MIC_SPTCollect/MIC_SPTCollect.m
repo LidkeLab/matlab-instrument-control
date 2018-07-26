@@ -392,6 +392,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 if exist(CalFileName,'file')
                     a=load(CalFileName);
                     obj.PixelSize=a.PixelSize;
+                    obj.OrientMatrix=a.OrientMatrix;
                     clear a;
                 end
           
@@ -413,6 +414,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 if exist(CalFileName,'file')
                     a=load(CalFileName);
                     obj.PixelSize=a.PixelSize;
+                    obj.IROrientMatrix=a.OrientMatrix;
                     clear a;
                 end
             end
