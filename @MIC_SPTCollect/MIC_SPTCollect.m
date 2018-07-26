@@ -116,12 +116,14 @@ classdef MIC_SPTCollect < MIC_Abstract
             if exist(fullfile(p,'SPT_AndorPixelSize.mat'),'file')
                 a=load(fullfile(p,'SPT_AndorPixelSize.mat'));
                 obj.PixelSize=a.PixelSize;
+                obj.OrientMatrix=OrientMatrix;
                 clear a
             end
             
             if exist(fullfile(p,'SPT_IRPixelSize.mat'),'file')
                 a=load(fullfile(p,'SPT_IRPixelSize.mat'));
                 obj.IRPixelSize=a.PixelSize;
+                obj.IROrientMatrix=OrientMatrix;
                 clear a
             end
             
