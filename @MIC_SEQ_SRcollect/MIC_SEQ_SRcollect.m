@@ -153,13 +153,16 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                 obj.StageStepper.exportState();
             [Children.Laser405.Attributes,Children.Laser405.Data,Children.Laser405.Children]=...
                 obj.Laser405.exportState();
-            [Children.Laser647.Attributes,Children.Laser647.Data,Children.Laser642.Children]=...
+            [Children.Laser647.Attributes,Children.Laser647.Data,Children.Laser647.Children]=...
                 obj.Laser647.exportState();
             [Children.Lamp850.Attributes,Children.Lamp850.Data,Children.Lamp850.Children]=...
                 obj.Lamp850.exportState();
             [Children.Lamp660.Attributes,Children.Lamp660.Data,Children.Lamp660.Children]=...
                 obj.Lamp660.exportState();
-            Children = [];
+            [Children.AlignReg.Attributes, Children.AlignReg.Data, ...
+                Children.AlignReg.Children] = obj.AlignReg.exportState();
+            [Children.ActiveReg.Attributes, Children.ActiveReg.Data, ...
+                Children.ActiveReg.Children] = obj.ActiveReg.exportState();
             
             % Our Properties
             Attributes.ExposureTimeLampFocus = obj.ExposureTimeLampFocus;
@@ -170,10 +173,10 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             Attributes.NumberOfSequences = obj.NumberOfSequences;
             Attributes.NumberOfPhotoBleachingIterations = ...
                 obj.NumberOfPhotoBleachingIterations;
-            Attributes.SCMOS_ROI_Collect = obj.SCMOS_ROI_Collect;
+            Attributes.CameraROI = obj.SCMOS_ROI_Collect;
             Attributes.SCMOS_ROI_Full = obj.SCMOS_ROI_Full;
             Attributes.IRCamera_ROI = obj.IRCamera_ROI;
-            Attributes.SCMOS_PixelSize=obj.SCMOS_PixelSize;
+            Attributes.CameraPixelSize=obj.SCMOS_PixelSize;
             
             Attributes.SaveDir = obj.SaveDir;
             Attributes.RegType = obj.RegType;
