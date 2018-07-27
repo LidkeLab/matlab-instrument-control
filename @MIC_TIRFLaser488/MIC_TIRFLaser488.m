@@ -1,14 +1,23 @@
 
 classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
-    %MIC_NewportLaser488 Matlab Instrument Class for Newport Cyan Laser 488
-    %on TIRF microscope
-    % REQUIREMENTS:
-    % NiDAQ card 
-    % Shutter
-    % filterwheel
-    % MIC_DynamixelServo
-    
-    % Functions: on, off, State, setPower, delete, shutdown, unitTest
+    % MIC_NewportLaser488: Matlab Instrument Class for Newport Cyan 
+    % Laser 488 on TIRF microscope.
+    %
+    % Does not need any input.
+    %
+    % Example: obj=MIC_TIRFLaser488()
+    % Functions: on, off, exportState, setPower, delete, shutdown
+    %
+    % REQUIREMENTS: 
+    %   MIC_Abstract.m
+    %   MIC_LightSource_Abstract.m
+    %   MIC_FilterWheel.m
+    %   MIC_DynamixelServo.m
+    %   MIC_ShutterTTL.m
+    %   MATLAB software version R2016b or later
+    %   Data Acquisition Toolbox
+    %
+    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
         
     properties (SetAccess=protected)  
         InstrumentName = 'TIRFLaser488' %instrument name
@@ -48,11 +57,11 @@ classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
     
     methods
         function obj=MIC_TIRFLaser488() %Constructor
-            %inheritance:
+            % inheritance:
             obj=obj@MIC_LightSource_Abstract(~nargout);
-            %setup the shutter
+            % setup the shutter
             obj.ShutterObj=MIC_ShutterTTL('Dev1','Port0/Line4');
-            %setup the filterWheels
+            % setup the filterWheels
             obj.FracTransmVals=[1 0.51 0.28 0.11 0.065 0.017]; %transmission
             obj.Transmission=obj.FracTransmVals.*obj.FracTransmVals;
             obj.FilterPos=[0 60 120 180 240 300];
@@ -76,7 +85,7 @@ classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
         
         
         function setPower(obj,PowerIn)
-            %choose which combination of ND filters to use based on PowerIn
+            % choose which combination of ND filters to use based on PowerIn
             if PowerIn<obj.MinPower
                 fprintf('Input value outside the range of laser power. Set to Minimum Power\n');
             elseif PowerIn>obj.MaxPower
@@ -104,19 +113,20 @@ classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
             Attribute.Power=obj.Power;
             Attribute.IsOn=obj.IsOn;
             Attribute.InstrumentName=obj.InstrumentName;
-            % no Data is saved in this class
             Data=[];
             Children=[];
             
         end
         
-        function on(obj) %opens the shutter
+        function on(obj) 
+            % Turns ON laser by opening the shutter
             obj.IsOn=1;
             obj.ShutterObj.open; 
             obj.updateGui();
         end
        
-        function off(obj) %closes the shutter
+        function off(obj) 
+            % Turns OFF laser by closeing the shutter
             obj.IsOn=0;
             obj.ShutterObj.close;   % Sets laser state to 0
             obj.updateGui();
@@ -131,6 +141,7 @@ classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
         end
 
         function shutdown(obj)
+            % shutdown Laser
             obj.setPower(0);
             obj.off();
         end

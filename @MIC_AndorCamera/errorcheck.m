@@ -127,7 +127,7 @@ switch obj.LastError
     case obj.ErrorCode.DRV_I2CDEVNOTFOUND
         error([fname ' error: I2C device not present.']);
     case obj.ErrorCode.DRV_NO_NEW_DATA
-        warning([fname ' error: Non-Acquisition Event occurred.']);
+        error([fname ' error: Non-Acquisition Event occurred.']);
     case obj.ErrorCode.DRV_NOT_AVAILABLE
         error([fname ' error: Your system does not support this feature']);
     case obj.ErrorCode.DRV_NOT_INITIALIZED

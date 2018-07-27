@@ -1,17 +1,17 @@
 classdef MIC_GalvoAnalog < MIC_Abstract
-    %MIC_GalvoAnalog controls Galvo Mirror
+    %  MIC_GalvoAnalog: Matlab Instrument Class for controlling Galvo Mirror
     %
-    %  Instrument control class for Galvo mirror
-    %  Control is via output voltage of NI card. Range is -10:10 Volt
+    %  Controls the Galvo mirror. The galvo mirror is controlled 
+    %  via output voltage of NI card. The operating range is -10:10 Volts
+    %
+    %  Example: obj=MIC_GalvoAnalog('Dev1','ao1');
+    %  Functions: delete, exportState, setVoltage 
     %
     %  REQUIREMENTS:
     %  MIC_Abstract.m
     %  MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
-    %  Example: obj=MIC_GalvoAnalog('Dev1','ao1');
-    %
-    
-    % Marjolein Meddens, Lidke Lab 2017
+    %  CITATION: Marjolein Meddens, Lidke Lab 2017
     
     properties(SetAccess=protected)
         InstrumentName='GalvoAnalog' % Descriptive Instrument Name
@@ -26,9 +26,8 @@ classdef MIC_GalvoAnalog < MIC_Abstract
     end
             
     methods
-        % Constructor 
         function obj=MIC_GalvoAnalog(NIDevice,AOChannel)
-            % Example: GMirror=MIC_GalvoAnalog('Dev1','ao1');
+            % Object Constructor
             
             % for file naming convention
             obj=obj@MIC_Abstract(~nargout);
@@ -48,22 +47,24 @@ classdef MIC_GalvoAnalog < MIC_Abstract
         
         % Destructor
         function delete(obj)
+            % Deletes the object
             obj.setVoltage(0);
             close(obj.GuiFigure);
             delete(obj.DAQ);
         end
         
         function setVoltage(obj,V_in)
+            % Sets voltage to V_in
             obj.Voltage=max(obj.MinVoltage,V_in);
             obj.Voltage=min(obj.MaxVoltage,obj.Voltage);            
             outputSingleScan(obj.DAQ,obj.Voltage);
         end
                 
-        function [State,Data,Children]=exportState(obj)
-            % Export the object current state
-            State.Voltage=obj.Voltage;
-            State.MinVoltage=obj.MinVoltage;
-            State.MaxVoltage=obj.MaxVoltage;
+        function [Attributes,Data,Children]=exportState(obj)
+            % Exports the object current state
+            Attributes.Voltage=obj.Voltage;
+            Attributes.MinVoltage=obj.MinVoltage;
+            Attributes.MaxVoltage=obj.MaxVoltage;
             Data=[];
             Children=[];
         end
@@ -72,7 +73,16 @@ classdef MIC_GalvoAnalog < MIC_Abstract
     methods (Static=true)
         
         function unitTest(NIDevice,AOChannel)
+            % Testing the functionality of the instrument
+            fprintf('Creating Object\n')
             Galvo=MIC_GalvoAnalog(NIDevice,AOChannel);
+            fprintf('Setting Voltage to -5V\n');
+            Galvo.setVoltage(-5);
+            fprintf('Setting Voltage to 0V\n');
+            Galvo.setVoltage(0);
+            fprintf('Setting Voltage to 5V\n');
+            Galvo.setVoltage(5);
+            fprintf('Deleting Object\n')
             delete(Galvo);
         end
     end

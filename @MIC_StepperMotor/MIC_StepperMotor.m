@@ -1,23 +1,31 @@
 classdef MIC_StepperMotor < MIC_Abstract
-    %Class to control Benchtop stepper motor.
-    %This device might also be cotroled using the kinesis software.
-    %This class give you access to some of the functions in the long list
-    %of functions to control this device.
-    %To change the setting user need to use the kinesis software, except
-    %the jog step size.
-    %Please check if you have the following setting on the kinesis
-    %software. Open the kinesis software and on all the windows for each
-    %motor you should have this setting:
+    % Class to control Benchtop stepper motor.
+    %
+    % This device might also be cotroled using the kinesis software.
+    % This class give you access to some of the functions in the long list
+    % of functions to control this device.
+    % To change the setting user need to use the kinesis software, except
+    % the jog step size.
+    % Please check if you have the following setting on the kinesis
+    % software. Open the kinesis software and on all the windows for each
+    % motor you should have this setting:
     % Setting, Device Startup Setting, klick on the botton in the Select
     % Actuator Type box, from the popup menu in the top select the device
     % that you wish to control (it could be either HS NanoMax 300 X Axis, 
-    %HS NanoMax 300 Y Axis or HS NanoMax 300 Z Axis), then OK and Save.
+    % HS NanoMax 300 Y Axis or HS NanoMax 300 Z Axis), then OK and Save.
     %
-    %REQUIREMENTS:
-    %MATLAB 2014 or higher
-    %Kinesis software from thorlabs
-    %MIC_Abstract class.
-    %Access to the mexfunctions for this device. (kinesis_SBC_function).
+    % Example: M = MIC_StepperMotor(70850323)
+    % Functions: constructor(), goHome(), getPosition(), getStatus(), 
+    %            getStatus(), moveJog(), moveToPosition(), setJogStep()
+    %            getJogStep(), closeSBC(), delete(), exportState()
+    %
+    % REQUIREMENTS:
+    %   MATLAB 2014 or higher
+    %   Kinesis software from thorlabs
+    %   MIC_Abstract class.
+    %   Access to the mexfunctions for this device. (kinesis_SBC_function).
+    %
+    % CITATION: Mohamadreza Fazel, Lidkelab, 2017.
     
     properties (SetAccess=protected)
         InstrumentName = 'StepperMotor'; %instrument name
@@ -32,7 +40,7 @@ classdef MIC_StepperMotor < MIC_Abstract
         function obj = MIC_StepperMotor(SerialNum)
             %constructor start the communications with all three motors and
             %also sets some of the class properties.
-            addpath('C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\x64\Release');
+            addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\mex64');
             obj=obj@MIC_Abstract(~nargout);
             obj.SerialN = SerialNum;
             Kinesis_SBC_Open(obj.SerialN);
@@ -89,10 +97,12 @@ classdef MIC_StepperMotor < MIC_Abstract
             delete(obj.GuiFigure);
             clear obj;
         end
-        function State = exportState(obj)
-            %exportState() function
-            State.InstrumentName = obj.InstrumentName;
-            State.SerialN = obj.SerialN;
+        function [Attributes, Data, Children] = exportState(obj)
+            %exportState() method to export current instrument state.
+            Attributes.InstrumentName = obj.InstrumentName;
+            Attributes.SerialN = obj.SerialN;
+            Data = [];
+            Children = [];
         end
     end
     methods (Static)
