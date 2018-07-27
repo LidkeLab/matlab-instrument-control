@@ -4,7 +4,7 @@ fprintf('IR starts!!!!\n')
 % tic
                 IRCamera.start_sequence();
                 fprintf('IR is done !!\n')
-IRCamera.tIR_end=clock()
+IRCamera.tIR_end=clock();
 % IRCamera.t_period=toc
 % end 
 end

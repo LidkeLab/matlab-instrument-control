@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-%gui Graphical User Interface to MIC_LinearStage_Abstract
+% gui: Graphical User Interface to MIC_LinearStage_Abstract
 % Functionality:
 %   Move the stage by moving the slider or clicking the jog buttons
 %   Outside jog buttons (C) are for coarse steps
@@ -16,7 +16,7 @@ function guiFig = gui(obj)
 %   Slider has tag "positionSlider"
 %   Set position edit box has tag "positionEdit"
 %   For example see MIC_Example_LinearStage
-
+%
 % Marjolein Meddens, Lidke Lab 2017
 
 

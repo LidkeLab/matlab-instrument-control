@@ -151,17 +151,17 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
             obj.IsOn=0;
         end
         
-        function State=exportState(obj)   
-            %This is an abstract method in super-super-class.
-            %It exports All Non-Transient Properties in a Structure called
-            %satet.
-            State.Power=obj.Power;
-            State.IsOn=obj.IsOn;
-            State.LaserStateText=obj.LaserStateText;
-            State.WaveLength=obj.WaveLength;
-            State.MinPower=obj.MinPower;
-            State.maxpower=obj.MaxPower;
-            State.SerialNumber=obj.SerialNumber;
+        function [Attributes, Data, Children] = exportState(obj)  
+            %exportState() method to export current state of the
+            %instrument.
+            Attributes.Power=obj.Power;
+            Attributes.IsOn=obj.IsOn;
+            Attributes.WaveLength=obj.WaveLength;
+            Attributes.MinPower=obj.MinPower;
+            Attributes.MaxPower=obj.MaxPower;
+            Attributes.SerialNumber=obj.SerialNumber;
+            Data = [];
+            Children = [];
         end
         
         function shutdown(obj)

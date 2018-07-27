@@ -63,7 +63,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
         end
         
          function delete(obj)
-               if ~(isempty(obj.FigureHandle)||~ishandle(obj.FigureHandle))
+             if ~(isempty(obj.FigureHandle)||~ishandle(obj.FigureHandle))
                 close(obj.FigureHandle); 
              end
             obj.shutdown;
