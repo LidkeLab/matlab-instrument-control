@@ -76,7 +76,7 @@ classdef MIC_ActiveReg3D_Seq < handle
            Attribute.PosPostCorrect_History =obj.PosPostCorrect_History; 
            Attribute.X_position =obj.X_position;  
            Data.Image_ReferenceStack =obj.Image_ReferenceStack; 
-%            Data.Image_Current =obj.Image_Current; 
+           Data.Image_Current =obj.Image_Current; 
            Data.Image_preCorrection=obj.Image_preCorrection;
            Children = [];
         end
