@@ -314,10 +314,18 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         end
         
         function findCoverSlipFocus(obj)
+            % Allow user to change z-position of stage to select a focal
+            % plane from a brightfield image on the Hamamatsu sCMOS camera.
+            
+            % Center the piezos before proceeding.
             obj.StagePiezoX.center();
             obj.StagePiezoY.center();
             obj.StagePiezoZ.center();
+            
+            % Open the stage control GUI.
             obj.gui_Stage();
+            
+            % Set some camera parameters and begin a focus acquisition.
             obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLampFocus;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Full;
             obj.CameraSCMOS.AcquisitionType = 'focus';

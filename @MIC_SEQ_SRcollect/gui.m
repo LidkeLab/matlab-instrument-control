@@ -2,6 +2,13 @@ function guiFig = gui(obj) % new SEQAutoCollect
 %gui Graphical User Interface to ExampleInstrument
 %   Must contain gui2properties() and properties2gui() functions
 
+% Ensure only one sequential microscope GUI is opened at a time.
+h = findall(0,'tag','SeqSRcollect.gui');
+if ~(isempty(h))
+    figure(h);
+    return;
+end
+
 xsz=600;
 ysz=600;
 xst=200;
