@@ -133,8 +133,8 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.setup_Lamps();
             obj.setup_Lasers();
             obj.setup_Stage_Stepper();
-            obj.setup_FlipMountTTL('Dev3', 'Port0/Line0');
-            obj.setup_ShutterTTL('Dev3', 'Port0/Line1');
+            obj.setup_FlipMountTTL();
+            obj.setup_ShutterTTL();
             obj.AlignReg = MIC_SeqReg3DTrans(obj.CameraSCMOS, ...
                 obj.StagePiezoX, obj.StagePiezoY, obj.StagePiezoZ, ...
                 obj.StageStepper); % active registration object
