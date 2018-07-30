@@ -1,5 +1,5 @@
 %Script for tracking and SR
-
+%test Merge
 SPT.Lamp850Obj.setPower(10);
 SPT.Lamp850Obj.on;
 SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
