@@ -1,8 +1,21 @@
 classdef MIC_HamamatsuLCOS < MIC_Abstract
-    %MIC_HamamatsuLCOS Matlab Instrument Control of Hamamatsu LCOS SLM
-    % This class controls a phase SLM connected through a DVI interface
-    % 
+    % MIC_HamamatsuLCOS: Matlab Instrument Control of Hamamatsu LCOS SLM
+    %
+    % This class controls a phase SLM connected through a DVI interface.
     % Pupil diameter is 2*NA*f, f=M/180 for olympus objectives
+    %
+    % Example: obj = MIC_HamamatsuLCOS();
+    % Functions: delete, gui, exportState, setupImage, displayImage,
+    %            calcZernikeImage, calcOptimPSFImage, calcPrasadImage,
+    %            calcZernikeStack, calcDisplayImage, calcBlazeImage,
+    %            displayCheckerboard
+    %
+    % REQUIREMENTS:
+    %   MIC_Abstract.m
+    %   MATLAB software version R2016b or later
+    %   Data Acquisition Toolbox
+    %
+    % CITATION: Marjoleing Meddens, Lidkelab, 2017.
     
     properties
         HorPixels=1272      %SLM Horizontal Pixels
@@ -39,8 +52,7 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
     
     methods
         function obj=MIC_HamamatsuLCOS()
-            %Create object, load correction and setup window
-            
+            % Object constructor
             obj = obj@MIC_Abstract(~nargout);
             
             %Load in correction file
@@ -58,14 +70,14 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
         end
         
         function delete(obj)
+            % Deletes object
             delete(obj.Fig_Pattern);
         end
         
         function gui()
+            % Sets up gui
         end
         
-        function unitTest()
-        end
         
         function [Attributes,Data,Children]=exportState(obj)
             %Export all important Attributes, Data and Children
@@ -182,7 +194,7 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
         end
         
         function calcZernikeStack(obj)
-            %Calculate a stack of images  
+            %Calculate a stack of images (still being implemented)
         end
         
         function calcDisplayImage(obj)
@@ -246,6 +258,12 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
             drawnow();
         end
         
+    end
+    
+    methods (Static=true)
+        function unitTest()
+            % Tests the functionality of the class/instrument
+        end        
     end
     
 end

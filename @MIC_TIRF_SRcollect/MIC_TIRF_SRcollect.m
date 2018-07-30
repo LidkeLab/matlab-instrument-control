@@ -1,12 +1,17 @@
 classdef MIC_TIRF_SRcollect < MIC_Abstract
-% MIC_TIRF_SRcollect SuperResolution data collection software.
-% Super resolution data collection class for TIRF microscope
+% MIC_TIRF_SRcollect: Matlab instrument class for controlling TIRF
+% microscope in room 118.
+%
+% Super resolution data collection software for TIRF microscope. Creates
+% object calling MIC classes for Andor EMCCD camera, MCL NanoDrive stage,
+% 405 nm CrystaLaser, 488 nm SpectaPhysics Laser, 561 nm Coherent Laser,
+% 642 nm Thorlabs TCube Laser Diode, halogen lamp attached to microscope
+% and the registration class Reg3DTrans.
 % Works with Matlab Instrument Control (MIC) classes since March 2017
-
-%  usage: SRC=MIC_TIRF_SRcollect();
+%
+% Example: TIRF=MIC_TIRF_SRcollect();
 %
 % REQUIRES:
-%   Matlab 2014b or higher
 %   MIC_Abstract
 %   MIC_LightSource_Abstract
 %   MIC_AndorCamera
@@ -17,6 +22,9 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
 %   MIC_IX71Lamp
 %   MIC_MCLNanoDrive
 %   MIC_Reg3DTrans  
+%   Matlab 2014b or higher
+%
+% CITATION:
 % First version: Sheng Liu 
 % MIC compatible version Sandeep Pallikuth & Marjolein Meddens
 % Lidke Lab 2017
@@ -136,12 +144,16 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.LampPower = 50;
                 % Registration object
                 fprintf('Initializing Registration object\n')
+                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
+                if ~exist(f,'file')
+                    obj.CameraObj.ROI=[1 256 1 256];
+                    obj.R3DObj.calibratePixelSize;
+                end  
                 if exist(f,'file')
                     a=load(f);
                     obj.PixelSize=a.PixelSize;
                     clear a;
                 end
-                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
                 obj.R3DObj.LampPower=obj.LampPower;
                 obj.R3DObj.LampWait=2.5;
                 obj.R3DObj.CamShutter=true;
@@ -369,8 +381,11 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                case 'h5'
                    FileH5=fullfile(obj.SaveDir,[obj.BaseFileName s '.h5']);
                    MIC_H5.createFile(FileH5);
-                   MIC_H5.createGroup(FileH5,'Data');
-                   MIC_H5.createGroup(FileH5,'Data/Channel01');
+%                    Previously used group structure
+%                    MIC_H5.createGroup(FileH5,'Data');
+%                    MIC_H5.createGroup(FileH5,'Data/Channel01');
+                   MIC_H5.createGroup(FileH5,'Channel01');
+                   MIC_H5.createGroup(FileH5,'Channel01/Zposition001');
                otherwise
                    error('StartSequence:: unknown file save type')
            end
@@ -442,7 +457,7 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                         save(fn,'sequence','Params');
                     case 'h5' %This will become default
                         S=sprintf('Data%04d',nn)
-                        MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
+                        MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition001',S,sequence);
                     otherwise
                         error('StartSequence:: unknown SaveFileType')
                 end
@@ -452,9 +467,10 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 case 'mat'
                     %Nothing to do
                 case 'h5' %This will become default
-                    S='MIC_TIRF_SRcollect';
+                    % S='MIC_TIRF_SRcollect'; % -modified SP
+                    S='Channel01/Zposition001'; % -modified SP
                     MIC_H5.createGroup(FileH5,S);
-                    obj.save2hdf5(FileH5,S);  %Not working yet
+                    obj.save2hdf5(FileH5,S);  %Working
                 otherwise
                     error('StartSequence:: unknown SaveFileType')
             end
@@ -473,23 +489,23 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 case 4  
                     ROI=[1 256 129 384];%Center Left
                 case 5
-                    ROI=[257 512 129 384];% right center
+                    ROI=[257 512 129 384];% Center right
                 case 6
-                    ROI=[1 512 129 384];% center horizontally
+                    ROI=[1 512 129 384];% center horizontal
                     
                 case 7
-                    ROI=[1 256 1 256];% center horizontally
+
                 case 8
-                    ROI=[1 256 257 512];% center horizontally
+                    ROI=[1 256 257 512];% Left Bottom quadrant
                 case 9
-                    ROI=[257 512 1 256];% center horizontally
+                    ROI=[257 512 1 256];% Right Top quadrant
                 case 10
-                    ROI=[257 512 257 512];% center horizontally
+                    ROI=[257 512 257 512];% Right Bottom quadrant
                 case 11
-                    ROI=[1 512 1 256];% center horizontally
+                    ROI=[1 512 1 256];% Top half
                     
                 case 12
-                    ROI=[1 512 257 512];% center horizontally
+                    ROI=[1 512 257 512];% Bottom half
                 case 13
                     ROI=[129 384 129 384];% center256
                     

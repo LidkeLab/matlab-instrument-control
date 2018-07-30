@@ -1,19 +1,20 @@
 classdef MIC_LightSource_Abstract < MIC_Abstract
-    %MIC_LightSource_Abstract Matlab Instrument Control abstract class for light sources.
+    % MIC_LightSource_Abstract: Matlab Instrument Abstact Class for all 
+    % light source Matlab Instrument Class 
     %
-    % This class defines a set of Abstract properties and methods that must
-    % implemented in inheritting classes.  See descriptions below. 
-    %
-    % This class also provides a simple and intutive GUI interface.   
+    % This class defines a set of abstract properties and methods that must
+    % implemented in inheritting classes for all light source devices.  
+    % This also provides a simple and intuitive GUI interface.   
     % 
     % The constructor in each subclass must begin with the following line 
-    % inorder to enable the auto-naming functionality. 
+    % inorder to enable the auto-naming functionality:
+    % obj=obj@MIC_LightSource_Abstract(~nargout);
     %
-    % 	obj=obj@MIC_LightSource_Abstract(~nargout);
+    % REQUIREMENTS: 
+    %   MIC_Abstract.m
+    %   MATLAB software version R2016b or later
     %
-    % REQUIRES:
-    %   MATLAB 2014b or higher
-    % Written by Hanieh Mazloom-Farsibaf 2/20/2017
+    % CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
     
     properties (Abstract,SetAccess=protected)
         PowerUnit;          % Power Unit based on each Device.
@@ -27,6 +28,7 @@ classdef MIC_LightSource_Abstract < MIC_Abstract
     methods
         
         function obj=MIC_LightSource_Abstract(AutoName)
+            %set  auto-naming functionality from MIC_Abstract Class 
             obj=obj@MIC_Abstract(AutoName);
         end
         
