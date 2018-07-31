@@ -103,9 +103,9 @@ properties2gui()
     function photobleach(~,~)
        obj.Use405=1;
        obj.LaserPower405Activate=5;
-       obj.IsBleach=1
+       obj.IsBleach=1;
        obj.autoCollect(1)   
-       obj.IsBleach=0 
+       obj.IsBleach=0;
     end
 
     function PSFcollect(~,~)

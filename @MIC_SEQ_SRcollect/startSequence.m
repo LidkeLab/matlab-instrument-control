@@ -86,7 +86,7 @@
         end
 
     else
-
+        fprintf('Collecting data...................................... \n')
         for nn=1:obj.NumberOfSequences
             obj.Shutter.open; % opens shutter before the Laser turns on
 
@@ -100,7 +100,7 @@
                         Params=exportState(obj); %#ok<NASGU>
                         save(fn,'sequence','Params');
                     case 'h5' %This will become default
-                        S=sprintf('Data%04d',nn)
+                        S=sprintf('Data%04d',nn);
                         MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition001',S,sequence);
                     otherwise
                         error('StartSequence:: unknown SaveFileType')
@@ -109,7 +109,7 @@
             end
             obj.Shutter.close; % closes shutter before the Laser turns on
         end
-
+        fprintf('Data collection complete \n')
         %End Laser
         obj.Shutter.close; % closes the shutter instead of turning off the Laser
         obj.FlipMount.FilterIn; %new
@@ -120,6 +120,7 @@
 
         %Save Everything
         if ~obj.IsBleach %Append Data
+            fprintf('Saving exportables from exportState()............ \n')
             switch obj.SaveFileType
                 case 'mat'
                     %Nothing to do
@@ -130,6 +131,7 @@
                 otherwise
                     error('StartSequence:: unknown SaveFileType')
             end
+            fprintf('Saving exportables from exportState() complete \n')
         end
 
         %delete ActiveReg

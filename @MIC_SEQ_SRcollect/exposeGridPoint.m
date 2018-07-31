@@ -24,7 +24,7 @@ function exposeGridPoint(obj)
     Fig.Name='Click To Center and Proceed';
     Fig.NumberTitle='off';
     try
-        [X,Y]=ginput(1)% [X,Y] goes from 1 to 2048 for each of the 
+        [X,Y]=ginput(1);% [X,Y] goes from 1 to 2048 for each of the 
         % ROIs of each of 100 buttons on the GUI. 
         % NOTE ON ROTATION: this [X,Y] are coordinates calculated on a rotated
         % and mirror imaged of the live SCMOS 

@@ -244,7 +244,7 @@ propertiesTogui();
         obj.MotorObj.get_position;
         pos=obj.MotorObj.Position;
         obj.MotorObj.get_position;
-        while sum(pos~=obj.MotorObj.Position)==1;
+        while sum(pos~=obj.MotorObj.Position)==1
             pos=obj.MotorObj.Position;
             obj.MotorObj.get_position;
             set(handles.Text_XPos,'String',num2str(obj.MotorObj.Position(1),3));

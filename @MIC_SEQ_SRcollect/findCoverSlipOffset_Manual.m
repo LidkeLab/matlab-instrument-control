@@ -1,7 +1,7 @@
 function Success=findCoverSlipOffset_Manual(obj,RefStruct)
     %Allow user to focus and indentify cell
     if nargin<2
-        ref=uigetfile('E:\')
+        ref=uigetfile('E:\');
         myDir=obj.TopDir;
         myCoverslip=obj.CoverslipName;
         load(fullfile(myDir,myCoverslip,ref))
@@ -35,7 +35,7 @@ function Success=findCoverSlipOffset_Manual(obj,RefStruct)
     Fig.Name='Click To Center and Proceed';
     Fig.NumberTitle='off';
     try
-        [X,Y]=ginput(1) 
+        [X,Y]=ginput(1);
         close(Fig);
     catch
         Success=0;

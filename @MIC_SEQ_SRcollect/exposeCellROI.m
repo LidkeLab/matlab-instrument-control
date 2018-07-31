@@ -7,7 +7,7 @@
     Fig.Name='Click To Center and Proceed';
     Fig.NumberTitle='off';
     try
-        [X,Y]=ginput(1)%coordinates with respect to top left corner of the 256by256 image
+        [X,Y]=ginput(1);%coordinates with respect to top left corner of the 256by256 image
         close(Fig);
     catch
         return
