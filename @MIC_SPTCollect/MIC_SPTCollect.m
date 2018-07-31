@@ -480,7 +480,7 @@ Image_BF=[];
                     otherwise
                         obj.R3DObj.align2imageFit();
                         Image_BF{nn}=obj.R3DObj.Image_Current;
-                        MaxCC(nn)=obj.R3DObj.maxACmodel;
+%                         MaxCC(nn)=obj.R3DObj.maxACmodel;
                 end
                 
                 %Setup laser for aquisition
