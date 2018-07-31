@@ -466,7 +466,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             end
             
                             MaxCC=[];
-Image_BF=[];
+                            Image_BF=[];
             %loop over sequences
             for nn=1:obj.NumSequences
                 if obj.AbortNow; obj.AbortNow=0; break; end
@@ -588,7 +588,7 @@ Image_BF=[];
                     obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
                     
                     %set timer for IRcamera
-                    obj.TimerIRCamera=timer('StartDelay',0.5);
+                    obj.TimerIRCamera=timer('StartDelay',.2);
                     obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
                     
                     %set timer for SyringePump
