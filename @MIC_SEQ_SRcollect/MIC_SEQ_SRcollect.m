@@ -44,7 +44,8 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         % Static Instrument Settings (never changed during use of this class)
         SCMOS_UseDefectCorrection = 0;
         IRCamera_ExposureTime;
-        IRCamera_ROI = [513, 769, 385, 641]; % IR Camera ROI Center 256
+%         IRCamera_ROI = [513, 769, 385, 641]; % IR Camera ROI Center 256
+        IRCamera_ROI = [653, 909, 385, 641]; % sloppy fix to physical misalignment
         Lamp850Power = 7;
         Lamp660Power=12;
         SCMOS_PixelSize=.104; % microns
