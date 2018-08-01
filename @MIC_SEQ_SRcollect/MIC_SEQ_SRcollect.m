@@ -128,14 +128,14 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             PixelSizeFileName = fullfile(p, 'SEQ_PixelSize.mat');
             
             % Setup instruments, ensuring proper order is maintained.
-            obj.setup_SCMOS();
-            obj.setup_IRCamera();
-            obj.setup_Stage_Piezo();
-            obj.setup_Lamps();
-            obj.setup_Lasers();
-            obj.setup_Stage_Stepper();
-            obj.setup_FlipMountTTL();
-            obj.setup_ShutterTTL();
+            obj.setupSCMOS();
+            obj.setupIRCamera();
+            obj.setupStage_Piezo();
+            obj.setupLamps();
+            obj.setupLasers();
+            obj.setupStageStepper();
+            obj.setupFlipMountTTL();
+            obj.setupShutterTTL();
             obj.AlignReg = MIC_SeqReg3DTrans(obj.CameraSCMOS, ...
                 obj.StagePiezoX, obj.StagePiezoY, obj.StagePiezoZ, ...
                 obj.StageStepper); % active registration object
@@ -222,7 +222,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         saveReferenceImage(obj);
         startSequence(obj, RefStruct, LabelID);
         
-        function setup_SCMOS(obj)
+        function setupSCMOS(obj)
             % Used to setup the Hamamatsu SCMOS camera.
             obj.CameraSCMOS = MIC_HamamatsuCamera();
             CamSet = obj.CameraSCMOS.CameraSetting;
@@ -235,7 +235,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.CameraSCMOS.ExpTime_Sequence = 0.01;
         end
         
-        function setup_Stage_Piezo(obj)
+        function setupStagePiezo(obj)
             % Setup the piezos on the NanoMax stage.
             obj.StagePiezoX = MIC_TCubePiezo('81850186', '84850145', 'X');
             obj.StagePiezoY = MIC_TCubePiezo('81850193', '84850146', 'Y');
@@ -245,7 +245,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.StagePiezoZ.center();
         end
         
-        function setup_Stage_Stepper(obj)
+        function setupStageStepper(obj)
             % Setup the stepper motors for the NanoMax stage.
             % The StepperMotor Serial Number is 70850323.
             % NOTE: the positions set here are chosen such that the center
@@ -256,7 +256,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.StageStepper.moveToPosition(3, 2); % z stepper
         end
         
-        function setup_IRCamera(obj)
+        function setupIRCamera(obj)
             % Setup the IR camera used for active registration.
             obj.CameraIR = MIC_ThorlabsIR();
             obj.CameraIR.ROI = obj.IRCamera_ROI;
@@ -272,29 +272,30 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
                 timenow(1)-2000, timenow(2), timenow(3));
         end
         
-        function setup_Lamps(obj)
+        function setupLamps(obj)
             % Setup the LED lamp objects.
             obj.Lamp660 = MIC_ThorlabsLED('Dev1', 'ao1');
             obj.Lamp850 = MIC_ThorlabsLED('Dev1', 'ao0');
         end
         
-        function setup_Lasers(obj)
+        function setupLasers(obj)
             % Setup the laser(s) needed.
             obj.Laser647 = MIC_MPBLaser();
             obj.Laser405 = ...
                 MIC_TCubeLaserDiode('64841724', 'Power', 45, 40.93, 1);
-            % Example: TLD=MIC_TCubeLaserDiode('64841724','Power',40,40.93,1)
-            %  RB 405: I_LD=69.99 mA, I_PD=981 uA, P_LD=40.15 mW. WperA=40.93
+            % Usage: TLD=MIC_TCubeLaserDiode('64841724','Power',40,40.93,1)
+            % RB 405: I_LD=69.99 mA, I_PD=981 uA, P_LD=40.15 mW,
+            %         WperA=40.93
         end
         
-        function setup_FlipMountTTL(obj)
+        function setupFlipMountTTL(obj)
             % Setup the flip mount object to control the neutral density
             % filter.
             obj.FlipMount = MIC_FlipMountTTL('Dev3', 'Port0/Line0');
             obj.FlipMount.FilterIn; % place the ND filter in 647 laser path
         end
         
-        function setup_ShutterTTL(obj)
+        function setupShutterTTL(obj)
             % Setup the shutter for control of the 647nm laser.
             obj.Shutter = MIC_ShutterTTL('Dev3', 'Port0/Line1');
             obj.Shutter.close; % close the shutter by default
