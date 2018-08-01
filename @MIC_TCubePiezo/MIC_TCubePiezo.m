@@ -67,7 +67,7 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
             obj.openDevices();
             
             %Zero the Strain Gauge
-            obj.zeroStainGauge();
+            obj.zeroStrainGauge();
             
             %Calibrate the Strain Gauge
             obj.calibrateStrainGauge();
@@ -84,7 +84,7 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
         function Err=openDevices(obj)
             % Opens communications to PZ and SG with Kinesis C-API via mex
             
-             Kinesis_TLI_BuildDeviceList(); 
+            Kinesis_TLI_BuildDeviceList(); 
             pause(1);  %Try to prevent crash
             
             ErrSG=Kinesis_SG_Open(obj.SerialNoTSG001);
@@ -129,23 +129,23 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
            obj.openDevices();
         end
         
-        function zeroStainGauge(obj)
+        function zeroStrainGauge(obj)
             % Intiates automatic Voltage-Position Calibration of the 
             SN=obj.SerialNoTPZ001;
             SNSG=obj.SerialNoTSG001;
             
             %Set to open loop and voltage to zero
-            Kinesis_PCC_SetPositionControlMode(SN,uint16(2))
-            Kinesis_PCC_SetPosition(SN,uint32(0))
+            Kinesis_PCC_SetPositionControlMode(SN,uint16(2));
+            Kinesis_PCC_SetPosition(SN,uint32(0));
             pause(4)
-            Kinesis_PCC_SetPositionControlMode(SN,uint16(1))
-            Kinesis_PCC_SetPosition(SN,uint32(0))
+            Kinesis_PCC_SetPositionControlMode(SN,uint16(1));
+            Kinesis_PCC_SetPosition(SN,uint32(0));
             
             %Zero strain gauge
-            Kinesis_SG_SetZero(SNSG) % This needs wait till finished inside mex.
+            Kinesis_SG_SetZero(SNSG); % This needs wait till finished inside mex.
             
             %Set to closed loop and voltage to zero
-            Kinesis_PCC_SetPositionControlMode(SN,uint16(2))
+            Kinesis_PCC_SetPositionControlMode(SN,uint16(2));
         end
         
         function calibrateStrainGauge(obj)
