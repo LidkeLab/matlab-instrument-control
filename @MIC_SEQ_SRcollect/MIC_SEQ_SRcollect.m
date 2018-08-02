@@ -1,4 +1,4 @@
-classdef MIC_SEQ_SRcollect<MIC_Abstract
+classdef MIC_SEQ_SRcollect < MIC_Abstract
 % MIC_SEQ_SRcollect SuperResolution data collection software.
 % Super resolution data collection class for Sequential microscope
 % Works with Matlab Instrument Control (MIC) classes since March 2017
@@ -130,7 +130,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             % Setup instruments, ensuring proper order is maintained.
             obj.setupSCMOS();
             obj.setupIRCamera();
-            obj.setupStage_Piezo();
+            obj.setupStagePiezo();
             obj.setupLamps();
             obj.setupLasers();
             obj.setupStageStepper();

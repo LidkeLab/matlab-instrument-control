@@ -103,11 +103,11 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
             % Determine if there were errors opening the piezo controller
             % and output an appropriate warning.
             if ErrPZ ~= 0 % ErrPZ == 0 suggests a succesful connection
-                ErrorMessage = obj.decodeError(ErrSG); 
+                ErrorMessage = obj.decodeError(ErrPZ); 
                 warning(['openDevices::Error opening piezo ', ...
                     'controller \nError code %i was returned while ', ...
                     'trying to connect to piezo controller %s: \n', ...
-                    ErrorMessage], ErrSG, obj.SerialNoTSG001)
+                    ErrorMessage], ErrPZ, obj.SerialNoTSG001)
             end
             
             % Return a general error boolean in case it's needed elsewhere.
@@ -255,19 +255,20 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
                     % The following errors are generated from the FTDI 
                     % communications module or supporting code."
                     case 0
-                        % Connection succesful, no action needed.
-                    case 1
                         ErrorMessage = 'FT_OK - Success';
-                    case 2
+                    case 1
                         ErrorMessage = ['FT_InvalidHandle - The FTDI ', ...
                             'functions have not been initialized.'];
+                    case 2
+                        ErrorMessage = ['FT_DeviceNotFound - The ', ...
+                            'Device could not be found'];
                     case 3
                         ErrorMessage = ['FT_DeviceNotOpened - The ', ...
                             'Device must be opened before it can be ', ...
                             'accessed'];
                     case 4
                         ErrorMessage = ['FT_IOError - An I/O Error ', ...
-                            'has occured in the FTDI chip. '];
+                            'has occured in the FTDI chip.'];
                     case 5
                         ErrorMessage = ['FT_InsufficientResources - ', ...
                             'There are Insufficient resources to run ', ...
@@ -306,16 +307,16 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
                     case 40
                         ErrorMessage = ['TL_DISCONNECTING - The ', ...
                             'function could not be completed because ', ...
-                            'the device is disconnected. '];
+                            'the device is disconnected.'];
                     case 41 
                         ErrorMessage = ['TL_FIRMWARE_BUG - The ', ...
-                            'firmware has thrown an error '];
+                            'firmware has thrown an error'];
                     case 42
                         ErrorMessage = ['TL_INITIALIZATION_FAILURE - ', ...
-                            'The device has failed to initialize '];
+                            'The device has failed to initialize'];
                     case 43
                         ErrorMessage = ['TL_INVALID_CHANNEL - An ', ...
-                            'Invalid channel address was supplied '];
+                            'Invalid channel address was supplied'];
                         
                     % "Motor specific errors
                     % The following errors are motor specific errors 
@@ -323,7 +324,7 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
                     case 37
                         ErrorMessage = ['TL_UNHOMED - The device ', ...
                             'cannot perform this function until it ', ...
-                            'has been Homed. '];
+                            'has been Homed.'];
                     case 38
                         ErrorMessage = ['TL_INVALID_POSITION - The ', ...
                             'function cannot be performed as it ', ...
@@ -334,11 +335,11 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
                             'invalid velocity parameter was supplied'];
                     case 44
                         ErrorMessage = ['TL_CANNOT_HOME_DEVICE - ', ...
-                            'This device does not support Homing '];
+                            'This device does not support Homing'];
                     case 45
                         ErrorMessage = ['TL_JOG_CONTINOUS_MODE - An ', ...
                             'invalid jog mode was supplied for the ', ...
-                            'jog function. '];
+                            'jog function.'];
                     otherwise
                         ErrorMessage = 'Unknown error code';
                 end
