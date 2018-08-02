@@ -257,6 +257,7 @@
             end
             
         end
+        % test
         
         function libreset()
             if  libisloaded('Madlib')
