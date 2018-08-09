@@ -375,7 +375,12 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Run the SCMOS in focus mode with Low Laser Power to allow the
             % user to focus.  
             
-            % Run SCMOS in focus mode with High Laser Power to check
+            % Run SCMOS in focus mode with Low Laser Power to check
+            % fluorescence. 
+            % NOTE: Once the laser is turned on once through this function,
+            % it will stay on until an acquisition is complete (this is
+            % done to avoid the laser power up delay at each cell
+            % selection).
             obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocus;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
@@ -386,7 +391,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.Laser647.on();
             obj.Lamp660.setPower(0);
             obj.CameraSCMOS.start_focus();
-            obj.Laser647.off();
             obj.Shutter.close; % closes shutter to prevent photobleaching
             
             % Ask user if they would like to save the current cell and
