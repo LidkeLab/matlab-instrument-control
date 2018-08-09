@@ -68,7 +68,11 @@ classdef MIC_H5
         % named GroupName in the .h5 file specified by FilePath.  
         % Examples: 
         %   H5Structure = readH5File('C:\file.h5', 'Laser647') will extract
-        %       contents of the group 'Laser647' from file.h5
+        %       contents of the group 'Laser647' from file.h5 given only the group
+        %       name.
+        %   H5Structure = readH5File('C:\file.h5', ...
+        %       '/Channel01/Zposition001/Laser647') will extract contents of the
+        %       group 'Laser647' from file.h5 given a full group path.
 
             % Ensure that FilePath points to a valid file.
             % NOTE: == 2 means a file indeed exists at FilePath
@@ -90,15 +94,24 @@ classdef MIC_H5
                 % Iterate through each of CurrentGroups to search for the 
                 % desired group.
                 for ii = 1:numel(CurrentGroupNames)
-                    % Simplify the group name to remove group structure, 
-                    % e.g. if 
+                    % If the GroupName isn't provided as a full path, simplify
+                    % the current group name to remove group structure e.g. if 
                     % CurrentGroupNames{ii} = '/Channel01/Zposition001', 
                     % simplify it to 'ZPosition001' for comparison to 
                     % GroupName.
-                    LastSlashIndex = find(CurrentGroupNames{ii}=='/', ...
-                        1, 'last'); 
-                    CurrentGroupName = ...
-                        CurrentGroupNames{ii}(LastSlashIndex+1:end);
+                    if GroupName(1) == '/'
+                        % If the first character of the input GroupName is '/',
+                        % assume that a full path was provided to the desired
+                        % group.
+                        CurrentGroupName = CurrentGroupNames{ii}; 
+                    else
+                        % The full path was not given, just a raw group name was
+                        % given.
+                        LastSlashIndex = find(CurrentGroupNames{ii}=='/', ...
+                            1, 'last'); 
+                        CurrentGroupName = ...
+                            CurrentGroupNames{ii}(LastSlashIndex+1:end);
+                    end
 
                     % Check if the current group is the desired group, 
                     % breaking out of the for loop if it is.
@@ -126,27 +139,71 @@ classdef MIC_H5
                 end
             end
 
-            % Now that we've found the desired group, store it's Data and 
-            % Attributes in a more useable format.
+            % Now that we've found the desired group, store it's Attributes, 
+            % Data, and Children in a more useable format.
             % NOTE: to reach this point in the code, we have found the 
             % desired group and it will have been found on the last 
             % iteration of the above for loop, thus the ii-th index will be
             % the index of the desired Group in the CurrentGroups cell 
             % array.
-            DesiredGroup = CurrentGroups(ii); 
-            H5Structure.Attributes = DesiredGroup.Attributes;
-            for ii = 1:numel(DesiredGroup.Datasets)
-                % Read the ii-th dataset from the h5 file and store the 
-                % data in a field of the output structure, matching the 
-                % datasets name in the h5 file to the name of the field in 
-                % the output structure.
-                H5Structure.(DesiredGroup.Datasets(ii).Name) = ...
-                    h5read(FilePath, [DesiredGroup.Name, '/', ...
-                        DesiredGroup.Datasets(ii).Name]);
+            DesiredGroup = CurrentGroups(ii);
+            if ~isempty(DesiredGroup.Attributes)
+                % If the desired group has attributes, store them in the output
+                % structure.
+                for ii = 1:numel(DesiredGroup.Attributes)
+                    % Store each attribute as a field in the output structure
+                    % accesible directly by that attributes name.
+                    AttributeName = DesiredGroup.Attributes(ii).Name;
+                    H5Structure.Attributes.(AttributeName) = ...
+                        DesiredGroup.Attributes(ii).Value;
+                end
+            else
+                % Create an empty field for the Attributes to prevent issues with
+                % functions that may be using this method.
+                H5Structure.Attributes = [];
+            end
+            if ~isempty(DesiredGroup.Datasets)
+                for ii = 1:numel(DesiredGroup.Datasets)
+                    % Read the ii-th dataset from the h5 file and store the 
+                    % data in a field of the output structure, matching the 
+                    % datasets name in the h5 file to the name of the field in 
+                    % the output structure.
+                    H5Structure.Data.(DesiredGroup.Datasets(ii).Name) = ...
+                        h5read(FilePath, [DesiredGroup.Name, '/', ...
+                            DesiredGroup.Datasets(ii).Name]);
+                end
+            else
+                % Create an empty field for the Data to prevent issues with
+                % functions that may be using this method.
+                H5Structure.Data = [];
+            end
+            if ~isempty(DesiredGroup.Groups)
+                % Create a cell array of subgroup names (if subgroups exist).
+                % NOTE: If you are comparing the output structure to the Data,
+                % Attributes, and Children format used in the exportState() method,
+                % the subgroups are assumed to be the Children.
+                SubgroupNames = {DesiredGroup.Groups.Name};
+                for ii = 1:numel(SubgroupNames)
+                    % Iteratively explore subgroups of the desired group to
+                    % store their attributes and data.
+                    SubgroupStructure = h5reader_test(FilePath, ...
+                        SubgroupNames{ii});
+
+                    % Remove the path information from the subgroup name, e.g. 
+                    % /Channel01/Zposition001 will become Zposition001.
+                    LastSlashIndex = find(SubgroupNames{ii}=='/', ...
+                            1, 'last');
+                    SubgroupName = SubgroupNames{ii}(LastSlashIndex+1:end); 
+
+                    % Store the subgroup structure into the output H5Structure.
+                    H5Structure.Children.(SubgroupName) = SubgroupStructure;
+                end
+            else
+                % Create an empty field for the Children to prevent issues with
+                % functions that may be using this method.
+                H5Structure.Children = [];
             end
         end
-        
-        
     end
     
 end
