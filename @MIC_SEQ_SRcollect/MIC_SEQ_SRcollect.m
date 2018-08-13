@@ -45,7 +45,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         SCMOS_UseDefectCorrection = 0;
         IRCamera_ExposureTime;
 %         IRCamera_ROI = [384, 640, 384, 640]; % IR Camera ROI Center 256
-        IRCamera_ROI = [513, 769, 385, 641]; % old alignment fix
+        IRCamera_ROI = [513, 768, 385, 640]; % old alignment fix
 %         IRCamera_ROI = [653, 909, 385, 641]; % sloppy fix to physical misalignment
         Lamp850Power = 7;
         Lamp660Power=12;
