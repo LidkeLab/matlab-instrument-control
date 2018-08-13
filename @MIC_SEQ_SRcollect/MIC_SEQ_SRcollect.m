@@ -147,6 +147,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         function delete(obj)
             % Class destructor.
             delete(obj.CameraIR);
+            obj.Laser647.off(); % ensure the 647 laser is turned off
         end
         
         function [Attributes, Data, Children] = exportState(obj)
