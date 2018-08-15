@@ -1,4 +1,4 @@
-classdef MIC_SEQ_SRcollect<MIC_Abstract
+classdef MIC_SEQ_SRcollect < MIC_Abstract
 % MIC_SEQ_SRcollect SuperResolution data collection software.
 % Super resolution data collection class for Sequential microscope
 % Works with Matlab Instrument Control (MIC) classes since March 2017
@@ -44,8 +44,9 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         % Static Instrument Settings (never changed during use of this class)
         SCMOS_UseDefectCorrection = 0;
         IRCamera_ExposureTime;
-%         IRCamera_ROI = [513, 769, 385, 641]; % IR Camera ROI Center 256
-        IRCamera_ROI = [653, 909, 385, 641]; % sloppy fix to physical misalignment
+%         IRCamera_ROI = [384, 640, 384, 640]; % IR Camera ROI Center 256
+        IRCamera_ROI = [513, 768, 385, 640]; % old alignment fix
+%         IRCamera_ROI = [653, 909, 385, 641]; % sloppy fix to physical misalignment
         Lamp850Power = 7;
         Lamp660Power=12;
         SCMOS_PixelSize=.104; % microns
@@ -130,7 +131,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             % Setup instruments, ensuring proper order is maintained.
             obj.setupSCMOS();
             obj.setupIRCamera();
-            obj.setupStage_Piezo();
+            obj.setupStagePiezo();
             obj.setupLamps();
             obj.setupLasers();
             obj.setupStageStepper();
@@ -146,6 +147,7 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
         function delete(obj)
             % Class destructor.
             delete(obj.CameraIR);
+            obj.Laser647.off(); % ensure the 647 laser is turned off
         end
         
         function [Attributes, Data, Children] = exportState(obj)
@@ -374,7 +376,12 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             % Run the SCMOS in focus mode with Low Laser Power to allow the
             % user to focus.  
             
-            % Run SCMOS in focus mode with High Laser Power to check
+            % Run SCMOS in focus mode with Low Laser Power to check
+            % fluorescence. 
+            % NOTE: Once the laser is turned on once through this function,
+            % it will stay on until an acquisition is complete (this is
+            % done to avoid the laser power up delay at each cell
+            % selection).
             obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocus;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
@@ -385,7 +392,6 @@ classdef MIC_SEQ_SRcollect<MIC_Abstract
             obj.Laser647.on();
             obj.Lamp660.setPower(0);
             obj.CameraSCMOS.start_focus();
-            obj.Laser647.off();
             obj.Shutter.close; % closes shutter to prevent photobleaching
             
             % Ask user if they would like to save the current cell and

@@ -87,13 +87,9 @@ classdef MIC_StepperMotor < MIC_Abstract
             %gives the current jog step size in mm.
             Step = Kinesis_SBC_GetJogStepSize(obj.SerialN,Channel);
         end
-        function closeSBC(obj)
-            %called inside the delete function to close the communication ports for all the motors.
-            Kinesis_SBC_Close(obj.SerialN);
-            Kinesis_LD_Close('SerialNoString',Channel); %FF
-        end
         function delete(obj)
-            obj.closeSBC();
+            Kinesis_SBC_Close(obj.SerialN);
+            Kinesis_LD_Close(obj.SerialN);
             delete(obj.GuiFigure);
             clear obj;
         end
