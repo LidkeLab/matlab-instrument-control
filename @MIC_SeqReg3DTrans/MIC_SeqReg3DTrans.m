@@ -100,10 +100,10 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             
             if nargout==0 %% This doesn't work, nargout is always 1
                 warning('You must assign this object to a variable: r3d=Reg3DTrans(cam,mcl). This time, I assign for you..')
-                varname = 'r3d'
+                varname = 'r3d';
                 n=1;
                 while exist('varname','var')
-                    s=sprintf('%s%d',varname,n)
+                    s=sprintf('%s%d',varname,n);
                     n=n+1;
                 end
                 assignin('base',s,obj);
@@ -473,8 +473,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 %check convergence
                 
                withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
-               iter=iter+1
-            
+               fprintf('Alignment iteration %i complete \n', iter)           
             end
             if iter==obj.MaxIter
                 warning('reached max iterations')
