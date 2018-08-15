@@ -40,7 +40,6 @@
     obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
     obj.CameraSCMOS.setup_acquisition();
     obj.AlignReg.Image_Reference=RefStruct.Image;
-    obj.AlignReg.MaxIter=20; %new
     try %So that if alignment fails, we don't stop auto collect for other cells
         obj.AlignReg.align2imageFit(RefStruct); %FF
     catch 
