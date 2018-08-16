@@ -89,6 +89,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Registration classes.
         ActiveReg; % Active registration with IR Camera
         AlignReg; % Active alignment object
+        UseActiveReg = 1; % boolean: 1 uses active registration, 0 doesn't
+        UsePeriodicReg = 0; % boolean: 1 periodically re-aligns, 0 doesn't
         
         % Transient Properties
         GuiFigureStage
@@ -187,10 +189,13 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 Children.AlignReg.Data, ...
                 Children.AlignReg.Children] = ...
                     obj.AlignReg.exportState();
-            [Children.ActiveReg.Attributes, ...
-                Children.ActiveReg.Data, ...
-                Children.ActiveReg.Children] = ...
-                    obj.ActiveReg.exportState();
+            if obj.UseActiveReg
+                % We should only export this object if it was used.
+                [Children.ActiveReg.Attributes, ...
+                    Children.ActiveReg.Data, ...
+                    Children.ActiveReg.Children] = ...
+                        obj.ActiveReg.exportState();
+            end
             
             % Store the desired obj properties to be exported.
             Attributes.ExposureTimeLampFocus = obj.ExposureTimeLampFocus;

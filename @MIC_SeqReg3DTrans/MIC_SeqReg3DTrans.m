@@ -469,11 +469,12 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 h=dipshow(obj.Fig_h_ov,o);
                 diptruesize(h,'tight');
                 drawnow;
-
+                
                 %check convergence
                 
-               withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
-               fprintf('Alignment iteration %i complete \n', iter)           
+                withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
+                iter = iter + 1;
+                fprintf('Alignment iteration %i complete \n', iter)
             end
             if iter==obj.MaxIter
                 warning('reached max iterations')

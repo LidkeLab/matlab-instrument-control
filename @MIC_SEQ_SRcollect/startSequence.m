@@ -49,14 +49,17 @@
 
     obj.Lamp660.setPower(0);
 
-    %Setup Stabilization
-    obj.ActiveReg=MIC_ActiveReg3D_Seq(obj.CameraIR,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ); %new
-    obj.Lamp850.on; 
-    obj.Lamp850.setPower(obj.Lamp850Power);
-    obj.IRCamera_ExposureTime=obj.CameraIR.ExpTime_Capture;
-    obj.ActiveReg.takeRefImageStack(); %takes 21 reference images
-    obj.ActiveReg.Period=obj.StabPeriod;
-    obj.ActiveReg.start(); 
+    % Setup Active Stabilization (if desired).
+    if obj.UseActiveReg
+        obj.ActiveReg = MIC_ActiveReg3D_Seq(...
+            obj.CameraIR,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ); 
+        obj.Lamp850.on; 
+        obj.Lamp850.setPower(obj.Lamp850Power);
+        obj.IRCamera_ExposureTime=obj.CameraIR.ExpTime_Capture;
+        obj.ActiveReg.takeRefImageStack(); %takes 21 reference images
+        obj.ActiveReg.Period=obj.StabPeriod;
+        obj.ActiveReg.start();
+    end
 
     %Setup sCMOS for Sequence
     obj.CameraSCMOS.ExpTime_Sequence=obj.ExposureTimeSequence;
@@ -87,6 +90,29 @@
     else
         fprintf('Collecting data...................................... \n')
         for nn=1:obj.NumberOfSequences
+            % Use periodic registration between each sequence (if desired).
+            if obj.UsePeriodicReg && nn~=1
+                % No need to re-align on the first iteration, we just did
+                % that above!
+                obj.Lamp660.setPower(obj.Lamp660Power+2);
+                pause(obj.LampWait);
+                obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture; 
+                obj.CameraSCMOS.AcquisitionType = 'capture';
+                obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
+                obj.CameraSCMOS.setup_acquisition();
+                obj.AlignReg.Image_Reference=RefStruct.Image;
+                obj.AlignReg.MaxIter = 10; % reduce from 20 for speed
+                try
+                    obj.AlignReg.align2imageFit(RefStruct); %FF
+                catch 
+                    % If the alignment fails, don't stop auto collect for 
+                    % other cells.
+                    warning('Problem with AlignReg.align2imageFit()')
+                    return
+                end
+                obj.Lamp660.setPower(0);
+            end
+            
             obj.Shutter.open; % opens shutter before the Laser turns on
 
             %Collect 
@@ -107,6 +133,7 @@
                 %obj.Shutter.open;
             end
             obj.Shutter.close; % closes shutter before the Laser turns on
+            
         end
         fprintf('Data collection complete \n')
         %End Laser
@@ -115,7 +142,9 @@
         obj.Laser405.setPower(0);
 
         %End Active Stabilization:
-        obj.ActiveReg.stop();
+        if obj.UseActiveReg
+            obj.ActiveReg.stop();
+        end
 
         %Save Everything
         if ~obj.IsBleach %Append Data
@@ -133,7 +162,9 @@
             fprintf('Saving exportables from exportState() complete \n')
         end
 
-        %delete ActiveReg
-        delete(obj.ActiveReg);
+        % Delete obj.ActiveReg (if active stabilization was used).
+        if obj.UseActiveReg
+            delete(obj.ActiveReg);
+        end
     end
  end
