@@ -313,7 +313,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % turn lamp on
             obj.LampObj.setPower(obj.LampObj.Power);
             obj.LampObj.on;
-            obj.Image_Current=obj.capture;;
+            obj.Image_Current=obj.capture;
             im=obj.Image_Current;
             dipshow(im);
             % turn lamp off
