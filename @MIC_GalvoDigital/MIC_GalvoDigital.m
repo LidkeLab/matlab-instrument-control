@@ -11,7 +11,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
     %  Example: obj=MIC_GalvoDigital('Dev1','Port0/Line0:31');
     %  Funtions: delete, clearSession, enable, disable, reset, setSequence,
     %  angle2word, word2angle, get.Angle, setAngle, exportState,
-    %  set.Voltage, get.Voltage, updateGui
+    %  set.Voltage, get.Voltage,G. updateGui
     %
     %  REQUIREMENTS:
     %  MIC_Abstract.m
@@ -210,8 +210,11 @@ classdef MIC_GalvoDigital < MIC_Abstract
                 msg=sprintf('Angle must be in thid Range: [%g, %g] ',-obj.Range,obj.Range);
                 error(msg);
             end
+            
+            
             TTLWord = (2^16 - 1)*(Angle+15)/(2*obj.Range);    % This step finds which of the 65,536 binary values should go to each voltage and provides the decimal number for it starting at 0 and going to 65,535.
-            Word = floor(TTLWord);        % Need to round each number to pick out one of the 65,536 values to then convert that into binary, so we need an integer here.
+            
+            Word = round(TTLWord);        % Need to round each number to pick out one of the 65,536 values to then convert that into binary, so we need an integer here.
             obj.Angle=Angle;
             obj.Word=Word;
             obj.updateGui();
@@ -248,7 +251,8 @@ classdef MIC_GalvoDigital < MIC_Abstract
             end
             
             obj.clearSession;
-            obj.Sequence=dec2bin(obj.Word, 16) - '0';
+            flip(dec2bin(obj.Word, 16) - '0')
+            obj.Sequence=flip(dec2bin(obj.Word, 16) - '0');
             obj.enable;
             outputSingleScan(obj.DAQsessionAngle,obj.Sequence);
             obj.updateGui();
