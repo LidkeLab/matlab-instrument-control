@@ -62,6 +62,8 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
         GuiDialog;                  % GUI dialog for the CameraParameters
                                     % consider making GuiDialog abstract??
+        AcquisitionTimeOutOffset
+        NumImage
     end
     
     methods
@@ -95,9 +97,12 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                     out=obj.getlastimage();
                 case 'sequence'
                     obj.setcurrentcamera();
-                    [obj.LastError, out]=GetAcquiredData16(prod(obj.ImageSize)*obj.SequenceLength);
+                    %get data based on the number of taken images instead
+                    %of SequenceLength
+                    [a b NumImages] =GetNumberAvailableImages;
+                    [obj.LastError, out]=GetAcquiredData16(prod(obj.ImageSize)*NumImages);
                     obj.errorcheck('GetAcquiredData16');
-                    out=reshape(out,[obj.ImageSize(1) obj.ImageSize(2) obj.SequenceLength]);  
+                    out=reshape(out,[obj.ImageSize(1) obj.ImageSize(2) NumImages]);  
             end
         end
         
@@ -370,7 +375,6 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             obj.errorcheck('StartAcquisition');
             [obj.LastError, aqstatus]= AndorGetStatus();
             obj.errorcheck('AndorGetStatus');
-            
             while aqstatus==obj.ErrorCode.DRV_ACQUIRING
                 if obj.AbortNow
                     obj.LastError=AbortAcquisition();
@@ -378,16 +382,28 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                     out=[];
                     break
                 end
-%                 obj.LastError=WaitForAcquisition;
-                fprintf('about to  WaitForAcquisition\n') 
-                obj.LastError=WaitForAcquisitionTimeOut(1000*obj.SequenceCycleTime+1000)
-                fprintf('finished WaitForAcquisition\n')
+                % fprintf('about to  WaitForAcquisition\n')
+                % [a b obj.NumImage] =GetNumberAvailableImages;
+                % we replaced WaitForAcquisition with WaitForAcquisitionTimeOut to run
+                % Andor and IR camera at the same time.
+                obj.LastError=WaitForAcquisitionTimeOut(1000*obj.SequenceCycleTime+obj.AcquisitionTimeOutOffset);
+%                 fprintf('finished WaitForAcquisition\n')
+                if obj.LastError==20024
+                    % This conditions isn't usually satisfied in regular
+                    % SRCollect
+                    warning('Andor Camera Timeout Reached');
+                    %abort acquisition in the case of not collecting data
+                    %as NumFrame
+                    obj.LastError=AbortAcquisition();
+                    break % out of acquiring data        
+                end 
+                    
                 obj.errorcheck('WaitForAcquisition');
                 obj.displaylastimage;
-                [obj.LastError, aqstatus]= AndorGetStatus; 
+                [obj.LastError, aqstatus]= AndorGetStatus;  
                 obj.errorcheck('AndorGetStatus');
             end
-            
+         
             % close shutter
             if ~obj.CameraSetting.ManualShutter.Bit
                 obj.closeShutter;  
@@ -995,7 +1011,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 A.setup_acquisition()
                 A.start_focus()
                 
-                A.AcquisitionType='capture'
+                A.AcquisitionType='capture';
                 A.ExpTime_Capture=.1;
                 A.setup_acquisition()
                 A.KeepData=1;
