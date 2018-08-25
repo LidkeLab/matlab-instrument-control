@@ -197,7 +197,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             disp('Deleting Lamp...');
             delete(obj.Lamp850Obj);
             disp('Deleting Laser 638...');
-            delete(obj.LaserObj);
+            delete(obj.Laser638Obj);
             disp('Deleting Stage...');
             delete(obj.StageObj);
             disp('Deleting Camera...');
@@ -405,10 +405,11 @@ classdef MIC_SPTCollect < MIC_Abstract
             %first take a reference image or align to image
             obj.LampObj.setPower(obj.LampPower);
 
-            obj.set_RegCamType();
             if isempty(obj.IRCameraObj)
                 obj.IRCameraObj=MIC_ThorlabsIR();
             end
+            obj.set_RegCamType();
+            
             switch obj.RegType
                 
                 case 'Self' %take and save the reference image
@@ -515,6 +516,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.CameraObj.setCamProperties(CamSet);
                 obj.CameraObj.ExpTime_Sequence=obj.ExpTime_Sequence_Set;
                 obj.CameraObj.SequenceLength=obj.NumFrames;
+                obj.CameraObj.AcquisitionTimeOutOffset=10000;
                 obj.CameraObj.ROI=obj.getROI('Andor');
 %                 fprintf('EM Gain\n')
                 obj.CameraObj.CameraSetting.EMGain
@@ -579,6 +581,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     
                 elseif strcmp(obj.sequenceType,'Tracking+SRCollect');
                     
+                    
                     %Setup IRCamera
                     obj.IRCameraObj.ROI=obj.getROI('IRThorlabs')
                     obj.IRCameraObj.ExpTime_Sequence=obj.IRExpTime_Sequence_Set;
@@ -588,7 +591,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
                     
                     %set timer for IRcamera
-                    obj.TimerIRCamera=timer('StartDelay',.2);
+                    obj.TimerIRCamera=timer('StartDelay',.5);
                     obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
                     
                     %set timer for SyringePump
