@@ -383,7 +383,6 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                     break
                 end
                 % fprintf('about to  WaitForAcquisition\n')
-                % [a b obj.NumImage] =GetNumberAvailableImages;
                 % we replaced WaitForAcquisition with WaitForAcquisitionTimeOut to run
                 % Andor and IR camera at the same time.
                 obj.LastError=WaitForAcquisitionTimeOut(1000*obj.SequenceCycleTime+obj.AcquisitionTimeOutOffset);
@@ -398,12 +397,13 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                     break % out of acquiring data        
                 end 
                     
-                obj.errorcheck('WaitForAcquisition');
+                obj.errorcheck('WaitForAcquisitionTimeOut');
                 obj.displaylastimage;
                 [obj.LastError, aqstatus]= AndorGetStatus;  
                 obj.errorcheck('AndorGetStatus');
             end
-         
+            [a b obj.NumImage] =GetNumberAvailableImages;
+
             % close shutter
             if ~obj.CameraSetting.ManualShutter.Bit
                 obj.closeShutter;  
