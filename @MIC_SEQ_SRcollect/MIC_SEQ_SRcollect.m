@@ -44,7 +44,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Static Instrument Settings (never changed during use of this class)
         SCMOS_UseDefectCorrection = 0;
         IRCamera_ExposureTime;
-        IRCamera_ROI = [512, 767, 384, 639]; % IR Camera ROI Center 256
+        IRCamera_ROI = [513, 768, 385, 640]; % IR Camera ROI Center 256
         Lamp850Power = 7;
         Lamp660Power=12;
         SCMOS_PixelSize=.104; % microns
@@ -60,7 +60,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         NumberOfPhotoBleachingIterations = 8;
         StabPeriod = 5; % Time between stabilization events (seconds)
         GridCorner = [1, 1] % 10x10 Full Frame Grid Corner (mm)
-        SCMOS_ROI_Collect = [896, 1151, 896, 1151];
+        SCMOS_ROI_Collect = [897, 1152, 897, 1152];
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
