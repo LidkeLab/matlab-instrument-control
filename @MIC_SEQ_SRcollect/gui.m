@@ -9,16 +9,16 @@ if ~(isempty(h))
     return;
 end
 
-xsz=600;
-ysz=600;
-xst=200;
-yst=200;
+XWidth = 600;
+YWidth = 600;
+XStarting = 200;
+YStarting = 200;
 pw=.9;
 psep=.03;
 staticst=30;
 editst=120;
 
-guiFig = figure('Units','pixels','Position',[xst yst xsz ysz],...
+guiFig = figure('Units','pixels','Position',[XStarting YStarting XWidth YWidth],...
     'MenuBar','none','ToolBar','none','Visible','on',...
     'NumberTitle','off','UserData',0,'Tag',...
     'SeqSRcollect.gui','HandleVisibility','off','name','SeqAutoCollect.gui');%,'CloseRequestFcn',@FigureClose);
@@ -31,7 +31,7 @@ guidata(guiFig,handles);
 
 % File Panel
 ph=0.2;
-php = ph*ysz*1;
+php = ph*YWidth*1;
 %hFilePanel = uipanel('Parent',guiFig,'Title','FILE','Position',[(1-pw)/2 (refh-ph-psep)*1 pw*1 ph*1]);
 %refh=refh-ph-psep;
 
@@ -52,6 +52,19 @@ handles.Button_AutoCollect=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'St
 handles.Button_PSFcollect=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String', 'PSFcollect','Enable','on','Position', [editst+195 php+75 100 30],'BackgroundColor',[0.5 0.5 1],'Callback',@PSFcollect);
 handles.Button_SCMOSgui=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String', 'SCMOS gui','Enable','on','Position', [editst+300 php+75 100 30],'BackgroundColor',[0.5 1 0.5],'Callback',@SCMOSgui);
 
+% Add checkboxes to select registration types.
+handles.CheckboxActiveRegText = uicontrol('Parent', guiFig, ...
+    'Style', 'text', 'String', 'Use Active Registration', ...
+    'Position', [XWidth-155, 500, 150, 15]);
+handles.CheckboxActiveReg = uicontrol('Parent', guiFig, ...
+    'Style', 'checkbox', 'Position', [XWidth-20, 500, 15, 15], ...
+    'Value', obj.UseActiveReg, 'Callback', @UseActiveReg);
+handles.CheckboxPeriodicRegText = uicontrol('Parent', guiFig, ...
+    'Style', 'text', 'String', 'Use Periodic Registration', ...
+    'Position', [XWidth-155, 525, 150, 15]);
+handles.CheckboxPeriodicReg = uicontrol('Parent', guiFig, ...
+    'Style', 'checkbox', 'Position', [XWidth-20, 525, 15, 15], ...
+    'Value', obj.UsePeriodicReg, 'Callback', @UsePeriodicReg); 
 
 for ii=1:10
     for jj=1:10
@@ -115,6 +128,19 @@ properties2gui()
     function SCMOSgui(~,~)
        obj.CameraSCMOS.gui; 
     end
+    
+    function UseActiveReg(Source, ~, ~)
+        % Sets the UseActiveReg property of MIC_SEQ_SRcollect to 1 when
+        % checked, otherwise it sets it to 0. 
+        obj.UseActiveReg = Source.Value; % ==1 if checked, ==0 otherwise
+    end
+
+    function UsePeriodicReg(Source, ~, ~)
+        % Sets the UsePeriodicReg property of MIC_SEQ_SRcollect to 1 when
+        % checked, otherwise it sets it to 0. 
+        obj.UsePeriodicReg = Source.Value; % ==1 if checked, ==0 otherwise
+    end
+
 %  All figure have these functions but will be different contents
 
     function gui2properties()
