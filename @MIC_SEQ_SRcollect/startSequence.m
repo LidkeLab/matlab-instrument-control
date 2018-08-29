@@ -86,12 +86,11 @@
             eval(S);
             obj.Shutter.close; % closes shutter before the Laser turns on
         end
-
     else
         fprintf('Collecting data...................................... \n')
         for nn=1:obj.NumberOfSequences
             % Use periodic registration between each sequence (if desired).
-            if obj.UsePeriodicReg && nn~=1
+            if obj.UsePeriodicReg && ~mod(nn, 5) % every 5th sequence
                 % No need to re-align on the first iteration, we just did
                 % that above!
                 obj.Lamp660.setPower(obj.Lamp660Power+2);
@@ -101,7 +100,7 @@
                 obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
                 obj.CameraSCMOS.setup_acquisition();
                 obj.AlignReg.Image_Reference=RefStruct.Image;
-                obj.AlignReg.MaxIter = 10; % reduce from 20 for speed
+                obj.AlignReg.MaxIter = 20;
                 try
                     obj.AlignReg.align2imageFit(RefStruct); %FF
                 catch 
@@ -115,14 +114,17 @@
             
             obj.Shutter.open; % opens shutter before the Laser turns on
 
-            %Collect 
+            %Collect
+            obj.CameraSCMOS.AcquisitionType = 'sequence';
+            obj.CameraSCMOS.ExpTime_Sequence=obj.ExposureTimeSequence;
+            obj.CameraSCMOS.setup_acquisition();
             sequence=obj.CameraSCMOS.start_sequence();
             if ~obj.IsBleach %Append Data
                 obj.Shutter.close;
                 switch obj.SaveFileType
                     case 'mat'
                         fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
-                        Params=exportState(obj); %#ok<NASGU>
+                        Params=exportState(obj);
                         save(fn,'sequence','Params');
                     case 'h5' %This will become default
                         S=sprintf('Data%04d',nn);
@@ -132,8 +134,7 @@
                 end
                 %obj.Shutter.open;
             end
-            obj.Shutter.close; % closes shutter before the Laser turns on
-            
+            obj.Shutter.close;
         end
         fprintf('Data collection complete \n')
         %End Laser
@@ -144,6 +145,7 @@
         %End Active Stabilization:
         if obj.UseActiveReg
             obj.ActiveReg.stop();
+            delete(obj.ActiveReg);
         end
 
         %Save Everything
@@ -160,11 +162,6 @@
                     error('StartSequence:: unknown SaveFileType')
             end
             fprintf('Saving exportables from exportState() complete \n')
-        end
-
-        % Delete obj.ActiveReg (if active stabilization was used).
-        if obj.UseActiveReg
-            delete(obj.ActiveReg);
         end
     end
  end
