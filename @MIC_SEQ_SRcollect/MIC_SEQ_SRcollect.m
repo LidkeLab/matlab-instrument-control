@@ -46,8 +46,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         IRCamera_ExposureTime;
         IRCamera_ROI = [513, 768, 385, 640]; % IR Camera ROI Center 256
         Lamp850Power = 7;
-        Lamp660Power=12;
-        SCMOS_PixelSize=.104; % microns
+        Lamp660Power = 14;
+        SCMOS_PixelSize = .104; % microns
         
         % Operational properties.
         LampWait = 0.1; % Time to wait for full power to lamp (seconds)
@@ -89,6 +89,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         AlignReg; % Active alignment object
         UseActiveReg = 1; % boolean: 1 uses active registration, 0 doesn't
         UsePeriodicReg = 0; % boolean: 1 periodically re-aligns, 0 doesn't
+        NSeqBeforePeriodicReg = 3; % seq. collected before periodic reg.
         
         % Transient Properties
         GuiFigureStage

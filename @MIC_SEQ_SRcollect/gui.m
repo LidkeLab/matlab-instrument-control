@@ -52,19 +52,26 @@ handles.Button_AutoCollect=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'St
 handles.Button_PSFcollect=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String', 'PSFcollect','Enable','on','Position', [editst+195 php+75 100 30],'BackgroundColor',[0.5 0.5 1],'Callback',@PSFcollect);
 handles.Button_SCMOSgui=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String', 'SCMOS gui','Enable','on','Position', [editst+300 php+75 100 30],'BackgroundColor',[0.5 1 0.5],'Callback',@SCMOSgui);
 
-% Add checkboxes to select registration types.
+% Add user inputs to select registration types (active registration vs.
+% periodic re-registration).
 handles.CheckboxActiveRegText = uicontrol('Parent', guiFig, ...
     'Style', 'text', 'String', 'Use Active Registration', ...
-    'Position', [XWidth-155, 500, 150, 15]);
+    'Position', [XWidth-155, 550, 150, 15]);
 handles.CheckboxActiveReg = uicontrol('Parent', guiFig, ...
-    'Style', 'checkbox', 'Position', [XWidth-20, 500, 15, 15], ...
-    'Value', obj.UseActiveReg, 'Callback', @UseActiveReg);
+    'Style', 'checkbox', 'Position', [XWidth-20, 550, 15, 15], ...
+    'Callback', @UseActiveReg);
 handles.CheckboxPeriodicRegText = uicontrol('Parent', guiFig, ...
     'Style', 'text', 'String', 'Use Periodic Registration', ...
-    'Position', [XWidth-155, 525, 150, 15]);
+    'Position', [XWidth-155, 500, 150, 15]);
 handles.CheckboxPeriodicReg = uicontrol('Parent', guiFig, ...
-    'Style', 'checkbox', 'Position', [XWidth-20, 525, 15, 15], ...
-    'Value', obj.UsePeriodicReg, 'Callback', @UsePeriodicReg); 
+    'Style', 'checkbox', 'Position', [XWidth-20, 500, 15, 15], ...
+    'Callback', @UsePeriodicReg); 
+handles.EditboxPeriodicRegText = uicontrol('Parent', guiFig, ...
+    'Style', 'text', 'String', 'Period of periodic registration', ...
+    'Position', [XWidth-170, 475, 150, 15]);
+handles.EditboxPeriodicReg = uicontrol('Parent', guiFig, ...
+    'Style', 'edit', 'String', obj.NSeqBeforePeriodicReg, ...
+    'Position', [XWidth-20, 475, 15, 15]);
 
 for ii=1:10
     for jj=1:10
@@ -137,7 +144,8 @@ properties2gui()
 
     function UsePeriodicReg(Source, ~, ~)
         % Sets the UsePeriodicReg property of MIC_SEQ_SRcollect to 1 when
-        % checked, otherwise it sets it to 0. 
+        % checked, otherwise it sets it to 0.
+        gui2properties();
         obj.UsePeriodicReg = Source.Value; % ==1 if checked, ==0 otherwise
     end
 
@@ -145,16 +153,21 @@ properties2gui()
 
     function gui2properties()
         % Sets the object properties based on the GUI widgets
-        obj.TopDir=handles.Edit_SaveDirectory.String;
-        obj.CoverslipName=handles.Edit_CoverSlipName.String;
-        obj.LabelIdx=handles.Edit_LabelNumber.Value;
+        obj.TopDir = handles.Edit_SaveDirectory.String;
+        obj.CoverslipName = handles.Edit_CoverSlipName.String;
+        obj.LabelIdx = handles.Edit_LabelNumber.Value;
+        obj.NSeqBeforePeriodicReg = ...
+            str2double(handles.EditboxPeriodicReg.String);
     end
 
     function properties2gui()
         % Set the GUI widgets based on the object properties
-        handles.Edit_SaveDirectory.String=obj.TopDir;
-        handles.Edit_CoverSlipName.String=obj.CoverslipName;
-        handles.Edit_LabelNumber.Value=obj.LabelIdx;
+        handles.Edit_SaveDirectory.String = obj.TopDir;
+        handles.Edit_CoverSlipName.String = obj.CoverslipName;
+        handles.Edit_LabelNumber.Value = obj.LabelIdx;
+        handles.EditboxPeriodicReg.String = obj.NSeqBeforePeriodicReg;
+        handles.CheckboxActiveReg.Value = obj.UseActiveReg;
+        handles.CheckboxPeriodicReg.Value = obj.UsePeriodicReg;
     end
 
 end

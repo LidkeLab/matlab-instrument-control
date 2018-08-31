@@ -89,20 +89,18 @@
     else
         fprintf('Collecting data...................................... \n')
         for nn=1:obj.NumberOfSequences
-            % Use periodic registration between each sequence (if desired).
-            if obj.UsePeriodicReg && ~mod(nn, 5) % every 5th sequence
-                % No need to re-align on the first iteration, we just did
-                % that above!
-                obj.Lamp660.setPower(obj.Lamp660Power+2);
+            % Use periodic registration after NSeqBeforePeriodicReg
+            % sequences have been collected.
+            if obj.UsePeriodicReg && ~mod(nn, obj.NSeqBeforePeriodicReg)
+                obj.Lamp660.setPower(obj.Lamp660Power);
                 pause(obj.LampWait);
                 obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture; 
                 obj.CameraSCMOS.AcquisitionType = 'capture';
                 obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
                 obj.CameraSCMOS.setup_acquisition();
                 obj.AlignReg.Image_Reference=RefStruct.Image;
-                obj.AlignReg.MaxIter = 20;
                 try
-                    obj.AlignReg.align2imageFit(RefStruct); %FF
+                    obj.AlignReg.align2imageFit(RefStruct);
                 catch 
                     % If the alignment fails, don't stop auto collect for 
                     % other cells.
@@ -145,7 +143,6 @@
         %End Active Stabilization:
         if obj.UseActiveReg
             obj.ActiveReg.stop();
-            delete(obj.ActiveReg);
         end
 
         %Save Everything
