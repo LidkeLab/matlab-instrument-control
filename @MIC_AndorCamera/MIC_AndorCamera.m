@@ -385,7 +385,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 obj.errorcheck('AndorGetStatus');
             end
             
-            % close shutter
+%             close shutter
             if ~obj.CameraSetting.ManualShutter.Bit
                 obj.closeShutter;  
             end
