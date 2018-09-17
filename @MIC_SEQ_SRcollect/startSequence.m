@@ -80,7 +80,10 @@
     %Collect Data
     if obj.IsBleach
         for nn=1:obj.NumberOfPhotoBleachingIterations
-            obj.Shutter.open; % opens shutter before the Laser turns on
+            obj.Shutter.open;
+            if obj.Use405
+                obj.Laser405.on();
+            end
             Data=obj.CameraSCMOS.start_sequence();
             S=sprintf('F.Data%2.2d=Data;',nn);
             eval(S);
@@ -110,6 +113,9 @@
                 obj.Lamp660.setPower(0);
             end
             
+            if obj.Use405
+                obj.Laser405.on();
+            end
             obj.Shutter.open; % opens shutter before the Laser turns on
 
             %Collect
@@ -133,12 +139,19 @@
                 %obj.Shutter.open;
             end
             obj.Shutter.close;
+            if obj.Use405
+                obj.Laser405.off();
+            end
         end
         fprintf('Data collection complete \n')
+        
         %End Laser
         obj.Shutter.close; % closes the shutter instead of turning off the Laser
         obj.FlipMount.FilterIn; %new
-        obj.Laser405.setPower(0);
+        if obj.Use405
+            obj.Laser405.setPower(0);
+            obj.Laser405.off();
+        end
 
         %End Active Stabilization:
         if obj.UseActiveReg
