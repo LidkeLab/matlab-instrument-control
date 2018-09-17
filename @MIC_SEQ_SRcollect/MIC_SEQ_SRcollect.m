@@ -24,7 +24,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 % Second version: Farzin Farzam  
 % MIC compatible version: Farzin Farzam
 % Lidke Lab 2017
-% old version of this code is named SeqAutoColletc.m and can be found at
+% old version of this code is named SeqAutoCollect.m and can be found at
 % documents>MATLAB>Instrumentation>development>SeqAutoCollect
     properties
         % Hardware objects
@@ -65,10 +65,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
         Use405 = 0;
-        LaserPowerSequence = 185;
+        LaserPowerSequence = 300;
         LaserPowerFocus = 50;
-        LaserPower405Activate = 3;
-        LaserPower405Bleach = 5;
+        LaserPower405Activate = 11.84; % max power, for now
+        LaserPower405Bleach = 11.84;
         IsBleach = 0;
         StepperLargeStep = 0.05; % Large Stepper motor step (mm)
         StepperSmallStep = 0.002; % Small Stepper motor step (mm)
@@ -287,11 +287,18 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         function setupLasers(obj)
             % Setup the laser(s) needed.
             obj.Laser647 = MIC_MPBLaser();
-            obj.Laser405 = ...
-                MIC_TCubeLaserDiode('64841724', 'Power', 45, 40.93, 1);
-            % Usage: TLD=MIC_TCubeLaserDiode('64841724','Power',40,40.93,1)
-            % RB 405: I_LD=69.99 mA, I_PD=981 uA, P_LD=40.15 mW,
-            %         WperA=40.93
+            obj.Laser405 = MIC_TCubeLaserDiode('64841724', ...
+                'Power', 11.84, 2.49, 10);
+            % Usage: 
+            % TLD = MIC_TCubeLaserDiode(SerialNo, Mode, ...
+            %                           MaxPower, WperA, TIARange)
+            % Max power was found to be 11.84 mA when driving the diode at
+            % 80% of it's maximum rated current (80.14 mA, ~80 mA).  WperA
+            % was found by reading the photodiode current at 1-11 mW laser
+            % output in steps of 1 mW and fitting a line to the result,
+            % taking the slope to be WperA.  The TIARange was set to the 
+            % photodiode setting as set by the dip switches on the laser
+            % driver controller.  See DS lab notes 9/10/18.
         end
         
         function setupFlipMountTTL(obj)
