@@ -64,7 +64,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
-        Use405 = 0;
+        Use405 = 1;
         LaserPowerSequence = 300;
         LaserPowerFocus = 50;
         LaserPower405Activate = 11.84; % max power, for now
@@ -280,8 +280,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function setupLamps(obj)
             % Setup the LED lamp objects.
-            obj.Lamp660 = MIC_ThorlabsLED('Dev1', 'ao1');
-            obj.Lamp850 = MIC_ThorlabsLED('Dev1', 'ao0');
+            obj.Lamp660 = MIC_ThorlabsLED('Dev1', 'ao0');
+            obj.Lamp850 = MIC_ThorlabsLED('Dev1', 'ao1');
         end
         
         function setupLasers(obj)
