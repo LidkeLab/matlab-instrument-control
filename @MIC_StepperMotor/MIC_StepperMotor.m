@@ -40,7 +40,7 @@ classdef MIC_StepperMotor < MIC_Abstract
         function obj = MIC_StepperMotor(SerialNum)
             %constructor start the communications with all three motors and
             %also sets some of the class properties.
-            addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\mex64');
+%             addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\mex64');
             obj=obj@MIC_Abstract(~nargout);
             obj.SerialN = SerialNum;
             Kinesis_SBC_Open(obj.SerialN);
