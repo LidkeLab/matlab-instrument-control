@@ -1,4 +1,4 @@
-classdef MIC_SPTCollect < MIC_Abstract
+ classdef MIC_SPTCollect < MIC_Abstract
     % MIC_SPTCollect Single Particle Tracking/Superresolution data collection
     % software. Super resolution and Single Particle Tracking data collection
     % class for SPT microscope Works with Matlab Instrument Control (MIC)
@@ -79,9 +79,9 @@ classdef MIC_SPTCollect < MIC_Abstract
         tAndor_start
         tAndor_end
         SyringeWaitTime
-        SyringeWaitTime_offset=-4; % in the unit of frame for IRCamera 
+        SyringeWaitTime_offset=-2; % in the unit of frame for IRCamera 
         IRSequenceLength
-        IRsequenceLength_offset=40;%in the unit of frame for IRCamera
+        IRsequenceLength_offset=60;%in the unit of frame for IRCamera
         sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
         ActiveRegCheck=0;
         RegCamType='Andor Camera'         % Type of Camera Bright Field Registration 
@@ -244,11 +244,17 @@ classdef MIC_SPTCollect < MIC_Abstract
         
         function showref(obj)
             % Displays current reference image
+             if isempty(obj.IRCameraObj)
+                obj.IRCameraObj=MIC_ThorlabsIR();
+            end
             dipshow(obj.R3DObj.Image_Reference);
         end
         
         function takeref(obj)
             % Captures reference image obj.setLampPower();
+             if isempty(obj.IRCameraObj)
+                obj.IRCameraObj=MIC_ThorlabsIR();
+            end
             obj.R3DObj.takerefimage();
         end
         
@@ -382,8 +388,12 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.R3DObj.ExposureTime=0.01;
           
             elseif strcmp(obj.RegCamType,'IRCamera')
-               CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
-               obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj,CalFileName);
+               
+                CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
+                if isempty(obj.IRCameraObj)
+                obj.IRCameraObj=MIC_ThorlabsIR();
+            end
+                obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj,CalFileName);
                obj.R3DObj.LampPower=obj.Lamp850Power;
                 obj.R3DObj.LampWait=2.5;
                 obj.R3DObj.CamShutter=false;
@@ -404,7 +414,8 @@ classdef MIC_SPTCollect < MIC_Abstract
             
             %first take a reference image or align to image
             obj.LampObj.setPower(obj.LampPower);
-
+%             obj.IRCameraObj.delete;
+%             obj.IRCameraObj=[];
             if isempty(obj.IRCameraObj)
                 obj.IRCameraObj=MIC_ThorlabsIR();
             end
@@ -439,8 +450,8 @@ classdef MIC_SPTCollect < MIC_Abstract
 %                 obj.IRCameraObj=MIC_ThorlabsIR();
 %                 obj.IRCameraObj.DisplayZoom=1;
 %             end
-            %
-            %set Active Stabilization
+%             %
+%             %set Active Stabilization
             if obj.ActiveRegCheck==1
                 %setup Lamp850
                 %Active Stabilization
@@ -483,6 +494,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                         Image_BF{nn}=obj.R3DObj.Image_Current;
 %                         MaxCC(nn)=obj.R3DObj.maxACmodel;
                 end
+                
                 
                 %Setup laser for aquisition
                 if obj.Laser638Aq
@@ -609,9 +621,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.IRCameraObj.SP.stop %(?)
                     fprintf('Syringe Pump is stopped\n')
                     
-                    %                     %clear IRCamera
-                    %                     obj.IRCameraObj.delete();
-                    %                     obj.IRCameraObj=[];
+%                                         %clear IRCamera
+%                                         obj.IRCameraObj.delete();
+%                                         obj.IRCameraObj=[];
                 end
                 
                 %Turn off Laser
