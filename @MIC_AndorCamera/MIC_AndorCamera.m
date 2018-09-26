@@ -100,6 +100,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                     %get data based on the number of taken images instead
                     %of SequenceLength
                     [a b NumImages] =GetNumberAvailableImages;
+%                     c=GetImages;
                     [obj.LastError, out]=GetAcquiredData16(prod(obj.ImageSize)*NumImages);
                     obj.errorcheck('GetAcquiredData16');
                     out=reshape(out,[obj.ImageSize(1) obj.ImageSize(2) NumImages]);  
