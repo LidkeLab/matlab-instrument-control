@@ -280,8 +280,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function setupLamps(obj)
             % Setup the LED lamp objects.
-            obj.Lamp660 = MIC_ThorlabsLED('Dev1', 'ao0');
-            obj.Lamp850 = MIC_ThorlabsLED('Dev1', 'ao1');
+            obj.Lamp660 = MIC_ThorlabsLED('Dev2', 'ao0');
+            obj.Lamp850 = MIC_ThorlabsLED('Dev2', 'ao1');
         end
         
         function setupLasers(obj)
