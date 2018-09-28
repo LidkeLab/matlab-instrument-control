@@ -304,13 +304,13 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         function setupFlipMountTTL(obj)
             % Setup the flip mount object to control the neutral density
             % filter.
-            obj.FlipMount = MIC_FlipMountTTL('Dev3', 'Port0/Line0');
+            obj.FlipMount = MIC_FlipMountTTL('Dev1', 'Port0/Line0');
             obj.FlipMount.FilterIn; % place the ND filter in 647 laser path
         end
         
         function setupShutterTTL(obj)
             % Setup the shutter for control of the 647nm laser.
-            obj.Shutter = MIC_ShutterTTL('Dev3', 'Port0/Line1');
+            obj.Shutter = MIC_ShutterTTL('Dev1', 'Port0/Line1');
             obj.Shutter.close; % close the shutter by default
         end
         
