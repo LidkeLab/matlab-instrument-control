@@ -3,6 +3,9 @@ classdef MIC_IRSyringPump < MIC_ThorlabsIR
     % the same time of taking data with IRCamera
     %
     %This class is only for SPT microscopy in Lidke's Lab 
+    % 
+    % Example: obj=MIC_IRSyringPump();
+    % Function: start_sequence
     %
     % REQUIREMENTS: 
     %   MIC_Abstract.m

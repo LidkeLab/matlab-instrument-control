@@ -20,7 +20,7 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
     %   MIC_Attenuator
     %   MIC_ShutterTTL
     %
-    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
+    % CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
     
     
     properties (SetAccess=protected)
