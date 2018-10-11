@@ -125,7 +125,6 @@
         obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
         obj.CameraSCMOS.setup_acquisition();
         Sequence = obj.CameraSCMOS.start_sequence();
-        obj.Shutter.close();
         switch obj.SaveFileType
             % For now, we will stick to saving data to a .h5 file.
             case 'h5'
@@ -142,7 +141,7 @@
     end
     fprintf('Data collection complete \n')
     
-    % Ensure that the lasers are no reaching the sample.
+    % Ensure that the lasers are not reaching the sample.
     obj.Shutter.close(); % close shutter instead of turning off the laser
     obj.FlipMount.FilterIn();
     if obj.Use405

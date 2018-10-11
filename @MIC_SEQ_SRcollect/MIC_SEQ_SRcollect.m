@@ -69,7 +69,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         LaserPowerFocus = 50;
         LaserPower405Activate = 11.84; % max power, for now
         LaserPower405Bleach = 11.84;
-        IsBleach = 0;
+        IsBleach = 0; % boolean: 1 for a photobleach round, 0 otherwise
         StepperLargeStep = 0.05; % Large Stepper motor step (mm)
         StepperSmallStep = 0.002; % Small Stepper motor step (mm)
         PiezoStep = 0.1; % Piezo step (micron)

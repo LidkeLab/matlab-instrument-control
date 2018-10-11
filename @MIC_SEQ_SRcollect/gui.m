@@ -73,6 +73,14 @@ handles.EditboxPeriodicReg = uicontrol('Parent', guiFig, ...
     'Style', 'edit', 'String', obj.NSeqBeforePeriodicReg, ...
     'Position', [XWidth-20, 475, 15, 15]);
 
+% Add a check-box to indicate a photo-bleaching round.
+handles.CheckboxPhotobleachText = uicontrol('Parent', guiFig, ...
+    'Style', 'text', 'String', 'Photobleaching Round', ...
+    'Position', [XWidth-170, 400, 150, 15]);
+handles.CheckboxPhotobleach = uicontrol('Parent', guiFig, ...
+    'Style', 'checkbox', 'Position', [XWidth-20, 400, 15, 15], ...
+    'Callback', @UpdateIsBleach);
+
 for ii=1:10
     for jj=1:10
         % create  100 pushbuttons with callback functions
@@ -136,17 +144,23 @@ properties2gui()
        obj.CameraSCMOS.gui; 
     end
     
-    function UseActiveReg(Source, ~, ~)
+    function UseActiveReg(Source, ~)
         % Sets the UseActiveReg property of MIC_SEQ_SRcollect to 1 when
-        % checked, otherwise it sets it to 0. 
+        % checked, otherwise it sets it to 0.
         obj.UseActiveReg = Source.Value; % ==1 if checked, ==0 otherwise
     end
 
-    function UsePeriodicReg(Source, ~, ~)
+    function UsePeriodicReg(Source, ~)
         % Sets the UsePeriodicReg property of MIC_SEQ_SRcollect to 1 when
         % checked, otherwise it sets it to 0.
         gui2properties();
         obj.UsePeriodicReg = Source.Value; % ==1 if checked, ==0 otherwise
+    end
+
+    function UpdateIsBleach(Source, ~)
+        % Sets the IsBleach property of MIC_SEQ_SRcollect to 1 when
+        % checked, otherwise it sets it to 0.
+        obj.IsBleach = Source.Value; % ==1 if checked, ==0 otherwise
     end
 
 %  All figure have these functions but will be different contents
