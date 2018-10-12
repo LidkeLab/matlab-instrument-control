@@ -114,7 +114,16 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
     end
     
     methods
-        function obj = MIC_SEQ_SRcollect()
+        function obj = MIC_SEQ_SRcollect(RunTestingMode)
+            % Enable the autonaming feature of MIC_Abstract.
+            obj = obj@MIC_Abstract(~nargout);
+            
+            % Check if the input RunTestingMode was passed, and if so
+            % proceed to create the class without setup of the instruments.
+            if exist('RunTestingMode', 'var') && RunTestingMode
+                return
+            end
+            
             % Ask the user to confirm sample is not fixed to the stage,
             % throw an error as a reminder if they answer Yes.
             proceedstr = questdlg('Is the sample fixed on the stage?', ...
@@ -123,12 +132,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 error(['Sample is fixed on the stage!  ', ...
                     'Remove the sample and restart SeqSRcollect.']);
             end
-            
-            % Enable the autonaming feature of MIC_Abstract.
-            obj = obj@MIC_Abstract(~nargout);
-            [p, ~] = fileparts(which('MIC_SEQ_SRcollect'));
-            PixelSizeFileName = fullfile(p, 'SEQ_PixelSize.mat');
-            
+
             % Setup instruments, ensuring proper order is maintained.
             obj.setupSCMOS();
             obj.setupIRCamera();
