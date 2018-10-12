@@ -56,7 +56,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         ExposureTimeSequence = 0.01;
         ExposureTimeCapture = 0.2;
         NumberOfFrames = 2000;
-        NumberOfSequences = 20; 
+        NumberOfSequences = 20;
         NumberOfPhotoBleachingIterations = 8;
         StabPeriod = 5; % Time between stabilization events (seconds)
         GridCorner = [1, 1] % 10x10 Full Frame Grid Corner (mm)
@@ -332,17 +332,16 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StageStepper.moveToPosition(3, 1.4); % z stepper
         end
         
-        function findCoverSlipFocus(obj)
-            % Allow user to change z-position of stage to select a focal
-            % plane from a brightfield image on the Hamamatsu sCMOS camera.
+        function findCoverslipFocus(obj)
+            % Displays the entire ROI of the main sCMOS camera while
+            % illuminating the sample with the 660nm lamp.  This can be
+            % used, e.g., to help find the coverslip when the sample is
+            % initially placed on the sample stage.
             
             % Center the piezos before proceeding.
             obj.StagePiezoX.center();
             obj.StagePiezoY.center();
             obj.StagePiezoZ.center();
-            
-            % Open the stage control GUI.
-            obj.gui_Stage();
             
             % Set some camera parameters and begin a focus acquisition.
             obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLampFocus;

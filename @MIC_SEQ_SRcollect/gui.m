@@ -1,95 +1,437 @@
-function guiFig = gui(obj) % new SEQAutoCollect
+function GuiFig = gui(obj) % new SEQAutoCollect
 %gui Graphical User Interface to ExampleInstrument
 %   Must contain gui2properties() and properties2gui() functions
 
 % Ensure only one sequential microscope GUI is opened at a time.
-h = findall(0,'tag','SeqSRcollect.gui');
+h = findall(0, 'tag', 'SeqSRcollect.gui');
 if ~(isempty(h))
     figure(h);
     return;
 end
 
-XWidth = 600;
-YWidth = 600;
-XStarting = 200;
-YStarting = 200;
-pw=.9;
-psep=.03;
-staticst=30;
-editst=120;
+% Define reference parameters for the GUI dimensions.
+ScreenSize = get(groot, 'ScreenSize'); % size of displaying screen
+XSize = 825;
+YSize = 750;
+BottomLeftX = floor(ScreenSize(3)/2 - XSize/2); % ~centers figure on screen
+BottomLeftY = floor(ScreenSize(4)/2 - YSize/2);
 
-guiFig = figure('Units','pixels','Position',[XStarting YStarting XWidth YWidth],...
-    'MenuBar','none','ToolBar','none','Visible','on',...
-    'NumberTitle','off','UserData',0,'Tag',...
-    'SeqSRcollect.gui','HandleVisibility','off','name','SeqAutoCollect.gui');%,'CloseRequestFcn',@FigureClose);
+% Create the GUI figure.
+GuiFig = figure('Units', 'pixels', ...
+    'Position', [BottomLeftX, BottomLeftY, XSize, YSize], ...
+    'MenuBar', 'none', 'ToolBar', 'none', 'Visible', 'on', ...
+    'NumberTitle', 'off', 'UserData', 0, 'Tag', 'SeqSRcollect.gui', ...
+    'HandleVisibility', 'off', 'name', 'SeqAutoCollect.gui');
+obj.GuiFigureMain = GuiFig;
+GuiFig.Color = get(0, 'defaultUicontrolBackgroundColor');
+GuiFig.WindowScrollWheelFcn = @zPiezoControl; % mouse wheel for Z piezo
+handles.output = GuiFig;
+guidata(GuiFig, handles);
 
-obj.GuiFigureMain=guiFig;
-defaultBackground = get(0,'defaultUicontrolBackgroundColor');
-set(guiFig,'Color',defaultBackground);
-handles.output = guiFig;
-guidata(guiFig,handles);
+% Create a sample stage control panel and associated controls.
+PanelHeight = 375;
+PanelWidth = 210;
+StageControlPanel = uipanel(GuiFig, 'Title', 'Sample Stage', ...
+    'FontWeight', 'bold', 'Units', 'pixels', ...
+    'Position', [5, YSize-PanelHeight, PanelWidth, PanelHeight]);
+handles.ButtonBigStepUp = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'PushButton', 'String', 'UP', ...
+    'Position', [5, PanelHeight-70, 60, 50], ...
+    'FontSize', 12, 'FontWeight', 'bold', 'Callback', @stepperControl);
+handles.ButtonSmallStepUp = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'PushButton', 'String', 'up', ...
+    'Position', [17, PanelHeight-95, 36, 25], ...
+    'FontSize', 10,  'Callback', @stepperControl);
+handles.ButtonSmallStepDown = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'PushButton', 'String', 'down', ...
+    'Position', [17, PanelHeight-125, 36, 25], ...
+    'FontSize', 10,  'Callback', @stepperControl);
+handles.ButtonBigStepDown = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'PushButton', 'String', 'DOWN', ...
+    'Position', [5, PanelHeight-175, 60, 50], ...
+    'FontSize', 12, 'FontWeight', 'bold', 'Callback', @stepperControl);
+uicontrol('Parent', StageControlPanel, 'Style', 'Text', ...
+    'String', 'Stepper Position (mm)', ...
+    'Position', [PanelWidth-120, PanelHeight-40, 110, 15]);
+handles.TextStepperX = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'Text', 'String', 'X: 1.000', ...
+    'Position', [PanelWidth-120, PanelHeight-55, 110, 15]);
+handles.TextStepperY = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'Text', 'String', 'Y: 1.000', ...
+    'Position', [PanelWidth-120, PanelHeight-70, 110, 15]);
+handles.TextStepperZ = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'Text', 'String', 'Z: 1.000', ...
+    'Position', [PanelWidth-120, PanelHeight-85, 110, 15]);
+uicontrol('Parent', StageControlPanel, 'Style', 'Text', ...
+    'String', 'Piezo Position (um)', ...
+    'Position', [PanelWidth-120, PanelHeight-120, 110, 15]);
+handles.TextPiezoX = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'Text', 'String', 'X: 10.000', ...
+    'Position', [PanelWidth-120, PanelHeight-135, 110, 15]);
+handles.TextPiezoY = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'Text', 'String', 'Y: 10.000', ...
+    'Position', [PanelWidth-120, PanelHeight-150, 110, 15]);
+handles.TextPiezoZ = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'Text', 'String', 'Z: 10.000', ...
+    'Position', [PanelWidth-120, PanelHeight-165, 110, 15]);
+handles.ButtonLoadSample = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Load Sample', ...
+    'Position', [5, PanelHeight-215, 100, 25], ...
+    'Callback', @loadSample);
+handles.ButtonUnloadSample = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Unload Sample', ...
+    'Position', [105, PanelHeight-215, 100, 25], ...
+    'Callback', @unloadSample);
 
-% File Panel
-ph=0.2;
-php = ph*YWidth*1;
-%hFilePanel = uipanel('Parent',guiFig,'Title','FILE','Position',[(1-pw)/2 (refh-ph-psep)*1 pw*1 ph*1]);
-%refh=refh-ph-psep;
+% Create a control panel for the main sCMOS camera.
+PanelHeight = 375;
+PanelWidth = 210;
+SCMOSControlPanel = uipanel(GuiFig, 'Title', 'Hamamatsu sCMOS', ...
+    'FontWeight', 'bold', 'Units', 'pixels', ...
+    'Position', ...
+    [PanelWidth+15, YSize-PanelHeight, PanelWidth, PanelHeight]);
+uicontrol('Parent', SCMOSControlPanel,'Style', 'Text', ...
+    'String', 'Exposure Time (seconds)', ...
+    'Position', [5, PanelHeight-40, 200, 15], ...
+    'HorizontalAlignment', 'left');
+handles.TextExposureTimeLampFocus = uicontrol(...
+    'Parent', SCMOSControlPanel, 'Style', 'Text', ...
+    'String', 'Lamp focus:', ...
+    'Position', [25, PanelHeight-55, 100, 15], ...
+    'HorizontalAlignment', 'left');
+handles.EditExposureTimeLampFocus = uicontrol(...
+    'Parent', SCMOSControlPanel, 'Style', 'Edit', ...
+    'Position', [125, PanelHeight-55, 50, 15], ...
+    'HorizontalAlignment', 'left', ...
+    'Callback', {@changeSCMOSExposureTime, 'LampFocus'});
+handles.TextExposureTimeLampCapture = uicontrol(...
+    'Parent', SCMOSControlPanel, 'Style', 'Text', ...
+    'String', 'Lamp capture:', ...
+    'Position', [25, PanelHeight-70, 100, 15], ...
+    'HorizontalAlignment', 'left');
+handles.EditExposureTimeLampCapture = uicontrol(...
+    'Parent', SCMOSControlPanel, 'Style', 'Edit', ...
+    'Position', [125, PanelHeight-70, 50, 15], ...
+    'HorizontalAlignment', 'left', ...
+    'Callback', {@changeSCMOSExposureTime, 'LampCapture'});
+handles.TextExposureTimeLaserFocus = uicontrol(...
+    'Parent', SCMOSControlPanel, 'Style', 'Text', ...
+    'String', 'Laser focus:', ...
+    'Position', [25, PanelHeight-85, 100, 15], ...
+    'HorizontalAlignment', 'left');
+handles.EditExposureTimeLaserFocus = uicontrol(...
+    'Parent', SCMOSControlPanel, 'Style', 'Edit', ...
+    'Position', [125, PanelHeight-85, 50, 15], ...
+    'HorizontalAlignment', 'left', ...
+    'Callback', {@changeSCMOSExposureTime, 'LaserFocus'});
+handles.TextExposureTimeLaserSequence = uicontrol(...
+    'Parent', SCMOSControlPanel, 'Style', 'Text', ...
+    'String', 'Laser sequence:', ...
+    'Position', [25, PanelHeight-100, 100, 15], ...
+    'HorizontalAlignment', 'left');
+handles.EditExposureTimeLaserSequence = uicontrol(...
+    'Parent', SCMOSControlPanel, 'Style', 'Edit', ...
+    'Position', [125, PanelHeight-100, 50, 15], ...
+    'HorizontalAlignment', 'left', ...
+    'Callback', {@changeSCMOSExposureTime, 'LaserSequence'});
+handles.ButtonFindCoverslip = uicontrol('Parent', SCMOSControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Find Coverslip', ...
+    'Position', [5, PanelHeight-215, 100, 25], 'Callback', @findCoverslip);
+handles.ButtonResetSCMOS = uicontrol('Parent', SCMOSControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Reset sCMOS', ...
+    'Position', [105, PanelHeight-215, 100, 25], 'Callback', @resetSCMOS);
+handles.ButtonAbortAcquisition = uicontrol('Parent', SCMOSControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Abort Acquisition', ...
+    'Position', [5, PanelHeight-240, 100, 25], ...
+    'Callback', @abortAcquisition);
 
-uicontrol('Parent',guiFig, 'Style', 'edit', 'String', 'Save Directory:','Enable','off','Position', [staticst php-10 100 20]);
-handles.Edit_SaveDirectory = uicontrol('Parent',guiFig, 'Style', 'edit', 'String','','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-10 350 20]);
-uicontrol('Parent',guiFig, 'Style', 'edit', 'String', 'Coverslip Name:','Enable','off','Position', [staticst php-40 100 20]);
-handles.Edit_CoverSlipName = uicontrol('Parent',guiFig, 'Style', 'edit', 'String','','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-40 350 20]);
-uicontrol('Parent',guiFig, 'Style', 'edit', 'String', 'Label Number:','Enable','off','Position', [staticst php-70 100 20]);
-handles.Edit_LabelNumber = uicontrol('Parent',guiFig, 'Style', 'popupmenu', 'String',{'1','2','3','4','5','6','7','8'},'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-70 350 20]);
-
-handles.Button_Loadsample=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String','Load Sample','Enable','on','Position', [editst-90 php+30 70 30],'BackgroundColor',[1 1 0],'Callback',@loadsample);
-handles.Button_Unloadsample=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String','Unload Sample','Enable','on','Position', [editst-15 php+30 100 30],'BackgroundColor',[1 1 0],'Callback',@unloadsample);
-handles.Button_ControlFocusLaserHigh=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String','Reset SCMOS','Enable','on','Position', [editst+90 php+30 100 30],'BackgroundColor',[1 0 0],'Callback',@resetSCMOS);
-handles.Button_FindCoverslip=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String','FindCoverslip','Enable','on','Position', [editst+195 php+30 70 30],'BackgroundColor',[0.5 0.9 0],'Callback',@findCoverslip);
-handles.Button_Abort=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String','Abort','Enable','on','Position', [editst-90 php+75 70 30],'BackgroundColor',[0.3 0.3 1],'Callback',@abort);
-handles.Button_PhotoBleach=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String','Photobleach','Enable','on','Position', [editst-15 php+75 100 30],'BackgroundColor',[1 0 1],'Callback',@photobleach);
-handles.Button_AutoCollect=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String', 'Autocollect','Enable','on','Position', [editst+90 php+75 100 30],'BackgroundColor',[1 1 1],'Callback',@autocollect);
-handles.Button_PSFcollect=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String', 'PSFcollect','Enable','on','Position', [editst+195 php+75 100 30],'BackgroundColor',[0.5 0.5 1],'Callback',@PSFcollect);
-handles.Button_SCMOSgui=uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String', 'SCMOS gui','Enable','on','Position', [editst+300 php+75 100 30],'BackgroundColor',[0.5 1 0.5],'Callback',@SCMOSgui);
-
-% Add user inputs to select registration types (active registration vs.
-% periodic re-registration).
-handles.CheckboxActiveRegText = uicontrol('Parent', guiFig, ...
-    'Style', 'text', 'String', 'Use Active Registration', ...
-    'Position', [XWidth-155, 550, 150, 15]);
-handles.CheckboxActiveReg = uicontrol('Parent', guiFig, ...
-    'Style', 'checkbox', 'Position', [XWidth-20, 550, 15, 15], ...
-    'Callback', @UseActiveReg);
-handles.CheckboxPeriodicRegText = uicontrol('Parent', guiFig, ...
-    'Style', 'text', 'String', 'Use Periodic Registration', ...
-    'Position', [XWidth-155, 500, 150, 15]);
-handles.CheckboxPeriodicReg = uicontrol('Parent', guiFig, ...
-    'Style', 'checkbox', 'Position', [XWidth-20, 500, 15, 15], ...
-    'Callback', @UsePeriodicReg); 
-handles.EditboxPeriodicRegText = uicontrol('Parent', guiFig, ...
-    'Style', 'text', 'String', 'Period of periodic registration', ...
-    'Position', [XWidth-170, 475, 150, 15]);
-handles.EditboxPeriodicReg = uicontrol('Parent', guiFig, ...
-    'Style', 'edit', 'String', obj.NSeqBeforePeriodicReg, ...
-    'Position', [XWidth-20, 475, 15, 15]);
-
-% Add a check-box to indicate a photo-bleaching round.
-handles.CheckboxPhotobleachText = uicontrol('Parent', guiFig, ...
-    'Style', 'text', 'String', 'Photobleaching Round', ...
-    'Position', [XWidth-170, 400, 150, 15]);
-handles.CheckboxPhotobleach = uicontrol('Parent', guiFig, ...
-    'Style', 'checkbox', 'Position', [XWidth-20, 400, 15, 15], ...
-    'Callback', @UpdateIsBleach);
-
-for ii=1:10
-    for jj=1:10
-        % create  100 pushbuttons with callback functions
-        S=sprintf('%d,%d',ii,jj);
-        uicontrol('Parent',guiFig, 'Style', 'pushbutton', 'String',S,'Enable','on','BackgroundColor',[0 1 0],'Position',[editst-20+33*10-33*jj php+125+32*10-32*ii 35 35],'Callback',@exposeGridPoint);
+% Create a control panel for the ROI selection tool and add the sub-ROI 
+% selection buttons.
+PanelHeight = 375;
+PanelWidth = 365;
+ROISelectionPanel = uipanel(GuiFig, 'Title', 'ROI Selection Tool', ...
+    'FontWeight', 'bold', 'Units', 'pixels', ...
+    'Position', ...
+    [445, YSize-PanelHeight, PanelWidth, PanelHeight]);
+for ii = 1:10
+    for jj = 1:10
+        ButtonString = sprintf('%d,%d', ii, jj);
+        uicontrol('Parent', ROISelectionPanel, 'Style', 'pushbutton', ...
+            'String', ButtonString, 'BackgroundColor', [0, 1, 0], ...
+            'Position', [5 + 35*(jj-1), 320 - 35*(ii-1), 35, 35], ...
+            'Callback', @exposeGridPoint);
     end
 end
 
+% Create a control panel for laser controls and add the needed controls.
+PanelHeight = 375;
+PanelWidth = 210;
+LaserControlPanel = uipanel(GuiFig, 'Title', 'Lasers', ...
+    'FontWeight', 'bold', 'Units', 'pixels', ...
+    'Position', ...
+    [5, YSize-2*PanelHeight, PanelWidth, PanelHeight]);
+uicontrol('Parent', LaserControlPanel,'Style', 'Text', ...
+    'String', 'Laser 647nm Power (mW)', ...
+    'Position', [5, PanelHeight-40, 200, 15], ...
+    'HorizontalAlignment', 'left');
+handles.Text647PowerSequence = uicontrol(...
+    'Parent', LaserControlPanel, 'Style', 'Text', ...
+    'String', 'Sequence:', ...
+    'Position', [25, PanelHeight-55, 100, 15], ...
+    'HorizontalAlignment', 'left');
+handles.Edit647PowerSequence = uicontrol(...
+    'Parent', LaserControlPanel, 'Style', 'Edit', ...
+    'Position', [125, PanelHeight-55, 50, 15], ...
+    'HorizontalAlignment', 'left', ...
+    'Callback', {@setLaserPower, 'LaserPowerSequence'});
+handles.Text647PowerFocus = uicontrol(...
+    'Parent', LaserControlPanel, 'Style', 'Text', ...
+    'String', 'Focus:', ...
+    'Position', [25, PanelHeight-70, 100, 15], ...
+    'HorizontalAlignment', 'left');
+handles.Edit647PowerFocus = uicontrol(...
+    'Parent', LaserControlPanel, 'Style', 'Edit', ...
+    'Position', [125, PanelHeight-70, 50, 15], ...
+    'HorizontalAlignment', 'left', ...
+    'Callback', {@setLaserPower, 'LaserPowerFocus'});
+uicontrol('Parent', LaserControlPanel,'Style', 'Text', ...
+    'String', 'Laser 405nm Power (mW)', ...
+    'Position', [5, PanelHeight-100, 200, 15], ...
+    'HorizontalAlignment', 'left');
+handles.Text405PowerActivate = uicontrol(...
+    'Parent', LaserControlPanel, 'Style', 'Text', ...
+    'String', 'Activation:', ...
+    'Position', [25, PanelHeight-115, 100, 15], ...
+    'HorizontalAlignment', 'left');
+handles.Edit405PowerActivate = uicontrol(...
+    'Parent', LaserControlPanel, 'Style', 'Edit', ...
+    'Position', [125, PanelHeight-115, 50, 15], ...
+    'HorizontalAlignment', 'left', ...
+    'Callback', {@setLaserPower, 'LaserPower405Activate'});
+handles.Text405PowerBleach = uicontrol(...
+    'Parent', LaserControlPanel, 'Style', 'Text', ...
+    'String', 'Bleaching:', ...
+    'Position', [25, PanelHeight-130, 100, 15], ...
+    'HorizontalAlignment', 'left');
+handles.Edit405PowerBleach = uicontrol(...
+    'Parent', LaserControlPanel, 'Style', 'Edit', ...
+    'Position', [125, PanelHeight-130, 50, 15], ...
+    'HorizontalAlignment', 'left', ...
+    'Callback', {@setLaserPower, 'LaserPower405Bleach'});
+% %Size Figure
+% W=250;
+% H=300;
+% X=400;
+% Y=400;
+% 
+% %UI elements
+% P=75;
+% handles.Button_StepLUp=uicontrol('Parent',guiFig,'Style', 'PushButton', 'String','UP','Enable','on','Position', [P H-100 100 100],'FontSize',16,'Callback',@gui_Stepper);
+% handles.Button_StepSUp=uicontrol('Parent',guiFig,'Style', 'PushButton', 'String','up','Enable','on','Position', [P+25 H-150 50 50],'FontSize',16,'Callback',@gui_Stepper);
+% handles.Button_StepSSown=uicontrol('Parent',guiFig,'Style', 'PushButton', 'String','down','Enable','on','Position', [P+25 H-200 50 50],'FontSize',16,'Callback',@gui_Stepper);
+% handles.Button_StepLUp=uicontrol('Parent',guiFig,'Style', 'PushButton', 'String','DOWN','Enable','on','Position', [P H-300 100 100],'FontSize',16,'Callback',@gui_Stepper);
+% 
+% uicontrol('Parent',guiFig,'Style', 'Text', 'String','Stepper (mm)','Enable','on','Position', [0 H-125 90 15],'FontSize',10);
+% handles.Text_Step_X=uicontrol('Parent',guiFig,'Style', 'Text', 'String','X: 1.000','Enable','on','Position', [10 H-125-15 50 15],'FontSize',8);
+% handles.Text_Step_Y=uicontrol('Parent',guiFig,'Style', 'Text', 'String','Y: 1.000','Enable','on','Position', [10 H-125-30 50 15],'FontSize',8);
+% handles.Text_Step_Z=uicontrol('Parent',guiFig,'Style', 'Text', 'String','Z: 1.000','Enable','on','Position', [10 H-125-45 50 15],'FontSize',8);
+% 
+% uicontrol('Parent',guiFig,'Style', 'Text', 'String','Piezo (um)','Enable','on','Position', [150 H-125 90 15],'FontSize',10);
+% handles.Text_Piezo_X=uicontrol('Parent',guiFig,'Style', 'Text', 'String','X: 10.00','Enable','on','Position', [150+10 H-125-15 60 15],'FontSize',8);
+% handles.Text_Piezo_Y=uicontrol('Parent',guiFig,'Style', 'Text', 'String','Y: 10.00','Enable','on','Position', [150+10 H-125-30 60 15],'FontSize',8);
+% handles.Text_Piezo_Z=uicontrol('Parent',guiFig,'Style', 'Text', 'String','Z: 10.00','Enable','on','Position', [150+10 H-125-45 60 15],'FontSize',8);
+% 
+% % File Panel
+% ph=0.2;
+% php = ph*YSize*1;
+
+% uicontrol('Parent',GuiFig, 'Style', 'edit', 'String', 'Save Directory:','Enable','off','Position', [staticst php-10 100 20]);
+% handles.Edit_SaveDirectory = uicontrol('Parent',GuiFig, 'Style', 'edit', 'String','','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-10 350 20]);
+% uicontrol('Parent',GuiFig, 'Style', 'edit', 'String', 'Coverslip Name:','Enable','off','Position', [staticst php-40 100 20]);
+% handles.Edit_CoverSlipName = uicontrol('Parent',GuiFig, 'Style', 'edit', 'String','','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-40 350 20]);
+% uicontrol('Parent',GuiFig, 'Style', 'edit', 'String', 'Label Number:','Enable','off','Position', [staticst php-70 100 20]);
+% handles.Edit_LabelNumber = uicontrol('Parent',GuiFig, 'Style', 'popupmenu', 'String',{'1','2','3','4','5','6','7','8'},'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-70 350 20]);
+% 
+% handles.Button_Loadsample=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String','Load Sample','Enable','on','Position', [editst-90 php+30 70 30],'BackgroundColor',[1 1 0],'Callback',@loadsample);
+% handles.Button_Unloadsample=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String','Unload Sample','Enable','on','Position', [editst-15 php+30 100 30],'BackgroundColor',[1 1 0],'Callback',@unloadsample);
+% handles.Button_ControlFocusLaserHigh=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String','Reset SCMOS','Enable','on','Position', [editst+90 php+30 100 30],'BackgroundColor',[1 0 0],'Callback',@resetSCMOS);
+% handles.Button_FindCoverslip=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String','FindCoverslip','Enable','on','Position', [editst+195 php+30 70 30],'BackgroundColor',[0.5 0.9 0],'Callback',@findCoverslip);
+% handles.Button_Abort=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String','Abort','Enable','on','Position', [editst-90 php+75 70 30],'BackgroundColor',[0.3 0.3 1],'Callback',@abort);
+% handles.Button_PhotoBleach=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String','Photobleach','Enable','on','Position', [editst-15 php+75 100 30],'BackgroundColor',[1 0 1],'Callback',@photobleach);
+% handles.Button_AutoCollect=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String', 'Autocollect','Enable','on','Position', [editst+90 php+75 100 30],'BackgroundColor',[1 1 1],'Callback',@autocollect);
+% handles.Button_PSFcollect=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String', 'PSFcollect','Enable','on','Position', [editst+195 php+75 100 30],'BackgroundColor',[0.5 0.5 1],'Callback',@PSFcollect);
+% handles.Button_SCMOSgui=uicontrol('Parent',GuiFig, 'Style', 'pushbutton', 'String', 'SCMOS gui','Enable','on','Position', [editst+300 php+75 100 30],'BackgroundColor',[0.5 1 0.5],'Callback',@SCMOSgui);
+% 
+% % Add user inputs to select registration types (active registration vs.
+% % periodic re-registration).
+% handles.CheckboxActiveRegText = uicontrol('Parent', GuiFig, ...
+%     'Style', 'text', 'String', 'Use Active Registration', ...
+%     'Position', [XWidth-155, 550, 150, 15]);
+% handles.CheckboxActiveReg = uicontrol('Parent', GuiFig, ...
+%     'Style', 'checkbox', 'Position', [XWidth-20, 550, 15, 15], ...
+%     'Callback', @UseActiveReg);
+% handles.CheckboxPeriodicRegText = uicontrol('Parent', GuiFig, ...
+%     'Style', 'text', 'String', 'Use Periodic Registration', ...
+%     'Position', [XWidth-155, 500, 150, 15]);
+% handles.CheckboxPeriodicReg = uicontrol('Parent', GuiFig, ...
+%     'Style', 'checkbox', 'Position', [XWidth-20, 500, 15, 15], ...
+%     'Callback', @UsePeriodicReg); 
+% handles.EditboxPeriodicRegText = uicontrol('Parent', GuiFig, ...
+%     'Style', 'text', 'String', 'Period of periodic registration', ...
+%     'Position', [XWidth-170, 475, 150, 15]);
+% handles.EditboxPeriodicReg = uicontrol('Parent', GuiFig, ...
+%     'Style', 'edit', 'String', obj.NSeqBeforePeriodicReg, ...
+%     'Position', [XWidth-20, 475, 15, 15]);
+% 
+% % Add a check-box to indicate a photo-bleaching round.
+% handles.CheckboxPhotobleachText = uicontrol('Parent', GuiFig, ...
+%     'Style', 'text', 'String', 'Photobleaching Round', ...
+%     'Position', [XWidth-170, 400, 150, 15]);
+% handles.CheckboxPhotobleach = uicontrol('Parent', GuiFig, ...
+%     'Style', 'checkbox', 'Position', [XWidth-20, 400, 15, 15], ...
+%     'Callback', @UpdateIsBleach);
+% 
+% % Create the pushbuttons for subregions of the main sCMOS.
+% for ii = 1:10
+%     for jj = 1:10
+%         S = sprintf('%d,%d', ii, jj);
+%         uicontrol('Parent', GuiFig, 'Style', 'pushbutton', 'String', S, ...
+%             'Enable', 'on', 'BackgroundColor', [0, 1, 0], ...
+%             'Position', [editst-20+33*10-33*jj, php+125+32*10-32*ii, 35, 35], ...
+%             'Callback', @exposeGridPoint);
+%     end
+% end
+
+% Set GUI parameter displays based on object properties.
 properties2gui()
+
+% Define the callback functions needed by the GUI controls/other GUI
+% methods that we need.
+    function gui2properties()
+        % Set the object properties based on the GUI widgets
+        obj.TopDir = handles.Edit_SaveDirectory.String;
+        obj.CoverslipName = handles.Edit_CoverSlipName.String;
+        obj.LabelIdx = handles.Edit_LabelNumber.Value;
+        obj.NSeqBeforePeriodicReg = ...
+            str2double(handles.EditboxPeriodicReg.String);
+    end
+
+    function properties2gui()
+        % Set the GUI widgets based on the object properties
+        handles.Edit_SaveDirectory.String = obj.TopDir;
+        handles.Edit_CoverSlipName.String = obj.CoverslipName;
+        handles.Edit_LabelNumber.Value = obj.LabelIdx;
+
+%         % Sample stage properties.
+%         StepperPositionY=obj.StageStepper.getPosition(1);
+%         StepperPositionX=obj.StageStepper.getPosition(2);
+%         StepperPositionZ=obj.StageStepper.getPosition(3);
+%         handles.TextStepperY.String=sprintf('Y: %1.3f', StepperPositionY);
+%         handles.TextStepperX.String=sprintf('X: %1.3f', StepperPositionX);
+%         handles.TextStepperZ.String=sprintf('Z: %1.3f', StepperPositionZ);
+%         PiezoPositionY=obj.StagePiezoY.getPosition;
+%         PiezoPositionX=obj.StagePiezoX.getPosition;
+%         PiezoPositionZ=obj.StagePiezoZ.getPosition;
+%         handles.TextStepperY.String=sprintf('Y: %2.5f', PiezoPositionY);
+%         handles.TextStepperX.String=sprintf('X: %2.5f', PiezoPositionX);
+%         handles.TextStepperZ.String=sprintf('Z: %2.5f', PiezoPositionZ);
+        
+        % Registration/alignment properties.
+        handles.EditboxPeriodicReg.String = obj.NSeqBeforePeriodicReg;
+        handles.CheckboxActiveReg.Value = obj.UseActiveReg;
+        handles.CheckboxPeriodicReg.Value = obj.UsePeriodicReg;
+        
+        % Main sCMOS camera properties.
+        handles.EditExposureTimeLampFocus.String = ...
+            obj.ExposureTimeLampFocus;
+        handles.EditExposureTimeLampCapture.String = ...
+            obj.ExposureTimeCapture;
+        handles.EditExposureTimeLaserFocus.String = ...
+            obj.ExposureTimeLaserFocus;
+        handles.EditExposureTimeLaserSequence.String = ...
+            obj.ExposureTimeSequence;
+        
+        % Laser properties.
+        handles.Edit647PowerSequence.String = obj.LaserPowerSequence;
+        handles.Edit647PowerFocus.String = obj.LaserPowerFocus;
+        handles.Edit405PowerActivate.String = obj.LaserPower405Activate;
+        handles.Edit405PowerBleach.String = obj.LaserPower405Bleach;
+    end
+
+    function stepperControl(Source, ~)
+        % Callback for uicontrol of the sample stage stepper motors.
+        switch Source.String
+            case 'UP'
+                Pos_Step_Z=obj.StageStepper.getPosition(3);
+                Pos_Z=Pos_Step_Z+obj.StepperLargeStep;
+                obj.StageStepper.moveToPosition(3,Pos_Z); 
+            case 'up'
+                Pos_Step_Z=obj.StageStepper.getPosition(3); 
+                Pos_Z=Pos_Step_Z+obj.StepperSmallStep;
+                obj.StageStepper.moveToPosition(3,Pos_Z); 
+            case 'down'
+                Pos_Step_Z=obj.StageStepper.getPosition(3); 
+                Pos_Z=Pos_Step_Z-obj.StepperSmallStep;
+                obj.StageStepper.moveToPosition(3,Pos_Z); 
+            case 'DOWN'
+                Pos_Step_Z=obj.StageStepper.getPosition(3); 
+                Pos_Z=Pos_Step_Z-obj.StepperLargeStep;
+                obj.StageStepper.moveToPosition(3,Pos_Z);
+        end
+    end
+
+    function zPiezoControl(~, Callbackdata)
+       % Callback for uicontrol of the sample stage piezos.
+       if Callbackdata.VerticalScrollCount>0 %Move Down
+           obj.movePiezoDownSmall();
+       else %Move up
+           obj.movePiezoUpSmall();
+       end
+       properties2gui();
+    end
+
+    function loadSample(~,~)
+        gui2properties();
+        obj.loadSample;
+    end
+
+    function unloadSample(~,~)
+        gui2properties();
+        obj.unloadSample();
+    end
+
+    function changeSCMOSExposureTime(Source, ~, ExpTimeType)
+        % Callback for edit boxes whose values determine the exposure
+        % time(s) of the main sCMOS camera.
+        switch ExpTimeType
+            case 'LampFocus'
+                obj.ExposureTimeLampFocus = str2double(Source.String);
+            case 'LampCapture'
+                obj.ExposureTimeCapture = str2double(Source.String);
+            case 'LaserFocus'
+                obj.ExposureTimeLaserFocus = str2double(Source.String);
+            case 'LaserSequence'
+                obj.ExposureTimeSequence = str2double(Source.String);
+        end
+    end
+
+    function setLaserPower(~, ~, LaserPowerType)
+        % Callback for the edit boxes whose values determine the laser
+        % power(s) of both the 647nm and the 405nm lasers.
+        switch LaserPowerType
+            case 'LaserPowerSequence'
+                obj.LaserPowerSequence = str2double(Source.String);
+            case 'LaserPowerFocus'
+                obj.LaserPowerFocus = str2double(Source.String);
+            case 'LaserPower405Activate'
+                obj.LaserPower405Activate = str2double(Source.String);
+            case 'LaserPower405Bleach'
+                obj.LaserPower405Bleach = str2double(Source.String);
+        end
+    end
+    function findCoverslip(~,~) 
+       obj.findCoverSlipFocus() 
+    end
 
     function exposeGridPoint(Source,~)
         gui2properties();
@@ -102,29 +444,13 @@ properties2gui()
         gui2properties();
         obj.autoCollect()
     end
- 
-    function findCoverslip(~,~) 
-       obj.findCoverSlipFocus() 
-    end
-
-    function loadsample(~,~)
-       % checkLiveview();
-        gui2properties();
-        obj.loadSample;
-    end
-
-    function unloadsample(~,~)
-     %   checkLiveview();
-        gui2properties();
-        obj.unloadSample();
-    end
 
     function resetSCMOS(~,~)
       %  checkLiveview();
       obj.CameraSCMOS.reset();
     end
 
-    function abort(~,~)
+    function abortAcquisition(~,~)
        obj.CameraSCMOS.abort(); 
     end
 
@@ -139,49 +465,38 @@ properties2gui()
     function PSFcollect(~,~)
        obj.PSFcollect();  
     end
-
-    function SCMOSgui(~,~)
-       obj.CameraSCMOS.gui; 
-    end
-    
+   
     function UseActiveReg(Source, ~)
         % Sets the UseActiveReg property of MIC_SEQ_SRcollect to 1 when
         % checked, otherwise it sets it to 0.
         obj.UseActiveReg = Source.Value; % ==1 if checked, ==0 otherwise
+        
+        % If using active registration, ensure periodic registration is
+        % turned off.
+        if Source.Value
+            obj.UsePeriodicReg = 0;
+            handles.CheckboxPeriodicReg.Value = 0;
+        end
     end
 
     function UsePeriodicReg(Source, ~)
         % Sets the UsePeriodicReg property of MIC_SEQ_SRcollect to 1 when
         % checked, otherwise it sets it to 0.
-        gui2properties();
+        gui2properties(); % ensure properties set based on gui
         obj.UsePeriodicReg = Source.Value; % ==1 if checked, ==0 otherwise
+        
+        % If using periodic registration, ensure active registration is
+        % turned off.
+        if Source.Value
+            obj.UseActiveReg = 0;
+            handles.CheckboxActiveReg.Value = 0;
+        end
     end
 
     function UpdateIsBleach(Source, ~)
         % Sets the IsBleach property of MIC_SEQ_SRcollect to 1 when
         % checked, otherwise it sets it to 0.
         obj.IsBleach = Source.Value; % ==1 if checked, ==0 otherwise
-    end
-
-%  All figure have these functions but will be different contents
-
-    function gui2properties()
-        % Sets the object properties based on the GUI widgets
-        obj.TopDir = handles.Edit_SaveDirectory.String;
-        obj.CoverslipName = handles.Edit_CoverSlipName.String;
-        obj.LabelIdx = handles.Edit_LabelNumber.Value;
-        obj.NSeqBeforePeriodicReg = ...
-            str2double(handles.EditboxPeriodicReg.String);
-    end
-
-    function properties2gui()
-        % Set the GUI widgets based on the object properties
-        handles.Edit_SaveDirectory.String = obj.TopDir;
-        handles.Edit_CoverSlipName.String = obj.CoverslipName;
-        handles.Edit_LabelNumber.Value = obj.LabelIdx;
-        handles.EditboxPeriodicReg.String = obj.NSeqBeforePeriodicReg;
-        handles.CheckboxActiveReg.Value = obj.UseActiveReg;
-        handles.CheckboxPeriodicReg.Value = obj.UsePeriodicReg;
     end
 
 end
