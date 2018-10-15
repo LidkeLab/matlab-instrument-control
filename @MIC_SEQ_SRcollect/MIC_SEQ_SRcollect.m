@@ -90,11 +90,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseActiveReg = 1; % boolean: 1 uses active registration, 0 doesn't
         UsePeriodicReg = 0; % boolean: 1 periodically re-aligns, 0 doesn't
         NSeqBeforePeriodicReg = 3; % seq. collected before periodic reg.
-        
-        % Transient Properties
-        GuiFigureStage
-        GuiFigureMain
-        
+                
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
         AbortNow = 0; % Flag for aborting acquisition
@@ -103,6 +99,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
     
     properties (SetAccess = protected)
         InstrumentName = 'MIC_SEQ_SRcollect';
+        GUIFigureMain; % object for the main GUI figure for the class
     end
         
     properties (Hidden)
@@ -111,10 +108,17 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         StartGUI = 1;
     end
     
+    properties (SetObservable)
+        StatusString = ''; % string for status of the acquisition
+    end
+    
     methods
         function obj = MIC_SEQ_SRcollect(RunTestingMode)
             % Enable the autonaming feature of MIC_Abstract.
             obj = obj@MIC_Abstract(~nargout);
+            
+            % Set a property listener for the StatusString property.
+            addlistener(obj, 'StatusString', 'PostSet', @obj.updateStatus);
             
             % Check if the input RunTestingMode was passed, and if so
             % proceed to create the class without setup of the instruments.
@@ -142,9 +146,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.setupShutterTTL();
             obj.AlignReg = MIC_SeqReg3DTrans(obj.CameraSCMOS, ...
                 obj.StagePiezoX, obj.StagePiezoY, obj.StagePiezoZ, ...
-                obj.StageStepper); % active registration object
+                obj.StageStepper);
             obj.AlignReg.PixelSize = 0.104; % microns (SCMOS camera)
             obj.unloadSample(); % move stage up so user can mount sample
+            obj.StatusString = '';
         end
         
         function delete(obj)
@@ -157,6 +162,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         function [Attributes, Data, Children] = exportState(obj)
             % exportState Exports current state of all hardware objects
             % and SEQ_SRcollect settings
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = ...
+                'Exporting object Data and Children with exportState()...';
             
             % First, call exportState() method for the Children of obj.
             [Children.CameraSCMOS.Attributes, ...
@@ -220,9 +229,24 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             
             % Store the Data to be exported.
             Data=[]; % Export as empty for now...
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
-        autoCollect(obj,StartCell, RefDir);
+        function updateStatus(obj, ~, ~)
+            % Listener callback for a change of the object property
+            % StatusString. 
+            
+            % Find the status box object within the GUI.
+            StatusObject = findall(obj.GUIFigureMain, 'Tag', 'StatusText');
+            
+            % Modify the text within the status box to show the current
+            % status.
+            StatusObject.String = obj.StatusString;
+        end
+        
+        autoCollect(obj, StartCell, RefDir);
         exposeCellROI(obj); 
         exposeGridPoint(obj);
         findCoverSlipOffset(obj, RefStruct);
@@ -231,7 +255,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         startSequence(obj, RefStruct, LabelID);
         
         function setupSCMOS(obj)
-            % Used to setup the Hamamatsu SCMOS camera.
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Setting up main sCMOS...';
+            
+            % Setup the sCMOS and set properties as needed.
             obj.CameraSCMOS = MIC_HamamatsuCamera();
             CamSet = obj.CameraSCMOS.CameraSetting;
             CamSet.DefectCorrection.Bit = 1;
@@ -241,9 +268,15 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 obj.CameraSCMOS.CameraSetting);
             obj.CameraSCMOS.ExpTime_Capture = 0.2;
             obj.CameraSCMOS.ExpTime_Sequence = 0.01;
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function setupStagePiezo(obj)
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Setting up sample stage piezos...';
+            
             % Setup the piezos on the NanoMax stage.
             obj.StagePiezoX = MIC_TCubePiezo('81850186', '84850145', 'X');
             obj.StagePiezoY = MIC_TCubePiezo('81850193', '84850146', 'Y');
@@ -251,9 +284,15 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StagePiezoX.center();
             obj.StagePiezoY.center();
             obj.StagePiezoZ.center();
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function setupStageStepper(obj)
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Setting up sample stage stepper motors...';
+            
             % Setup the stepper motors for the NanoMax stage.
             % The StepperMotor Serial Number is 70850323.
             % NOTE: the positions set here are chosen such that the center
@@ -262,32 +301,41 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
             obj.StageStepper.moveToPosition(3, 2); % z stepper
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function setupIRCamera(obj)
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Setting up IR camera...';
+            
             % Setup the IR camera used for active registration.
             obj.CameraIR = MIC_ThorlabsIR();
             obj.CameraIR.ROI = obj.IRCamera_ROI;
             obj.CameraIR.ExpTime_Capture = 0.5;
             
-            % Set the save directory based on the current Windows user. 
-            % NOTE: This might not ever get used anywhere but I'm keeping
-            %       it around because it might be nice if needed someday...
-            UserName = java.lang.System.getProperty('user.name');
-            timenow = clock; % current time
-            obj.SaveDir = sprintf('Y:\\%s%s%02.2g-%02.2g-%02.2g\\', ...
-                UserName, filesep, ...
-                timenow(1)-2000, timenow(2), timenow(3));
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function setupLamps(obj)
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Setting up sample illumination LEDs...';
+            
             % Setup the LED lamp objects.
             obj.Lamp660 = MIC_ThorlabsLED('Dev2', 'ao0');
             obj.Lamp850 = MIC_ThorlabsLED('Dev2', 'ao1');
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function setupLasers(obj)
-            % Setup the laser(s) needed.
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Setting up lasers...';
+            
+            % Setup the needed laser(s).
             obj.Laser647 = MIC_MPBLaser();
             obj.Laser405 = MIC_TCubeLaserDiode('64841724', ...
                 'Power', 11.84, 2.49, 10);
@@ -301,33 +349,61 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % taking the slope to be WperA.  The TIARange was set to the 
             % photodiode setting as set by the dip switches on the laser
             % driver controller.  See DS lab notes 9/10/18.
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function setupFlipMountTTL(obj)
+            % Update the status indicator for the GUI.
+            obj.StatusString = ...
+                'Setting up neutral density filter flipmount...';
+            
             % Setup the flip mount object to control the neutral density
             % filter.
             obj.FlipMount = MIC_FlipMountTTL('Dev1', 'Port0/Line0');
             obj.FlipMount.FilterIn; % place the ND filter in 647 laser path
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function setupShutterTTL(obj)
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Setting up the shutter...';
+            
             % Setup the shutter for control of the 647nm laser.
             obj.Shutter = MIC_ShutterTTL('Dev1', 'Port0/Line1');
             obj.Shutter.close; % close the shutter by default
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function unloadSample(obj)
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Unloading the sample...';
+            
             % Raise the sample stage away from the objective.
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
             obj.StageStepper.moveToPosition(3, 4); % z stepper
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function loadSample(obj)
+            % Update the status indicator for the GUI.
+            obj.StatusString = 'Loading the sample...';
+            
             % Lower the sample stage towards the objective
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
             obj.StageStepper.moveToPosition(3, 1.4); % z stepper
+            
+            % Update the status indicator for the GUI.
+            obj.StatusString = '';
         end
         
         function findCoverslipFocus(obj)

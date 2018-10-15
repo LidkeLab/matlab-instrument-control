@@ -2,6 +2,7 @@
     %Collects and saves a SR data Set
 
     % Setup directories/filenames as needed.
+    obj.StatusString = 'Preparing directories...';
     DirectoryName = fullfile(obj.TopDir, obj.CoverslipName, ...
         sprintf('Cell_%2.2d', RefStruct.CellIdx), ...
         sprintf('Label_%2.2d', LabelID));
@@ -43,6 +44,8 @@
     obj.StagePiezoZ.center();
     
     % Attempt to align the cell to the reference image in brightfield.
+    obj.StatusString = ...
+        'Attempting initial brightfield alignment of cell...';
     obj.Lamp660.setPower(obj.Lamp660Power);
     pause(obj.LampWait);
     obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture; 
@@ -72,7 +75,8 @@
         obj.ActiveReg.start();
     end
 
-    % Setup the main sCMOS to acquire to sequence.
+    % Setup the main sCMOS to acquire the sequence.
+    obj.StatusString = 'Preparing for acquisition...';
     obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
     obj.CameraSCMOS.SequenceLength = obj.NumberOfFrames;
     obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
@@ -95,6 +99,7 @@
         % Use periodic registration after NSeqBeforePeriodicReg
         % sequences have been collected.
         if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg)
+            obj.StatusString = 'Attempting periodic registration...';
             obj.Lamp660.setPower(obj.Lamp660Power);
             pause(obj.LampWait);
             obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
@@ -121,6 +126,7 @@
         obj.Shutter.open();
         
         % Collect the sequence.
+        obj.StatusString = 'Acquiring data...';
         obj.CameraSCMOS.AcquisitionType = 'sequence';
         obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
         obj.CameraSCMOS.setup_acquisition();
@@ -129,7 +135,8 @@
             % For now, we will stick to saving data to a .h5 file.
             case 'h5'
                 SequenceName = sprintf('Data%04d', ii);
-                MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition001',SequenceName,Sequence);
+                MIC_H5.writeAsync_uint16(FileH5, ...
+                    'Channel01/Zposition001', SequenceName, Sequence);
             otherwise
                 error('StartSequence:: unknown SaveFileType')
         end
@@ -139,6 +146,7 @@
             obj.Laser405.off();
         end
     end
+    obj.StatusString = '';
     fprintf('Data collection complete \n')
     
     % Ensure that the lasers are not reaching the sample.
