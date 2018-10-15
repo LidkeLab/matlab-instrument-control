@@ -423,7 +423,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
             obj.Lamp660.setPower(obj.Lamp660Power);
-            obj.Lamp660.on;
+            obj.Lamp660.on();
             obj.CameraSCMOS.start_focus();
             obj.Lamp660.setPower(0);
         end
@@ -453,7 +453,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
             obj.Lamp660.setPower(obj.Lamp660Power);
-            obj.FlipMount.FilterIn; 
+            obj.FlipMount.FilterIn(); 
             obj.CameraSCMOS.start_focus();
             obj.startROILaserFocusLow();
             obj.Lamp660.setPower(0);
@@ -479,7 +479,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.Laser647.on();
             obj.Lamp660.setPower(0);
             obj.CameraSCMOS.start_focus();
-            obj.Shutter.close; % closes shutter to prevent photobleaching
+            obj.Shutter.close(); % closes shutter to prevent photobleaching
             
             % Ask user if they would like to save the current cell and
             % focus as a reference (question dialog will appear once the
