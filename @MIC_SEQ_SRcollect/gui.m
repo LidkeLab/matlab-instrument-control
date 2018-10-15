@@ -1,6 +1,4 @@
-function GuiFig = gui(obj) % new SEQAutoCollect
-%gui Graphical User Interface to ExampleInstrument
-%   Must contain gui2properties() and properties2gui() functions
+function GuiFig = gui(obj)
 
 % Ensure only one sequential microscope GUI is opened at a time.
 h = findall(0, 'tag', 'SeqSRcollect.gui');
@@ -102,6 +100,10 @@ handles.ButtonUnloadSample = uicontrol('Parent', StageControlPanel, ...
     'Style', 'pushbutton', 'String', 'Unload Sample', ...
     'Position', TopButtonPosition + [0, -25, 0, 0], ...
     'Callback', @unloadSample);
+handles.ButtonResetPiezos = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Reset Piezos', ...
+    'Position', TopButtonPosition + [0, -50, 0, 0], ...
+    'Callback', @resetPiezos);
 
 % Create a control panel for the main sCMOS camera.
 SCMOSControlPanel = uipanel(GuiFig, 'Title', 'Hamamatsu sCMOS', ...
@@ -320,16 +322,16 @@ properties2gui()
 % Define the callback functions needed by the GUI controls/other GUI
 % methods that we need.
     function gui2properties()
-        % Set the object properties based on the GUI widgets
-        obj.TopDir = handles.Edit_SaveDirectory.String;
-        obj.CoverslipName = handles.Edit_CoverSlipName.String;
-        obj.LabelIdx = str2double(handles.Edit_LabelNumber.String);
+        % Set the object properties based on the GUI controls.
+        obj.TopDir = handles.EditSaveDirectory.String;
+        obj.CoverslipName = handles.EditCoverSlipName.String;
+        obj.LabelIdx = str2double(handles.EditLabelNumber.String);
         obj.NSeqBeforePeriodicReg = ...
             str2double(handles.EditboxPeriodicReg.String);
     end
 
     function properties2gui()
-        % Set the GUI widgets based on the object properties
+        % Set the GUI controls/display based on object properties.
         handles.EditSaveDirectory.String = obj.TopDir;
         handles.EditCoverSlipName.String = obj.CoverslipName;
         handles.EditLabelNumber.String = obj.LabelIdx;
@@ -430,7 +432,7 @@ properties2gui()
         properties2gui();
     end
 
-    function loadSample(~,~)
+    function loadSample(~, ~)
         % Callback for the Load Sample button, which will move the sample
         % stage such that the sample is sufficiently close to the objective
         % to allow for finding the coverslip.
@@ -445,7 +447,7 @@ properties2gui()
         properties2gui();
     end
 
-    function unloadSample(~,~)
+    function unloadSample(~, ~)
         % Callback for the Unload Sample button, which will move the sample
         % stage to a position appropriate for removing the sample holder.
         
@@ -455,6 +457,26 @@ properties2gui()
         % Unload the sample.
         obj.unloadSample();
         
+        % Ensure the GUI reflects object properties.
+        properties2gui();
+    end
+
+    function resetPiezos(~, ~)
+        % Callback for the Reset Piezos button, which will attempt to close
+        % and then re-open the connection to each individual piezo.
+                
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Ensure that the piezo objects exist and then proceed with the
+        % reset.
+        if ~isempty(obj.StagePiezoX) && ~isempty(obj.StagePiezoY) && ...
+                ~isempty(obj.StagePiezoZ)
+            obj.StagePiezoX.reset();
+            obj.StagePiezoY.reset();
+            obj.StagePiezoZ.reset();
+        end
+    
         % Ensure the GUI reflects object properties.
         properties2gui();
     end

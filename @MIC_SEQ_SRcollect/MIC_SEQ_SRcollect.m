@@ -97,10 +97,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
-        BaseFileName = 'Cell1'; % Base File Name
         AbortNow = 0; % Flag for aborting acquisition
-        RegType = 'None'; % Registration type ('None', 'Self' or 'Ref')
-        SaveFileType = 'h5'; % Save to .mat or .h5
+        SaveFileType = 'h5'; % .h5 currently only option
     end
     
     properties (SetAccess = protected)
@@ -214,7 +212,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Attributes.IRCamera_ROI = obj.IRCamera_ROI;
             Attributes.CameraPixelSize=obj.SCMOS_PixelSize;
             Attributes.SaveDir = obj.SaveDir;
-            Attributes.RegType = obj.RegType;
             Attributes.LaserPower405Activate = obj.LaserPower405Activate;
             Attributes.LaserPower405Bleach = obj.LaserPower405Bleach;
             Attributes.LaserPowerSequence = obj.LaserPowerSequence;
