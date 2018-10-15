@@ -322,7 +322,7 @@ handles.EditStatusIndicator = uicontrol('Parent', CollectionPanel, ...
     'Position', [50, 5, XSize-65, 25]);
 
 % Set GUI parameter displays based on object properties.
-properties2gui()
+properties2gui();
 
 % Define the callback functions needed by the GUI controls/other GUI
 % methods that we need.
@@ -355,14 +355,14 @@ properties2gui()
         end
         if ~isempty(obj.StagePiezoX) && ~isempty(obj.StagePiezoY) && ...
                 ~isempty(obj.StagePiezoZ)
-            PiezoPositionY = obj.StagePiezoY.getPosition;
-            PiezoPositionX = obj.StagePiezoX.getPosition;
-            PiezoPositionZ = obj.StagePiezoZ.getPosition;
-            handles.TextStepperY.String = ...
+            PiezoPositionY = obj.StagePiezoY.getPosition();
+            PiezoPositionX = obj.StagePiezoX.getPosition();
+            PiezoPositionZ = obj.StagePiezoZ.getPosition();
+            handles.TextPiezoY.String = ...
                 sprintf('Y: %2.5f', PiezoPositionY);
-            handles.TextStepperX.String = ...
+            handles.TextPiezoX.String = ...
                 sprintf('X: %2.5f', PiezoPositionX);
-            handles.TextStepperZ.String = ...
+            handles.TextPiezoZ.String = ...
                 sprintf('Z: %2.5f', PiezoPositionZ);
         end
         
@@ -449,6 +449,7 @@ properties2gui()
         obj.loadSample;
         
         % Ensure the GUI reflects object properties.
+        pause(3); % ensure the sample movement is complete.
         properties2gui();
     end
 
@@ -463,6 +464,7 @@ properties2gui()
         obj.unloadSample();
         
         % Ensure the GUI reflects object properties.
+        pause(3); % ensure the sample movement is complete.
         properties2gui();
     end
 
@@ -473,15 +475,21 @@ properties2gui()
         % Ensure the object properties are set based on the GUI.
         gui2properties();
         
+        % Update the status indicator for the GUI.
+        obj.StatusString = 'Resetting sample stage piezos...';
+        
         % Ensure that the piezo objects exist and then proceed with the
         % reset.
         if ~isempty(obj.StagePiezoX) && ~isempty(obj.StagePiezoY) && ...
                 ~isempty(obj.StagePiezoZ)
-            obj.StagePiezoX.reset();
-            obj.StagePiezoY.reset();
-            obj.StagePiezoZ.reset();
+            obj.StagePiezoX.resetDevices();
+            obj.StagePiezoY.resetDevices();
+            obj.StagePiezoZ.resetDevices();
         end
     
+        % Update the status indicator for the GUI.
+        obj.StatusString = '';
+        
         % Ensure the GUI reflects object properties.
         properties2gui();
     end
@@ -599,15 +607,21 @@ properties2gui()
         properties2gui();
     end
 
-    function autoCollect(~, ~)
+    function autoCollect(Source, ~)
         % Callback for the Start Autocollect button, which begins the
         % automated acquisiton process for all selected cells.
         
         % Ensure the object properties are set based on the GUI.
         gui2properties();
+
+        % Disable the autocollect button.
+        Source.Enable = 'off';
         
         % Begin the automated collection process.
         obj.autoCollect()
+        
+        % Re-enable the autocollect button.
+        Source.Enable = 'on';
         
         % Ensure the GUI reflects object properties.
         properties2gui();
@@ -619,8 +633,14 @@ properties2gui()
         % Ensure the object properties are set based on the GUI.
         gui2properties();
         
+        % Update the status indicator for the GUI.
+        obj.StatusString = 'Resetting main sCMOS...';
+        
         % Call the cameras reset method.
         obj.CameraSCMOS.reset();
+        
+        % Update the status indicator for the GUI.
+        obj.StatusString = '';
         
         % Ensure the GUI reflects object properties.
         properties2gui();
