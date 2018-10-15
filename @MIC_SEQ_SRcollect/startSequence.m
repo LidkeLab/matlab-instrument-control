@@ -163,6 +163,8 @@
     end
     
     % Save the acquisition data.
+    obj.StatusString = ...
+        'Exporting object Data and Children with exportState()...';
     fprintf('Saving exportables from exportState().................... \n')
     switch obj.SaveFileType
         % For now, we will stick to saving data to a .h5 file.
@@ -173,5 +175,6 @@
         otherwise
             error('StartSequence:: unknown SaveFileType')
     end
+    obj.StatusString = '';
     fprintf('Saving exportables from exportState() complete \n')
  end

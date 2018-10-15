@@ -162,11 +162,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         function [Attributes, Data, Children] = exportState(obj)
             % exportState Exports current state of all hardware objects
             % and SEQ_SRcollect settings
-            
-            % Update the status indicator for the GUI.
-            obj.StatusString = ...
-                'Exporting object Data and Children with exportState()...';
-            
+                        
             % First, call exportState() method for the Children of obj.
             [Children.CameraSCMOS.Attributes, ...
                 Children.CameraSCMOS.Data, ...
