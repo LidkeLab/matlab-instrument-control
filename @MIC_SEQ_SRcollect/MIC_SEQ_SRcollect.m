@@ -470,8 +470,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
             obj.Laser647.setPower(obj.LaserPowerFocus);
-            obj.FlipMount.FilterIn;
-            obj.Shutter.open; % opens shutter for laser
+            obj.FlipMount.FilterIn();
+            obj.Shutter.open(); % opens shutter for laser
             obj.Laser647.on();
             obj.Lamp660.setPower(0);
             obj.CameraSCMOS.start_focus();
@@ -496,8 +496,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.setup_acquisition();
             obj.Laser647.setPower(obj.LaserPowerSequence);
             obj.Laser647.WaitForLaser = 0;
-            obj.Shutter.open; % open shutter
-            obj.FlipMount.FilterOut; 
+            obj.Shutter.open(); % open shutter
+            obj.FlipMount.FilterOut(); 
             obj.Laser647.on();
             obj.CameraSCMOS.start_focus();
             obj.Laser647.off();
@@ -533,8 +533,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function movePiezoUpSmall(obj)
             % Small stage step up in the z dimension with piezo.
-            PosPiezoZ=obj.StagePiezoZ.getPosition; % get z position
-            PosPiezoZ=PosPiezoZ+obj.PiezoStep; % proposed z pos.
+            PosPiezoZ = obj.StagePiezoZ.getPosition; % get z position
+            PosPiezoZ = PosPiezoZ + obj.PiezoStep; % proposed z pos.
             obj.StagePiezoZ.setPosition(PosPiezoZ); % set new z pos.
         end
         
