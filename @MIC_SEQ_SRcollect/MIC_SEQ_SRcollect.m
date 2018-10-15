@@ -224,10 +224,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Attributes.LaserPowerFocus = obj.LaserPowerFocus;
             
             % Store the Data to be exported.
-            Data=[]; % Export as empty for now...
-            
-            % Update the status indicator for the GUI.
-            obj.StatusString = '';
+            Data = [];
         end
         
         function updateStatus(obj, ~, ~)
@@ -370,7 +367,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             
             % Setup the shutter for control of the 647nm laser.
             obj.Shutter = MIC_ShutterTTL('Dev1', 'Port0/Line1');
-            obj.Shutter.close; % close the shutter by default
+            obj.Shutter.close(); % close the shutter by default
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
