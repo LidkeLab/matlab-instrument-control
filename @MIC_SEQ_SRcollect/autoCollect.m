@@ -19,7 +19,11 @@
         %Loop over cells
 
         for nn=StartCell:NumCells 
-
+            % If AbortNow flag was set, do not continue.
+            if obj.AbortNow
+                return
+            end
+            
             %Create or load RefImageStruct
             FileName=fullfile(RefDir,FileList(nn).name);
             F=matfile(FileName);

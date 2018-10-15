@@ -350,7 +350,7 @@ properties2gui();
         
         % Misc. file saving properties.
         obj.TopDir = handles.EditSaveDirectory.String;
-        obj.CoverslipName = handles.EditCoverSlipName.String;
+        obj.CoverslipName = handles.EditCoverslipName.String;
         obj.LabelIdx = str2double(handles.EditLabelNumber.String);
         
         % Alignment/registration properties.
@@ -365,11 +365,11 @@ properties2gui();
         % sCMOS properties.
         obj.ExposureTimeLampFocus = ...
             str2double(handles.EditExposureTimeLampFocus.String);
-        obj.ExposureTimeLampCapture = ...
+        obj.ExposureTimeCapture = ...
             str2double(handles.EditExposureTimeLampCapture.String);
         obj.ExposureTimeLaserFocus = ...
             str2double(handles.EditExposureTimeLaserFocus.String);
-        obj.ExposureTimeLaserSequence = ...
+        obj.ExposureTimeSequence = ...
             str2double(handles.EditExposureTimeLaserSequence.String);
         
         % Laser properties.
@@ -388,7 +388,7 @@ properties2gui();
         
         % Misc. file saving displays.
         handles.EditSaveDirectory.String = obj.TopDir;
-        handles.EditCoverSlipName.String = obj.CoverslipName;
+        handles.EditCoverslipName.String = obj.CoverslipName;
         handles.EditLabelNumber.String = obj.LabelIdx;
 
         % Update sample stage property displays.
@@ -559,7 +559,7 @@ properties2gui();
         
         % Call the appropriate method of obj. to begin the coverslip search
         % process.
-        obj.findCoverSlipFocus()
+        obj.findCoverslipFocus()
         
         % Ensure the GUI reflects object properties.
         properties2gui();
@@ -620,6 +620,9 @@ properties2gui();
         
         % Ensure the object properties are set based on the GUI.
         gui2properties();
+        
+        % Ensure the AbortNow flag is no longer set.
+        obj.AbortNow = 0;
 
         % Disable the autocollect button.
         Source.Enable = 'off';
@@ -646,6 +649,12 @@ properties2gui();
         % Call the cameras reset method.
         obj.CameraSCMOS.reset();
         
+        % Set some default exposure times.
+        obj.ExposureTimeLampFocus = 0.01; % seconds
+        obj.ExposureTimeCapture = 0.2; 
+        obj.ExposureTimeLaserFocus = 0.2;
+        obj.ExposureTimeSequence = 0.01;
+        
         % Update the status indicator for the GUI.
         obj.StatusString = '';
         
@@ -668,6 +677,9 @@ properties2gui();
         
         % Call the cameras abort method.
         obj.CameraSCMOS.abort();
+        
+        % Set the AbortNow flag to hault further acquisition.
+        obj.AbortNow = 1;
         
         % Ensure the object properties are set based on the GUI.
         gui2properties();

@@ -96,6 +96,11 @@
     % Begin the acquisition.
     fprintf('Collecting data.......................................... \n')
     for ii = 1:obj.NumberOfSequences
+        % If AbortNow flag was set, do not continue.
+            if obj.AbortNow
+                return
+            end
+            
         % Use periodic registration after NSeqBeforePeriodicReg
         % sequences have been collected.
         if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg)
