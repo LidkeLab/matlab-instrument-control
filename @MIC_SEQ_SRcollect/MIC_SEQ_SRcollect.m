@@ -374,7 +374,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         function startROILampFocus(obj)
             % Run the SCMOS in focus mode with the 660nm lamp to allow the 
             % user to focus.
-            obj.gui_Stage();
             obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLampFocus;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
