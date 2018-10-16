@@ -792,9 +792,15 @@ properties2gui();
             % Make sure PublishSeqSRResults actually exists in the users 
             % filepath so as to not cause errors later on.
             if isempty(which('PublishSeqSRResults'))
+                % Warn the user about the missing file and change
+                % properties as needed.
                 warning('PublishSeqSRResults.m not found')
                 Source.Value = 0;
                 obj.PublishResults = 0;
+                
+                % Ensure the GUI reflects object properties (used here just 
+                % to make sure GUI is updated as often as is feasible).
+                properties2gui();
                 return
             end
             

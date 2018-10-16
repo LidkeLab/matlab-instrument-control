@@ -54,7 +54,9 @@
         % Publish the results if requested.
         if obj.PublishResults
             obj.StatusString = 'Publishing results...';
-            PublishSeqSRResults(obj.TopDir, obj.SCMOSCalFilePath);
+            PublishSeqSRResults(...
+                fullfile(obj.TopDir, obj.CoverslipName), ...
+                obj.SCMOSCalFilePath);
             obj.StatusString = '';
         end
  end 
