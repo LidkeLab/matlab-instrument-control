@@ -3,22 +3,12 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 % Super resolution data collection class for Sequential microscope
 % Works with Matlab Instrument Control (MIC) classes since March 2017
 
-%  usage: SRC=MIC_SEQ_SRcollect();
+%  usage: SEQ=MIC_SEQ_SRcollect();
 %
 % REQUIRES:
 %   Matlab 2014b or higher
-%   MIC_Abstract
-%   MIC_LightSource_Abstract
-%   MIC_CrystaLaser405
-%   MIC_TcubeLaserDiode
-%   MIC_ThorlabsLED
-%   MIC_MCLNanoDrive
-%   MIC_MPBLaser
-%   MIC_IMGSourceCamera
-%   MIC_TCubePiezo
-%   MIC_StepperMotor
-%   MIC_ShutterTTL
-%   MIC_FlipMountTTL
+%   matlab-instrument-control
+%   sma-core-alpha (if using PublishResults flag)
 
 % First version: Sheng Liu 
 % Second version: Farzin Farzam  
@@ -41,13 +31,14 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         FlipMount; % FlipMount for Laser Attenuation
         Shutter; % Shutter for Laser Block
  
-        % Static Instrument Settings (never changed during use of this class)
+        % Static Instrument Settings
         SCMOS_UseDefectCorrection = 0;
         IRCamera_ExposureTime;
         IRCamera_ROI = [513, 768, 385, 640]; % IR Camera ROI Center 256
         Lamp850Power = 7;
         Lamp660Power = 14;
         SCMOS_PixelSize = .104; % microns
+        SCMOSCalFilePath; % needed if using PublishResults flag
         
         % Operational properties.
         LampWait = 0.1; % Time to wait for full power to lamp (seconds)
@@ -95,6 +86,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         SaveDir = 'Y:\'; % Save Directory
         AbortNow = 0; % Flag for aborting acquisition
         SaveFileType = 'h5'; % .h5 currently only option
+        PublishResults = 0; % if 1, call PublishSeqSRResults after imaging
     end
     
     properties (SetAccess = protected)

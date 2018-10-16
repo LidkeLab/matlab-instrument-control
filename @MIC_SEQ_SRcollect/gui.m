@@ -41,6 +41,10 @@ StageControlPanel = uipanel(GuiFig, 'Title', 'Sample Stage', ...
     'FontWeight', 'bold', 'Units', 'pixels', ...
     'Position', SecondRowStartPosition...
     + [0, 0, BigPanelWidth, BigPanelHeight]);
+uicontrol('Parent', StageControlPanel, 'Style', 'Text', ...
+    'String', '(use mouse wheel to control z piezo)', ...
+    'HorizontalAlignment', 'left', ...
+    'Position', [5, BigPanelHeight-35, 200, 20]);
 handles.ButtonBigStepZPlus = uicontrol('Parent', StageControlPanel, ...
     'Style', 'PushButton', 'String', '+Z', ...
     'Position', [10, BigPanelHeight-70, 40, 40], ...
@@ -209,14 +213,18 @@ handles.EditExposureTimeLaserSequence = uicontrol(...
     'Position', [150, MediumPanelHeight-100, 35, 15], ...
     'HorizontalAlignment', 'left');
 TopButtonPosition = ...
-    [floor(MediumPanelWidth/2 - 125/2), MediumPanelHeight-150, 125, 25];
+    [floor(MediumPanelWidth/2 - 125/2), MediumPanelHeight-145, 125, 25];
 handles.ButtonFindCoverslip = uicontrol('Parent', SCMOSControlPanel, ...
     'Style', 'pushbutton', 'String', 'Find Coverslip', ...
     'Position', TopButtonPosition, ...
     'Callback', @findCoverslip);
+handles.ButtonOpenSCMOSGUI = uicontrol('Parent', SCMOSControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Open sCMOS GUI', ...
+    'Position', TopButtonPosition + [0, -25, 0, 0], ...
+    'Callback', @openSCMOSGUI);
 handles.ButtonResetSCMOS = uicontrol('Parent', SCMOSControlPanel, ...
     'Style', 'pushbutton', 'String', 'Reset sCMOS', ...
-    'Position', TopButtonPosition + [0, -25, 0, 0], ...
+    'Position', TopButtonPosition + [0, -50, 0, 0], ...
     'Callback', @resetSCMOS);
 
 % Create a control panel for the ROI selection tool and add the sub-ROI 
@@ -270,26 +278,38 @@ handles.Edit647PowerSequence = uicontrol(...
     'Parent', LaserControlPanel, 'Style', 'Edit', ...
     'Position', [150, MediumPanelHeight-70, 35, 15], ...
     'HorizontalAlignment', 'left');
+handles.ButtonOpen647LaserGUI = uicontrol(...
+    'Parent', LaserControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Open 647nm Laser GUI', ...
+    'Position', ...
+    [floor(MediumPanelWidth/2-125/2), MediumPanelHeight-100, 125, 25], ...
+    'Callback', @open647LaserGUI);
 uicontrol('Parent', LaserControlPanel, 'Style', 'Text', ...
     'String', '405nm Laser', ...
-    'Position', [5, MediumPanelHeight-100, 200, 15], ...
+    'Position', [5, MediumPanelHeight-135, 200, 15], ...
     'HorizontalAlignment', 'left');
 uicontrol('Parent', LaserControlPanel, 'Style', 'Text', ...
     'String', 'Activation Power (mW):', ...
-    'Position', [25, MediumPanelHeight-130, 125, 15], ...
+    'Position', [25, MediumPanelHeight-165, 125, 15], ...
     'HorizontalAlignment', 'left');
 handles.Edit405PowerActivate = uicontrol(...
     'Parent', LaserControlPanel, 'Style', 'Edit', ...
-    'Position', [150, MediumPanelHeight-115, 35, 15], ...
+    'Position', [150, MediumPanelHeight-150, 35, 15], ...
     'HorizontalAlignment', 'left');
 uicontrol('Parent', LaserControlPanel, 'Style', 'Text', ...
     'String', 'Bleaching Power (mW):', ...
-    'Position', [25, MediumPanelHeight-115, 125, 15], ...
+    'Position', [25, MediumPanelHeight-150, 125, 15], ...
     'HorizontalAlignment', 'left');
 handles.Edit405PowerBleach = uicontrol(...
     'Parent', LaserControlPanel, 'Style', 'Edit', ...
-    'Position', [150, MediumPanelHeight-130, 35, 15], ...
+    'Position', [150, MediumPanelHeight-165, 35, 15], ...
     'HorizontalAlignment', 'left');
+handles.ButtonOpen405LaserGUI = uicontrol(...
+    'Parent', LaserControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Open 405nm Laser GUI', ...
+    'Position', ...
+    [floor(MediumPanelWidth/2-125/2), MediumPanelHeight-195, 125, 25], ...
+    'Callback', @open405LaserGUI);
 
 % Create a control panel for alignment/registration controls and add the 
 % needed controls.
@@ -343,25 +363,30 @@ handles.EditSaveDirectory = uicontrol('Parent', FileSavePanel, ...
     BigPanelWidth-95, 20]);
 uicontrol('Parent', FileSavePanel, 'Style', 'edit', ...
     'String', 'Coverslip Name:', 'Enable', 'off', ...
-    'Position', [5, SmallPanelHeight-80, 85, 20]);
+    'Position', [5, SmallPanelHeight-75, 85, 20]);
 handles.EditCoverslipName = uicontrol('Parent', FileSavePanel, ...
     'Style', 'edit', ...
-    'Position', [5+85, SmallPanelHeight-80, ...
+    'Position', [5+85, SmallPanelHeight-75, ...
     BigPanelWidth-95, 20]);
 uicontrol('Parent', FileSavePanel, 'Style', 'edit', ...
     'String', 'Label Number:', 'Enable', 'off', ...
-    'Position', [5, SmallPanelHeight-110, 85, 20]);
+    'Position', [5, SmallPanelHeight-100, 85, 20]);
 handles.EditLabelNumber = uicontrol('Parent', FileSavePanel, ...
-    'Style', 'edit', 'Position', [5+85, SmallPanelHeight-110, 25, 20]);
+    'Style', 'edit', 'Position', [5+85, SmallPanelHeight-100, 25, 20]);
 uicontrol('Parent', FileSavePanel, 'Style', 'text', ...
     'String', 'Indicate Photobleaching Round', ...
-    'Position', [5+140, SmallPanelHeight-113, 150, 20], ...
+    'Position', [5+140, SmallPanelHeight-103, 150, 20], ...
     'TooltipString', 'Select to add _bleaching tag to the filename');
 handles.CheckboxPhotobleach = uicontrol('Parent', FileSavePanel, ...
     'Style', 'checkbox', ...
-    'Position', [5+290, SmallPanelHeight-113, 25, 25], ...
-    'TooltipString', 'Select to add _bleaching tag to the filename', ...
-    'Callback', @updateIsBleach);
+    'Position', [5+290, SmallPanelHeight-103, 25, 25], ...
+    'TooltipString', 'Select to add _bleaching tag to the filename');
+uicontrol('Parent', FileSavePanel, 'Style', 'text', ...
+    'String', 'Publish Results with PublishSeqSRResults', ...
+    'HorizontalAlignment', 'left', 'Position', [5, 0, 205, 20]);
+handles.CheckboxPublishResults = uicontrol('Parent', FileSavePanel, ...
+    'Style', 'checkbox', 'Position', [5+205, 0, 25, 25], ...
+    'Callback', @publishResults);
 
 % Create a control panel for misc. acquisition parameter controls that
 % don't fit well elsewhere/that should be close to the final workflow
@@ -430,6 +455,7 @@ properties2gui();
         obj.NumberOfSequences = ...
             str2double(handles.EditNumberOfSequences.String);
         obj.NumberOfFrames = str2double(handles.EditNumberOfFrames.String);
+        obj.IsBleach = handles.CheckboxPhotobleach.Value;
         
         % sCMOS properties.
         obj.ExposureTimeLampFocus = ...
@@ -603,15 +629,31 @@ properties2gui();
     function openStepperGUI(~, ~)
         % Callback for the Open Stepper GUI button, which will open the GUI 
         % for the sample stage stepper motors.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Open the stepper motor GUI.
         obj.StageStepper.gui();
+        
+        % Ensure the GUI reflects object properties.
+        properties2gui();
     end
 
     function openPiezoGUI(~, ~)
         % Callback for the Open Piezo GUIs button, which will open all
         % three GUIs for each of the three (x, y, z) sample stage piezos.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Open each of the piezo GUIs.
         obj.StagePiezoX.gui();
         obj.StagePiezoY.gui();
         obj.StagePiezoZ.gui();
+        
+        % Ensure the GUI reflects object properties.
+        properties2gui();
     end
 
     function resetPiezos(~, ~)
@@ -689,6 +731,32 @@ properties2gui();
         properties2gui();
     end
 
+    function open647LaserGUI(~, ~)
+        % Callback for the Open 647nm Laser GUI button.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Open the 647nm laser GUI.
+        obj.Laser647.gui();
+        
+        % Ensure the GUI reflects object properties.
+        properties2gui();
+    end
+
+    function open405LaserGUI(~, ~)
+        % Callback for the Open 405nm Laser GUI button.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Open the 405nm laser GUI.
+        obj.Laser405.gui();
+        
+        % Ensure the GUI reflects object properties.
+        properties2gui();
+    end
+
     function findCoverslipOffset(~, ~)
         % Callback for the Find Coverslip Offset button, used to find the
         % offset of the coverslip once it's been re-mounted onto the sample
@@ -705,6 +773,37 @@ properties2gui();
         properties2gui();
     end
 
+    function publishResults(Source, ~)
+        % Callback for the checkbox which specifies whether or not
+        % PublishSeqSRResults() will be called after the acquisition is
+        % complete.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Set the PublishResults object property based on status of the
+        % checkbox. 
+        obj.PublishResults = Source.Value;
+        
+        % If the box is checked, request user selection of an sCMOS
+        % calibration file, ensuring a file is actually selected to avoid
+        % errors later on.
+        if Source.Value
+            [File, Path] = uigetfile('Y:\sCMOS Calibrations\*.mat', ...
+                'Select sCMOS Calibration File');
+            if isequal(File, 0) || isequal(Path, 0)
+                % User didn't select a file, uncheck the checkbox.
+                Source.Value = 0;
+            else
+                % User did select a file, proceed to set object properties
+                % as needed.
+                obj.SCMOSCalFilePath = fullfile(Path, File);
+            end
+        end
+                
+        % Ensure the GUI reflects object properties.
+        properties2gui();
+    end
     function autoCollect(Source, ~)
         % Callback for the Start Autocollect button, which begins the
         % automated acquisiton process for all selected cells.
@@ -728,7 +827,21 @@ properties2gui();
         properties2gui();
     end
 
-    function resetSCMOS(~,~)
+    function openSCMOSGUI(~, ~)
+        % Callback for the Open sCMOS GUI button, which opens the GUI for
+        % the main sCMOS camera.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Open the cameras GUI.
+        obj.CameraSCMOS.gui();
+        
+        % Ensure the GUI reflects object properties.
+        properties2gui();
+    end
+
+    function resetSCMOS(~, ~)
         % Callback for the Reset sCMOS button.
         
         % Ensure the object properties are set based on the GUI.
@@ -816,20 +929,6 @@ properties2gui();
             obj.UseActiveReg = 0;
             handles.CheckboxActiveReg.Value = 0;
         end
-        
-        % Ensure the GUI reflects object properties.
-        properties2gui();
-    end
-
-    function updateIsBleach(Source, ~)
-        % Sets the IsBleach property of MIC_SEQ_SRcollect to 1 when
-        % checked, otherwise it sets it to 0.
-        
-        % Ensure the object properties are set based on the GUI.
-        gui2properties();
-        
-        % Set the object property IsBleach to the chosen value.
-        obj.IsBleach = Source.Value; % ==1 if checked, ==0 otherwise
         
         % Ensure the GUI reflects object properties.
         properties2gui();

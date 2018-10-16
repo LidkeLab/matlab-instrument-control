@@ -50,4 +50,9 @@
         obj.FlipMount.FilterIn; %moves in the ND filter toward the beam
         obj.Shutter.close;
         obj.Laser647.off();
+        
+        % Publish the results if requested.
+        if obj.PublishResults
+            PublishSeqSRResults(obj.TopDir, obj.SCMOSCalFilePath);
+        end
  end 
