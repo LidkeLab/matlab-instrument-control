@@ -787,13 +787,25 @@ properties2gui();
         
         % If the box is checked, request user selection of an sCMOS
         % calibration file, ensuring a file is actually selected to avoid
-        % errors later on.
+        % errors later on.  
         if Source.Value
+            % Make sure PublishSeqSRResults actually exists in the users 
+            % filepath so as to not cause errors later on.
+            if isempty(which('PublishSeqSRResults'))
+                warning('PublishSeqSRResults.m not found')
+                Source.Value = 0;
+                obj.PublishResults = 0;
+                return
+            end
+            
+            % Request user selection of the calibration file.
             [File, Path] = uigetfile('Y:\sCMOS Calibrations\*.mat', ...
                 'Select sCMOS Calibration File');
             if isequal(File, 0) || isequal(Path, 0)
-                % User didn't select a file, uncheck the checkbox.
+                % User didn't select a file, uncheck the checkbox and
+                % remove the PublishResults flag.
                 Source.Value = 0;
+                obj.PublishResults = 0;
             else
                 % User did select a file, proceed to set object properties
                 % as needed.
@@ -804,6 +816,7 @@ properties2gui();
         % Ensure the GUI reflects object properties.
         properties2gui();
     end
+
     function autoCollect(Source, ~)
         % Callback for the Start Autocollect button, which begins the
         % automated acquisiton process for all selected cells.
