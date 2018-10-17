@@ -3,6 +3,10 @@
 
         if nargin<3 %Ask for directory with Reference files
             RefDir=uigetdir(obj.TopDir);
+            if RefDir == 0
+                % No directory was specified.
+                return
+            end
         end
 
         if nargin<2 %Ask for directory with Reference files

@@ -534,7 +534,8 @@ properties2gui();
         
         % Display for total number of cells selected.
         handles.TextNumSelectedCells.String = sprintf(...
-            '%i cell(s) selected from this coverslip', obj.CurrentCellIdx);
+            '%i cell(s) selected from this coverslip', ...
+            obj.CurrentCellIdx-1);
         
         % Misc. acquisition properties (related to sCMOS but made distinct
         % in the GUI).
