@@ -563,7 +563,7 @@ properties2gui();
         % Determine the dimension along which to move.
         % E.g.: if movement code is 1, the channel is 1
         %       if movement code is 11, the channel is again 1
-        StepperChannel = max(abs(MovementCode), abs(MovementCode/11));
+        StepperChannel = mod(abs(MovementCode), 10);
         
         % Send the command to the appropriate stepper motor.
         CurrentStepperPosition = ...
@@ -571,7 +571,7 @@ properties2gui();
         NewStepperPosition = CurrentStepperPosition + StepSize;
         obj.StageStepper.moveToPosition(StepperChannel, ...
             NewStepperPosition);
-           
+        
         % Ensure the GUI reflects object properties.
         properties2gui();
     end
