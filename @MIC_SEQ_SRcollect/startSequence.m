@@ -83,8 +83,8 @@
     obj.CameraSCMOS.AcquisitionType = 'sequence';
     obj.CameraSCMOS.setup_acquisition();
 
-    % Send the 647 nm laser to the sample.  If requested, also send the 
-    % 405 nm laser to the sample.
+    % Send the 647nm laser to the sample.  If requested, also send the 
+    % 405nm laser to the sample.
     obj.FlipMount.FilterOut(); % removes ND filter from optical path
     if obj.Use405
         obj.Laser405.setPower(obj.LaserPower405Activate);
@@ -105,7 +105,7 @@
         % Pause for the prescribed amount of time to allow for
         % pre-activation, first ensuring the user hasn't disabled the
         % pause setting.
-        pause('on');
+        PreviousState = pause('on'); % saves current state for later
         pause(obj.DurationPreActivation);
         
         % Turn off the 405nm laser (if used) and close the shutter to
@@ -115,6 +115,10 @@
             % Turn off the 405nm laser.
             obj.Laser405.off();
         end
+        
+        % Restore the previous pause setting (in case this was important
+        % elsewhere/to the user).
+        pause(PreviousState);
     end
     fprintf('Collecting data.......................................... \n')
     for ii = 1:obj.NumberOfSequences
