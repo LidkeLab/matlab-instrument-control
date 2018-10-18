@@ -93,13 +93,35 @@
         obj.Laser405.setPower(obj.LaserPower405Bleach);
     end
 
-    % Begin the acquisition.
+    % Begin the acquisition, performing a pre-activation step if requested.
+    if obj.UsePreActivation
+        % Turn on the 405nm laser (if needed) and open the shutter to
+        % allow the 647nm laser to reach the sample.
+        if obj.Use405
+            obj.Laser405.on();
+        end
+        obj.Shutter.open();
+        
+        % Pause for the prescribed amount of time to allow for
+        % pre-activation, first ensuring the user hasn't disabled the
+        % pause setting.
+        pause('on');
+        pause(obj.DurationPreActivation);
+        
+        % Turn off the 405nm laser (if used) and close the shutter to
+        % prevent the 647nm laser from reaching the sample.
+        obj.Shutter.close();
+        if obj.Use405
+            % Turn off the 405nm laser.
+            obj.Laser405.off();
+        end
+    end
     fprintf('Collecting data.......................................... \n')
     for ii = 1:obj.NumberOfSequences
         % If AbortNow flag was set, do not continue.
-            if obj.AbortNow
-                return
-            end
+        if obj.AbortNow
+            return
+        end
             
         % Use periodic registration after NSeqBeforePeriodicReg
         % sequences have been collected.
@@ -123,8 +145,8 @@
             obj.Lamp660.setPower(0);
         end
         
-        % Turn on the 405 nm laser (if needed) and open the shutter to
-        % allow the 647 nm laser to reach the sample.
+        % Turn on the 405nm laser (if needed) and open the shutter to
+        % allow the 647nm laser to reach the sample.
         if obj.Use405
             obj.Laser405.on();
         end
@@ -145,9 +167,9 @@
             otherwise
                 error('StartSequence:: unknown SaveFileType')
         end
-        obj.Shutter.close(); % block 647 nm from reaching sample
+        obj.Shutter.close(); % block 647nm from reaching sample
         if obj.Use405
-            % Turn off the 405 nm laser.
+            % Turn off the 405nm laser.
             obj.Laser405.off();
         end
     end

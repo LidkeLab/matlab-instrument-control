@@ -48,7 +48,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         ExposureTimeCapture = 0.2;
         NumberOfFrames = 2000;
         NumberOfSequences = 20;
-        NumberOfPhotoBleachingIterations = 8;
+        UsePreActivation = 1; % excite fluors. before acquiring data
+        DurationPreActivation = 1; % (seconds) time of pre-activation
         StabPeriod = 5; % Time between stabilization events (seconds)
         GridCorner = [1, 1] % 10x10 Full Frame Grid Corner (mm)
         SCMOS_ROI_Collect = [897, 1152, 897, 1152];

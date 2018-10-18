@@ -11,7 +11,7 @@ end
 BigPanelWidth = 400; % width of big uipanels
 BigPanelHeight = 400; % height of big uipanels
 MediumPanelWidth = floor(BigPanelWidth / 2);
-MediumPanelHeight = floor(BigPanelHeight / 2); 
+MediumPanelHeight = floor(BigPanelHeight / 2);
 SmallPanelHeight = floor(BigPanelHeight / 3);
 ScreenSize = get(groot, 'ScreenSize'); % size of displaying screen
 XSize = BigPanelWidth + MediumPanelWidth + 20; % width of figure
@@ -321,26 +321,26 @@ RegistrationControlPanel = uipanel(GuiFig, ...
     MediumPanelWidth, MediumPanelHeight]);
 uicontrol('Parent', RegistrationControlPanel, 'Style', 'text', ...
     'String', 'Use Active Registration', ...
-    'Position', [5, MediumPanelHeight-40, 125, 15], ...
+    'Position', [25, MediumPanelHeight-40, 125, 15], ...
     'HorizontalAlignment', 'left');
 handles.CheckboxActiveReg = uicontrol(...
     'Parent', RegistrationControlPanel, 'Style', 'checkbox', ...
-    'Position', [5+125, MediumPanelHeight-40, 15, 15], ...
+    'Position', [170, MediumPanelHeight-40, 15, 15], ...
     'Callback', @useActiveReg);
 uicontrol('Parent', RegistrationControlPanel, 'Style', 'text', ...
     'String', 'Use Periodic Registration', ...
-    'Position', [5, MediumPanelHeight-70, 125, 15]);
+    'Position', [25, MediumPanelHeight-70, 125, 15]);
 handles.CheckboxPeriodicReg = uicontrol(...
     'Parent', RegistrationControlPanel, 'Style', 'checkbox', ...
-    'Position', [5+125, MediumPanelHeight-70, 15, 15], ...
+    'Position', [170, MediumPanelHeight-70, 15, 15], ...
     'Callback', @usePeriodicReg); 
-uicontrol('Parent', RegistrationControlPanel, 'Style', 'text', ...
-    'String', 'after every         sequence(s)', ...
-    'Position', [15, MediumPanelHeight-85, 150, 15]);
+handles.TextPeriodicReg = uicontrol('Parent', RegistrationControlPanel, ...
+    'Style', 'text', 'String', 'after every         sequence(s)', ...
+    'Position', [25, MediumPanelHeight-85, 150, 15], 'Visible', 'off');
 handles.EditboxPeriodicReg = uicontrol(...
     'Parent', RegistrationControlPanel, 'Style', 'edit', ...
     'String', obj.NSeqBeforePeriodicReg, ...
-    'Position', [75, MediumPanelHeight-85, 20, 15]);
+    'Position', [85, MediumPanelHeight-85, 20, 15], 'Visible', 'off');
 TopButtonPosition = ...
     [floor(MediumPanelWidth/2 - 125/2), MediumPanelHeight-125, 125, 25];
 handles.ButtonFindCoverslipOffset = uicontrol(...
@@ -395,7 +395,7 @@ CollectionPanel = uipanel(GuiFig, 'Title', 'Acquisition', ...
     'FontWeight', 'bold', 'Units', 'pixels', 'Tag', 'CollectionPanel', ...
     'Position', SecondRowStartPosition ...
     + [BigPanelWidth+10, 0, MediumPanelWidth, MediumPanelHeight]);
-uicontrol('Parent', CollectionPanel, 'Style', 'Text', ...
+uicontrol('Parent', CollectionPanel, 'Style', 'text', ...
     'String', 'Number of Sequences:', ...
     'Position', [25, MediumPanelHeight-40, 125, 15], ...
     'HorizontalAlignment', 'left');
@@ -403,7 +403,7 @@ handles.EditNumberOfSequences = uicontrol(...
     'Parent', CollectionPanel, 'Style', 'Edit', ...
     'Position', [150, MediumPanelHeight-40, 35, 15], ...
     'HorizontalAlignment', 'left');
-uicontrol('Parent', CollectionPanel, 'Style', 'Text', ...
+uicontrol('Parent', CollectionPanel, 'Style', 'text', ...
     'String', 'Number of Frames:', ...
     'Position', [25, MediumPanelHeight-55, 125, 15], ...
     'HorizontalAlignment', 'left');
@@ -411,6 +411,23 @@ handles.EditNumberOfFrames = uicontrol(...
     'Parent', CollectionPanel, 'Style', 'Edit', ...
     'Position', [150, MediumPanelHeight-55, 35, 15], ...
     'HorizontalAlignment', 'left');
+uicontrol('Parent', CollectionPanel, 'Style', 'text', ...
+    'String', 'Pre-Activate Fluorophores', ...
+    'Position', [25, MediumPanelHeight-100, 150, 30], ...
+    'HorizontalAlignment', 'left');
+handles.CheckboxPreActivateFluorophores = uicontrol(...
+    'Parent', CollectionPanel, 'Style', 'checkbox', ...
+    'Position', [170, MediumPanelHeight-85, 15, 15], ...
+    'Callback', @activateBeforeAcquisition);
+handles.TextTimeToActivateFluorophores = uicontrol(...
+    'Parent', CollectionPanel, 'Style', 'text', ...
+    'String', 'for         second(s)', ...
+    'Position', [25, MediumPanelHeight-115, 125, 30], ...
+    'HorizontalAlignment', 'left', 'Visible', 'off');
+handles.EditboxPreActivateFluorophores = uicontrol(...
+    'Parent', CollectionPanel, 'Style', 'edit', ...
+    'String', obj.DurationPreActivation, ...
+    'Position', [45, MediumPanelHeight-100, 20, 15], 'Visible', 'off');
 
 % Add the final set of controls (i.e. those used once everything is set,
 % such as Start Autocollect).
@@ -456,6 +473,8 @@ properties2gui();
             str2double(handles.EditNumberOfSequences.String);
         obj.NumberOfFrames = str2double(handles.EditNumberOfFrames.String);
         obj.IsBleach = handles.CheckboxPhotobleach.Value;
+        obj.DurationPreActivation = ...
+            str2double(handles.EditboxPreActivateFluorophores.String);
         
         % sCMOS properties.
         obj.ExposureTimeLampFocus = ...
@@ -515,6 +534,11 @@ properties2gui();
         handles.EditboxPeriodicReg.String = obj.NSeqBeforePeriodicReg;
         handles.CheckboxActiveReg.Value = obj.UseActiveReg;
         handles.CheckboxPeriodicReg.Value = obj.UsePeriodicReg;
+        if handles.CheckboxPeriodicReg.Value
+            % Ensure additional parameter selections are available.
+            handles.TextPeriodicReg.Visible = 'on';
+            handles.EditboxPeriodicReg.Visible = 'on';
+        end
         
         % Main sCMOS camera properties.
         handles.EditExposureTimeLampFocus.String = ...
@@ -537,10 +561,18 @@ properties2gui();
             '%i cell(s) selected from this coverslip', ...
             obj.CurrentCellIdx-1);
         
-        % Misc. acquisition properties (related to sCMOS but made distinct
-        % in the GUI).
+        % Misc. acquisition properties.
         handles.EditNumberOfSequences.String = obj.NumberOfSequences;
         handles.EditNumberOfFrames.String = obj.NumberOfFrames;
+        handles.CheckboxPreActivateFluorophores.Value = ...
+            obj.UsePreActivation;
+        handles.EditboxPreActivateFluorophores.String = ...
+            obj.DurationPreActivation;
+        if handles.CheckboxPreActivateFluorophores.Value
+            % Ensure additional parameter selections are available.
+            handles.TextTimeToActivateFluorophores.Visible = 'on';
+            handles.EditboxPreActivateFluorophores.Visible = 'on';
+        end
     end
 
     function stepperControl(~, ~, MovementCode)
@@ -920,13 +952,15 @@ properties2gui();
         gui2properties();
         
         % Set UseActiveReg to the desired value.
-        obj.UseActiveReg = Source.Value; % ==1 if checked, ==0 otherwise
+        obj.UseActiveReg = Source.Value;
         
         % If using active registration, ensure periodic registration is
-        % turned off.
+        % turned off and hide the periodic registration parameter choices.
         if Source.Value
             obj.UsePeriodicReg = 0;
             handles.CheckboxPeriodicReg.Value = 0;
+            handles.TextPeriodicReg.Visible = 'off';
+            handles.EditboxPeriodicReg.Visible = 'off';
         end
         
         % Ensure the GUI reflects object properties.
@@ -935,23 +969,52 @@ properties2gui();
 
     function usePeriodicReg(Source, ~)
         % Callback which sets the UsePeriodicReg property of
-        % MIC_SEQ_SRcollect to 1 when checked and 0 otherwise..
+        % MIC_SEQ_SRcollect to 1 when checked and 0 otherwise.
         
         % Ensure the object properties are set based on the GUI.
         gui2properties();
         
         % Set UsePeriodicReg to the desired value.
-        obj.UsePeriodicReg = Source.Value; % ==1 if checked, ==0 otherwise
+        obj.UsePeriodicReg = Source.Value;
         
         % If using periodic registration, ensure active registration is
-        % turned off.
+        % turned off and make the periodic registration parameter choices
+        % visible.
         if Source.Value
             obj.UseActiveReg = 0;
             handles.CheckboxActiveReg.Value = 0;
+            handles.TextPeriodicReg.Visible = 'on';
+            handles.EditboxPeriodicReg.Visible = 'on';
+        else
+            handles.TextPeriodicReg.Visible = 'off';
+            handles.EditboxPeriodicReg.Visible = 'off';
         end
         
         % Ensure the GUI reflects object properties.
         properties2gui();
     end
 
+    function activateBeforeAcquisition(Source, ~)
+        % Callback which sets the UsePreActivation property of
+        % MIC_SEQ_SRcollect to 1 when checked and 0 otherwise.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Set UsePreActivation to the desired value.
+        obj.UsePreActivation = Source.Value;
+        
+        % If using pre-activation, make the pre-activation parameter 
+        % choices visible.
+        if Source.Value
+            handles.TextTimeToActivateFluorophores.Visible = 'on';
+            handles.EditboxPreActivateFluorophores.Visible = 'on';
+        else
+            handles.TextTimeToActivateFluorophores.Visible = 'off';
+            handles.EditboxPreActivateFluorophores.Visible = 'off';
+        end
+        
+        % Ensure the GUI reflects object properties.
+        properties2gui();
+    end
 end
