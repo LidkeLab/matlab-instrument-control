@@ -29,12 +29,12 @@ int Size[5] = {1,1,1,1,1};
 unsigned short * dataMATLAB;
 double IsSaving = 0;
 int CompressionLevel = 0;
-int IsCopied = 0;
+int IsCopied = 0;    
 bool Append;
 
 void Save(void *p){
 
-	mexPrintf("Entering Save...\n");
+	//mexPrintf("Entering Save...\n");
 
 	unsigned short * data;
 	int elemsize = 2;
@@ -47,7 +47,7 @@ void Save(void *p){
 	for (int n = 0; n < NDims; n++)
 		Nelem = Nelem*Size[n];
 
-	mexPrintf("NDims %d Nelem %d\n",NDims, Nelem);
+	//mexPrintf("NDims %d Nelem %d\n",NDims, Nelem);
 
 	//This does the fliplr() operation needed to convert column major (MATLAB) to row-major (HDF5)
 	for (int n = 0; n < NDims; n++)
@@ -62,16 +62,16 @@ void Save(void *p){
 	/*
 	* Create a new file using the default properties.
 	*/
-	mexPrintf("filename %s\n", filename);
+	//mexPrintf("filename %s\n", filename);
 
 	file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
-	mexPrintf("file %d\n", file);
+	//mexPrintf("file %d\n", file);
 	/*
 	* Open group if nessesary using the default properties.
 	*/
-	mexPrintf("group %s\n", group);
+	//mexPrintf("group %s\n", group);
 	gid = H5Gopen(file, group, H5P_DEFAULT);
-	mexPrintf("gid %d\n", gid);
+	//mexPrintf("gid %d\n", gid);
 	/*
 	* Create dataspace.  Setting maximum size to NULL sets the maximum
 	* size to be the current size.
@@ -84,22 +84,22 @@ void Save(void *p){
 	*/
 	dcpl = H5Pcreate(H5P_DATASET_CREATE); 
 	status = H5Pset_deflate(dcpl, 5);
-	mexPrintf("Deflate Status: %d\n", status);
+	//mexPrintf("Deflate Status: %d\n", status);
 	//dims[NDims - 1] = 1;
 	status = H5Pset_chunk(dcpl, NDims, dims);
 
 	/*
 	* Create the dataset.
 	*/
-	mexPrintf("DATASET %s\n", DATASET);
+	//mexPrintf("DATASET %s\n", DATASET);
 	dset = H5Dcreate(gid, DATASET, H5T_NATIVE_USHORT, space, H5P_DEFAULT, dcpl,
 		H5P_DEFAULT);
-	mexPrintf("dset %d\n", dset);
+	//mexPrintf("dset %d\n", dset);
 	/*
 	* Write the data to the dataset.
 	*/
 	status = H5Dwrite(dset, H5T_NATIVE_USHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (const void *)data);
-	mexPrintf("Write Status: %d\n", status);
+	//mexPrintf("Write Status: %d\n", status);
 	/*
 	* Close and release resources.
 	*/
@@ -230,5 +230,5 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	
 	
 
-	return;
+	return;   
  }
