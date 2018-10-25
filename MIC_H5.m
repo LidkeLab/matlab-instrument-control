@@ -222,7 +222,7 @@ classdef MIC_H5
                     for jj = 1:numel(SubgroupNames)
                         % Iteratively explore subgroups of the desired 
                         % group to store their attributes and data.
-                        SubgroupStructure = h5reader_test(FilePath, ...
+                        SubgroupStructure = MIC_H5.readH5File(FilePath, ...
                             SubgroupNames{jj});
 
                         % Remove the path information from the subgroup 
