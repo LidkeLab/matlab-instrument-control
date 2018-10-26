@@ -165,6 +165,10 @@ handles.ButtonResetPiezos = uicontrol('Parent', StageControlPanel, ...
     'Style', 'pushbutton', 'String', 'Reset Piezos', ...
     'Position', TopButtonPosition + [2*(125+5), 0, 0, 0], ...
     'Callback', @resetPiezos);
+handles.ButtonReconnectPiezos = uicontrol('Parent', StageControlPanel, ...
+    'Style', 'pushbutton', 'String', 'Reconnect Piezos', ...
+    'Position', TopButtonPosition + [2*(125+5), -25, 0, 0], ...
+    'Callback', @reconnectPiezos);
 
 % Create a control panel for the main sCMOS camera.
 SCMOSControlPanel = uipanel(GuiFig, 'Title', 'Hamamatsu sCMOS', ...
@@ -710,6 +714,36 @@ properties2gui();
     
         % Update the status indicator for the GUI.
         obj.StatusString = '';
+        
+        % Ensure the GUI reflects object properties.
+        properties2gui();
+    end
+
+    function reconnectPiezos(~, ~)
+        % Callback for the Reconnect Piezos button, which will attempt to
+        % delete the piezo objects and then reconnect to each piezo.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Request user confirmation that they want to reconnect the piezos.
+        UserConfirmation = questdlg(...
+            sprintf(['Reconnecting piezos takes ~1min. \n', ...
+            'Would you like to proceed?']), 'Warning', 'Yes', 'No', 'No');
+        if strcmp(UserConfirmation, 'No')
+            return
+        end
+        
+        % If the piezo objects exist, delete them.
+        if ~isempty(obj.StagePiezoX) && ~isempty(obj.StagePiezoY) && ...
+                ~isempty(obj.StagePiezoZ)
+            obj.StagePiezoX.delete();
+            obj.StagePiezoY.delete();
+            obj.StagePiezoZ.delete();
+        end
+        
+        % Attempt to reconnect to the piezos.
+        obj.setupStagePiezo();        
         
         % Ensure the GUI reflects object properties.
         properties2gui();
