@@ -59,6 +59,7 @@
         % We don't want to throw an error since there are still other cells
         % to be measured from here on.
         warning('Problem with AlignReg.align2imageFit()')
+        obj.StatusString = ''; % clear the status string
         return
     end
     obj.Lamp660.setPower(0);

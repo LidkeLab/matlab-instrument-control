@@ -745,6 +745,11 @@ properties2gui();
         % Attempt to reconnect to the piezos.
         obj.setupStagePiezo();        
         
+        % Reset the AlignReg object to contain the new piezo handles.
+        obj.AlignReg = MIC_SeqReg3DTrans(obj.CameraSCMOS, ...
+                obj.StagePiezoX, obj.StagePiezoY, obj.StagePiezoZ, ...
+                obj.StageStepper);
+        
         % Ensure the GUI reflects object properties.
         properties2gui();
     end

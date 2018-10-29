@@ -23,9 +23,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     properties
         CameraObj
 %       StageObj %old
-        Stage_Piezo_X %new
-        Stage_Piezo_Y %new
-        Stage_Piezo_Z %new
+        StagePiezoX %new
+        StagePiezoY %new
+        StagePiezoZ %new
         MotorObj
         PixelSize;          %micron
         RefImageFile
@@ -72,7 +72,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     
     methods
 %         function obj=SeqReg3DTrans(CameraObj,StageObj,MotorObj)
-          function obj=MIC_SeqReg3DTrans(SCMOS,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z,Stage_Stepper) %new
+          function obj=MIC_SeqReg3DTrans(SCMOS,StagePiezoX,StagePiezoY,StagePiezoZ,Stage_Stepper) %new
 
             % pass in input for autonaming feature MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
@@ -83,9 +83,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             end
             
             %obj.StageObj=StageObj;
-            obj.Stage_Piezo_X=Stage_Piezo_X;
-            obj.Stage_Piezo_Y=Stage_Piezo_Y;
-            obj.Stage_Piezo_Z=Stage_Piezo_Z;
+            obj.StagePiezoX=StagePiezoX;
+            obj.StagePiezoY=StagePiezoY;
+            obj.StagePiezoZ=StagePiezoZ;
             obj.CameraObj=SCMOS;
             obj.MotorObj=Stage_Stepper;
             [p,~]=fileparts(which('Reg3DTrans'));
@@ -274,9 +274,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         
         function calibrate(obj)
             %move stage over 5 microns and fit line
-            X=obj.Stage_Piezo_X.Position; %new
-            Y=obj.Stage_Piezo_Y.Position; %new
-            Z=obj.Stage_Piezo_Z.Position; %new
+            X=obj.StagePiezoX.Position; %new
+            Y=obj.StagePiezoY.Position; %new
+            Z=obj.StagePiezoZ.Position; %new
             N=10;
             StepSize=0.1; %micron
             deltaX=((0:N-1)*StepSize)'; %old
@@ -293,9 +293,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 Y(1)=Ystart(1)+deltaY(ii); %new
                 Z(1)=Zstart(1)+deltaZ(ii); %new
 %               obj.StageObj.set_position(X); %old
-                obj.Stage_Piezo_X.set_position(X); %new
-                obj.Stage_Piezo_Y.set_position(Y); %new
-                obj.Stage_Piezo_Z.set_position(Z); %new
+                obj.StagePiezoX.set_position(X); %new
+                obj.StagePiezoY.set_position(Y); %new
+                obj.StagePiezoZ.set_position(Z); %new
                 pause(.1);
                 ImageStack(:,:,ii)=single(obj.CameraObj.start_capture);
             end
@@ -337,9 +337,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             obj.CameraObj.setup_acquisition;
 
 %           X=obj.StageObj.Position;
-            X=obj.Stage_Piezo_X.Position; %new
-            Y=obj.Stage_Piezo_Y.Position; %new
-            Z=obj.Stage_Piezo_Z.Position; %new
+            X=obj.StagePiezoX.Position; %new
+            Y=obj.StagePiezoY.Position; %new
+            Z=obj.StagePiezoZ.Position; %new
             N=length(deltaX);
             ImSz=obj.CameraObj.ImageSize;
             ImageStack=zeros(ImSz(1),ImSz(2),N);
@@ -353,16 +353,16 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
 %               X(2)=Xstart(2)+deltaY(ii); %old
                 Y=Ystart+deltaY(ii); %new
 %               obj.StageObj.set_position(X); %old
-                obj.Stage_Piezo_X.set_position(X); %new
-                obj.Stage_Piezo_Y.set_position(Y); %new
-                obj.Stage_Piezo_Z.set_position(Z); %new
+                obj.StagePiezoX.set_position(X); %new
+                obj.StagePiezoY.set_position(Y); %new
+                obj.StagePiezoZ.set_position(Z); %new
                 pause(1)
                 ImageStack(:,:,ii)=single(obj.CameraObj.start_capture);
             end
 %           obj.StageObj.set_position(Xstart); %old
-            obj.Stage_Piezo_X.set_position(Xstart); %new 
-            obj.Stage_Piezo_Y.set_position(Ystart); %new
-            obj.Stage_Piezo_Z.set_position(Zstart); %new
+            obj.StagePiezoX.set_position(Xstart); %new 
+            obj.StagePiezoY.set_position(Ystart); %new
+            obj.StagePiezoZ.set_position(Zstart); %new
             dipshow(ImageStack);
             sequence=ImageStack;
             Params.CameraObj.ROI=obj.CameraObj.ROI;
@@ -381,7 +381,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             % start timer
             TimerST=timer('StartDelay',0,'period',fmr,'TasksToExecute',numf,'ExecutionMode','fixedRate');
 %           TimerST.TimerFcn={@ImpulseTimerFcn,obj.StageObj,deltaX,fmr/2};  %old
-            TimerST.TimerFcn={@ImpulseTimerFcn,obj.Stage_Piezo_X,obj.Stage_Piezo_Y,obj.Stage_Piezo_Z,deltaX,fmr/2}; %new
+            TimerST.TimerFcn={@ImpulseTimerFcn,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ,deltaX,fmr/2}; %new
             start(TimerST);
             sequence=obj.CameraObj.start_sequence();
             % delete timer
@@ -422,9 +422,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             iter=0;
             withintol=0;
             while (withintol==0)&&(iter<obj.MaxIter) 
-                X=obj.Stage_Piezo_X.getPosition; %new
-                Y=obj.Stage_Piezo_Y.getPosition; %new
-                Z=obj.Stage_Piezo_Z.getPosition; %new
+                X=obj.StagePiezoX.getPosition; %new
+                Y=obj.StagePiezoY.getPosition; %new
+                Z=obj.StagePiezoZ.getPosition; %new
                 X0=X; %new
                 Y0=Y; %new
                 Z0=Z; %new
@@ -439,20 +439,20 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 [Zfit,mACfit]=obj.findZPos();
                 Zshift=Z-abs(Zfit); %new
                 Z=Zfit; %new
-                obj.Stage_Piezo_X.setPosition(X); %new
-                obj.Stage_Piezo_Y.setPosition(Y); %new
-                obj.Stage_Piezo_Z.setPosition(Z); %new
+                obj.StagePiezoX.setPosition(X); %new
+                obj.StagePiezoY.setPosition(Y); %new
+                obj.StagePiezoZ.setPosition(Z); %new
                 %find XY position and adjust in XY using Piezo:
                 [Xshift,Yshift]=findXYShift(obj); % in um 
 
                 % current position on Piezo
-                CurrentPos_X=obj.Stage_Piezo_X.getPosition;
-                CurrentPos_Y=obj.Stage_Piezo_Y.getPosition;
+                CurrentPos_X=obj.StagePiezoX.getPosition;
+                CurrentPos_Y=obj.StagePiezoY.getPosition;
                 NewPos_X = CurrentPos_X - Xshift;
                 NewPos_Y = CurrentPos_Y - Yshift;
-                obj.Stage_Piezo_X.setPosition(NewPos_X);
-                obj.Stage_Piezo_Y.setPosition(NewPos_Y);
-                obj.Stage_Piezo_Z.setPosition(Z);
+                obj.StagePiezoX.setPosition(NewPos_X);
+                obj.StagePiezoY.setPosition(NewPos_Y);
+                obj.StagePiezoZ.setPosition(Z);
                 
                 %show overlay
                 obj.Image_Current=obj.capture_single();
@@ -483,9 +483,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         end
         
         function collect_zstack(obj)
-            X=obj.Stage_Piezo_X.getPosition; %new
-            Y=obj.Stage_Piezo_Y.getPosition; %new
-            Z=obj.Stage_Piezo_Z.getPosition; %new
+            X=obj.StagePiezoX.getPosition; %new
+            Y=obj.StagePiezoY.getPosition; %new
+            Z=obj.StagePiezoZ.getPosition; %new
             obj.X_Current=X; %new
             obj.Y_Current=Y; %new
             obj.Z_Current=Z; %new
@@ -503,9 +503,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             obj.CameraObj.setup_fast_acquisition(N);
             %out=single(obj.CameraObj.start_capture);
             for nn=1:N
-                obj.Stage_Piezo_X.setPosition(obj.X_Current); %now
-                obj.Stage_Piezo_Y.setPosition(obj.Y_Current); %now
-                obj.Stage_Piezo_Z.setPosition(obj.ZStack_Pos(nn)); %now
+                obj.StagePiezoX.setPosition(obj.X_Current); %now
+                obj.StagePiezoY.setPosition(obj.Y_Current); %now
+                obj.StagePiezoZ.setPosition(obj.ZStack_Pos(nn)); %now
                 if nn==1
                     pause(.2); %it was 0.5 originally
                 end
@@ -513,9 +513,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             end
             out=obj.CameraObj.FinishTriggeredCapture(N);
             obj.ZStack=single(out);
-            obj.Stage_Piezo_X.setPosition(X); %new
-            obj.Stage_Piezo_Y.setPosition(Y); %new
-            obj.Stage_Piezo_Z.setPosition(Z); %new
+            obj.StagePiezoX.setPosition(X); %new
+            obj.StagePiezoY.setPosition(Y); %new
+            obj.StagePiezoZ.setPosition(Z); %new
             %put EMGain/Shutter back
         end
         
