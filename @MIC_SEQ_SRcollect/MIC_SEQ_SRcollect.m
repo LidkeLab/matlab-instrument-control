@@ -204,12 +204,9 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Attributes.ExposureTimeCapture = obj.ExposureTimeCapture;
             Attributes.NumberOfFrames = obj.NumberOfFrames;
             Attributes.NumberOfSequences = obj.NumberOfSequences;
-            Attributes.NumberOfPhotoBleachingIterations = ...
-                obj.NumberOfPhotoBleachingIterations;
             Attributes.CameraROI = obj.SCMOS_ROI_Collect;
             Attributes.SCMOS_ROI_Full = obj.SCMOS_ROI_Full;
             Attributes.IRCamera_ROI = obj.IRCamera_ROI;
-            Attributes.CameraPixelSize=obj.SCMOS_PixelSize;
             Attributes.SaveDir = obj.SaveDir;
             Attributes.LaserPower405Activate = obj.LaserPower405Activate;
             Attributes.LaserPower405Bleach = obj.LaserPower405Bleach;
