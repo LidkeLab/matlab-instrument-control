@@ -267,9 +267,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StagePiezoX = MIC_TCubePiezo('81850186', '84850145', 'X');
             obj.StagePiezoY = MIC_TCubePiezo('81850193', '84850146', 'Y');
             obj.StagePiezoZ = MIC_TCubePiezo('81850176', '84850203', 'Z');
-            obj.StagePiezoX.center();
-            obj.StagePiezoY.center();
-            obj.StagePiezoZ.center();
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
