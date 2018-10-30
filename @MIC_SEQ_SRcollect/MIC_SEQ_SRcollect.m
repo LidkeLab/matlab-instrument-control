@@ -212,6 +212,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Attributes.LaserPower405Bleach = obj.LaserPower405Bleach;
             Attributes.LaserPowerSequence = obj.LaserPowerSequence;
             Attributes.LaserPowerFocus = obj.LaserPowerFocus;
+            Attributes.UsePreActivation = obj.UsePreActivation;
+            Attributes.DurationPreActivation = obj.DurationPreActivation;
             
             % Store the Data to be exported.
             Data = [];
