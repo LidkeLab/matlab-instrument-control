@@ -25,6 +25,7 @@ function Success=findCoverSlipOffset_Manual(obj,RefStruct)
     obj.CameraSCMOS.AcquisitionType = 'focus';
     obj.CameraSCMOS.setup_acquisition();
     obj.Lamp660.setPower(obj.Lamp660Power);
+    obj.Lamp660.on();
     obj.CameraSCMOS.start_focus();
     obj.Lamp660.setPower(0);
 

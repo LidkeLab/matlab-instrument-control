@@ -36,7 +36,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         IRCamera_ExposureTime;
         IRCamera_ROI = [513, 768, 385, 640]; % IR Camera ROI Center 256
         Lamp850Power = 7;
-        Lamp660Power = 14;
+        Lamp660Power = 50;
         SCMOS_PixelSize = .104; % microns
         SCMOSCalFilePath; % needed if using PublishResults flag
         
@@ -45,7 +45,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         ExposureTimeLampFocus = 0.01;
         ExposureTimeLaserFocus = 0.2;
         ExposureTimeSequence = 0.01;
-        ExposureTimeCapture = 0.2;
+        ExposureTimeCapture = 0.01;
         NumberOfFrames = 2000;
         NumberOfSequences = 20;
         UsePreActivation = 1; % excite fluors. before acquiring data
