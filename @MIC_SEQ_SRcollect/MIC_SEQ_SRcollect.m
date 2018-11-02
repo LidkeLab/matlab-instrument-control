@@ -36,16 +36,16 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         IRCamera_ExposureTime;
         IRCamera_ROI = [513, 768, 385, 640]; % IR Camera ROI Center 256
         Lamp850Power = 7;
-        Lamp660Power = 50;
+        Lamp660Power = 40;
         SCMOS_PixelSize = .104; % microns
         SCMOSCalFilePath; % needed if using PublishResults flag
         
         % Operational properties.
         LampWait = 0.1; % Time to wait for full power to lamp (seconds)
-        ExposureTimeLampFocus = 0.01;
+        ExposureTimeLampFocus = 0.02;
         ExposureTimeLaserFocus = 0.2;
         ExposureTimeSequence = 0.01;
-        ExposureTimeCapture = 0.01;
+        ExposureTimeCapture = 0.02;
         NumberOfFrames = 2000;
         NumberOfSequences = 20;
         UsePreActivation = 1; % excite fluors. before acquiring data
@@ -370,6 +370,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
             obj.StageStepper.moveToPosition(3, 4); % z stepper
+            
+            % Clear the coverslip offset (this will no longer be a valid
+            % offset, but might cause other problems if not reset).
+            obj.CoverSlipOffset = [0, 0, 0];
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
