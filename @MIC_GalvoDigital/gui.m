@@ -7,7 +7,7 @@
 %    MIC_Abstract.m
 %    MATLAB NI-DAQmx driver installed via the Support Package Installer
 %
-% CITATION: Sandeep Pallikkuth, Lidlelab, 2017.
+% CITATION: Hanieh Mazloom-Farsibaf, Lidlelab, 2017.
 
 function guiFig = gui(obj)
 %gui Graphical User Interface to MIC_LightSource_Abstract

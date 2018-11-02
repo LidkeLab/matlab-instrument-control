@@ -20,8 +20,9 @@ classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
     %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
-    %
-    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
+    % 
+    %   CITATION: Sandeep Pallikkuth, LidkeLab, 2017.
+
     
     properties (SetAccess=protected)
         InstrumentName='CrystaLaser561'; %Name of instrument

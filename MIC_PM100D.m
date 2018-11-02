@@ -14,7 +14,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
     %            getWavelength(), measure(), setWavelength(), shutdown()
     %
     % REQUIREMENTS:
-    %    NI_DAQ should be installed.
+    %    NI_DAQ  (VISA and ICP Interfaces) should be installed.
     %    MATLAB 2014 or higher.
     %    MIC_Abstract.m
     %    MIC_PowerMeter_Abstract.m
