@@ -81,7 +81,7 @@
         SyringeWaitTime
         SyringeWaitTime_offset=-2; % in the unit of frame for IRCamera 
         IRSequenceLength
-        IRsequenceLength_offset=60;%in the unit of frame for IRCamera
+        IRsequenceLength_offset=50;%in the unit of frame for IRCamera
         sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
         ActiveRegCheck=0;
         RegCamType='Andor Camera'         % Type of Camera Bright Field Registration 
@@ -705,6 +705,15 @@
                         ROI=[1 DimX round(DimX/4)+1 round(DimX*3/4)];% center horizontally
                     case 7
                         ROI=[1 DimX round(DimX*3/8)+1 round(DimX*5/8)];% center horizontally half
+                    case 8
+                        ROI=[1 DimX round(DimX*7/16)+1 round(DimX*9/16)];% 128*16 center
+                    case 9
+                        ROI=[DimX/2 DimX round(DimX*6/8) DimX];% 64*32 low right
+                    case 10
+                        ROI=[1 DimX/2 round(DimX*6/8) DimX];% 64*32 low left
+                    case 11
+                        ROI=[DimX/2 DimX round(DimX*14/16) DimX];% 64*32 low left
+                    
                     otherwise
                         error('SRcollect: ROI not found')
                 end
