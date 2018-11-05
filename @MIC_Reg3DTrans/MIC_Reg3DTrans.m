@@ -116,7 +116,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % This function is to obtain elements of rotation matrix between
             % Camera (x,y) and Stage(X,Y) OrientMatrix=[A B,C D]
             if ~exist('PlotFlag','var')
-                PlotFlag=1;
+                PlotFlag=0;
             end
             
             obj.StageObj.center;
