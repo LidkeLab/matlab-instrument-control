@@ -15,7 +15,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     %    to be specified after initialization of the class, before using
     %    any of the functionality. See properties section for explanation
     %    and which ones.
-    %
+    % 
     % REQUIRES
     %    Matlab 2014b or higher
     %    MIC_Abstract
