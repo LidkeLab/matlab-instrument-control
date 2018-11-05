@@ -40,7 +40,7 @@ classdef MIC_StepperMotor < MIC_Abstract
         function obj = MIC_StepperMotor(SerialNum)
             %constructor start the communications with all three motors and
             %also sets some of the class properties.
-            addpath('C:\Users\lidkelab\Documents\MATLAB\MIC\development\source\MIC\x64\Release');
+            addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\mex64');
             obj=obj@MIC_Abstract(~nargout);
             obj.SerialN = SerialNum;
             Kinesis_SBC_Open(obj.SerialN);
@@ -97,10 +97,12 @@ classdef MIC_StepperMotor < MIC_Abstract
             delete(obj.GuiFigure);
             clear obj;
         end
-        function State = exportState(obj)
-            %exportState() function
-            State.InstrumentName = obj.InstrumentName;
-            State.SerialN = obj.SerialN;
+        function [Attributes, Data, Children] = exportState(obj)
+            %exportState() method to export current instrument state.
+            Attributes.InstrumentName = obj.InstrumentName;
+            Attributes.SerialN = obj.SerialN;
+            Data = [];
+            Children = [];
         end
     end
     methods (Static)

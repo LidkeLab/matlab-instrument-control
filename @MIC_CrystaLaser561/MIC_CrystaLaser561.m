@@ -20,8 +20,9 @@ classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
     %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
-    %
-    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
+    % 
+    %   CITATION: Sandeep Pallikkuth, LidkeLab, 2017.
+
     
     properties (SetAccess=protected)
         InstrumentName='CrystaLaser561'; %Name of instrument
@@ -97,32 +98,30 @@ classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
             Power=Power_in;
         end
     end
-            methods (Static=true)
-            function unitTest(NIDevice,DOChannel)
-                % unit test of object functionality
-                % Syntax: MIC_CrystaLaser561.unitTest(NIDevice,DOChannel)
-                % Example:
-                % MIC_CrystaLaser561.unitTest('Dev1','Port0/Line0:1')
-                
-                fprintf('Creating Object\n')
-                CL=MIC_CrystaLaser561(NIDevice,DOChannel);
-                fprintf('Turn On\n')
-                CL.on();pause(1);
-                fprintf('State Export\n')
-                A=CL.exportState(); disp(A); pause(1);
-                fprintf('Turn Off\n')
-                CL.off();pause(1);
-                fprintf('State Export\n')
-                A=CL.exportState(); disp(A); pause(1);
-                fprintf('Turn On\n')
-                CL.on();pause(1);
-                fprintf('State Export\n')
-                A=CL.exportState(); disp(A); pause(1);
-                fprintf('Delete Object\n')
-                clear CL;
-                
-            end
-            
+    methods (Static=true)
+        function unitTest(NIDevice,DOChannel)
+            % unit test of object functionality
+            % Syntax: MIC_CrystaLaser561.unitTest(NIDevice,DOChannel)
+            % Example:
+            % MIC_CrystaLaser561.unitTest('Dev1','Port0/Line0:1')
+
+            fprintf('Creating Object\n')
+            CL=MIC_CrystaLaser561(NIDevice,DOChannel);
+            fprintf('Turn On\n')
+            CL.on();pause(1);
+            fprintf('State Export\n')
+            A=CL.exportState(); disp(A); pause(1);
+            fprintf('Turn Off\n')
+            CL.off();pause(1);
+            fprintf('State Export\n')
+            A=CL.exportState(); disp(A); pause(1);
+            fprintf('Turn On\n')
+            CL.on();pause(1);
+            fprintf('State Export\n')
+            A=CL.exportState(); disp(A); pause(1);
+            fprintf('Delete Object\n')
+            clear CL;
+
         end
- 
+    end
 end
