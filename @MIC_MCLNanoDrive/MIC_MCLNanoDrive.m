@@ -1,4 +1,4 @@
- classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
+classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     %MIC_MCLNanoDrive MIC controller for the Mad City Labs 3D Piezo Stage
     %   
     %   This class controls a 3D Peizo stage from Mad City Labs.  The class
@@ -267,4 +267,3 @@
     end
     
 end
-

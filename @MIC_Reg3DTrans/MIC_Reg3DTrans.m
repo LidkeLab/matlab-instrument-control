@@ -660,12 +660,20 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.MaxXYShift = obj.MaxXYShift;
             Attribute.MaxZShift = obj.MaxZShift;
             
-            Data.ZFitPos = obj.ZFitPos;
-            Data.ZFitModel = obj.ZFitModel;
-            Data.ZMaxAC = obj.ZMaxAC;
-            Data.Image_Reference = obj.Image_Reference;
-            Data.Image_Current = obj.Image_Current;
-            Data.ZStack = obj.ZStack;
+            %Return 0 as null marker
+            Data.ZFitPos = 0;
+            Data.ZFitModel = 0;
+            Data.ZMaxAC = 0;
+            Data.Image_Reference = 0;
+            Data.Image_Current = 0;
+            Data.ZStack = 0;
+            
+            if ~isempty(obj.ZFitPos);Data.ZFitPos = obj.ZFitPos;end
+            if ~isempty(obj.ZFitModel);Data.ZFitModel = obj.ZFitModel;end
+            if ~isempty(obj.ZMaxAC); Data.ZMaxAC = obj.ZMaxAC;end
+            if ~isempty(obj.Image_Reference);Data.Image_Reference = obj.Image_Reference;end
+            if ~isempty(obj.Image_Current); Data.Image_Current = obj.Image_Current;end
+            if ~isempty(obj.ZStack);Data.ZStack = obj.ZStack;end
             
             Children=[];
             
