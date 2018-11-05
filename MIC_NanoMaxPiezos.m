@@ -9,11 +9,14 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     %
     % REQUIREMENTS:
     %   MIC_Abstract.m
-    %   MIC_PiezoStage_Abstract.m
+    %   MIC_3DStage_Abstract.m
     %   MIC_TCubePiezo.m
     %   MATLAB 2016b or later required.
     %
-    % CITATION: David Schodt, Lidke Lab, 2018
+    % CITATION:
+    
+    %Created by:
+    %   David James Schodt (Lidkelab, 2018)
     
     
     properties
