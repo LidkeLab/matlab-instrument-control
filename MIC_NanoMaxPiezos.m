@@ -74,15 +74,9 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             % Class destructor for the NanoMax Stage piezo control class.
             % Closes the connection to both the strain gauge and the piezo
             % controller for each of the three (x, y, z) piezos.
-            
-            % Close the x controller/strain gauges.
-            obj.StagePiezoX.closeDevices();
-            
-            % Close the y controller/strain gauges.
-            obj.StagePiezoY.closeDevices();
-            
-            % Close the z controller/strain gauges.
-            obj.StagePiezoZ.closeDevices();
+            obj.StagePiezoX.delete();
+            obj.StagePiezoY.delete();
+            obj.StagePiezoZ.delete();
         end
         
         function [Attributes, Data, Children] = exportState(obj) 
