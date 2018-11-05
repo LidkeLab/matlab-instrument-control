@@ -24,6 +24,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     % TIRF: LampPower=?; LampWait=2.5; CamShutter=true; ChangeEMgain=true; 
     %       EMgain=2; ChangeExpTime=true; ExposureTime=0.01;   
     
+    %created by
     % Marjolein Meddens,  Lidke Lab 2017
     % Update:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
     
