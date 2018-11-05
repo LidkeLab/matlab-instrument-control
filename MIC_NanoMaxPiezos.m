@@ -5,7 +5,11 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     % Thorlabs NanoMax stage. 
     %
     % Example: 
-    % Functions: 
+    % Functions:
+    %   center()
+    %   setPosition()
+    %   exportState()
+    %   delete()
     %
     % REQUIREMENTS:
     %   MIC_Abstract.m
@@ -64,22 +68,13 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             obj.StagePiezoX = MIC_TCubePiezo(...
                 obj.SerialNumberControllerX, ...
                 obj.SerialNumberStrainGaugeX, 'X'); 
-            obj.StagePiezoY=MIC_TCubePiezo(...
+            obj.StagePiezoY = MIC_TCubePiezo(...
                 obj.SerialNumberControllerY, ...
                 obj.SerialNumberStrainGaugeY, 'Y'); 
-            obj.StagePiezoZ=MIC_TCubePiezo(...
+            obj.StagePiezoZ = MIC_TCubePiezo(...
                 obj.SerialNumberControllerZ, ...
                 obj.SerialNumberStrainGaugeZ, 'Z'); 
             obj.center();
-        end
-        
-        function delete(obj)
-            % Class destructor for the NanoMax Stage piezo control class.
-            % Closes the connection to both the strain gauge and the piezo
-            % controller for each of the three (x, y, z) piezos.
-            obj.StagePiezoX.delete();
-            obj.StagePiezoY.delete();
-            obj.StagePiezoZ.delete();
         end
         
         function [Attributes, Data, Children] = exportState(obj) 
@@ -100,6 +95,15 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             Attributes.InstrumentName = obj.InstrumentName;
             Data=[];
             Children=[];
+        end
+        
+        function delete(obj)
+            % Class destructor for the NanoMax Stage piezo control class.
+            % Closes the connection to both the strain gauge and the piezo
+            % controller for each of the three (x, y, z) piezos.
+            obj.StagePiezoX.delete();
+            obj.StagePiezoY.delete();
+            obj.StagePiezoZ.delete();
         end
         
         function center(obj)
