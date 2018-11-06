@@ -67,7 +67,7 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
             obj.openDevices();
             
             %Zero the Strain Gauge
-            obj.zeroStainGauge();
+            obj.zeroStrainGauge();
             
             %Calibrate the Strain Gauge
             obj.calibrateStrainGauge();
@@ -84,18 +84,33 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
         function Err=openDevices(obj)
             % Opens communications to PZ and SG with Kinesis C-API via mex
             
-             Kinesis_TLI_BuildDeviceList(); 
+            Kinesis_TLI_BuildDeviceList(); 
             pause(1);  %Try to prevent crash
             
             ErrSG=Kinesis_SG_Open(obj.SerialNoTSG001);
-            if ErrSG
-                warning('openDevices::Error opening strain gauge controller')
+            
+            % Determine if there were errors opening the strain gauge and
+            % output an appropriate warning.
+            if ErrSG ~= 0 % ErrSG == 0 suggests a succesful connection
+                ErrorMessage = obj.decodeError(ErrSG); 
+                warning(['openDevices::Error opening strain gauge ', ...
+                    'controller \nError code %i was returned while ', ...
+                    'trying to connect to strain gauge %s: \n', ...
+                    ErrorMessage], ErrSG, obj.SerialNoTSG001)
             end
             
             ErrPZ=Kinesis_PCC_Open(obj.SerialNoTPZ001);
-            if ErrPZ
-                warning('openDevices::Error opening piezo controller')
+            % Determine if there were errors opening the piezo controller
+            % and output an appropriate warning.
+            if ErrPZ ~= 0 % ErrPZ == 0 suggests a succesful connection
+                ErrorMessage = obj.decodeError(ErrPZ); 
+                warning(['openDevices::Error opening piezo ', ...
+                    'controller \nError code %i was returned while ', ...
+                    'trying to connect to piezo controller %s: \n', ...
+                    ErrorMessage], ErrPZ, obj.SerialNoTPZ001)
             end
+            
+            % Return a general error boolean in case it's needed elsewhere.
             Err=(ErrSG==0)&(ErrPZ==0);
             
         end
@@ -114,23 +129,23 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
            obj.openDevices();
         end
         
-        function zeroStainGauge(obj)
+        function zeroStrainGauge(obj)
             % Intiates automatic Voltage-Position Calibration of the 
             SN=obj.SerialNoTPZ001;
             SNSG=obj.SerialNoTSG001;
             
             %Set to open loop and voltage to zero
-            Kinesis_PCC_SetPositionControlMode(SN,uint16(2))
-            Kinesis_PCC_SetPosition(SN,uint32(0))
+            Kinesis_PCC_SetPositionControlMode(SN,uint16(2));
+            Kinesis_PCC_SetPosition(SN,uint32(0));
             pause(4)
-            Kinesis_PCC_SetPositionControlMode(SN,uint16(1))
-            Kinesis_PCC_SetPosition(SN,uint32(0))
+            Kinesis_PCC_SetPositionControlMode(SN,uint16(1));
+            Kinesis_PCC_SetPosition(SN,uint32(0));
             
             %Zero strain gauge
-            Kinesis_SG_SetZero(SNSG) % This needs wait till finished inside mex.
+            Kinesis_SG_SetZero(SNSG); % This needs wait till finished inside mex.
             
             %Set to closed loop and voltage to zero
-            Kinesis_PCC_SetPositionControlMode(SN,uint16(2))
+            Kinesis_PCC_SetPositionControlMode(SN,uint16(2));
         end
         
         function calibrateStrainGauge(obj)
@@ -221,6 +236,113 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
                     Success=0;
                 end
                 
+            end
+            
+            function [ErrorMessage] = decodeError(Error)
+                % Used to decode an integer error code returned by a TCube
+                % device.
+                % Example: [ErrorMessage] = decodeError(0) returns
+                % ErrorMessage = 'FT_OK - Success' as given in the
+                % Thorlabs.MotionControl.C_API Device and Low Level Error
+                % Codes section.
+                % NOTE: error codes >= 32 might actually be returned as HEX
+                %       values, in which case the code here is not working
+                %       correctly for such errors...
+
+                % Switch through the possible error codes.
+                switch Error
+                    % "FTDI and Communication errors
+                    % The following errors are generated from the FTDI 
+                    % communications module or supporting code."
+                    case 0
+                        ErrorMessage = 'FT_OK - Success';
+                    case 1
+                        ErrorMessage = ['FT_InvalidHandle - The FTDI ', ...
+                            'functions have not been initialized.'];
+                    case 2
+                        ErrorMessage = ['FT_DeviceNotFound - The ', ...
+                            'Device could not be found'];
+                    case 3
+                        ErrorMessage = ['FT_DeviceNotOpened - The ', ...
+                            'Device must be opened before it can be ', ...
+                            'accessed'];
+                    case 4
+                        ErrorMessage = ['FT_IOError - An I/O Error ', ...
+                            'has occured in the FTDI chip.'];
+                    case 5
+                        ErrorMessage = ['FT_InsufficientResources - ', ...
+                            'There are Insufficient resources to run ', ...
+                            'this application.'];
+                    case 6
+                        ErrorMessage = ['FT_InvalidParameter - An ', ...
+                            'invalid parameter has been supplied to ', ...
+                            'the device.'];
+                    case 7
+                        ErrorMessage = ['FT_DeviceNotPresent - The ', ...
+                            'Device is no longer present'];
+                    case 8
+                        ErrorMessage = ['FT_IncorrectDevice - The ', ...
+                            'device detected does not match that ', ...
+                            'expected.'];
+                        
+                    % "General DLL control errors
+                    % The following errors are general errors generated 
+                    % by all DLLs."
+                    case {32, 20} % check for both hex. and dec. errors
+                        ErrorMessage = ['TL_ALREADY_OPEN - Attempt ', ...
+                            'to open a device that was already open.'];
+                    case {33, 21} % check for both hex. and dec. errors
+                        ErrorMessage = ['TL_NO_RESPONSE - The device ', ...
+                            'has stopped responding.'];
+                    case {34, 22} % check for both hex. and dec. errors
+                        ErrorMessage = ['TL_NOT_IMPLEMENTED - This ', ...
+                            'function has not been implemented.'];
+                    case {35, 23} % check for both hex. and dec. errors
+                        ErrorMessage = ['TL_FAULT_REPORTED - The ', ...
+                            'device has reported a fault.'];
+                    case {36, 24} % check for both hex. and dec. errors
+                        ErrorMessage = ['TL_INVALID_OPERATION - The ', ...
+                            'function could not be completed at this ', ...
+                            'time.'];
+                    case {40, 28} % check for both hex. and dec. errors
+                        ErrorMessage = ['TL_DISCONNECTING - The ', ...
+                            'function could not be completed because ', ...
+                            'the device is disconnected.'];
+                    case {41, 29} % check for both hex. and dec. errors 
+                        ErrorMessage = ['TL_FIRMWARE_BUG - The ', ...
+                            'firmware has thrown an error'];
+                    case 42
+                        ErrorMessage = ['TL_INITIALIZATION_FAILURE - ', ...
+                            'The device has failed to initialize'];
+                    case 43
+                        ErrorMessage = ['TL_INVALID_CHANNEL - An ', ...
+                            'Invalid channel address was supplied'];
+                        
+                    % "Motor specific errors
+                    % The following errors are motor specific errors 
+                    % generated by the Motor DLLs."
+                    case {37, 25} % check for both hex. and dec. errors
+                        ErrorMessage = ['TL_UNHOMED - The device ', ...
+                            'cannot perform this function until it ', ...
+                            'has been Homed.'];
+                    case {38, 26} % check for both hex. and dec. errors
+                        ErrorMessage = ['TL_INVALID_POSITION - The ', ...
+                            'function cannot be performed as it ', ...
+                            'would result in an illegal position.'];
+                    case {39, 27} % check for both hex. and dec. errors
+                        ErrorMessage = ...
+                            ['TL_INVALID_VELOCITY_PARAMETER - An ', ...
+                            'invalid velocity parameter was supplied'];
+                    case 44
+                        ErrorMessage = ['TL_CANNOT_HOME_DEVICE - ', ...
+                            'This device does not support Homing'];
+                    case 45
+                        ErrorMessage = ['TL_JOG_CONTINOUS_MODE - An ', ...
+                            'invalid jog mode was supplied for the ', ...
+                            'jog function.'];
+                    otherwise
+                        ErrorMessage = 'Unknown error code';
+                end
             end
             
         end
