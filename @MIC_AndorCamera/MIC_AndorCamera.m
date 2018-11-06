@@ -265,9 +265,9 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 obj.setup_acquisition;
             end
             
-            if ~obj.CameraSetting.ManualShutter.Bit
+%             if ~obj.CameraSetting.ManualShutter.Bit
                 obj.openShutter;    
-            end
+%             end
          
             obj.setcurrentcamera();
             obj.LastError = StartAcquisition();
@@ -277,9 +277,9 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             obj.LastError=WaitForAcquisition();
             out=obj.getdata();
           
-            if ~obj.CameraSetting.ManualShutter.Bit
+%             if ~obj.CameraSetting.ManualShutter.Bit
                 obj.closeShutter();  
-            end
+%             end
             
             if obj.KeepData
                 obj.Data=out;
@@ -359,9 +359,9 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         function out=start_sequence(obj)
             obj.AcquisitionType='sequence';
  
-            if ~obj.CameraSetting.ManualShutter.Bit
+%             if ~obj.CameraSetting.ManualShutter.Bit
                 obj.openShutter();    
-            end
+%             end
             
             if obj.ReadyForAcq==0
                 obj.setup_acquisition();
@@ -403,12 +403,18 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 [obj.LastError, aqstatus]= AndorGetStatus;  
                 obj.errorcheck('AndorGetStatus');
             end
+<<<<<<< HEAD
             [a b obj.NumImage] =GetNumberAvailableImages;
 
             % close shutter
             if ~obj.CameraSetting.ManualShutter.Bit
+=======
+            
+%             close shutter
+%             if ~obj.CameraSetting.ManualShutter.Bit
+>>>>>>> remotes/origin/Fix_Reg3DTrans_New
                 obj.closeShutter;  
-            end
+%             end
             
             if obj.AbortNow
                obj.AbortNow=0;
@@ -609,6 +615,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
     methods(Access=protected)
         % shutter control, internal control only...
         function openShutter(obj)
+            if isfield(obj.CameraSetting,'ManualShutter')
             extTTL = 1;
             mode = 1;
             closingtime = 50;
@@ -616,8 +623,10 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             
             obj.LastError = SetShutter(extTTL,mode,closingtime,openingtime);
             obj.errorcheck('SetShutter');
+            end
         end
         function closeShutter(obj)
+            if isfield(obj.CameraSetting,'ManualShutter')
             extTTL = 1;
             mode = 2;
             closingtime = 50;
@@ -625,6 +634,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             
             obj.LastError = SetShutter(extTTL,mode,closingtime,openingtime);
             obj.errorcheck('SetShutter');
+            end
         end
         function obj=get_capabilities(obj)
            %things with selectable modes
