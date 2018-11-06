@@ -528,7 +528,7 @@
                 obj.CameraObj.setCamProperties(CamSet);
                 obj.CameraObj.ExpTime_Sequence=obj.ExpTime_Sequence_Set;
                 obj.CameraObj.SequenceLength=obj.NumFrames;
-                obj.CameraObj.AcquisitionTimeOutOffset=10000;
+%                 obj.CameraObj.AcquisitionTimeOutOffset=10000;
                 obj.CameraObj.ROI=obj.getROI('Andor');
 %                 fprintf('EM Gain\n')
                 obj.CameraObj.CameraSetting.EMGain
