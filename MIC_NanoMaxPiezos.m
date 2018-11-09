@@ -104,6 +104,10 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                         obj.(sprintf('SerialNumberController%c', ii)));
                 end
             end
+            
+            % Assuming piezos were connected succesfully, set the Position
+            % property to [10, 10, 10].
+            obj.Position = [10, 10, 10];
         end
         
         function [Attributes, Data, Children] = exportState(obj) 
@@ -147,6 +151,9 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             obj.StagePiezoX.setPosition(Position(1));
             obj.StagePiezoY.setPosition(Position(2));
             obj.StagePiezoZ.setPosition(Position(3));
+            
+            % Update the position property to the appropriate value.
+            obj.Position = Position;
         end
 
     end
