@@ -14,7 +14,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     % REQUIREMENTS:
     %   MIC_Abstract.m
     %   MIC_3DStage_Abstract.m
-    %   MIC_TCubePiezo.m
+    %   MIC_TCubePiezo.m AND/OR MIC_KCubePiezo.m
     %   MATLAB 2016b or later required.
     %
     % CITATION:
@@ -24,7 +24,6 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     
     
     properties
-        InstrumentName = 'NanoMaxStagePiezos'; % Meaningful instrument name
         StagePiezoX; % Piezo object for x position piezo on the stage
         StagePiezoY; % Piezo object for y position piezo on the stage
         StagePiezoZ; % Piezo object for z position piezo on the stage
@@ -37,9 +36,14 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     end
     
     properties (SetAccess = protected) % users shouldn't set these directly
+       InstrumentName = 'NanoMaxStagePiezos'; % Meaningful instrument name
        Position; % Vector [x, y, z] giving the current piezo positions
        PositionUnit; % Units of position parameter (e.g. um, mm, etc.)
        StepSize; % Three element vector giving step size in each direction
+    end
+    
+    properties (Hidden)
+        StartGUI = 0; % don't open GUI on object creation
     end
  
     methods
@@ -59,22 +63,45 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             obj.SerialNumberControllerZ = SerialNumberControllerZ; 
             obj.SerialNumberStrainGaugeX = SerialNumberStrainGaugeX; 
             obj.SerialNumberStrainGaugeY = SerialNumberStrainGaugeY;
-            obj.SerialNumberStrainGaugeZ = SerialNumberStrainGaugeZ; 
+            obj.SerialNumberStrainGaugeZ = SerialNumberStrainGaugeZ;
             
-            % Connect the appropriate piezos and center them. 
-            % NOTE: usage MIC_TCubePiezo(PiezoControllerSerialNum, ...
-            %                            PiezoStrainGaugeSerialNum, ...
-            %                            AxisLabel);
-            obj.StagePiezoX = MIC_TCubePiezo(...
-                obj.SerialNumberControllerX, ...
-                obj.SerialNumberStrainGaugeX, 'X'); 
-            obj.StagePiezoY = MIC_TCubePiezo(...
-                obj.SerialNumberControllerY, ...
-                obj.SerialNumberStrainGaugeY, 'Y'); 
-            obj.StagePiezoZ = MIC_TCubePiezo(...
-                obj.SerialNumberControllerZ, ...
-                obj.SerialNumberStrainGaugeZ, 'Z'); 
-            obj.center();
+            % Determine the instrument version being connected (i.e. TCube
+            % or KCube) based on the provided serial numbers and connect to
+            % the instruments with the appropriate methods.
+            % NOTE: This assumes that a given piezo controller is
+            %       associated with a strain gauge of the same type, e.g. 
+            %       if the 'X' piezo controller is a T-Cube, the 'X' strain
+            %       gauge must also be a T-Cube.            % 
+            % NOTE: Piezo controllers serial numbers starting with '81' are
+            %       T-Cubes, and those starting with '29' are K-Cubes.
+            %       Strain gauge serial numbers starting with '84' are
+            %       T-Cubes, and those starting with '59' are K-Cubes.
+            DeviceVersionTagArray.X = obj.SerialNumberControllerX(1:2);
+            DeviceVersionTagArray.Y = obj.SerialNumberControllerY(1:2);
+            DeviceVersionTagArray.Z = obj.SerialNumberControllerZ(1:2);
+            for ii = ['X', 'Y', 'Z']
+                if strcmp(DeviceVersionTagArray.(ii), '81')
+                    % This is a T-Cube piezo pair.
+                    % USAGE NOTE:
+                    % MIC_TCubePiezo(PiezoControllerSerialNum, ...
+                    %                PiezoStrainGaugeSerialNum, ...
+                    %                AxisLabel);
+                    obj.(sprintf('StagePiezo%c', ii)) = MIC_TCubePiezo(...
+                        obj.(sprintf('SerialNumberController%c', ii)), ...
+                        obj.(sprintf('SerialNumberStrainGauge%c', ii)), ...
+                        ii);
+                elseif strcmp(DeviceVersionTagArray{ii}, '29')
+                    % This is a K-Cube piezo pair.
+                    obj.(sprintf('StagePiezo%c', ii)) = MIC_KCubePiezo(...
+                        obj.(sprintf('SerialNumberController%c', ii)), ...
+                        obj.(sprintf('SerialNumberStrainGauge%c', ii)), ...
+                        ii);
+                else
+                    warning(['Piezo controller serial number', ...
+                        '%s not recognized'], ...
+                        obj.(sprintf('SerialNumberController%c', ii)));
+                end
+            end
         end
         
         function [Attributes, Data, Children] = exportState(obj) 
