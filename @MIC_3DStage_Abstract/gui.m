@@ -1,15 +1,15 @@
 function gui(obj)
-% gui: Graphical user interface for MIC_MCLNanoDrive
-%
+%gui Graphical User Interface to MIC_3DStage_Abstract
 
-h = findall(0,'tag','MIC_MCLNanoDrive_gui');
+h = findall(0,'tag','MIC_3DStage_Abstract_gui');
+%Prevent opening more than one figure for same instrument
 if ~(isempty(h))
     figure(h);
     return;
 end
 
 
-
+%Set the position of figure in windows
 xsz=300;
 ysz=400;
 xst=100;
@@ -19,24 +19,27 @@ bszy=30;
 txsz = 75;
 txszy = 20;
 etxsz = 50;
+PositionUnit=obj.PositionUnit;
 
+%Open figure
 guiFig = figure('Units','pixels','Position',[xst yst xsz ysz],...
     'MenuBar','none','ToolBar','none','Visible','on',...
     'NumberTitle','off','UserData',0,...
-    'Tag','MIC_MCLNanoDrive_gui','HandleVisibility','off');
+    'Tag','MIC_3DStage_Abstract_gui','HandleVisibility','off');
 defaultBackground = get(0,'defaultUicontrolBackgroundColor');
 set(guiFig,'Color',defaultBackground)
 
+%Initialize GUI properties
 guiFig.WindowButtonDownFcn=@properties2gui;
 
 
 %top
 uicontrol('Parent',guiFig, 'Style', 'text', 'String', ...
-    'X Position (um)','Position', [10 ysz-(bszy+10) txsz bszy]);
+   ['X Position (' PositionUnit ')'],'Position', [10 ysz-(bszy+10) txsz bszy]);
 uicontrol('Parent',guiFig, 'Style', 'text', 'String', ...
-    'Y Position (um)','Position', [10 ysz-2*(bszy+10) txsz bszy]);
+    ['Y Position (' PositionUnit ')'],'Position', [10 ysz-2*(bszy+10) txsz bszy]);
 uicontrol('Parent',guiFig, 'Style', 'text', 'String', ...
-    'Z Position (um)','Position', [10 ysz-3*(bszy+10) txsz bszy]);
+   ['Z Position (' PositionUnit ')'],'Position', [10 ysz-3*(bszy+10) txsz bszy]);
 
 handles.edit_XCurrent = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
     '','Position', [15+txsz ysz-(bszy+10)+10 etxsz txszy],'enable','off');
@@ -46,17 +49,17 @@ handles.edit_ZCurrent = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ..
     '','Position', [15+txsz ysz-3*(bszy+10)+10 etxsz txszy],'enable','off');
 
 handles.edit_XSet = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
-    '','Position', [50+txsz+etxsz ysz-(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
+    '','Position', [62+txsz+etxsz ysz-(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
 handles.edit_YSet = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
-    '','Position', [50+txsz+etxsz ysz-2*(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
+    '','Position', [62+txsz+etxsz ysz-2*(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
 handles.edit_ZSet = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
-    '','Position', [50+txsz+etxsz ysz-3*(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
+    '','Position', [62+txsz+etxsz ysz-3*(bszy+10)+10 etxsz txszy],'BackgroundColor',[1 1 1]);
 
 properties2gui();
 
 %Step Size
 uicontrol('Parent',guiFig, 'Style', 'text', 'String', ...
-    'Step Size (um)','Position', [10 ysz-4*(bszy+10) txsz bszy]);
+    ['Step Size (' PositionUnit ')'],'Position', [10 ysz-4*(bszy+10) txsz bszy]);
 handles.edit_StepSize = uicontrol('Parent',guiFig, 'Style', 'edit', 'String', ...
     '0.1','Position', [10 ysz-5*(bszy+10)+20 etxsz txszy]);
 
@@ -224,6 +227,7 @@ guidata(guiFig,handles)
         set(handles.edit_ZSet,'String',num2str(X(3)));
     end
 
+%Callback function for push button to set the position
     function set_pushbutton_Callback(~,~)
         X(1)=str2double(get(handles.edit_XSet,'String'));
         X(2)=str2double(get(handles.edit_YSet,'String'));
@@ -232,11 +236,13 @@ guidata(guiFig,handles)
         properties2gui()
     end
 
+%Callback function for push button to set to the center
     function center_pushbutton_Callback(~,~)
         obj.center();
         properties2gui()
     end
 
+%Callback function for push button to set left
     function left_pushbutton_Callback(~,~)
         X = obj.Position;
         d = str2double(get(handles.edit_StepSize,'String'));
@@ -245,6 +251,7 @@ guidata(guiFig,handles)
         properties2gui()
     end
 
+%Callback function for push button to set right
     function right_pushbutton_Callback(~,~)
         X = obj.Position;
         d = str2double(get(handles.edit_StepSize,'String'));
@@ -253,6 +260,7 @@ guidata(guiFig,handles)
         properties2gui()
     end
 
+%Callback function for push button to set up
     function up_pushbutton_Callback(~,~)
         X = obj.Position;
         d = str2double(get(handles.edit_StepSize,'String'));
@@ -261,6 +269,7 @@ guidata(guiFig,handles)
         properties2gui()
     end
 
+%Callback function for push button to set down
     function down_pushbutton_Callback(~,~)
         X = obj.Position;
         d = str2double(get(handles.edit_StepSize,'String'));
@@ -269,6 +278,7 @@ guidata(guiFig,handles)
         properties2gui()
     end
 
+%Callback function for push button to set in Z direction up
     function zup_pushbutton_Callback(~,~)
         X = obj.Position;
         d = str2double(get(handles.edit_StepSize,'String'));
@@ -277,6 +287,7 @@ guidata(guiFig,handles)
         properties2gui()
     end
 
+%Callback function for push button to set in Z direction down
     function zdown_pushbutton_Callback(~,~)
         X = obj.Position;
         d = str2double(get(handles.edit_StepSize,'String'));
@@ -285,6 +296,7 @@ guidata(guiFig,handles)
         properties2gui()
     end
 
+%Callback function for scrolling the mouse in Z direction 
     function gui_ZScroll(~,Callbackdata)
         if Callbackdata.VerticalScrollCount>0 %Move Down
             zdown_pushbutton_Callback()
@@ -296,5 +308,3 @@ guidata(guiFig,handles)
 
 
 end
-
-
