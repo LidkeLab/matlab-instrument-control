@@ -49,6 +49,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         ZFitPos;
         ZFitModel;
         ZMaxAC;
+        ErrorSignal = zeros(0, 3); %Error Signal [X Y Z] in microns
     end
     
     properties (Access='private')
