@@ -904,15 +904,9 @@ properties2gui();
         
         % Ensure the AbortNow flag is no longer set.
         obj.AbortNow = 0;
-
-        % Disable the autocollect button.
-        Source.Enable = 'off';
         
         % Begin the automated collection process.
         obj.autoCollect()
-        
-        % Re-enable the autocollect button.
-        Source.Enable = 'on';
         
         % Ensure the GUI reflects object properties.
         properties2gui();
