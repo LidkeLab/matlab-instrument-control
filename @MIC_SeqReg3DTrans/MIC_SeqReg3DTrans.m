@@ -27,7 +27,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         StagePiezoY %new
         StagePiezoZ %new
         MotorObj
-        PixelSize;          %micron
+        PixelSize = .104;          %micron
         RefImageFile
         Image_Reference
         Image_Current
