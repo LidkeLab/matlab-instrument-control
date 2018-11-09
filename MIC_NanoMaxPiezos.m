@@ -24,22 +24,22 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     
     
     properties
-        StagePiezoX; % Piezo object for x position piezo on the stage
-        StagePiezoY; % Piezo object for y position piezo on the stage
-        StagePiezoZ; % Piezo object for z position piezo on the stage
         SerialNumberControllerX; % x piezo controller ser. no. (string)
         SerialNumberControllerY; % y piezo controller ser. no. (string)
         SerialNumberControllerZ; % z piezo controller ser. no. (string)
         SerialNumberStrainGaugeX; % x piezo strain gauge ser. no. (string)
         SerialNumberStrainGaugeY; % y piezo strain gauge ser. no. (string)
         SerialNumberStrainGaugeZ; % z piezo strain gauge ser. no. (string)
+        StagePiezoX; % Piezo object for x position piezo on the stage
+        StagePiezoY; % Piezo object for y position piezo on the stage
+        StagePiezoZ; % Piezo object for z position piezo on the stage
+        StepSize; % Three element vector giving step size in each direction
     end
     
     properties (SetAccess = protected) % users shouldn't set these directly
        InstrumentName = 'NanoMaxStagePiezos'; % Meaningful instrument name
        Position; % Vector [x, y, z] giving the current piezo positions
        PositionUnit; % Units of position parameter (e.g. um, mm, etc.)
-       StepSize; % Three element vector giving step size in each direction
     end
     
     properties (Hidden)
