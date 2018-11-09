@@ -20,6 +20,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Hardware objects
         CameraSCMOS; % Main Data Collection Camera
         CameraIR; % Active Stabilization Camera
+        MaxPiezoConnectAttempts = 5; % max # of attempts to connect piezo
+        XPiezoSerialNums = {'81850186', '84850145'}; % controller, gauge
+        YPiezoSerialNums = {'81850193', '84850146'}; % controller, gauge
+        ZPiezoSerialNums = {'81850176', '84850203'}; % controller, gauge
         StagePiezoX; % Linear Piezo Stage in X direction
         StagePiezoY; % Linear Piezo Stage in Y direction
         StagePiezoZ; % Linear Piezo Stage in Z direction
@@ -36,7 +40,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         IRCamera_ExposureTime;
         IRCamera_ROI = [513, 768, 385, 640]; % IR Camera ROI Center 256
         Lamp850Power = 7;
-        Lamp660Power = 40;
+        Lamp660Power = 35;
         SCMOS_PixelSize = .104; % microns
         SCMOSCalFilePath; % needed if using PublishResults flag
         
@@ -262,10 +266,50 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Update the status indicator for the GUI.
             obj.StatusString = 'Setting up sample stage piezos...';
             
-            % Setup the piezos on the NanoMax stage.
-            obj.StagePiezoX = MIC_TCubePiezo('81850186', '84850145', 'X');
-            obj.StagePiezoY = MIC_TCubePiezo('81850193', '84850146', 'Y');
-            obj.StagePiezoZ = MIC_TCubePiezo('81850176', '84850203', 'Z');
+            % Setup the piezos on the NanoMax stage, ensuring a proper
+            % connection was made by setting the piezo to an arbitrary
+            % position and checking that the strain gauge reading matches
+            % the set position.
+            TestPosition = 12.3; % arbitrary set position for the piezos
+            for ii = ['X', 'Y', 'Z']
+                for jj = 1:obj.MaxPiezoConnectAttempts
+                    % Create a string defining the piezo object class
+                    % property name (e.g. StagePiezoX).
+                    PiezoObject = sprintf('StagePiezo%c', ii);
+                    
+                    % Grab the serial numbers for the current piezo.
+                    SerialNumbers = obj.(sprintf('%cPiezoSerialNums', ii));
+                    
+                    % Attempt the connection to the piezo, pausing after
+                    % the call to allow the piezo setup to complete.
+                    obj.(PiezoObject) = MIC_TCubePiezo(...
+                        SerialNumbers{1}, SerialNumbers{2}, ii);
+                    pause(2);
+                    
+                    % Attempt to set the position of the piezo and then 
+                    % pause briefly to allow the piezo to reach it's set
+                    % position.
+                    obj.(PiezoObject).setPosition(TestPosition);
+                    pause(2);
+                    
+                    % Read the strain gauge to determine the piezo 
+                    % position, and determine if it matches the test 
+                    % position.
+                    Position = (20 / 2^15) ...
+                        * Kinesis_SG_GetReading(SerialNumbers{2});
+                    
+                    if round(Position, 1) == TestPosition
+                        % Position matches TestPosition to the nearest 
+                        % 1/10um: re-center piezo and break the loop.
+                        obj.(PiezoObject).center();
+                        break
+                    elseif jj == obj.MaxPiezoConnectAttempts
+                        % This was the last attempt, warn the user and
+                        % proceed.
+                        warning('Connection to %c piezo has failed', ii)
+                    end
+                end
+            end
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
