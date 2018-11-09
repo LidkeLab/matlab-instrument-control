@@ -49,6 +49,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         ZFitPos;
         ZFitModel;
         ZMaxAC;
+        ErrorSignal = zeros(0, 3); %Error Signal [X Y Z] in microns
     end
     
     properties (Access='private')
@@ -444,7 +445,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 obj.StagePiezoZ.setPosition(Z); %new
                 %find XY position and adjust in XY using Piezo:
                 [Xshift,Yshift]=findXYShift(obj); % in um 
-
+                obj.ErrorSignal(1:2)=[Xshift,Yshift];
+                obj.ErrorSignal(3) = Zshift;
+                
                 % current position on Piezo
                 CurrentPos_X=obj.StagePiezoX.getPosition;
                 CurrentPos_Y=obj.StagePiezoY.getPosition;
