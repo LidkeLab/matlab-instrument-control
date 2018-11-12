@@ -1,5 +1,6 @@
 classdef MIC_CavroSyringePump < MIC_Abstract
-    % MIC class for control of the Cavro syringe pump PN 20740556 -D. 
+    %WARNING: This is a prototype class and is not ready for use.
+    %MIC class for control of the Cavro syringe pump PN 20740556 -D. 
     %
     % This class is used to control a Cavro syringe pump via USB.  This
     % class may work for a wide range of Cavro brand syringe pumps, however

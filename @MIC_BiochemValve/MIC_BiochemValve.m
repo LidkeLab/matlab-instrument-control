@@ -1,5 +1,6 @@
 classdef MIC_BiochemValve < MIC_Abstract
-    % Class used for control of the BIOCHEM flow selection valves.
+    %WARNING: This is a prototype class and is not ready for use.
+    %Class used for control of the BIOCHEM flow selection valves.
     %
     % This class controls (indirectly) the BIOCHEM flow selection valves
     % via communication with an Arduino.  It can open and close specific
