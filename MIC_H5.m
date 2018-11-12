@@ -65,7 +65,7 @@ classdef MIC_H5
         function [H5Structure] = readH5File(FilePath, GroupName)
         %Extracts contents of an h5 file into H5Structure.
         % This method will extract the Data and Attributes from a group
-        % named GroupName in the .h5 file specified by FilePath.  
+        % named GroupName in the .h5 file specified by FilePath.
         % Examples: 
         %   H5Structure = readH5File('C:\file.h5') will extract all 
         %       contents of file.h5 and store them in H5Structure.
@@ -95,10 +95,18 @@ classdef MIC_H5
                 % GroupName was not given, set the SaveAll flag. 
                 SaveAll = 1; 
             end
-
+            
             % Read in all of the information available in the h5 file using 
             % MATLAB's built-in h5info() method.
             H5Info = h5info(FilePath); 
+            
+            % Determine the .h5 file structure being used (i.e. is each
+            % dataset in it's own group or does one group contain all of
+            % the datasets).
+            % NOTE: DataFormat==1 means each dataset is in its' own group, 
+            %       DataFormat==0 means each dataset is contained in one
+            %       "supergroup" of all datasets.
+            DataFormat = isempty(H5Info.Groups.Groups.Datasets);
 
             % Iterate through the structure provided by h5info() to find 
             % the fields specified by GroupName.
