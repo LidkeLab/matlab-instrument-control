@@ -62,6 +62,8 @@ classdef MIC_H5
             H5F.close(fid);
         end
         
+        [H5Structure] = readH5File(FilePath, GroupName)
+        
     end
     
 end
