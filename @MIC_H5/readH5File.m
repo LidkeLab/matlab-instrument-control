@@ -88,10 +88,9 @@ while isempty(DesiredGroups)
         end
         
         % Check if the current group is the desired group,
-        % breaking out of the for loop if it is.
+        % concatenating to the DesiredGroups structure if it is.
         if strcmp(CurrentGroupName, GroupName)
-            DesiredGroups = CurrentGroups(jj);
-            break; % exit the current for loop immediately
+            DesiredGroups = [DesiredGroups, CurrentGroups(jj)];
         end
     end
     
