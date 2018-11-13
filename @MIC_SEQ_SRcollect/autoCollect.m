@@ -1,66 +1,83 @@
- function autoCollect(obj,StartCell,RefDir)
-        %This takes all SR data using saved reference data
+function autoCollect(obj, StartCell, RefDir)
+%This method initiates collection of SR data using saved reference data.
+%   This method will initiate the super-resolution data collection workflow
+%   for the MIC_SEQ_SRcollect class, acquiring data for selected cells in
+%   the RefDir in an automated fashion.
 
-        if nargin<3 %Ask for directory with Reference files
-            RefDir=uigetdir(obj.TopDir);
-            if RefDir == 0
-                % No directory was specified.
-                return
-            end
+
+% Define default parameter values.
+if ~exist('RefDir', 'var')
+    % No RefDir was provided: ask for user input.
+    RefDir = uigetdir(obj.TopDir);
+    if RefDir == 0
+        % No directory was specified.
+        return
+    end
+end
+if ~exist('StartCell', 'var')
+    % No StartCell was provided: default to starting at cell 1.
+    StartCell = 1;
+end
+
+% Construct a list of cell reference files and determine the number of
+% cells to be observed.
+FileList = dir(fullfile(RefDir, 'Reference_Cell*'));
+NumCells = numel(FileList);
+
+
+% Proceed with the data acquisition, looping through each of the cells
+% specified in the FileList.
+obj.Shutter.close(); % close shutter before the laser turns on
+obj.Laser647.setPower(obj.LaserPowerSequence);
+obj.Laser647.on();
+for nn = StartCell:NumCells
+    % If AbortNow flag was set, do not continue.
+    if obj.AbortNow
+        return
+    end
+    
+    % Load data from the cell reference .mat file.
+    FileName = fullfile(RefDir, FileList(nn).name);
+    MatFileObj = matfile(FileName);
+    RefStruct=MatFileObj.RefStruct; % extract RefStruct from the mat file
+    if obj.UseManualFindCell && (nn==StartCell)
+        % Allow the user to manually identify the cell (if requested).
+        Success = obj.findCoverSlipOffset_Manual(RefStruct);
+        if ~Success
+            % The coverslip offset find procedure was not succesful, do not
+            % proceed.
+            return
         end
+    end
+    
+    % Begin the acquisition for the current cell.
+    obj.startSequence(RefStruct, obj.LabelIdx);
+    
+    % If this is the first cell of the acquisition, update the coverslip
+    % offset property to reflect changes determined during the collection
+    % process.
+    if nn == StartCell
+        XStepperPosition = Kinesis_SBC_GetPosition('70850323', 2);
+        YStepperPosition = Kinesis_SBC_GetPosition('70850323', 1);
+        ZStepperPosition = Kinesis_SBC_GetPosition('70850323', 3);
+        StepperPosition = [XStepperPosition, YStepperPosition, ...
+            ZStepperPosition];
+        obj.CoverSlipOffset = StepperPosition - RefStruct.StepperPos;
+    end
+end
 
-        if nargin<2 %Ask for directory with Reference files
-            StartCell=1;
-        end
+% Ensure the laser is not longer illuminating the sample.
+obj.FlipMount.FilterIn(); % move ND filter into beam path
+obj.Shutter.close();
+obj.Laser647.off();
 
-        %Find number of cells, filenames, etc
-        FileList=dir(fullfile(RefDir,'Reference_Cell*'));
-        NumCells=length(FileList);               
-        obj.Shutter.close; % close shutter before the Laser turns on
-        obj.Laser647.setPower(obj.LaserPowerSequence);
-        obj.Laser647.on();
+% Publish the results if requested.
+if obj.PublishResults
+    obj.StatusString = 'Publishing results...';
+    PublishSeqSRResults(...
+        fullfile(obj.TopDir, obj.CoverslipName), ...
+        obj.SCMOSCalFilePath);
+    obj.StatusString = '';
+end
 
-        %Loop over cells
-
-        for nn=StartCell:NumCells 
-            % If AbortNow flag was set, do not continue.
-            if obj.AbortNow
-                return
-            end
-            
-            %Create or load RefImageStruct
-            FileName=fullfile(RefDir,FileList(nn).name);
-            F=matfile(FileName);
-            RefStruct=F.RefStruct;
-            if (obj.UseManualFindCell)&&(nn==StartCell)
-                S=obj.findCoverSlipOffset_Manual(RefStruct);
-                obj.CoverSlipOffset;
-                if ~S;return;end
-            end
-
-            obj.startSequence(RefStruct,obj.LabelIdx);
-
-            if nn==StartCell %update coverslip offset
-                %obj.CoverSlipOffset=obj.StageStepper.Position-RefStruct.StepperPos; %old
-                SPx=Kinesis_SBC_GetPosition('70850323',2); %new
-                SPy=Kinesis_SBC_GetPosition('70850323',1); %new
-                SPz=Kinesis_SBC_GetPosition('70850323',3); %new
-                SP=[SPx,SPy,SPz];
-                obj.CoverSlipOffset=SP-RefStruct.StepperPos; %new
-            end
-
-        end
-
-        obj.FlipMount.FilterIn; %moves in the ND filter toward the beam
-        obj.Shutter.close;
-        obj.Laser647.off();
-        
-        % Publish the results if requested.
-        if obj.PublishResults
-            obj.StatusString = 'Publishing results...';
-            PublishSeqSRResults(...
-                fullfile(obj.TopDir, obj.CoverslipName), ...
-                obj.SCMOSCalFilePath);
-            obj.StatusString = '';
-        end
- end 
+end
