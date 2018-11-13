@@ -1,8 +1,14 @@
 function autoCollect(obj, StartCell, RefDir)
-%This method initiates collection of SR data using saved reference data.
+%autoCollect initiates collection of SR data using saved reference data.
 %   This method will initiate the super-resolution data collection workflow
 %   for the MIC_SEQ_SRcollect class, acquiring data for selected cells in
 %   the RefDir in an automated fashion.
+%   
+%   INPUTS: 
+%       StartCell: (integer, scalar)(default = 1) Specifies the cell (of a
+%                  list of cells in RefDir) for which to start the
+%                  acquisition.
+%       RefDir: Directory containing the cell reference .mat files.
 
 
 % Define default parameter values.
@@ -39,7 +45,7 @@ for nn = StartCell:NumCells
     % Load data from the cell reference .mat file.
     FileName = fullfile(RefDir, FileList(nn).name);
     MatFileObj = matfile(FileName);
-    RefStruct=MatFileObj.RefStruct; % extract RefStruct from the mat file
+    RefStruct = MatFileObj.RefStruct; % extract RefStruct from the mat file
     if obj.UseManualFindCell && (nn==StartCell)
         % Allow the user to manually identify the cell (if requested).
         Success = obj.findCoverSlipOffset_Manual(RefStruct);
