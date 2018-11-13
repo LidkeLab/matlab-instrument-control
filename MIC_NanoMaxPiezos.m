@@ -24,12 +24,12 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     
     
     properties
-        SerialNumberControllerX; % x piezo controller ser. no. (string)
-        SerialNumberControllerY; % y piezo controller ser. no. (string)
-        SerialNumberControllerZ; % z piezo controller ser. no. (string)
-        SerialNumberStrainGaugeX; % x piezo strain gauge ser. no. (string)
-        SerialNumberStrainGaugeY; % y piezo strain gauge ser. no. (string)
-        SerialNumberStrainGaugeZ; % z piezo strain gauge ser. no. (string)
+        ControllerXSerialNum; % x piezo controller ser. no. (string)
+        ControllerYSerialNum; % y piezo controller ser. no. (string)
+        ControllerZSerialNum; % z piezo controller ser. no. (string)
+        StrainGaugeXSerialNum; % x piezo strain gauge ser. no. (string)
+        StrainGaugeYSerialNum; % y piezo strain gauge ser. no. (string)
+        StrainGaugeZSerialNum; % z piezo strain gauge ser. no. (string)
         StagePiezoX; % Piezo object for x position piezo on the stage
         StagePiezoY; % Piezo object for y position piezo on the stage
         StagePiezoZ; % Piezo object for z position piezo on the stage
@@ -48,22 +48,28 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
  
     methods
         function obj = MIC_NanoMaxPiezos(...
-                SerialNumberControllerX, SerialNumberStrainGaugeX, ...
-                SerialNumberControllerY, SerialNumberStrainGaugeY, ...
-                SerialNumberControllerZ, SerialNumberStrainGaugeZ)
+                ControllerXSerialNum, StrainGaugeXSerialNum, ...
+                ControllerYSerialNum, StrainGaugeYSerialNum, ...
+                ControllerZSerialNum, StrainGaugeZSerialNum, ...
+                MaxPiezoConnectAttempts)
             % Constructor for NanoMax Stage piezo control class.
+            
+            % Define a default value for MaxPiezoConnectAttempts if needed.
+            if ~exist('MaxPiezoConnectAttempts', 'var')
+                MaxPiezoConnectAttempts = 1;
+            end
             
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
             obj = obj@MIC_3DStage_Abstract(~nargout);
             
             % Set the object properties based on the appropriate inputs.
-            obj.SerialNumberControllerX = SerialNumberControllerX; 
-            obj.SerialNumberControllerY = SerialNumberControllerY;
-            obj.SerialNumberControllerZ = SerialNumberControllerZ; 
-            obj.SerialNumberStrainGaugeX = SerialNumberStrainGaugeX; 
-            obj.SerialNumberStrainGaugeY = SerialNumberStrainGaugeY;
-            obj.SerialNumberStrainGaugeZ = SerialNumberStrainGaugeZ;
+            obj.ControllerXSerialNum = ControllerXSerialNum; 
+            obj.ControllerYSerialNum = ControllerYSerialNum;
+            obj.ControllerZSerialNum = ControllerZSerialNum; 
+            obj.StrainGaugeXSerialNum = StrainGaugeXSerialNum; 
+            obj.StrainGaugeYSerialNum = StrainGaugeYSerialNum;
+            obj.StrainGaugeZSerialNum = StrainGaugeZSerialNum;
             
             % Determine the instrument version being connected (i.e. TCube
             % or KCube) based on the provided serial numbers and connect to
@@ -76,32 +82,70 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             %       T-Cubes, and those starting with '29' are K-Cubes.
             %       Strain gauge serial numbers starting with '84' are
             %       T-Cubes, and those starting with '59' are K-Cubes.
-            DeviceVersionTagArray.X = obj.SerialNumberControllerX(1:2);
-            DeviceVersionTagArray.Y = obj.SerialNumberControllerY(1:2);
-            DeviceVersionTagArray.Z = obj.SerialNumberControllerZ(1:2);
-            for ii = ['X', 'Y', 'Z']
-                if strcmp(DeviceVersionTagArray.(ii), '81') ...
-                        || strcmp(DeviceVersionTagArray.(ii), '84') 
-                    % This is a T-Cube piezo pair.
-                    % USAGE NOTE:
-                    % MIC_TCubePiezo(PiezoControllerSerialNum, ...
-                    %                PiezoStrainGaugeSerialNum, ...
-                    %                AxisLabel);
-                    obj.(sprintf('StagePiezo%c', ii)) = MIC_TCubePiezo(...
-                        obj.(sprintf('SerialNumberController%c', ii)), ...
-                        obj.(sprintf('SerialNumberStrainGauge%c', ii)), ...
-                        ii);
-                elseif strcmp(DeviceVersionTagArray.ii, '29') ...
-                        || strcmp(DeviceVersionTagArray.(ii), '59') 
-                    % This is a K-Cube piezo pair.
-                    obj.(sprintf('StagePiezo%c', ii)) = MIC_KCubePiezo(...
-                        obj.(sprintf('SerialNumberController%c', ii)), ...
-                        obj.(sprintf('SerialNumberStrainGauge%c', ii)), ...
-                        ii);
-                else
-                    warning(['Piezo controller serial number', ...
-                        '%s not recognized'], ...
-                        obj.(sprintf('SerialNumberController%c', ii)));
+            DeviceVersionTagArray.X = obj.ControllerXSerialNum(1:2);
+            DeviceVersionTagArray.Y = obj.ControllerYSerialNum(1:2);
+            DeviceVersionTagArray.Z = obj.ControllerZSerialNum(1:2);
+            for cc = ['X', 'Y', 'Z']
+                % Determine the object name of the piezo to be connected.
+                StagePiezo = sprintf('StagePiezo%c', cc);
+            
+                % Determine the appropriate piezo controller and strain 
+                % gauge serial numbers.
+                ControllerSN = ...
+                    obj.(sprintf('Controller%cSerialNum', cc));
+                StrainGaugeSN = ...
+                    obj.(sprintf('StrainGauge%cSerialNum', cc));
+                
+                % Setup the piezos on the NanoMax stage, ensuring a proper
+                % connection was made by setting the piezo to an arbitrary
+                % position and checking that the strain gauge reading 
+                % matches the set position.
+                TestPosition = 12.3; % arbitrary set position to test
+                for jj = 1:obj.MaxPiezoConnectAttempts
+                    % Attempt the connection to the piezo, pausing after
+                    % the call to allow the piezo setup to complete.
+                    if strcmp(DeviceVersionTagArray.(cc), '81') ...
+                            || strcmp(DeviceVersionTagArray.(cc), '84')
+                        % This is a T-Cube piezo pair.
+                        obj.(StagePiezo) = MIC_TCubePiezo(...
+                            ControllerSN, StrainGaugeSN, cc);
+                    elseif strcmp(DeviceVersionTagArray.(cc), '29') ...
+                            || strcmp(DeviceVersionTagArray.(cc), '59')
+                        % This is a K-Cube piezo pair.
+                        obj.(StagePiezo) = MIC_KCubePiezo(...
+                            ControllerSN, StrainGaugeSN, cc);
+                    else
+                        warning(['Piezo controller serial number', ...
+                            '%s not recognized'], ...
+                            obj.(sprintf('SerialNumberController%c', cc)));
+                        continue % move on to the next iteration
+                    end
+                    pause(2);
+                    
+                    % Attempt to set the position of the piezo and then
+                    % pause briefly to allow the piezo to reach it's set
+                    % position.
+                    obj.(StagePiezo).setPosition(TestPosition);
+                    pause(2);
+                    
+                    % Read the strain gauge to determine the piezo
+                    % position, and determine if it matches the test
+                    % position.
+                    % NOTE: 15 bits cover a range of 20um -> convert a
+                    %       0-(2^15-1) range to ~0-20um with a factor of 
+                    %       (20um / 2^15).
+                    PiezoPosition = (20 / 2^15) ...
+                        * Kinesis_SG_GetReading(StrainGaugeSN);
+                    if round(PiezoPosition, 1) == TestPosition
+                        % Position matches TestPosition to the nearest
+                        % 1/10um: re-center piezo and break the loop.
+                        obj.(StagePiezo).center();
+                        break
+                    elseif jj == obj.MaxPiezoConnectAttempts
+                        % This was the last attempt, warn the user and
+                        % proceed.
+                        warning('Connection to %c piezo has failed', cc)
+                    end
                 end
             end
             
@@ -156,6 +200,51 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             obj.Position = Position;
         end
 
+        function connectTCubePiezo(obj, StagePiezo, ...
+                ControllerSN, StrainGaugeSN)
+            % This method will connect (or reconnect) a TCube piezo,
+            % attempting iterative re-connection if needed/requested.
+            
+            % Setup the piezos on the NanoMax stage, ensuring a proper
+            % connection was made by setting the piezo to an arbitrary
+            % position and checking that the strain gauge reading matches
+            % the set position.
+            TestPosition = 12.3; % arbitrary set position for the piezos
+            for cc = ['X', 'Y', 'Z']
+                for jj = 1:obj.MaxPiezoConnectAttempts
+                    % Attempt the connection to the piezo, pausing after
+                    % the call to allow the piezo setup to complete.
+                    obj.(StagePiezo) = MIC_TCubePiezo(...
+                        obj.(ControllerSN), obj.(StrainGaugeSN), cc);
+                    pause(2);
+                    
+                    % Attempt to set the position of the piezo and then
+                    % pause briefly to allow the piezo to reach it's set
+                    % position.
+                    obj.(StagePiezo).setPosition(TestPosition);
+                    pause(2);
+                    
+                    % Read the strain gauge to determine the piezo
+                    % position, and determine if it matches the test
+                    % position.
+                    PiezoPosition = (20 / 2^15) ...
+                        * Kinesis_SG_GetReading(StrainGaugeSN);
+                    if round(PiezoPosition, 1) == TestPosition
+                        % Position matches TestPosition to the nearest
+                        % 1/10um: re-center piezo and break the loop.
+                        obj.(StagePiezo).center();
+                        break
+                    elseif jj == obj.MaxPiezoConnectAttempts
+                        % This was the last attempt, warn the user and
+                        % proceed.
+                        warning('Connection to %c piezo has failed', cc)
+                    end
+                end
+            end
+        end
+        
+        function connectKCubePiezo(obj)
+        end
     end
     
     methods (Static)
