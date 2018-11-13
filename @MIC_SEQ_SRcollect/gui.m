@@ -298,7 +298,7 @@ uicontrol('Parent', LaserControlPanel, 'Style', 'Text', ...
     'HorizontalAlignment', 'left');
 handles.Edit405PowerActivate = uicontrol(...
     'Parent', LaserControlPanel, 'Style', 'Edit', ...
-    'Position', [150, MediumPanelHeight-150, 35, 15], ...
+    'Position', [150, MediumPanelHeight-165, 35, 15], ...
     'HorizontalAlignment', 'left');
 uicontrol('Parent', LaserControlPanel, 'Style', 'Text', ...
     'String', 'Bleaching Power (mW):', ...
@@ -306,7 +306,7 @@ uicontrol('Parent', LaserControlPanel, 'Style', 'Text', ...
     'HorizontalAlignment', 'left');
 handles.Edit405PowerBleach = uicontrol(...
     'Parent', LaserControlPanel, 'Style', 'Edit', ...
-    'Position', [150, MediumPanelHeight-165, 35, 15], ...
+    'Position', [150, MediumPanelHeight-150, 35, 15], ...
     'HorizontalAlignment', 'left');
 handles.ButtonOpen405LaserGUI = uicontrol(...
     'Parent', LaserControlPanel, ...
@@ -745,6 +745,11 @@ properties2gui();
         % Attempt to reconnect to the piezos.
         obj.setupStagePiezo();        
         
+        % Reset the AlignReg object to contain the new piezo handles.
+        obj.AlignReg = MIC_SeqReg3DTrans(obj.CameraSCMOS, ...
+                obj.StagePiezoX, obj.StagePiezoY, obj.StagePiezoZ, ...
+                obj.StageStepper);
+        
         % Ensure the GUI reflects object properties.
         properties2gui();
     end
@@ -899,15 +904,9 @@ properties2gui();
         
         % Ensure the AbortNow flag is no longer set.
         obj.AbortNow = 0;
-
-        % Disable the autocollect button.
-        Source.Enable = 'off';
         
         % Begin the automated collection process.
         obj.autoCollect()
-        
-        % Re-enable the autocollect button.
-        Source.Enable = 'on';
         
         % Ensure the GUI reflects object properties.
         properties2gui();
@@ -940,8 +939,8 @@ properties2gui();
         obj.CameraSCMOS.reset();
         
         % Set some default exposure times.
-        obj.ExposureTimeLampFocus = 0.01; % seconds
-        obj.ExposureTimeCapture = 0.2; 
+        obj.ExposureTimeLampFocus = 0.02; % seconds
+        obj.ExposureTimeCapture = 0.02; 
         obj.ExposureTimeLaserFocus = 0.2;
         obj.ExposureTimeSequence = 0.01;
         

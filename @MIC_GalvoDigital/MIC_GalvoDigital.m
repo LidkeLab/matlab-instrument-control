@@ -250,7 +250,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
                 error('The Angle is not specified')
             end
             
-            obj.clearSession;
+            %obj.clearSession;
             flip(dec2bin(obj.Word, 16) - '0')
             obj.Sequence=flip(dec2bin(obj.Word, 16) - '0');
             obj.enable;

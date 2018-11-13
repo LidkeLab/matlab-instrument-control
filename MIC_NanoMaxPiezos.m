@@ -1,19 +1,26 @@
-classdef MIC_NanoMaxPiezos < MIC_PiezoStage_Abstract
+classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     % MIC class for control of the NanoMax Stage piezos.
     %
     % This class is used to control the three piezos (x, y, z) in a
     % Thorlabs NanoMax stage. 
     %
     % Example: 
-    % Functions: 
+    % Functions:
+    %   center()
+    %   setPosition()
+    %   exportState()
+    %   delete()
     %
     % REQUIREMENTS:
     %   MIC_Abstract.m
-    %   MIC_PiezoStage_Abstract.m
+    %   MIC_3DStage_Abstract.m
     %   MIC_TCubePiezo.m
     %   MATLAB 2016b or later required.
     %
-    % CITATION: David Schodt, Lidke Lab, 2018
+    % CITATION:
+    
+    %Created by:
+    %   David James Schodt (Lidkelab, 2018)
     
     
     properties
@@ -44,7 +51,7 @@ classdef MIC_NanoMaxPiezos < MIC_PiezoStage_Abstract
             
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
-            obj = obj@MIC_PiezoStage_Abstract(~nargout);
+            obj = obj@MIC_3DStage_Abstract(~nargout);
             
             % Set the object properties based on the appropriate inputs.
             obj.SerialNumberControllerX = SerialNumberControllerX; 
@@ -55,34 +62,19 @@ classdef MIC_NanoMaxPiezos < MIC_PiezoStage_Abstract
             obj.SerialNumberStrainGaugeZ = SerialNumberStrainGaugeZ; 
             
             % Connect the appropriate piezos and center them. 
-            % NOTE: MIC_TCubePiezo(PiezoControllerSerialNum, ...
-            %                      PiezoStrainGaugeSerialNum, ...
-            %                      AxisLabel);
-            obj.StagePiezoX = MIC_TCubePiezo( ...
+            % NOTE: usage MIC_TCubePiezo(PiezoControllerSerialNum, ...
+            %                            PiezoStrainGaugeSerialNum, ...
+            %                            AxisLabel);
+            obj.StagePiezoX = MIC_TCubePiezo(...
                 obj.SerialNumberControllerX, ...
                 obj.SerialNumberStrainGaugeX, 'X'); 
-            obj.StagePiezoY=MIC_TCubePiezo( ...
+            obj.StagePiezoY = MIC_TCubePiezo(...
                 obj.SerialNumberControllerY, ...
                 obj.SerialNumberStrainGaugeY, 'Y'); 
-            obj.StagePiezoZ=MIC_TCubePiezo( ...
+            obj.StagePiezoZ = MIC_TCubePiezo(...
                 obj.SerialNumberControllerZ, ...
                 obj.SerialNumberStrainGaugeZ, 'Z'); 
             obj.center();
-        end
-        
-        function delete(obj)
-            % Class destructor for the NanoMax Stage piezo control class.
-            % Closes the connection to both the strain gauge and the piezo
-            % controller for each of the three (x, y, z) piezos.
-            
-            % Close the x controller/strain gauges.
-            obj.StagePiezoX.closeDevices();
-            
-            % Close the y controller/strain gauges.
-            obj.StagePiezoY.closeDevices();
-            
-            % Close the z controller/strain gauges.
-            obj.StagePiezoZ.closeDevices();
         end
         
         function [Attributes, Data, Children] = exportState(obj) 
@@ -105,8 +97,14 @@ classdef MIC_NanoMaxPiezos < MIC_PiezoStage_Abstract
             Children=[];
         end
         
-        gui(obj);
-        setPosition(obj, Position); % Set the piezo positions to Position
+        function delete(obj)
+            % Class destructor for the NanoMax Stage piezo control class.
+            % Closes the connection to both the strain gauge and the piezo
+            % controller for each of the three (x, y, z) piezos.
+            obj.StagePiezoX.delete();
+            obj.StagePiezoY.delete();
+            obj.StagePiezoZ.delete();
+        end
         
         function center(obj)
             % Center the three piezos in the NanoMax stage. 
@@ -115,6 +113,13 @@ classdef MIC_NanoMaxPiezos < MIC_PiezoStage_Abstract
             obj.StagePiezoZ.center();
         end
         
+        function setPosition(obj, Position)
+            % Move the piezos to position given by Position.
+            obj.StagePiezoX.setPosition(Position(1));
+            obj.StagePiezoY.setPosition(Position(2));
+            obj.StagePiezoZ.setPosition(Position(3));
+        end
+
     end
     
     methods (Static)

@@ -57,8 +57,25 @@
         obj.AlignReg.align2imageFit(RefStruct);
     catch
         % We don't want to throw an error since there are still other cells
-        % to be measured from here on.
+        % to be measured from here on: warn the user, attempt to export
+        % data that might be useful, and return control to the calling
+        % method.
         warning('Problem with AlignReg.align2imageFit()')
+        obj.StatusString = ...
+            'Exporting object Data and Children with exportState()...';
+        fprintf(...
+            'Saving exportables from exportState().................... \n')
+        switch obj.SaveFileType
+            % For now, we will stick to saving data to a .h5 file.
+            case 'h5'
+                SequenceName = 'Channel01/Zposition001';
+                MIC_H5.createGroup(FileH5, SequenceName);
+                obj.save2hdf5(FileH5, SequenceName);
+            otherwise
+                error('StartSequence:: unknown SaveFileType')
+        end
+        obj.StatusString = '';
+        fprintf('Saving exportables from exportState() complete \n')
         return
     end
     obj.Lamp660.setPower(0);
