@@ -52,7 +52,7 @@ refh=refh-ph-psep;
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Camera Gain:','Enable','off','Position', [staticst php-40 100 20]);
 handles.Popup_CameraGain = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',{'Low (Alexa647)','High (FAP/FP)'},'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-40 250 20],'CallBack',@gain_set);
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Camera ROI:','Enable','off','Position', [staticst php-70 80 20]);
-ROIlist={'Full','Left','Right','Left Center','Right Center','Center Horizontally','Center Horizontally Half'};
+ROIlist={'Full','Left','Right','Left Center','Right Center','Center Horizontally','Center Horizontally Half','128*16 Center','64*32 low right','64*32 low left','64*16 low right'};
 handles.Popup_CameraROI = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',ROIlist,'Enable','on','BackgroundColor',[1 1 1],'Position', [90 php-70 85 20]);
 uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','IRCamera ROI:','Enable','off','Position', [staticst+180 php-70 80 20]);
 ROIlist_IR={'Full','Center 350' ,'Center 256','Center 128'};
@@ -301,7 +301,7 @@ properties2gui();
         gui2properties();
         [temp status]=obj.CameraObj.call_temperature
         if status==2
-%         error('Camera is cooling down! Please wait for a few mintues!')
+        error('Camera is cooling down! Please wait for a few mintues!')
         end 
         set(handles.Button_ControlStart, 'String','Acquiring','Enable','off');
         obj.sequenceType='SRCollect';
@@ -313,7 +313,7 @@ properties2gui();
         gui2properties();
         [temp status]=obj.CameraObj.call_temperature
         if status==2
-%         error('Camera is cooling down! Please wait for a few mintues!')
+        error('Camera is cooling down! Please wait for a few mintues!')
         end 
         set(handles.Button_ControlStart, 'String','Acquiring','Enable','off');
         obj.sequenceType='Tracking+SRCollect';
