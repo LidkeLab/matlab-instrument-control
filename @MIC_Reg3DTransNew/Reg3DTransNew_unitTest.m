@@ -22,10 +22,10 @@ end
 lamp.on;
 R3.calibrate;
 % change back camera setting to the values before using the R3DTrans class
+R3.CameraObj.setShutter(0);
 CamSet.EMGain.Value = EMGTemp; 
 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
 R3.CameraObj.setCamProperties(CamSet); %set the camera properties 
-R3.CameraObj.setShutter(0);
 lamp.off;
 
 %R3.takerefimage
@@ -43,10 +43,10 @@ end
 lamp.on;
 R3.takerefimage;
 % change back camera setting to the values before using the R3DTrans class
+R3.CameraObj.setShutter(0);
 CamSet.EMGain.Value = EMGTemp; 
 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
 R3.CameraObj.setCamProperties(CamSet); %set the camera properties 
-R3.CameraObj.setShutter(0);
 lamp.off;
 
 %R3.getcurrentimage
@@ -64,10 +64,10 @@ end
 lamp.on;
 R3.getcurrentimage;
 % change back camera setting to the values before using the R3DTrans class
+R3.CameraObj.setShutter(0);
 CamSet.EMGain.Value = EMGTemp; 
 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
 R3.CameraObj.setCamProperties(CamSet); %set the camera properties 
-R3.CameraObj.setShutter(0);
 lamp.off;
  
 %R3.align2imageFit
@@ -85,10 +85,10 @@ end
 lamp.on;
 R3.align2imageFit;
 % change back camera setting to the values before using the R3DTrans class
+R3.CameraObj.setShutter(0);
 CamSet.EMGain.Value = EMGTemp; 
 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
 R3.CameraObj.setCamProperties(CamSet); %set the camera properties 
-R3.CameraObj.setShutter(0);
 lamp.off;
 
 %R3.collect_zstack
@@ -106,10 +106,10 @@ end
 lamp.on;
 R3.collect_zstack;
 % change back camera setting to the values before using the R3DTrans class
+R3.CameraObj.setShutter(0);
 CamSet.EMGain.Value = EMGTemp; 
 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
 R3.CameraObj.setCamProperties(CamSet); %set the camera properties 
-R3.CameraObj.setShutter(0);
 lamp.off;
 
 %R3.capture_single
@@ -127,8 +127,8 @@ end
 lamp.on;
 R3.capture_single;
 % change back camera setting to the values before using the R3DTrans class
+R3.CameraObj.setShutter(0);
 CamSet.EMGain.Value = EMGTemp; 
 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
 R3.CameraObj.setCamProperties(CamSet); %set the camera properties 
-R3.CameraObj.setShutter(0);
 lamp.off;
