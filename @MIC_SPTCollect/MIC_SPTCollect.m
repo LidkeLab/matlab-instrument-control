@@ -84,7 +84,8 @@
         IRsequenceLength_offset=50;%in the unit of frame for IRCamera
         sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
         ActiveRegCheck=0;
-        RegCamType='Andor Camera'         % Type of Camera Bright Field Registration 
+        RegCamType='Andor Camera'   % Type of Camera Bright Field Registration 
+                                    %'Andor Camera', 'IRCamera'
         CalFilePath
         zPosition
         MaxCC
@@ -169,8 +170,7 @@
 %                     obj.PixelSize=a.PixelSize;
 %                     clear a;
 %                 end
-                
-%                 
+ %                 
                 
             catch ME
                 ME
@@ -206,7 +206,7 @@
             delete(obj.IRCameraObj);
             disp('Deleting Syringe Pump')
             delete(obj.SyringePumpObj)
-            disp('Turn off MCl Nanodriver and Laser 638 manually!')
+            disp('Turn off MCl Nanodriver and Lasers 638/561 manually!')
             close all force;
             clear;
         end
@@ -225,8 +225,31 @@
         
         function takecurrent(obj)
             % captures and displays current image
-            obj.LampObj.setPower(obj.LampPower);
-            obj.R3DObj.getcurrentimage();
+             obj.set_RegCamType();
+             if strcmp(obj.RegCamType,'Andor Camera');
+                 %set the lamp
+                 if isempty(obj.LampPower) || obj.LampPower==0
+                     obj.LampPower=obj.LampObj.MaxPower/2;
+                     obj.LampObj.setPower(obj.LampPower);
+                 end
+                 obj.LampObj.on;
+                 obj.R3DObj.getcurrentimage();
+                 % change back camera setting to the values before using the R3DTrans class
+                 obj.R3DObj.CameraObj.setShutter(0);
+                 CamSet.EMGain.Value = EMGTemp;
+                 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                 obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                 obj.LampObj.off;
+             else strcmp(obj.RegCamType,'IRCamera');
+                 %set the lamp
+                 if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
+                     obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
+                     obj.Lamp850Obj.setPower(obj.Lamp850Power);
+                 end
+                 obj.Lamp850Obj.on;
+                 obj.R3DObj.getcurrentimage();
+                 obj.Lamp850Obj.off;
+             end
         end
         
         function align(obj)
@@ -378,12 +401,7 @@
 
                 CalFileName=fullfile(obj.CalFilePath,'SPT_AndorPixelSize.mat');
 
-                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,CalFileName);
-                obj.R3DObj.LampPower=obj.LampPower;
-                obj.R3DObj.LampWait=2.5;
-                obj.R3DObj.CamShutter=true;
-                obj.R3DObj.ChangeEMgain=true;
-                obj.R3DObj.EMgain=2;
+                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,CalFileName);
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
           
@@ -391,13 +409,9 @@
                
                 CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
                 if isempty(obj.IRCameraObj)
-                obj.IRCameraObj=MIC_ThorlabsIR();
-            end
-                obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,obj.Lamp850Obj,CalFileName);
-               obj.R3DObj.LampPower=obj.Lamp850Power;
-                obj.R3DObj.LampWait=2.5;
-                obj.R3DObj.CamShutter=false;
-                obj.R3DObj.ChangeEMgain=false;
+                    obj.IRCameraObj=MIC_ThorlabsIR();
+                end
+                obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,CalFileName);
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
             end
