@@ -11,6 +11,12 @@ SPT.Lamp850Obj.setPower(50);
 SPT.Lamp850Obj.on;
 SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
 SPT.IRCameraObj.start_capture;
+FullImageROI_bfTracking=SPT.IRCameraObj.Data;
+
+SPT.Lamp850Obj.setPower(50);
+SPT.Lamp850Obj.on;
+SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
+SPT.IRCameraObj.start_capture;
 FullImageROI_afTracking=SPT.IRCameraObj.Data;
 
 SPT.Lamp850Obj.setPower(15);
