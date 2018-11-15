@@ -100,7 +100,7 @@ classdef MIC_Reg3DTransNew < MIC_Abstract
             obj.StageObj = StageObj;
 %             obj.LampObj = LampObj;
             
-            if nargin == 4
+            if nargin == 3
                 obj.CalibrationFile = CalFileName;
                 % get pixelsize
                 if exist(obj.CalibrationFile,'file')
