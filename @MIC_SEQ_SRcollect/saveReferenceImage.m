@@ -7,6 +7,8 @@ function saveReferenceImage(obj)
     if obj.UseStackCorrelation
         obj.Lamp660.setPower(obj.Lamp660Power);
         pause(obj.LampWait);
+        obj.AlignReg.ZStack_Step = 0.1; % 100nm
+        obj.AlignReg.ZStack_MaxDev = 2;
         obj.AlignReg.collect_zstack(); 
         RefStruct.ReferenceStack = obj.AlignReg.ZStack;
         obj.Lamp660.setPower(0);

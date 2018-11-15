@@ -51,6 +51,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         ZFitModel;
         ZMaxAC;
         ErrorSignal = zeros(0, 3); %Error Signal [X Y Z] in microns
+        ErrorSignal_History=[]     %Error Signal [X Y Z] in micron
     end
     
     properties (Access='private')
@@ -137,6 +138,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             Data.Image_Reference = 0;
             Data.Image_Current = 0;
             Data.ZStack = 0;
+            Data.ErrorSignal_History = obj.ErrorSignal_History;
             
             if ~isempty(obj.ZFitPos);Data.ZFitPos = obj.ZFitPos;end
             if ~isempty(obj.ZFitModel);Data.ZFitModel = obj.ZFitModel;end
@@ -433,12 +435,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 % the appropriate method.
                 if obj.UseStackCorrelation
                     % Set limits on the extent to which we can shift.
-                    obj.ZStack_Step=0.05; % in case it's changed elsewhere
-                    if iter < 2
-                        obj.ZStack_MaxDev = 4;
-                    else
-                        obj.ZStack_MaxDev=0.5;
-                    end
+                    obj.ZStack_Step=0.1; % in case it's changed elsewhere
+                    obj.ZStack_MaxDev = 2;
                     
                     % Extract the z-stack from the RefStruct.
                     ReferenceStack = RefStruct.ReferenceStack;
@@ -451,25 +449,36 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     % between the two stacks.
                     MaxOffset = [2, 2, 2]; % max possible xcorr offset
                     [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
-                        findStackOffset(ReferenceStack, CurrentStack, ...
-                        MaxOffset);
+                        obj.findStackOffset(ReferenceStack, ...
+                        CurrentStack, MaxOffset);
                     
                     % Decide which shift to proceed with based on
                     % PixelOffset and SubPixelOffset (SubPixelOffset can be
                     % innacurate).
-                    PixelOffset = PixelOffset ...
+                    PixelOffset = SubPixelOffset ...
                         .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
-                        + IntegerOffset ...
+                        + PixelOffset ...
                         .* (abs(PixelOffset-SubPixelOffset) > 0.5);
                     PixelOffset = PixelOffset * obj.PixelSize; % pixel->um
+                    
+                    % Modify PixelOffset to correspond to physical piezo
+                    % dimensions.
+                    PixelOffset = ...
+                        [PixelOffset(2); -PixelOffset(1); PixelOffset(3)];
+% 
+%                     % TEST with findshift(...'iter')
+%                     PixelOffset = findshift(ReferenceStack, CurrentStack, 'iter');
+%                     PixelOffset = [PixelOffset(2), PixelOffset(1), PixelOffset(3)];
+%                     PixelOffset = PixelOffset * obj.PixelSize;
+%                     CorrAtOffset = 1;
                     
                     % Move the piezos to adjust for the predicted shift.
                     CurrentPosX = obj.StagePiezoX.getPosition();
                     CurrentPosY = obj.StagePiezoY.getPosition();
                     CurrentPosZ = obj.StagePiezoZ.getPosition();
-                    NewPosX = CurrentPosX + PixelOffset(1);
-                    NewPosY = CurrentPosY + PixelOffset(2);
-                    NewPosZ = CurrentPosZ + PixelOffset(3);
+                    NewPosX = CurrentPosX - PixelOffset(1);
+                    NewPosY = CurrentPosY - PixelOffset(2);
+                    NewPosZ = CurrentPosZ - PixelOffset(3);
                     obj.StagePiezoX.setPosition(NewPosX);
                     obj.StagePiezoY.setPosition(NewPosY);
                     obj.StagePiezoZ.setPosition(NewPosZ);
@@ -513,7 +522,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     obj.StagePiezoY.setPosition(NewPosY);
                     obj.StagePiezoZ.setPosition(Z);
                 end
-
+                
+                obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);
+                
                 %show overlay
                 obj.Image_Current=obj.capture_single();
                 
@@ -539,7 +550,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             
             
             if iter==obj.MaxIter
-                warning('reached max iterations')
+                error('reached max iterations')
+%                 warning('reached max iterations')
             end
             
         end
@@ -664,9 +676,6 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             Zfit=zAtMax;
         end
         
-        [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
-            findStackOffset(Stack1, Stack2, MaxOffset)
- 
         function [fval,model]=GaussFit(obj,X,CC,Zpos)
            u = X(1);    %mean
            s = X(2);    %sigma
@@ -707,6 +716,11 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             [];
         end
     end
+    methods (Static)
+        [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
+            findStackOffset(Stack1, Stack2, MaxOffset)
+    end
+    
     
 end
 

@@ -152,14 +152,14 @@ PolyFitFunction = @(R) Beta(1) + Beta(2)*R(1) + Beta(3)*R(1).^2 ...
 % polynomial, computing the matrix form found by maximizing the fitted 
 % polynomial (i.e. set gradient of polynomial to 0 vector, solve with
 % matrix equation).
-RawOffsetFitIndices = [2*Beta(3), Beta(8), Beta(10); ...
+RawOffsetFit = [2*Beta(3), Beta(8), Beta(10); ...
     Beta(8), 2*Beta(5), Beta(9); ...
     Beta(10), Beta(9), 2*Beta(7)] \ -[Beta(2); Beta(4); Beta(6)];
 
 % Determine the predicted offset between the stack.
 % NOTE: We subtract MaxOffset+1 because that is the location of the 
 %       [0, 0, 0] offset (the center of the cross-correlation).
-SubPixelOffset = RawOffsetFitIndices - MaxOffset - 1;
+SubPixelOffset = RawOffsetFit - MaxOffset - 1;
 
 % % Determine if the fit is worth using, or if we should stick to the integer
 % % shift found earlier.
