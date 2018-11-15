@@ -1,12 +1,12 @@
 classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
     % MIC_KCubePiezo Matlab Instrument Control Class for ThorLabs Cube Piezo
     %
-    %   This class controls a linear piezo stage using the Thorlabs TCube Piezo
-    %   controller TPZ001 and TCube strain gauge controller TSG001. It uses the Thorlabs 
+    %   This class controls a linear piezo stage using the Thorlabs KCube Piezo
+    %   controller KPZ101 and TCube strain gauge controller KSG101. It uses the Thorlabs 
     %   Kinesis C-API via pre-complied mex files. 
     %   
     % USAGE:
-    %   PX=MIC_TCubePiezo(SerialNoKPZ001,SerialNoKSG001,AxisLabel)
+    %   PX=MIC_KCubePiezo(SerialNoKPZ001,SerialNoKSG001,AxisLabel)
     %   PX.gui()
     %   PX.setPosition(10);
     %
@@ -26,7 +26,8 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
     %   Thorlabs.MotionControl.KCube.StrainGauge.dll
     %   Thorlabs.MotionControl.DeviceManager.dll
     %
-    % CITATION: Keith Lidke, LidkeLab, 2017.
+    
+    % Keith Lidke, LidkeLab, 2018.
     
     properties (SetAccess=protected)
         PositionUnit='um';          % Units of position parameter (eg. um/mm)
@@ -34,8 +35,8 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
         MinPosition=0;              % Lower limit position 
         MaxPosition=20;             % Upper limit position
         Axis;                       % Stage axis (X, Y or Z)
-        SerialNoKPZ001;             % Serial Number of TCube Piezo Controller
-        SerialNoKSG001;             % Serial Number of TCube Strain Gauge Controller
+        SerialNoKPZ001;             % Serial Number of KCube Piezo Controller
+        SerialNoKSG001;             % Serial Number of KCube Strain Gauge Controller
         Slope;                      % Strain Gauge Calibration Parameter
         Offset;                     % Strain Gauge Calibration Parameter
         InstrumentName='KCubePiezo' % Instrument name. 
@@ -216,16 +217,16 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
         methods (Static=true)
             function Success=unitTest(SNP,SNSG,AxisLabel)
                 % Unit test of object functionality
-                % Example: MIC_TCubePiezo.unitTest('81843229','84842506','X')
+                % Example: MIC_KCubePiezo.unitTest('81843229','84842506','X')
                 
                 if nargin<3
-                    error('MIC_TCubePiezo::SerialNoKPZ001,SerialNoKSG001,AxisLabel must be defined')
+                    error('MIC_KCubePiezo::SerialNoKPZ001,SerialNoKSG001,AxisLabel must be defined')
                 end
                 
                 try
                     %Creating an Object and Testing setPower, on, off
                     fprintf('Creating Object and testing...\n')
-                    P=MIC_TCubePiezo(SNP,SNSG,AxisLabel);
+                    P=MIC_KCubePiezo(SNP,SNSG,AxisLabel);
                     P.gui;
                     P.setPosition(P.MaxPosition/8);
                     pause(1);
@@ -239,7 +240,7 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
                     clear RS;
                     Success=1;
                 catch
-                    warning('MIC_TCubePiezo:: Failed Unit Test');
+                    warning('MIC_KCubePiezo:: Failed Unit Test');
                     clear RS;
                     Success=0;
                 end
