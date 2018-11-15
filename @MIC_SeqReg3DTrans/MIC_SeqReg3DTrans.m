@@ -604,6 +604,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             %Zfit=zinterp(ind);
             Zfit=zAtMax;
         end
+        
+        [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
+            findStackOffset(Stack1, Stack2, MaxOffset)
  
         function [fval,model]=GaussFit(obj,X,CC,Zpos)
            u = X(1);    %mean
