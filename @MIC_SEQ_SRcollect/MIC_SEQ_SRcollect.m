@@ -85,6 +85,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         AlignReg; % Active alignment object
         UseActiveReg = 1; % boolean: 1 uses active registration, 0 doesn't
         UsePeriodicReg = 0; % boolean: 1 periodically re-aligns, 0 doesn't
+        UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 3; % seq. collected before periodic reg.
                 
         % Misc. other properties.
@@ -145,6 +146,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 obj.StagePiezoX, obj.StagePiezoY, obj.StagePiezoZ, ...
                 obj.StageStepper);
             obj.AlignReg.PixelSize = 0.104; % microns (SCMOS camera)
+            obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
             obj.unloadSample(); % move stage up so user can mount sample
             obj.StatusString = '';
         end

@@ -43,6 +43,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         Tol_X=0.01; %F
         Tol_Y=0.01; %F
         Tol_Z=.05;          %micron
+        UseStackCorrelation = 1; % find [x,y,z] shifts by stack comparison
         MaxIter=20; %FF
         MaxXYShift = 5;     %micron
         MaxZShift  = 1;   %micron
@@ -423,40 +424,96 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             iter=0;
             withintol=0;
             while (withintol==0)&&(iter<obj.MaxIter) 
-                X=obj.StagePiezoX.getPosition; %new
-                Y=obj.StagePiezoY.getPosition; %new
-                Z=obj.StagePiezoZ.getPosition; %new
-                X0=X; %new
-                Y0=Y; %new
-                Z0=Z; %new
-                %find z-position and adjust in Z using Piezo:
-                if iter < 2
-                    obj.ZStack_MaxDev=4;
-                    obj.ZStack_Step=0.05; %50 nm
+                X=obj.StagePiezoX.getPosition();
+                Y=obj.StagePiezoY.getPosition();
+                Z=obj.StagePiezoZ.getPosition();
+                
+                % Determine if we are making comparisons to a single
+                % reference image or to a reference stack and proceed with
+                % the appropriate method.
+                if obj.UseStackCorrelation
+                    % Set limits on the extent to which we can shift.
+                    obj.ZStack_Step=0.05; % in case it's changed elsewhere
+                    if iter < 2
+                        obj.ZStack_MaxDev = 4;
+                    else
+                        obj.ZStack_MaxDev=0.5;
+                    end
+                    
+                    % Extract the z-stack from the RefStruct.
+                    ReferenceStack = RefStruct.ReferenceStack;
+                    
+                    % Collect a z-stack for the current location.
+                    obj.collect_zstack();
+                    CurrentStack = obj.ZStack;
+                    
+                    % Determine the pixel and sub-pixel predicted shifts
+                    % between the two stacks.
+                    MaxOffset = [2, 2, 2]; % max possible xcorr offset
+                    [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
+                        findStackOffset(ReferenceStack, CurrentStack, ...
+                        MaxOffset);
+                    
+                    % Decide which shift to proceed with based on
+                    % PixelOffset and SubPixelOffset (SubPixelOffset can be
+                    % innacurate).
+                    PixelOffset = PixelOffset ...
+                        .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
+                        + IntegerOffset ...
+                        .* (abs(PixelOffset-SubPixelOffset) > 0.5);
+                    PixelOffset = PixelOffset * obj.PixelSize; % pixel->um
+                    
+                    % Move the piezos to adjust for the predicted shift.
+                    CurrentPosX = obj.StagePiezoX.getPosition();
+                    CurrentPosY = obj.StagePiezoY.getPosition();
+                    CurrentPosZ = obj.StagePiezoZ.getPosition();
+                    NewPosX = CurrentPosX + PixelOffset(1);
+                    NewPosY = CurrentPosY + PixelOffset(2);
+                    NewPosZ = CurrentPosZ + PixelOffset(3);
+                    obj.StagePiezoX.setPosition(NewPosX);
+                    obj.StagePiezoY.setPosition(NewPosY);
+                    obj.StagePiezoZ.setPosition(NewPosZ);
+                    
+                    % Rename parameters for consistency with the rest of
+                    % the code.
+                    Xshift = PixelOffset(1);
+                    Yshift = PixelOffset(2);
+                    Zshift = PixelOffset(3);
+                    mACfit = CorrAtOffset;
+                    
+                    % Save the error signal.
+                    obj.ErrorSignal = PixelOffset.'; % col->row vector
                 else
-                    obj.ZStack_MaxDev=0.5;
-                    obj.ZStack_Step=0.05; %50 nm
+                    %find z-position and adjust in Z using Piezo:
+                    if iter < 2
+                        obj.ZStack_MaxDev=4;
+                        obj.ZStack_Step=0.05; %50 nm
+                    else
+                        obj.ZStack_MaxDev=0.5;
+                        obj.ZStack_Step=0.05; %50 nm
+                    end
+                    [Zfit,mACfit]=obj.findZPos();
+                    Zshift=Z-abs(Zfit); %new
+                    Z=Zfit; %new
+                    obj.StagePiezoX.setPosition(X); %new
+                    obj.StagePiezoY.setPosition(Y); %new
+                    obj.StagePiezoZ.setPosition(Z); %new
+                    
+                    %find XY position and adjust in XY using Piezo:
+                    [Xshift,Yshift]=findXYShift(obj); % in um
+                    obj.ErrorSignal(1:2)=[Xshift,Yshift];
+                    obj.ErrorSignal(3) = Zshift;
+                    
+                    % current position on Piezo
+                    CurrentPosX=obj.StagePiezoX.getPosition;
+                    CurrentPosY=obj.StagePiezoY.getPosition;
+                    NewPosX = CurrentPosX - Xshift;
+                    NewPosY = CurrentPosY - Yshift;
+                    obj.StagePiezoX.setPosition(NewPosX);
+                    obj.StagePiezoY.setPosition(NewPosY);
+                    obj.StagePiezoZ.setPosition(Z);
                 end
-                [Zfit,mACfit]=obj.findZPos();
-                Zshift=Z-abs(Zfit); %new
-                Z=Zfit; %new
-                obj.StagePiezoX.setPosition(X); %new
-                obj.StagePiezoY.setPosition(Y); %new
-                obj.StagePiezoZ.setPosition(Z); %new
-                %find XY position and adjust in XY using Piezo:
-                [Xshift,Yshift]=findXYShift(obj); % in um 
-                obj.ErrorSignal(1:2)=[Xshift,Yshift];
-                obj.ErrorSignal(3) = Zshift;
-                
-                % current position on Piezo
-                CurrentPos_X=obj.StagePiezoX.getPosition;
-                CurrentPos_Y=obj.StagePiezoY.getPosition;
-                NewPos_X = CurrentPos_X - Xshift;
-                NewPos_Y = CurrentPos_Y - Yshift;
-                obj.StagePiezoX.setPosition(NewPos_X);
-                obj.StagePiezoY.setPosition(NewPos_Y);
-                obj.StagePiezoZ.setPosition(Z);
-                
+
                 %show overlay
                 obj.Image_Current=obj.capture_single();
                 
@@ -479,6 +536,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 iter = iter + 1;
                 fprintf('Alignment iteration %i complete \n', iter)
             end
+            
+            
             if iter==obj.MaxIter
                 warning('reached max iterations')
             end

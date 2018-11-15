@@ -1,6 +1,17 @@
 function saveReferenceImage(obj)
     %Take reference image and save
 
+    % Collect a z-stack if needed (probably not a good way to do this, 
+    % but it's important to collect the z-stack in the same manner as it 
+    % will be collected in the AlignReg class).
+    if obj.UseStackCorrelation
+        obj.Lamp660.setPower(obj.Lamp660Power);
+        pause(obj.LampWait);
+        obj.AlignReg.collect_zstack(); 
+        RefStruct.ReferenceStack = obj.AlignReg.ZStack;
+        obj.Lamp660.setPower(0);
+    end
+    
     %Collect ROI Image
     obj.Lamp660.setPower(obj.Lamp660Power);
     pause(obj.LampWait);
