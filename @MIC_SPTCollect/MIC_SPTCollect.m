@@ -84,7 +84,7 @@ classdef MIC_SPTCollect < MIC_Abstract
         IRsequenceLength_offset=50;%in the unit of frame for IRCamera
         sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
         ActiveRegCheck=0;
-        RegCamType='Andor Camera'   % Type of Camera Bright Field Registration
+        RegCamType='IRCamera'   % Type of Camera Bright Field Registration
         %'Andor Camera', 'IRCamera'
         CalFilePath
         zPosition
@@ -174,7 +174,43 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 
                 if ~exist(f,'file')
-                    obj.R3DObj.calibrate();
+                    if strcmp(obj.RegCamType,'Andor Camera')
+                        %set the Andor Camera
+                        CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                        CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                        EMGTemp = CamSet.EMGain.Value;
+                        CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                        obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                        obj.R3DObj.CameraObj.setShutter(1);
+                        
+                        %set the lamp
+                        if isempty(obj.LampPower) || obj.LampPower==0
+                            obj.LampPower=obj.LampObj.MaxPower/2;
+                        end
+                        obj.LampObj.setPower(obj.LampPower);
+                        obj.LampObj.on;
+                        fprintf('Calibrating camera and stage ...\n')
+                        obj.R3DObj.calibrate();
+                        % change back camera setting to the values before using the R3DTrans class
+                        obj.R3DObj.CameraObj.setShutter(0);
+                        CamSet.EMGain.Value = EMGTemp;
+                        CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                        obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                        obj.LampObj.off;
+                        obj.PixelSize=obj.R3DObj.PixelSize;
+                    else strcmp(obj.RegCamType,'IRCamera');
+                        %set the lamp
+                        if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
+                            obj.Lamp850Power=obj.Lamp850Obj.MaxPower/3;
+                        end
+                        obj.Lamp850Obj.setPower(obj.Lamp850Power);
+                        obj.Lamp850Obj.on;
+                        obj.R3DObj.CameraObj.ROI=[515 770 467 722];
+                        fprintf('Calibrating camera and stage ...\n')
+                        obj.R3DObj.calibrate();
+                        obj.Lamp850Obj.off;
+                        obj.IRPixelSize=obj.R3DObj.PixelSize;
+                    end
                     clear a;
                 end
                 
@@ -243,8 +279,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %set the lamp
                 if isempty(obj.LampPower) || obj.LampPower==0
                     obj.LampPower=obj.LampObj.MaxPower/2;
-                    obj.LampObj.setPower(obj.LampPower);
                 end
+                obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on;
                 obj.R3DObj.getcurrentimage();
                 % change back camera setting to the values before using the R3DTrans class
@@ -257,8 +293,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %set the lamp
                 if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
                     obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
-                    obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 end
+                obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on;
                 obj.R3DObj.getcurrentimage();
                 obj.Lamp850Obj.off;
@@ -271,9 +307,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                 case 'Self'
                     obj.takeref();
                 case 'Ref'
-                if isempty(obj.R3DObj.Image_Reference)   
-                    obj.loadref();
-                end
+                    if isempty(obj.R3DObj.Image_Reference)
+                        obj.loadref();
+                    end
             end
             if strcmp(obj.RegCamType,'Andor Camera');
                 %set the Andor Camera
@@ -287,8 +323,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %set the lamp
                 if isempty(obj.LampPower) || obj.LampPower==0
                     obj.LampPower=obj.LampObj.MaxPower/2;
-                    obj.LampObj.setPower(obj.LampPower);
                 end
+                obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on;
                 obj.R3DObj.align2imageFit();
                 % change back camera setting to the values before using the R3DTrans class
@@ -301,8 +337,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %set the lamp
                 if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
                     obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
-                    obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 end
+                obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on;
                 obj.R3DObj.align2imageFit();
                 obj.Lamp850Obj.off;
@@ -327,8 +363,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %set the lamp
                 if isempty(obj.LampPower) || obj.LampPower==0
                     obj.LampPower=obj.LampObj.MaxPower/2;
-                    obj.LampObj.setPower(obj.LampPower);
                 end
+                obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on;
                 obj.R3DObj.takerefimage();
                 % change back camera setting to the values before using the R3DTrans class
@@ -344,8 +380,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %set the lamp
                 if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
                     obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
-                    obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 end
+                obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on;
                 obj.R3DObj.takerefimage();
                 obj.Lamp850Obj.off;
