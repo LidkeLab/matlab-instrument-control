@@ -1,4 +1,4 @@
- classdef MIC_SPTCollect < MIC_Abstract
+classdef MIC_SPTCollect < MIC_Abstract
     % MIC_SPTCollect Single Particle Tracking/Superresolution data collection
     % software. Super resolution and Single Particle Tracking data collection
     % class for SPT microscope Works with Matlab Instrument Control (MIC)
@@ -79,13 +79,13 @@
         tAndor_start
         tAndor_end
         SyringeWaitTime
-        SyringeWaitTime_offset=-2; % in the unit of frame for IRCamera 
+        SyringeWaitTime_offset=-2; % in the unit of frame for IRCamera
         IRSequenceLength
         IRsequenceLength_offset=50;%in the unit of frame for IRCamera
         sequenceType='SRCollect';  % Type of acquisition data 'Tracking+SRCollect'
         ActiveRegCheck=0;
-        RegCamType='Andor Camera'   % Type of Camera Bright Field Registration 
-                                    %'Andor Camera', 'IRCamera'
+        RegCamType='Andor Camera'   % Type of Camera Bright Field Registration
+        %'Andor Camera', 'IRCamera'
         CalFilePath
         zPosition
         MaxCC
@@ -163,14 +163,20 @@
                 obj.LampObj=MIC_IX71Lamp('Dev1','ao0','Port0/Line0');
                 obj.LampPower = 50;
                 
-                % Registration object
-%                 fprintf('Initializing Registration object\n')
-%                 if exist(obj.CalFilePath,'file')
-%                     a=load(obj.CalFilePath);
-%                     obj.PixelSize=a.PixelSize;
-%                     clear a;
-%                 end
- %                 
+                %                 Registration object
+                fprintf('Initializing Registration object\n')
+                if strcmp(obj.RegCamType,'Andor Camera')
+                    f=fullfile(obj.CalFilePath,'SPT_AndorPixelSize.mat')
+                    obj.R3DObj=MIC_Reg3DTransNew(obj.CameraObj,obj.StageObj,f);
+                elseif strcmp(obj.RegCamType,'IRCamera')
+                    f=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat')
+                    obj.R3DObj=MIC_Reg3DTransNew(obj.IRCameraObj,obj.StageObj,f);
+                end
+                
+                if ~exist(f,'file')
+                    obj.R3DObj.calibrate();
+                    clear a;
+                end
                 
             catch ME
                 ME
@@ -225,64 +231,131 @@
         
         function takecurrent(obj)
             % captures and displays current image
-             obj.set_RegCamType();
-             if strcmp(obj.RegCamType,'Andor Camera');
-                 %set the lamp
-                 if isempty(obj.LampPower) || obj.LampPower==0
-                     obj.LampPower=obj.LampObj.MaxPower/2;
-                     obj.LampObj.setPower(obj.LampPower);
-                 end
-                 obj.LampObj.on;
-                 obj.R3DObj.getcurrentimage();
-                 % change back camera setting to the values before using the R3DTrans class
-                 obj.R3DObj.CameraObj.setShutter(0);
-                 CamSet.EMGain.Value = EMGTemp;
-                 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
-                 obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
-                 obj.LampObj.off;
-             else strcmp(obj.RegCamType,'IRCamera');
-                 %set the lamp
-                 if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
-                     obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
-                     obj.Lamp850Obj.setPower(obj.Lamp850Power);
-                 end
-                 obj.Lamp850Obj.on;
-                 obj.R3DObj.getcurrentimage();
-                 obj.Lamp850Obj.off;
-             end
+            if strcmp(obj.RegCamType,'Andor Camera');
+                %set the Andor Camera
+                CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                EMGTemp = CamSet.EMGain.Value;
+                CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.R3DObj.CameraObj.setShutter(1);
+                
+                %set the lamp
+                if isempty(obj.LampPower) || obj.LampPower==0
+                    obj.LampPower=obj.LampObj.MaxPower/2;
+                    obj.LampObj.setPower(obj.LampPower);
+                end
+                obj.LampObj.on;
+                obj.R3DObj.getcurrentimage();
+                % change back camera setting to the values before using the R3DTrans class
+                obj.R3DObj.CameraObj.setShutter(0);
+                CamSet.EMGain.Value = EMGTemp;
+                CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.LampObj.off;
+            else strcmp(obj.RegCamType,'IRCamera');
+                %set the lamp
+                if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
+                    obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
+                    obj.Lamp850Obj.setPower(obj.Lamp850Power);
+                end
+                obj.Lamp850Obj.on;
+                obj.R3DObj.getcurrentimage();
+                obj.Lamp850Obj.off;
+            end
         end
         
         function align(obj)
             % Align to current reference image
-            obj.set_RegCamType;
             switch obj.RegType
                 case 'Self'
                     obj.takeref();
-                otherwise
+                case 'Ref'
+                if isempty(obj.R3DObj.Image_Reference)   
                     obj.loadref();
+                end
             end
-            obj.LampObj.setPower(obj.LampPower);
-            obj.R3DObj.align2imageFit();
+            if strcmp(obj.RegCamType,'Andor Camera');
+                %set the Andor Camera
+                CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                EMGTemp = CamSet.EMGain.Value;
+                CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.R3DObj.CameraObj.setShutter(1);
+                
+                %set the lamp
+                if isempty(obj.LampPower) || obj.LampPower==0
+                    obj.LampPower=obj.LampObj.MaxPower/2;
+                    obj.LampObj.setPower(obj.LampPower);
+                end
+                obj.LampObj.on;
+                obj.R3DObj.align2imageFit();
+                % change back camera setting to the values before using the R3DTrans class
+                obj.R3DObj.CameraObj.setShutter(0);
+                CamSet.EMGain.Value = EMGTemp;
+                CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.LampObj.off;
+            else strcmp(obj.RegCamType,'IRCamera');
+                %set the lamp
+                if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
+                    obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
+                    obj.Lamp850Obj.setPower(obj.Lamp850Power);
+                end
+                obj.Lamp850Obj.on;
+                obj.R3DObj.align2imageFit();
+                obj.Lamp850Obj.off;
+            end
         end
         
         function showref(obj)
             % Displays current reference image
-             if isempty(obj.IRCameraObj)
-                obj.IRCameraObj=MIC_ThorlabsIR();
-            end
             dipshow(obj.R3DObj.Image_Reference);
         end
         
         function takeref(obj)
             % Captures reference image obj.setLampPower();
-             if isempty(obj.IRCameraObj)
-                obj.IRCameraObj=MIC_ThorlabsIR();
+            if strcmp(obj.RegCamType,'Andor Camera');
+                %set the Andor Camera
+                CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                EMGTemp = CamSet.EMGain.Value;
+                CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.R3DObj.CameraObj.setShutter(1);
+                %set the lamp
+                if isempty(obj.LampPower) || obj.LampPower==0
+                    obj.LampPower=obj.LampObj.MaxPower/2;
+                    obj.LampObj.setPower(obj.LampPower);
+                end
+                obj.LampObj.on;
+                obj.R3DObj.takerefimage();
+                % change back camera setting to the values before using the R3DTrans class
+                obj.R3DObj.CameraObj.setShutter(0);
+                CamSet.EMGain.Value = EMGTemp;
+                CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.LampObj.off;
+            else strcmp(obj.RegCamType,'IRCamera');
+                if isempty(obj.IRCameraObj)
+                    obj.IRCameraObj=MIC_ThorlabsIR();
+                end
+                %set the lamp
+                if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
+                    obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
+                    obj.Lamp850Obj.setPower(obj.Lamp850Power);
+                end
+                obj.Lamp850Obj.on;
+                obj.R3DObj.takerefimage();
+                obj.Lamp850Obj.off;
             end
-            obj.R3DObj.takerefimage();
+            
         end
         
         function saveref(obj)
-            % Saves current reference image obj.R3DObj.saverefimage();
+            % Saves current reference image
+            obj.R3DObj.saverefimage();
         end
         
         function focusLow(obj)
@@ -297,12 +370,12 @@
             else
                 obj.Laser638Obj.off;
             end
-            %     if obj.focus561Flag
-            %         obj.Laser561Obj.setPower(obj.Laser561Low);
-            %         obj.Laser561Obj.on;
-            %     else
-            %         obj.Laser561Obj.off;
-            %     end
+            %                 if obj.focus561Flag
+            %                     obj.Laser561Obj.setPower(obj.Laser561Low);
+            %                     obj.Laser561Obj.on;
+            %                 else
+            %                     obj.Laser561Obj.off;
+            %                 end
             %
             % Aquiring and displaying images
             obj.CameraObj.ROI=obj.getROI('Andor');
@@ -396,22 +469,30 @@
         end
         
         function set_RegCamType(obj)
-            
             if strcmp(obj.RegCamType,'Andor Camera');
-
                 CalFileName=fullfile(obj.CalFilePath,'SPT_AndorPixelSize.mat');
-
-                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,CalFileName);
+                if exist(CalFileName,'file')
+                    obj.R3DObj=MIC_Reg3DTransNew(obj.CameraObj,obj.StageObj,CalFileName);
+                else
+                    obj.R3DObj=MIC_Reg3DTransNew(obj.CameraObj,obj.StageObj);
+                    warning('Put nanogris as a sample to do the calibration for Reg3dTrans class')
+                    obj.R3DObj.calibrate();
+                end
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
-          
+                
             elseif strcmp(obj.RegCamType,'IRCamera')
-               
-                CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
                 if isempty(obj.IRCameraObj)
                     obj.IRCameraObj=MIC_ThorlabsIR();
                 end
-                obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,CalFileName);
+                CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
+                if exist(CalFileName,'file')
+                    obj.R3DObj=MIC_Reg3DTransNew(obj.IRCameraObj,obj.StageObj,CalFileName);
+                else
+                    obj.R3DObj=MIC_Reg3DTransNew(obj.IRCameraObj,obj.StageObj);
+                    warning('Put nanogris as a sample to do the calibration for Reg3dTrans class')
+                    obj.R3DObj.calibrate();
+                end
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
             end
@@ -426,19 +507,15 @@
             timenow=clock;
             s=['-' num2str(timenow(1)) '-' num2str(timenow(2))  '-' num2str(timenow(3)) '-' num2str(timenow(4)) '-' num2str(timenow(5)) '-' num2str(round(timenow(6)))];
             
-            %first take a reference image or align to image
             obj.LampObj.setPower(obj.LampPower);
-%             obj.IRCameraObj.delete;
-%             obj.IRCameraObj=[];
-            if isempty(obj.IRCameraObj)
+            %make sure IR camera exists
+            if ~isvalid(obj.IRCameraObj)
                 obj.IRCameraObj=MIC_ThorlabsIR();
             end
-            obj.set_RegCamType();
             
             switch obj.RegType
-                
                 case 'Self' %take and save the reference image
-                    obj.R3DObj.takerefimage();
+                    obj.takeref();
                     f=fullfile(obj.SaveDir,[obj.BaseFileName s '_ReferenceImage']);
                     Image_Reference=obj.R3DObj.Image_Reference; %#ok<NASGU>
                     save(f,'Image_Reference');
@@ -449,23 +526,14 @@
             end
             %define IRCameraObj from different classes if SPT+SR is running
             if strcmp(obj.sequenceType,'Tracking+SRCollect');
-                if ~isempty(obj.IRCameraObj)
+                if isvalid(obj.IRCameraObj)
                     obj.IRCameraObj.delete;
                 end
                 obj.IRCameraObj=MIC_IRSyringPump();
                 obj.IRCameraObj.DisplayZoom=1;
                 obj.ActiveRegCheck=0;
             end
-%             if strcmp(obj.sequenceType,'SRCollect');
-%                 if ~isempty(obj.IRCameraObj)
-%                     obj.IRCameraObj.delete;
-%                     obj.IRCameraObj=[];
-%                 end
-%                 obj.IRCameraObj=MIC_ThorlabsIR();
-%                 obj.IRCameraObj.DisplayZoom=1;
-%             end
-%             %
-%             %set Active Stabilization
+            %set Active Stabilization
             if obj.ActiveRegCheck==1
                 %setup Lamp850
                 %Active Stabilization
@@ -491,8 +559,8 @@
                     error('StartSequence:: unknown file save type')
             end
             
-                            MaxCC=[];
-                            Image_BF=[];
+            MaxCC=[];
+            Image_BF=[];
             %loop over sequences
             for nn=1:obj.NumSequences
                 if obj.AbortNow; obj.AbortNow=0; break; end
@@ -504,9 +572,9 @@
                 switch obj.RegType
                     case 'None'
                     otherwise
-                        obj.R3DObj.align2imageFit();
+                        obj.align();
                         Image_BF{nn}=obj.R3DObj.Image_Current;
-%                         MaxCC(nn)=obj.R3DObj.maxACmodel;
+                        %                         MaxCC(nn)=obj.R3DObj.maxACmodel;
                 end
                 
                 
@@ -544,11 +612,11 @@
                 obj.CameraObj.SequenceLength=obj.NumFrames;
                 obj.CameraObj.AcquisitionTimeOutOffset=10000;
                 obj.CameraObj.ROI=obj.getROI('Andor');
-%                 fprintf('EM Gain\n')
+                %                 fprintf('EM Gain\n')
                 obj.CameraObj.CameraSetting.EMGain
                 CamSet.FrameTransferMode.Ind=2;
                 obj.CameraObj.setCamProperties(CamSet);
-%                 fprintf('Frame mode\n')
+                %                 fprintf('Frame mode\n')
                 obj.CameraObj.CameraSetting.FrameTransferMode
                 %Collect
                 % For SPT microscope there are three options for imaging:
@@ -602,8 +670,8 @@
                         delete(TimerIR);
                     end
                     
-                elseif strcmp(obj.sequenceType,'TwoTracking');   
-                obj.CameraObj2=MIC_AndorCamera();
+                elseif strcmp(obj.sequenceType,'TwoTracking');
+                    obj.CameraObj2=MIC_AndorCamera();
                     
                 elseif strcmp(obj.sequenceType,'Tracking+SRCollect');
                     
@@ -635,9 +703,9 @@
                     obj.IRCameraObj.SP.stop %(?)
                     fprintf('Syringe Pump is stopped\n')
                     
-%                                         %clear IRCamera
-%                                         obj.IRCameraObj.delete();
-%                                         obj.IRCameraObj=[];
+                    %                                         %clear IRCamera
+                    %                                         obj.IRCameraObj.delete();
+                    %                                         obj.IRCameraObj=[];
                 end
                 
                 %Turn off Laser
@@ -655,13 +723,13 @@
                 switch obj.SaveFileType
                     case 'mat'
                         fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
-                       if strcmp(obj.sequenceType,'Tracking+SRCollect')
-                        [Params IRData]=exportState(obj); %#ok<NASGU>
-                        save(fn,'sequence','Params','IRData');
-                       else 
-                           [Params]=exportState(obj); %#ok<NASGU>
-                        save(fn,'sequence','Params','zPosition','MaxCC','Image_BF');
-                       end
+                        if strcmp(obj.sequenceType,'Tracking+SRCollect')
+                            [Params IRData]=exportState(obj); %#ok<NASGU>
+                            save(fn,'sequence','Params','IRData');
+                        else
+                            [Params]=exportState(obj); %#ok<NASGU>
+                            save(fn,'sequence','Params','zPosition','MaxCC','Image_BF');
+                        end
                     case 'h5' %This will become default
                         S=sprintf('Data%04d',nn)
                         MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
@@ -727,7 +795,7 @@
                         ROI=[1 DimX/2 round(DimX*6/8) DimX];% 64*32 low left
                     case 11
                         ROI=[DimX/2 DimX round(DimX*14/16) DimX];% 64*32 low left
-                    
+                        
                     otherwise
                         error('SRcollect: ROI not found')
                 end
