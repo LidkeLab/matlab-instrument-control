@@ -155,31 +155,42 @@ PolyFitFunction = @(R) Beta(1) + Beta(2)*R(1, :) + Beta(3)*R(1, :).^2 ...
 XPeakArray = ones(1, numel(RepArrayX)) * RawOffsetIndices(1);
 YPeakArray = ones(1, numel(RepArrayY)) * RawOffsetIndices(2);
 ZPeakArray = ones(1, numel(RepArrayZ)) * RawOffsetIndices(3);
-XArray = linspace(-MaxOffset(1), MaxOffset(1), numel(RepArrayX));
-YArray = linspace(-MaxOffset(2), MaxOffset(2), numel(RepArrayY));
-ZArray = linspace(-MaxOffset(3), MaxOffset(3), numel(RepArrayZ));
+XArray = linspace(1, 2*MaxOffset(1)+1, numel(RepArrayX));
+YArray = linspace(1, 2*MaxOffset(2)+1, numel(RepArrayY));
+ZArray = linspace(1, 2*MaxOffset(3)+1, numel(RepArrayZ));
 XFitAtPeak = PolyFitFunction([XArray; YPeakArray; ZPeakArray]);
 YFitAtPeak = PolyFitFunction([XPeakArray; YArray; ZPeakArray]);
 ZFitAtPeak = PolyFitFunction([XPeakArray; YPeakArray; ZArray]);
 
 % Display line sections through the integer location of the
 % cross-correlation, overlain on the fit along those lines.
-figure;
+FigureWindow = findobj('Tag', 'CorrWindow');
+if isempty(FigureWindow)
+    FigureWindow = figure('Tag', 'CorrWindow');
+end
+clf(FigureWindow); % clear the figure window
+figure(FigureWindow); % ensure we plot into the correct figure
 subplot(3, 1, 1)
-plot(CorrOffsetIndicesX, ...
+plot(-MaxOffset(1):MaxOffset(1), ...
     XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3)), 'x')
+hold on
+plot(XArray-MaxOffset(1)-1, XFitAtPeak)
 title('X Correlation')
 xlabel('Pixel Offset')
 ylabel('Correlation Coefficient')
 subplot(3, 1, 2)
-plot(CorrOffsetIndicesY, ...
+plot(-MaxOffset(2):MaxOffset(2), ...
     XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)), 'x')
+hold on
+plot(YArray-MaxOffset(2)-1, YFitAtPeak)
 title('Y Correlation')
 xlabel('Pixel Offset')
 ylabel('Correlation Coefficient')
 subplot(3, 1, 3)
-plot(CorrOffsetIndicesZ, ...
+plot(-MaxOffset(3):MaxOffset(3), ...
     squeeze(XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :)), 'x')
+hold on
+plot(ZArray-MaxOffset(3)-1, ZFitAtPeak)
 title('Y Correlation')
 xlabel('Pixel Offset')
 ylabel('Correlation Coefficient')
