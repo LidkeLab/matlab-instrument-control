@@ -323,7 +323,9 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             
             % Setup the stepper motors for the NanoMax stage.
             % The StepperMotor Serial Number is 70850323.
-            % NOTE: the positions set here are chosen such that the center
+            % NOTE: The x,y convention used is that y<->left-right,
+            %       x<->up-down.
+            % NOTE: The positions set here are chosen such that the center
             %       GUI button will ~correspond to the center of the well.
             obj.StageStepper = MIC_StepperMotor('70850323');
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper

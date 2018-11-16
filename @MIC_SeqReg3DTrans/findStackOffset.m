@@ -5,7 +5,7 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
 
 % Set default parameter values if needed.
 if ~exist('MaxOffset', 'var')
-    MaxOffset = [2, 2, 2];
+    MaxOffset = [2; 2; 2];
 end
 
 % Ensure MaxOffset is a column vector for consistency.
@@ -14,8 +14,8 @@ if size(MaxOffset, 1) < size(MaxOffset, 2)
 end
 
 % Determine dimensions relevant to the problem to improve code readability.
-Stack1Size = size(Stack1);
-Stack2Size = size(Stack2);
+Stack1Size = size(Stack1).';
+Stack2Size = size(Stack2).';
 SizeOfFullXCorr = Stack1Size + Stack2Size - 1; % size of a full xcorr stack
 
 % Ensure that the MaxOffset input is valid, modifying it's values if
@@ -136,10 +136,12 @@ Beta = ((X.'*X + Lambda*eye(size(X, 2))) \ X.') * StackedCorrCube;
 
 % Build our approximate solution as an anonymous function to easily compute
 % values at certain pixels.
-PolyFitFunction = @(R) Beta(1) + Beta(2)*R(1) + Beta(3)*R(1).^2 ...
-    + Beta(4)*R(2) + Beta(5)*R(2).^2 ...
-    + Beta(6)*R(3) + Beta(7)*R(3).^2 ...
-    + Beta(8)*R(1)*R(2) + Beta(9)*R(2)*R(3) + Beta(10)*R(3)*R(1);
+PolyFitFunction = @(R) Beta(1) + Beta(2)*R(1, :) + Beta(3)*R(1, :).^2 ...
+    + Beta(4)*R(2, :) + Beta(5)*R(2, :).^2 ...
+    + Beta(6)*R(3, :) + Beta(7)*R(3, :).^2 ...
+    + Beta(8)*R(1, :).*R(2, :) ...
+    + Beta(9)*R(2, :).*R(3, :) ...
+    + Beta(10)*R(3, :).*R(1, :);
 % PolyFitArray = Beta(1) + Beta(2)*RepArrayX + Beta(3)*RepArrayX.^2 ...
 %     + Beta(4)*RepArrayY + Beta(5)*RepArrayY.^2 ...
 %     + Beta(6)*RepArrayZ + Beta(7)*RepArrayZ.^2 ...
@@ -147,6 +149,40 @@ PolyFitFunction = @(R) Beta(1) + Beta(2)*R(1) + Beta(3)*R(1).^2 ...
 %     + Beta(9)*RepArrayY.*RepArrayZ ...
 %     + Beta(10)*RepArrayZ.*RepArrayX;
 % PolyFitMatrix = reshape(PolyFitArray, size(XCorr3D));
+
+% Construct lines through the polynomial fit at the integer peak location
+% found previously.
+XPeakArray = ones(1, numel(RepArrayX)) * RawOffsetIndices(1);
+YPeakArray = ones(1, numel(RepArrayY)) * RawOffsetIndices(2);
+ZPeakArray = ones(1, numel(RepArrayZ)) * RawOffsetIndices(3);
+XArray = linspace(-MaxOffset(1), MaxOffset(1), numel(RepArrayX));
+YArray = linspace(-MaxOffset(2), MaxOffset(2), numel(RepArrayY));
+ZArray = linspace(-MaxOffset(3), MaxOffset(3), numel(RepArrayZ));
+XFitAtPeak = PolyFitFunction([XArray; YPeakArray; ZPeakArray]);
+YFitAtPeak = PolyFitFunction([XPeakArray; YArray; ZPeakArray]);
+ZFitAtPeak = PolyFitFunction([XPeakArray; YPeakArray; ZArray]);
+
+% Display line sections through the integer location of the
+% cross-correlation, overlain on the fit along those lines.
+figure;
+subplot(3, 1, 1)
+plot(CorrOffsetIndicesX, ...
+    XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3)), 'x')
+title('X Correlation')
+xlabel('Pixel Offset')
+ylabel('Correlation Coefficient')
+subplot(3, 1, 2)
+plot(CorrOffsetIndicesY, ...
+    XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)), 'x')
+title('Y Correlation')
+xlabel('Pixel Offset')
+ylabel('Correlation Coefficient')
+subplot(3, 1, 3)
+plot(CorrOffsetIndicesZ, ...
+    squeeze(XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :)), 'x')
+title('Y Correlation')
+xlabel('Pixel Offset')
+ylabel('Correlation Coefficient')
 
 % Determine the raw index offset based on the peak location of the
 % polynomial, computing the matrix form found by maximizing the fitted 
@@ -160,14 +196,6 @@ RawOffsetFit = [2*Beta(3), Beta(8), Beta(10); ...
 % NOTE: We subtract MaxOffset+1 because that is the location of the 
 %       [0, 0, 0] offset (the center of the cross-correlation).
 SubPixelOffset = RawOffsetFit - MaxOffset - 1;
-
-% % Determine if the fit is worth using, or if we should stick to the integer
-% % shift found earlier.
-% % NOTE: If the offset predicted by the fit is greater than 0.5 pixels from 
-% %       the integer offset prediction, we will just use the integer offset
-% %       prediction.
-% PixelOffset = PixelOffset .* (abs(PixelOffset-IntegerOffset) <= 0.5) ...
-%     + IntegerOffset .* (abs(PixelOffset-IntegerOffset) > 0.5);
 
 % Determine the correlation coefficient of the polynomial fit at the
 % selected offset.
