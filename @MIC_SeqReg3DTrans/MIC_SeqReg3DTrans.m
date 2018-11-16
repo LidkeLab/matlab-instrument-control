@@ -447,7 +447,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    MaxOffset = [2, 2, 2]; % max possible xcorr offset
+                    MaxOffset = [1; 1; 1]; % max possible xcorr offset
                     [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
                         obj.findStackOffset(ReferenceStack, ...
                         CurrentStack, MaxOffset);
@@ -463,14 +463,10 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     
                     % Modify PixelOffset to correspond to physical piezo
                     % dimensions.
-                    PixelOffset = [-PixelOffset(1), PixelOffset(2), ...
-                        PixelOffset(3)];
-% 
-%                     % TEST with findshift(...'iter')
-%                     PixelOffset = findshift(ReferenceStack, CurrentStack, 'iter');
-%                     PixelOffset = [PixelOffset(2), PixelOffset(1), PixelOffset(3)];
-%                     PixelOffset = PixelOffset * obj.PixelSize;
-%                     CorrAtOffset = 1;
+                    % NOTE: The extra (-) in front is to account for the
+                    %       convention used in findStackOffset.
+                    PixelOffset = -[PixelOffset(2), -PixelOffset(1), ...
+                        -PixelOffset(3)];
                     
                     % Move the piezos to adjust for the predicted shift.
                     CurrentPosX = obj.StagePiezoX.getPosition();
