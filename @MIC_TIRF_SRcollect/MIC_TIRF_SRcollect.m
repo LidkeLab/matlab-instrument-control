@@ -147,7 +147,7 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
                 if ~exist(f,'file')
                     obj.CameraObj.ROI=[1 256 1 256];
-                    obj.R3DObj.calibratePixelSize;
+                    obj.R3DObj.calibrate();
                 end  
                 if exist(f,'file')
                     a=load(f);
