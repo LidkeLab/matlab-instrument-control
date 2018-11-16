@@ -243,16 +243,16 @@ switch FitType
         XPeakArray = ones(1, numel(RepArrayX)) * RawOffsetIndices(1);
         YPeakArray = ones(1, numel(RepArrayY)) * RawOffsetIndices(2);
         ZPeakArray = ones(1, numel(RepArrayZ)) * RawOffsetIndices(3);
+        XArrayDense = linspace(1, 2*MaxOffset(1)+1, size(Stack1, 1));
+        YArrayDense = linspace(1, 2*MaxOffset(2)+1, size(Stack1, 2));
+        ZArrayDense = linspace(1, 2*MaxOffset(3)+1, size(Stack1, 3));
         XFitAtPeak = PolyFitFunction(...
             [XArrayDense; YPeakArray; ZPeakArray]);
         YFitAtPeak = PolyFitFunction(...
             [XPeakArray; YArrayDense; ZPeakArray]);
         ZFitAtPeak = PolyFitFunction(...
             [XPeakArray; YPeakArray; ZArrayDense]);
-        XArrayDense = linspace(1, 2*MaxOffset(1)+1, size(Stack1, 1));
-        YArrayDense = linspace(1, 2*MaxOffset(2)+1, size(Stack1, 2));
-        ZArrayDense = linspace(1, 2*MaxOffset(3)+1, size(Stack1, 3));
-        
+
         % PolyFitArray = Beta(1) + Beta(2)*RepArrayX + Beta(3)*RepArrayX.^2 ...
         %     + Beta(4)*RepArrayY + Beta(5)*RepArrayY.^2 ...
         %     + Beta(6)*RepArrayZ + Beta(7)*RepArrayZ.^2 ...
