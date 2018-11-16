@@ -1,6 +1,15 @@
 function [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
-    findStackOffset(Stack1, Stack2, MaxOffset)
+    findStackOffset(Stack1, Stack2, Method, MaxOffset)
 %Estimates a sub-pixel offset between two stacks.
+% Method 'FFT' is based on the  standard FFT based XCorr with whitening, 
+% but the offset is determined with the small offset assumption: only 
+% center of xcorr is observed.  Furthermore, the cross-correlation is
+% element-wise divided by the cross-correlation of two binary stacks which
+% match the sizes of Stack1 and Stack2: this reduces the tendency for the
+% cross-correlation peak to appear at [0, 0, 0] offset. 
+% Method 'OLRW' (overlap re-whitening) is similar to a cross-correlation, 
+% but each point of the cross-correlation is calculated with the
+% overlapping regions of the two stacks being rewhitened. 
 
 
 % Set default parameter values if needed.
@@ -39,7 +48,7 @@ for ii = 1:Stack2Size(3)
 end
 
 % Define the indices within a full cross-correlation (size SizeOfFullXCorr)
-% that we wish to calculate.
+% that we wish to inspect.
 CorrOffsetIndicesX = max(ceil(SizeOfFullXCorr(1)/2) - MaxOffset(1), 1) ...
     : ceil(SizeOfFullXCorr(1)/2) + MaxOffset(1);
 CorrOffsetIndicesY = max(ceil(SizeOfFullXCorr(2)/2) - MaxOffset(2), 1) ...
@@ -47,46 +56,96 @@ CorrOffsetIndicesY = max(ceil(SizeOfFullXCorr(2)/2) - MaxOffset(2), 1) ...
 CorrOffsetIndicesZ = max(ceil(SizeOfFullXCorr(3)/2) - MaxOffset(3), 1) ...
     : ceil(SizeOfFullXCorr(3)/2) + MaxOffset(3);
 
-% Compute the brute-forced cross-correlation, considering only "small"
-% offsets between the stacks.
-XCorr3D = zeros(numel(CorrOffsetIndicesX), ...
-    numel(CorrOffsetIndicesY), ...
-    numel(CorrOffsetIndicesZ));
-for ll = CorrOffsetIndicesX
-    for mm = CorrOffsetIndicesY
-        for nn = CorrOffsetIndicesZ
-            % Isolate the sub-stacks of interest (the section of the stacks
-            % which overlap in the current iteration).
-            Stack1XIndices = ...
-                max(1, ll-Stack1Size(1)+1):min(ll, Stack1Size(1));
-            Stack1YIndices = ...
-                max(1, mm-Stack1Size(2)+1):min(mm, Stack1Size(2));
-            Stack1ZIndices = ...
-                max(1, nn-Stack1Size(3)+1):min(nn, Stack1Size(3));
-            SubStack1 = Stack1(Stack1XIndices, Stack1YIndices, ...
-                Stack1ZIndices);
-            Stack2XIndices = max(1, Stack2Size(1)-ll+1) ...
-                : max(1, Stack2Size(1)-ll+1)+numel(Stack1XIndices)-1;
-            Stack2YIndices = max(1, Stack2Size(2)-mm+1) ...
-                : max(1, Stack2Size(2)-mm+1)+numel(Stack1YIndices)-1;
-            Stack2ZIndices = max(1, Stack2Size(3)-nn+1) ...
-                : max(1, Stack2Size(3)-nn+1)+numel(Stack1ZIndices)-1;
-            SubStack2 = Stack2(Stack2XIndices, Stack2YIndices, ...
-                Stack2ZIndices);              
-            
-            % Re-whiten the sub-stacks.
-            SubStack1 = (SubStack1 - mean(SubStack1(:))) ...
-                / (std(SubStack1(:)) * sqrt(numel(SubStack1(:)) - 1));
-            SubStack2 = (SubStack2 - mean(SubStack2(:))) ...
-                / (std(SubStack2(:)) * sqrt(numel(SubStack2(:)) - 1));
-            
-            % Compute the current point of the cross-correlation.
-            XCorr3D(ll-min(CorrOffsetIndicesX)+1, ...
-                mm-min(CorrOffsetIndicesY)+1, ...
-                nn-min(CorrOffsetIndicesZ)+1) = ...
-                SubStack1(:)' * SubStack2(:);
+% Compute the cross-correlation based on the method specified by Method.
+switch Method
+    case 'FFT'
+        % Compute the standard cross-correlation based on the FFT, but
+        % inspect only the central portion corresponding to MaxOffset
+        % offsets along each dimension.
+        
+        % Whiten each image in the stack with respect to the entire stack.
+        Stack1Whitened = (Stack1 - mean(Stack1(:))) ...
+            / (std(Stack1(:)) * sqrt(numel(Stack1(:)) - 1));
+        Stack2Whitened = (Stack2 - mean(Stack2(:))) ...
+            / (std(Stack2(:)) * sqrt(numel(Stack2(:)) - 1));
+
+        % Compute the zero-padded 3D FFT's of each stack.
+        Stack1PaddedFFT = fftn(Stack1Whitened, 2*size(Stack1Whitened)-1);
+        Stack2PaddedFFT = fftn(Stack2Whitened, 2*size(Stack2Whitened)-1);
+        
+        % Compute the 3D cross-correlation in the Fourier domain.
+        XCorr3D = ifftn(conj(Stack1PaddedFFT) .* Stack2PaddedFFT);
+        
+        % Compute the binary cross-correlation for later use in scaling.
+        Stack1Binary = ones(size(Stack1Whitened));
+        Stack2Binary = ones(size(Stack2Whitened));
+        Stack1BinaryFFT = fftn(Stack1Binary, 2*size(Stack1Whitened)-1);
+        Stack2BinaryFFT = fftn(Stack2Binary, 2*size(Stack2Whitened)-1);
+        XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
+
+        % Scale the 3D cross-correlation by the cross-correlation of the
+        % zero-padded binary images (an attempt to reduce the bias to a 
+        % [0, 0, 0] offset introduced by the zero-padded edge effects),
+        % scaling by max(XCorr3DBinary(:)) to re-convert to a correlation
+        % coefficient.
+        XCorr3D = (XCorr3D ./ XCorr3DBinary) * max(XCorr3DBinary(:));
+        
+        % Shift the cross-correlation image such that an auto-correlation 
+        % image will have it's energy peak at the center of the 3D image.
+        XCorr3D = circshift(XCorr3D, size(Stack1Whitened) - 1);
+
+        % Isolate the central chunk of the cross-correlation and the
+        % binary cross-correlation.
+        XCorr3D = XCorr3D(CorrOffsetIndicesX, ...
+            CorrOffsetIndicesY, ...
+            CorrOffsetIndicesZ); % center of our cross-correlation 
+    case 'OLRW'
+        % Compute the brute-forced cross-correlation, considering only
+        % "small" offsets between the stacks.
+        XCorr3D = zeros(numel(CorrOffsetIndicesX), ...
+            numel(CorrOffsetIndicesY), ...
+            numel(CorrOffsetIndicesZ));
+        for ll = CorrOffsetIndicesX
+            for mm = CorrOffsetIndicesY
+                for nn = CorrOffsetIndicesZ
+                    % Isolate the sub-stacks of interest (the section of 
+                    % the stacks which overlap in the current iteration).
+                    Stack1XIndices = ...
+                        max(1, ll-Stack1Size(1)+1):min(ll, Stack1Size(1));
+                    Stack1YIndices = ...
+                        max(1, mm-Stack1Size(2)+1):min(mm, Stack1Size(2));
+                    Stack1ZIndices = ...
+                        max(1, nn-Stack1Size(3)+1):min(nn, Stack1Size(3));
+                    SubStack1 = Stack1(Stack1XIndices, Stack1YIndices, ...
+                        Stack1ZIndices);
+                    Stack2XIndices = max(1, Stack2Size(1)-ll+1) ...
+                        : max(1, Stack2Size(1)-ll+1) ...
+                        + numel(Stack1XIndices)-1;
+                    Stack2YIndices = max(1, Stack2Size(2)-mm+1) ...
+                        : max(1, Stack2Size(2)-mm+1) ...
+                        + numel(Stack1YIndices)-1;
+                    Stack2ZIndices = max(1, Stack2Size(3)-nn+1) ...
+                        : max(1, Stack2Size(3)-nn+1) ...
+                        + numel(Stack1ZIndices)-1;
+                    SubStack2 = Stack2(Stack2XIndices, Stack2YIndices, ...
+                        Stack2ZIndices);
+                    
+                    % Re-whiten the sub-stacks.
+                    SubStack1 = (SubStack1 - mean(SubStack1(:))) ...
+                        / (std(SubStack1(:)) ...
+                        * sqrt(numel(SubStack1(:)) - 1));
+                    SubStack2 = (SubStack2 - mean(SubStack2(:))) ...
+                        / (std(SubStack2(:)) ...
+                        * sqrt(numel(SubStack2(:)) - 1));
+                    
+                    % Compute the current point of the cross-correlation.
+                    XCorr3D(ll - min(CorrOffsetIndicesX) + 1, ...
+                        mm - min(CorrOffsetIndicesY) + 1, ...
+                        nn - min(CorrOffsetIndicesZ) + 1) = ...
+                        SubStack1(:)' * SubStack2(:);
+                end
+            end
         end
-    end
 end
 
 % Stack the 3D xcorr cube into a 1D array.  
@@ -97,16 +156,24 @@ end
 StackedCorrCube = XCorr3D(:);
 
 % Determine the integer offset between the two stacks.
-[~, IndexOfMax] = max(StackedCorrCube);
+[CorrAtPixelOffset, IndexOfMax] = max(StackedCorrCube);
 [PeakRow, PeakColumn, PeakHeight] = ind2sub(size(XCorr3D), IndexOfMax);
 RawOffsetIndices = [PeakRow; PeakColumn; PeakHeight];
 
 % Compute the integer offset by subtracting the found cross-correlation 
 % peak.
-% NOTE: We have to subtract MaxOffset+1 since the [0, 0, 0] offset will 
-%       occur at MaxOffset+1 (e.g. the cross-correlation corresponds to
-%       offsets of -MaxOffset:MaxOffset).
+% NOTE: For the OLRW method, we have to subtract MaxOffset+1 since the 
+%           [0, 0, 0] offset will occur at MaxOffset+1 (e.g. the 
+%           cross-correlation corresponds to offsets of 
+%           -MaxOffset:MaxOffset).
+%       For the FFT method, which obtains the more standard form of the
+%       xcorr, we include an additional minus sign in the found offset to
+%       account for an additional spatial reversal not captured by the OLRW
+%       method.
 PixelOffset = RawOffsetIndices - MaxOffset - 1;
+if strcmpi(Method, 'FFT')
+    PixelOffset = -PixelOffset;
+end
 
 % Determine the repetition length(s), the length for which moving down the
 % stacked array corresponds to a repeated index along one dimension, e.g.
@@ -177,7 +244,8 @@ SubPixelOffset = RawOffsetFit - MaxOffset - 1;
 
 % Determine the correlation coefficient of the polynomial fit at the
 % selected offset.
-CorrAtOffset = PolyFitFunction(SubPixelOffset + MaxOffset + 1);
+CorrAtOffset = CorrAtPixelOffset;
+% CorrAtOffset = PolyFitFunction(SubPixelOffset + MaxOffset + 1);
 
 % Display line sections through the integer location of the
 % cross-correlation, overlain on the fit along those lines.
