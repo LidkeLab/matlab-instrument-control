@@ -186,11 +186,6 @@ if strcmpi(Method, 'FFT')
     PixelOffset = -PixelOffset;
 end
 
-% Define coordinate vectors for later use.
-XArrayDense = linspace(1, 2*MaxOffset(1)+1, size(Stack1, 1));
-YArrayDense = linspace(1, 2*MaxOffset(2)+1, size(Stack1, 2));
-ZArrayDense = linspace(1, 2*MaxOffset(3)+1, size(Stack1, 3));
-
 % Fit the cross-correlation based on input FitType.
 switch FitType
     case '3D'
@@ -216,7 +211,8 @@ switch FitType
         % Compute the least-squares solution for the polynomial parameters.
         X = [ones(numel(StackedCorrCube), 1), RepArrayX, RepArrayX.^2, ...
             RepArrayY, RepArrayY.^2, RepArrayZ, RepArrayZ.^2, ...
-            RepArrayX.*RepArrayY, RepArrayY.*RepArrayZ, RepArrayZ.*RepArrayX];
+            RepArrayX.*RepArrayY, RepArrayY.*RepArrayZ, ...
+            RepArrayZ.*RepArrayX];
         Lambda = 0; % ridge regression parameter
         Beta = ((X.'*X + Lambda*eye(size(X, 2))) \ X.') * StackedCorrCube;
         
@@ -228,8 +224,8 @@ switch FitType
             Beta(8), 2*Beta(5), Beta(9); ...
             Beta(10), Beta(9), 2*Beta(7)] \ -[Beta(2); Beta(4); Beta(6)];
 
-        % Build our approximate solution as an anonymous function to easily compute
-        % values at certain pixels.
+        % Build our approximate solution as an anonymous function to easily 
+        % compute values at certain pixels.
         PolyFitFunction = @(R) ...
             Beta(1) + Beta(2)*R(1, :) + Beta(3)*R(1, :).^2 ...
             + Beta(4)*R(2, :) + Beta(5)*R(2, :).^2 ...
@@ -242,14 +238,20 @@ switch FitType
         % the predicted offset.
         CorrAtOffset = PolyFitFunction(RawOffsetFit);
         
-        % Construct appropriate arrays corresponding to x,y,z that intersect the
-        % max integer offset found above (to be used later).
+        % Construct appropriate arrays corresponding to x,y,z that 
+        % intersect the max integer offset found above (to be used later).
         XPeakArray = ones(1, numel(RepArrayX)) * RawOffsetIndices(1);
         YPeakArray = ones(1, numel(RepArrayY)) * RawOffsetIndices(2);
         ZPeakArray = ones(1, numel(RepArrayZ)) * RawOffsetIndices(3);
-        XFitAtPeak = PolyFitFunction([XArrayDense; YPeakArray; ZPeakArray]);
-        YFitAtPeak = PolyFitFunction([XPeakArray; YArrayDense; ZPeakArray]);
-        ZFitAtPeak = PolyFitFunction([XPeakArray; YPeakArray; ZArrayDense]);
+        XFitAtPeak = PolyFitFunction(...
+            [XArrayDense; YPeakArray; ZPeakArray]);
+        YFitAtPeak = PolyFitFunction(...
+            [XPeakArray; YArrayDense; ZPeakArray]);
+        ZFitAtPeak = PolyFitFunction(...
+            [XPeakArray; YPeakArray; ZArrayDense]);
+        XArrayDense = linspace(1, 2*MaxOffset(1)+1, size(Stack1, 1));
+        YArrayDense = linspace(1, 2*MaxOffset(2)+1, size(Stack1, 2));
+        ZArrayDense = linspace(1, 2*MaxOffset(3)+1, size(Stack1, 3));
         
         % PolyFitArray = Beta(1) + Beta(2)*RepArrayX + Beta(3)*RepArrayX.^2 ...
         %     + Beta(4)*RepArrayY + Beta(5)*RepArrayY.^2 ...
@@ -261,37 +263,52 @@ switch FitType
     case '1D'
         % Fit a second order polynomial through a line varying with x
         % at the peak of the cross-correlation in y, z, and use that
-        % polynomial to predict an offset.
-        XData = XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3));
-        XArray = (1:2*MaxOffset(1)+1).';
+        % polynomial to predict an offset.  If possible, center the fit 
+        % around the integer peak of the cross-correlation.
+        % NOTE: This only fits to a total of five datapoints.
+        XArray = (max(1, RawOffsetIndices(1)-2) ...
+            : min(RawOffsetIndices(1)+MaxOffset(1), ...
+            RawOffsetIndices(1)+2)).';
+        XData = XCorr3D(XArray, RawOffsetIndices(2), RawOffsetIndices(3));
         X = [ones(numel(XArray), 1), XArray, XArray.^2];
         Lambda = 0; % ridge regression parameter
         Beta = ((X.'*X + Lambda*eye(size(X, 2))) \ X.') * XData;
         RawOffsetFitX = -Beta(2) / (2 * Beta(3));
         PolyFitFunctionX = @(R) Beta(1) + Beta(2)*R + Beta(3)*R.^2;
-        XFitAtPeak = PolyFitFunctionX(XArrayDense);
         
         % Fit a second order polynomial through a line varying with y
         % at the peak of the cross-correlation in x, z.
-        YData = XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)).';
-        YArray = (1:2*MaxOffset(2)+1).';
+        YArray = (max(1, RawOffsetIndices(2)-2) ...
+            : min(RawOffsetIndices(2)+MaxOffset(2), ...
+            RawOffsetIndices(2)+2)).';
+        YData = ...
+            XCorr3D(RawOffsetIndices(1), YArray, RawOffsetIndices(3)).';
         X = [ones(numel(YArray), 1), YArray, YArray.^2];
         Lambda = 0; % ridge regression parameter
         Beta = ((X.'*X + Lambda*eye(size(X, 2))) \ X.') * YData;
         RawOffsetFitY = -Beta(2) / (2 * Beta(3));
-        PolyFitFunctionY = @(R) Beta(1) + Beta(2)*R + Beta(3)*R.^2;
-        YFitAtPeak = PolyFitFunctionY(YArrayDense);
+        PolyFitFunctionY = @(R) Beta(1) + Beta(2)*R + Beta(3)*R.^2;        
         
         % Fit a second order polynomial through a line varying with z
         % at the peak of the cross-correlation in x, y.
+        ZArray = (max(1, RawOffsetIndices(3)-2) ...
+            : min(RawOffsetIndices(3)+MaxOffset(3), ...
+            RawOffsetIndices(3)+2)).';
         ZData = squeeze(...
-            XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :));
-        ZArray = (1:2*MaxOffset(3)+1).';
+            XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), ZArray));
         X = [ones(numel(ZArray), 1), ZArray, ZArray.^2];
         Lambda = 0; % ridge regression parameter
         Beta = ((X.'*X + Lambda*eye(size(X, 2))) \ X.') * ZData;
         RawOffsetFitZ = -Beta(2) / (2 * Beta(3));
         PolyFitFunctionZ = @(R) Beta(1) + Beta(2)*R + Beta(3)*R.^2;
+            
+        % Create arrays of the polynomial fits to use for visualization
+        % later on.
+        XArrayDense = linspace(XArray(1), XArray(end), size(Stack1, 1));
+        YArrayDense = linspace(YArray(1), YArray(end), size(Stack1, 2));
+        ZArrayDense = linspace(ZArray(1), ZArray(end), size(Stack1, 3));
+        XFitAtPeak = PolyFitFunctionX(XArrayDense);
+        YFitAtPeak = PolyFitFunctionY(YArrayDense);
         ZFitAtPeak = PolyFitFunctionZ(ZArrayDense);
         
         % Compute the predicted offset based on the polynomial fits.
