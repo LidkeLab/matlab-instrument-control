@@ -162,39 +162,6 @@ XFitAtPeak = PolyFitFunction([XArray; YPeakArray; ZPeakArray]);
 YFitAtPeak = PolyFitFunction([XPeakArray; YArray; ZPeakArray]);
 ZFitAtPeak = PolyFitFunction([XPeakArray; YPeakArray; ZArray]);
 
-% Display line sections through the integer location of the
-% cross-correlation, overlain on the fit along those lines.
-FigureWindow = findobj('Tag', 'CorrWindow');
-if isempty(FigureWindow)
-    FigureWindow = figure('Tag', 'CorrWindow');
-end
-clf(FigureWindow); % clear the figure window
-figure(FigureWindow); % ensure we plot into the correct figure
-subplot(3, 1, 1)
-plot(-MaxOffset(1):MaxOffset(1), ...
-    XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3)), 'x')
-hold on
-plot(XArray-MaxOffset(1)-1, XFitAtPeak)
-title('X Correlation')
-xlabel('Pixel Offset')
-ylabel('Correlation Coefficient')
-subplot(3, 1, 2)
-plot(-MaxOffset(2):MaxOffset(2), ...
-    XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)), 'x')
-hold on
-plot(YArray-MaxOffset(2)-1, YFitAtPeak)
-title('Y Correlation')
-xlabel('Pixel Offset')
-ylabel('Correlation Coefficient')
-subplot(3, 1, 3)
-plot(-MaxOffset(3):MaxOffset(3), ...
-    squeeze(XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :)), 'x')
-hold on
-plot(ZArray-MaxOffset(3)-1, ZFitAtPeak)
-title('Y Correlation')
-xlabel('Pixel Offset')
-ylabel('Correlation Coefficient')
-
 % Determine the raw index offset based on the peak location of the
 % polynomial, computing the matrix form found by maximizing the fitted 
 % polynomial (i.e. set gradient of polynomial to 0 vector, solve with
@@ -211,5 +178,34 @@ SubPixelOffset = RawOffsetFit - MaxOffset - 1;
 % Determine the correlation coefficient of the polynomial fit at the
 % selected offset.
 CorrAtOffset = PolyFitFunction(SubPixelOffset + MaxOffset + 1);
+
+% Display line sections through the integer location of the
+% cross-correlation, overlain on the fit along those lines.
+FigureWindow = findobj('Tag', 'CorrWindow');
+if isempty(FigureWindow)
+    FigureWindow = figure('Tag', 'CorrWindow');
+end
+clf(FigureWindow); % clear the figure window
+figure(FigureWindow); % ensure we plot into the correct figure
+subplot(3, 1, 1)
+plot(-MaxOffset(1):MaxOffset(1), ...
+    XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3)), 'x')
+hold on
+plot(XArray-MaxOffset(1)-1, XFitAtPeak)
+title('X Correlation')
+subplot(3, 1, 2)
+plot(-MaxOffset(2):MaxOffset(2), ...
+    XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)), 'x')
+hold on
+plot(YArray-MaxOffset(2)-1, YFitAtPeak)
+title('Y Correlation')
+ylabel('Correlation Coefficient')
+subplot(3, 1, 3)
+plot(-MaxOffset(3):MaxOffset(3), ...
+    squeeze(XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :)), 'x')
+hold on
+plot(ZArray-MaxOffset(3)-1, ZFitAtPeak)
+title('Z Correlation')
+xlabel('Pixel Offset')
 
 end
