@@ -714,7 +714,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     end
     methods (Static)
         [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
-            findStackOffset(Stack1, Stack2, Method, MaxOffset)
+            findStackOffset(Stack1, Stack2, Method, MaxOffset, FitType)
     end
     
     
