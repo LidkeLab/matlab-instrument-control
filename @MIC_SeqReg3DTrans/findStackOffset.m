@@ -1,5 +1,5 @@
 function [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
-    findStackOffset(Stack1, Stack2, Method, MaxOffset, FitType)
+    findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType)
 %Estimates a sub-pixel offset between two stacks.
 % Method 'FFT' is based on the  standard FFT based XCorr with whitening, 
 % but the offset is determined with the small offset assumption: only 
@@ -18,11 +18,11 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
 
 
 % Set default parameter values if needed.
-if ~exist('Method', 'var')
-    Method = 'FFT';
-end
 if ~exist('MaxOffset', 'var')
     MaxOffset = [2; 2; 2];
+end
+if ~exist('Method', 'var')
+    Method = 'FFT';
 end
 if ~exist('FitType', 'var')
     FitType = '3D';
@@ -186,6 +186,11 @@ if strcmpi(Method, 'FFT')
     PixelOffset = -PixelOffset;
 end
 
+% Define coordinate vectors for later use.
+XArrayDense = linspace(1, 2*MaxOffset(1)+1, size(Stack1, 1));
+YArrayDense = linspace(1, 2*MaxOffset(2)+1, size(Stack1, 2));
+ZArrayDense = linspace(1, 2*MaxOffset(3)+1, size(Stack1, 3));
+
 % Fit the cross-correlation based on input FitType.
 switch FitType
     case '3D'
@@ -242,12 +247,9 @@ switch FitType
         XPeakArray = ones(1, numel(RepArrayX)) * RawOffsetIndices(1);
         YPeakArray = ones(1, numel(RepArrayY)) * RawOffsetIndices(2);
         ZPeakArray = ones(1, numel(RepArrayZ)) * RawOffsetIndices(3);
-        XArray = linspace(1, 2*MaxOffset(1)+1, size(Stack1, 1));
-        YArray = linspace(1, 2*MaxOffset(2)+1, size(Stack1, 2));
-        ZArray = linspace(1, 2*MaxOffset(3)+1, size(Stack1, 3));
-        XFitAtPeak = PolyFitFunction([XArray; YPeakArray; ZPeakArray]);
-        YFitAtPeak = PolyFitFunction([XPeakArray; YArray; ZPeakArray]);
-        ZFitAtPeak = PolyFitFunction([XPeakArray; YPeakArray; ZArray]);
+        XFitAtPeak = PolyFitFunction([XArrayDense; YPeakArray; ZPeakArray]);
+        YFitAtPeak = PolyFitFunction([XPeakArray; YArrayDense; ZPeakArray]);
+        ZFitAtPeak = PolyFitFunction([XPeakArray; YPeakArray; ZArrayDense]);
         
         % PolyFitArray = Beta(1) + Beta(2)*RepArrayX + Beta(3)*RepArrayX.^2 ...
         %     + Beta(4)*RepArrayY + Beta(5)*RepArrayY.^2 ...
@@ -267,7 +269,7 @@ switch FitType
         Beta = ((X.'*X + Lambda*eye(size(X, 2))) \ X.') * XData;
         RawOffsetFitX = -Beta(2) / (2 * Beta(3));
         PolyFitFunctionX = @(R) Beta(1) + Beta(2)*R + Beta(3)*R.^2;
-        XFitAtPeak = PolyFitFunctionX(XArray);
+        XFitAtPeak = PolyFitFunctionX(XArrayDense);
         
         % Fit a second order polynomial through a line varying with y
         % at the peak of the cross-correlation in x, z.
@@ -278,7 +280,7 @@ switch FitType
         Beta = ((X.'*X + Lambda*eye(size(X, 2))) \ X.') * YData;
         RawOffsetFitY = -Beta(2) / (2 * Beta(3));
         PolyFitFunctionY = @(R) Beta(1) + Beta(2)*R + Beta(3)*R.^2;
-        YFitAtPeak = PolyFitFunctionY(YArray);
+        YFitAtPeak = PolyFitFunctionY(YArrayDense);
         
         % Fit a second order polynomial through a line varying with z
         % at the peak of the cross-correlation in x, y.
@@ -290,7 +292,7 @@ switch FitType
         Beta = ((X.'*X + Lambda*eye(size(X, 2))) \ X.') * ZData;
         RawOffsetFitZ = -Beta(2) / (2 * Beta(3));
         PolyFitFunctionZ = @(R) Beta(1) + Beta(2)*R + Beta(3)*R.^2;
-        ZFitAtPeak = PolyFitFunctionZ(ZArray);
+        ZFitAtPeak = PolyFitFunctionZ(ZArrayDense);
         
         % Compute the predicted offset based on the polynomial fits.
         RawOffsetFit = [RawOffsetFitX; RawOffsetFitY; RawOffsetFitZ];
@@ -320,20 +322,20 @@ subplot(3, 1, 1)
 plot(-MaxOffset(1):MaxOffset(1), ...
     XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3)), 'x')
 hold on
-plot(XArray-MaxOffset(1)-1, XFitAtPeak)
+plot(XArrayDense-MaxOffset(1)-1, XFitAtPeak)
 title('X Correlation')
 subplot(3, 1, 2)
 plot(-MaxOffset(2):MaxOffset(2), ...
     XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)), 'x')
 hold on
-plot(YArray-MaxOffset(2)-1, YFitAtPeak)
+plot(YArrayDense-MaxOffset(2)-1, YFitAtPeak)
 title('Y Correlation')
 ylabel('Correlation Coefficient')
 subplot(3, 1, 3)
 plot(-MaxOffset(3):MaxOffset(3), ...
     squeeze(XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :)), 'x')
 hold on
-plot(ZArray-MaxOffset(3)-1, ZFitAtPeak)
+plot(ZArrayDense-MaxOffset(3)-1, ZFitAtPeak)
 title('Z Correlation')
 xlabel('Pixel Offset')
 
