@@ -423,9 +423,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
 
         function align2imageFit(obj,RefStruct)
             
-            iter=0;
+            iter=1;
             withintol=0;
-            while (withintol==0)&&(iter<obj.MaxIter) 
+            while (withintol==0)&&(iter<=obj.MaxIter)
                 X=obj.StagePiezoX.getPosition();
                 Y=obj.StagePiezoY.getPosition();
                 Z=obj.StagePiezoZ.getPosition();
@@ -434,8 +434,19 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 % reference image or to a reference stack and proceed with
                 % the appropriate method.
                 if obj.UseStackCorrelation
+                    % Set parameters based on the iteration.
+                    if iter == 1
+                        MaxOffset = [10; 10; 10];
+                    elseif iter <= 3
+                        MaxOffset = [5; 5; 5];
+                    elseif iter <= 5
+                        MaxOffset = [2; 2; 2];
+                    else
+                        MaxOffset = [1; 1; 1];
+                    end
+                    
                     % Set limits on the extent to which we can shift.
-                    obj.ZStack_Step=0.1; % in case it's changed elsewhere
+                    obj.ZStack_Step = 0.1; % in case it's changed elsewhere
                     obj.ZStack_MaxDev = 2;
                     
                     % Extract the z-stack from the RefStruct.
@@ -447,18 +458,23 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    MaxOffset = [1; 1; 1]; % max possible xcorr offset
                     [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
                         obj.findStackOffset(ReferenceStack, ...
-                        CurrentStack, MaxOffset);
+                        CurrentStack, MaxOffset, 'FFT', '1D');
                     
                     % Decide which shift to proceed with based on
                     % PixelOffset and SubPixelOffset (SubPixelOffset can be
                     % innacurate).
-                    PixelOffset = SubPixelOffset ...
-                        .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
-                        + PixelOffset ...
-                        .* (abs(PixelOffset-SubPixelOffset) > 0.5);
+                    if iter > 1
+                        % On the first iteration, just use the raw pixel
+                        % offset (don't use the polynomial fit).
+                        % After the first iteration, proceed to use the
+                        % below formulation.
+                        PixelOffset = SubPixelOffset ...
+                            .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
+                            + PixelOffset ...
+                            .* (abs(PixelOffset-SubPixelOffset) > 0.5);
+                    end
                     PixelOffset = PixelOffset * obj.PixelSize; % pixel->um
                     
                     % Modify PixelOffset to correspond to physical piezo
@@ -540,8 +556,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 %check convergence
                 
                 withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
-                iter = iter + 1;
                 fprintf('Alignment iteration %i complete \n', iter)
+                iter = iter + 1;
             end
             
             
@@ -714,7 +730,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     end
     methods (Static)
         [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
-            findStackOffset(Stack1, Stack2, Method, MaxOffset, FitType)
+            findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType)
     end
     
     
