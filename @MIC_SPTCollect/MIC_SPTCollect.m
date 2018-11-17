@@ -56,7 +56,7 @@ classdef MIC_SPTCollect < MIC_Abstract
         Laser561Aq;           % Flag for using 561 laser during acquisition
         LampAq;               % Flag for using lamp during acquisition
         Lamp850Aq;            % Flag for using lamp 850 during acquisition
-        LampWait=0.5;         % Lamp wait time
+        LampWait=1;           % Time (s) to wait after turning on lamp before Reg3DTrans functions
         focus638Flag=0;       % Flag for using 638 laser during focus
         focus561Flag=0;       % Flag for using 561 laser during focus
         focusLampFlag=0;      % Flag for using Lamp IX71 during focus
@@ -190,6 +190,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                         obj.LampObj.setPower(obj.LampPower);
                         obj.LampObj.on;
                         fprintf('Calibrating camera and stage ...\n')
+                        pause(obj.LampWait);
                         obj.R3DObj.calibrate();
                         % change back camera setting to the values before using the R3DTrans class
                         obj.R3DObj.CameraObj.setShutter(0);
@@ -207,6 +208,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                         obj.Lamp850Obj.on;
                         obj.R3DObj.CameraObj.ROI=[515 770 467 722];
                         fprintf('Calibrating camera and stage ...\n')
+                        pause(obj.LampWait);
                         obj.R3DObj.calibrate();
                         obj.Lamp850Obj.off;
                         obj.IRPixelSize=obj.R3DObj.PixelSize;
@@ -282,6 +284,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on;
+                pause(obj.LampWait);
                 obj.R3DObj.getcurrentimage();
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
@@ -296,6 +299,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on;
+                pause(obj.LampWait);
                 obj.R3DObj.getcurrentimage();
                 obj.Lamp850Obj.off;
             end
@@ -326,6 +330,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on;
+                pause(obj.LampWait);
                 obj.R3DObj.align2imageFit();
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
@@ -340,6 +345,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on;
+                pause(obj.LampWait);
                 obj.R3DObj.align2imageFit();
                 obj.Lamp850Obj.off;
             end
@@ -366,6 +372,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on;
+                pause(obj.LampWait);
                 obj.R3DObj.takerefimage();
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
@@ -383,6 +390,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on;
+                pause(obj.LampWait);
                 obj.R3DObj.takerefimage();
                 obj.Lamp850Obj.off;
             end
@@ -486,7 +494,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             CamSet.EMGain.Value = obj.CameraEMGainHigh;
             obj.CameraObj.setCamProperties(CamSet);
             obj.LampObj.off;
-            %           pause(obj.LampWait);
+            %           pause(obj.obj.LampWait);
         end
         
         % this is for Lamp 850 and IRCamera
@@ -501,7 +509,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             obj.IRCameraObj.start_focus();
             %dipshow(out);
             obj.Lamp850Obj.off;
-            %           pause(obj.LampWait);
+            %           pause(obj.obj.LampWait);
         end
         
         function set_RegCamType(obj)
@@ -646,7 +654,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.CameraObj.setCamProperties(CamSet);
                 obj.CameraObj.ExpTime_Sequence=obj.ExpTime_Sequence_Set;
                 obj.CameraObj.SequenceLength=obj.NumFrames;
-                obj.CameraObj.AcquisitionTimeOutOffset=10000;
+%                 obj.CameraObj.AcquisitionTimeOutOffset=10000;
                 obj.CameraObj.ROI=obj.getROI('Andor');
                 %                 fprintf('EM Gain\n')
                 obj.CameraObj.CameraSetting.EMGain
