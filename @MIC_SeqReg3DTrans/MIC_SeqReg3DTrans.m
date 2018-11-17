@@ -434,16 +434,17 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 % reference image or to a reference stack and proceed with
                 % the appropriate method.
                 if obj.UseStackCorrelation
-                    % Set parameters based on the iteration.
-                    if iter == 1
-                        MaxOffset = [30; 30; 30];
-                    elseif iter <= 3
-                        MaxOffset = [5; 5; 5];
-                    elseif iter <= 5
-                        MaxOffset = [2; 2; 2];
-                    else
-                        MaxOffset = [1; 1; 1];
-                    end
+%                     % Set parameters based on the iteration.
+%                     if iter == 1
+%                         MaxOffset = [30; 30; 30];
+%                     elseif iter <= 3
+%                         MaxOffset = [5; 5; 5];
+%                     elseif iter <= 5
+%                         MaxOffset = [2; 2; 2];
+%                     else
+%                         MaxOffset = [1; 1; 1];
+%                     end
+                    MaxOffset = [30; 30; 30];
                     
                     % Set limits on the extent to which we can shift.
                     obj.ZStack_Step = 0.1; % in case it's changed elsewhere
@@ -479,10 +480,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     
                     % Modify PixelOffset to correspond to physical piezo
                     % dimensions.
-                    % NOTE: The extra (-) in front is to account for the
-                    %       convention used in findStackOffset.
-                    PixelOffset = -[PixelOffset(2), -PixelOffset(1), ...
-                        -PixelOffset(3)];
+                    PixelOffset = ...
+                        [PixelOffset(2), -PixelOffset(1), -PixelOffset(3)];
                     
                     % Move the piezos to adjust for the predicted shift.
                     CurrentPosX = obj.StagePiezoX.getPosition();
