@@ -121,7 +121,7 @@ b3=uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'radio','tag'
 
 
 b4=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Reg Camera Type','Position',[staticst+125 BGh-34 140 20]);
-b5 = uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'popupmenu', 'String',{'Andor Camera','IRCamera'},'Value',1,'Enable','on','BackgroundColor',[1 1 1],...
+b5 = uicontrol('Parent',handles.ButtonGroup_RegCollectType, 'Style', 'popupmenu', 'String',{'Andor Camera','IRCamera'},'Enable','on','BackgroundColor',[1 1 1],...
     'Position', [staticst+240 BGh-30 100 20],'CallBack',@RegCamType_set);
 
 b6=uicontrol('Parent',handles.ButtonGroup_RegCollectType,'Style','text','String','Active Stabilization','Position',[staticst+125 BGh-94 210 20]);
@@ -455,6 +455,12 @@ function zoom_set_IR(~,~)
         %         set(handles.Edit_RegExpTime,'string',num2str(obj.R3DObj.ExposureTime));
         set(handles.Edit_CameraNumFrames,'string',num2str(obj.NumFrames));
         %         set(handles.Edit_RegFileName,'string',obj.R3DObj.RefImageFile);
+        if strcmp(obj.RegCamType,'Andor Camera')
+            v=1;
+        elseif strcmp(obj.RegCamType,'IRCamera')
+            v=2;
+        end
+        set(b5,'value',v);
         set(b7,'value',obj.ActiveRegCheck);
         set(handles.LP561,'string',obj.Laser561Low);
         set(handles.LP638,'string',obj.Laser638Low);
