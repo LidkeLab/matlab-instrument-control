@@ -436,7 +436,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 if obj.UseStackCorrelation
                     % Set parameters based on the iteration.
                     if iter == 1
-                        MaxOffset = [10; 10; 10];
+                        MaxOffset = [30; 30; 30];
                     elseif iter <= 3
                         MaxOffset = [5; 5; 5];
                     elseif iter <= 5
