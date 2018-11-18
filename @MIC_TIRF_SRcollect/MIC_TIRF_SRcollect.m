@@ -1,4 +1,4 @@
-classdef MIC_TIRF_SRcollect < MIC_Abstract
+classdef MIC_TIRF_SRcollectNew < MIC_Abstract
 % MIC_TIRF_SRcollect: Matlab instrument class for controlling TIRF
 % microscope in room 118.
 %
@@ -144,21 +144,31 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.LampPower = 50;
                 % Registration object
                 fprintf('Initializing Registration object\n')
-                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.LampObj,f);
+                obj.R3DObj=MIC_Reg3DTransNew(obj.CameraObj,obj.StageObj,f);
                 if ~exist(f,'file')
-                    obj.CameraObj.ROI=[1 256 1 256];
-                    obj.R3DObj.calibratePixelSize;
+                    %set the Andor Camera
+                        CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                        CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                        EMGTemp = CamSet.EMGain.Value;
+                        CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                        obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                        obj.R3DObj.CameraObj.setShutter(1);
+                        
+                        %set the lamp
+                        if isempty(obj.LampPower) || obj.LampPower==0
+                            obj.LampPower=obj.LampObj.MaxPower/2;
+                        end
+                        obj.LampObj.setPower(obj.LampPower);
+                        obj.LampObj.on;
+                        fprintf('Calibrating camera and stage ...\n')
+                        pause(obj.LampWait);
+                        obj.R3DObj.calibrate;
                 end  
                 if exist(f,'file')
                     a=load(f);
                     obj.PixelSize=a.PixelSize;
                     clear a;
                 end
-                obj.R3DObj.LampPower=obj.LampPower;
-                obj.R3DObj.LampWait=2.5;
-                obj.R3DObj.CamShutter=true;
-                obj.R3DObj.ChangeEMgain=true;
-                obj.R3DObj.EMgain=2;
                 obj.R3DObj.ChangeExpTime=true;
                 obj.R3DObj.ExposureTime=0.01;
            catch ME
@@ -197,14 +207,54 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
         
         function takecurrent(obj)
             % captures and displays current image
-            obj.LampObj.setPower(obj.LampPower);
-            obj.R3DObj.getcurrentimage();
+            %set the Andor Camera
+                CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                EMGTemp = CamSet.EMGain.Value;
+                CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.R3DObj.CameraObj.setShutter(1);
+                
+                %set the lamp
+                if isempty(obj.LampPower) || obj.LampPower==0
+                    obj.LampPower=obj.LampObj.MaxPower/2;
+                end
+                obj.LampObj.setPower(obj.LampPower);
+                obj.LampObj.on;
+                pause(obj.LampWait);
+                obj.R3DObj.getcurrentimage();
+                % change back camera setting to the values before using the R3DTrans class
+                obj.R3DObj.CameraObj.setShutter(0);
+                CamSet.EMGain.Value = EMGTemp;
+                CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.LampObj.off;
         end
         
         function align(obj)
             % Align to current reference image
-            obj.LampObj.setPower(obj.LampPower);
-            obj.R3DObj.align2imageFit();
+             %set the Andor Camera
+                CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                EMGTemp = CamSet.EMGain.Value;
+                CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.R3DObj.CameraObj.setShutter(1);
+                
+                %set the lamp
+                if isempty(obj.LampPower) || obj.LampPower==0
+                    obj.LampPower=obj.LampObj.MaxPower/2;
+                end
+                obj.LampObj.setPower(obj.LampPower);
+                obj.LampObj.on;
+                pause(obj.LampWait);
+                obj.R3DObj.align2imageFit();
+                % change back camera setting to the values before using the R3DTrans class
+                obj.R3DObj.CameraObj.setShutter(0);
+                CamSet.EMGain.Value = EMGTemp;
+                CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.LampObj.off;
         end
         
         function showref(obj)
@@ -214,8 +264,27 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
         
         function takeref(obj)
             % Captures reference image
-            obj.setLampPower();
-            obj.R3DObj.takerefimage();
+            %set the Andor Camera
+                CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                EMGTemp = CamSet.EMGain.Value;
+                CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.R3DObj.CameraObj.setShutter(1);
+                %set the lamp
+                if isempty(obj.LampPower) || obj.LampPower==0
+                    obj.LampPower=obj.LampObj.MaxPower/2;
+                end
+                obj.LampObj.setPower(obj.LampPower);
+                obj.LampObj.on;
+                pause(obj.LampWait);
+                obj.R3DObj.takerefimage();
+                % change back camera setting to the values before using the R3DTrans class
+                obj.R3DObj.CameraObj.setShutter(0);
+                CamSet.EMGain.Value = EMGTemp;
+                CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                obj.LampObj.off;
         end
         
         function saveref(obj)
@@ -370,7 +439,7 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
            
            switch obj.RegType
                 case 'Self' %take and save the reference image
-                    obj.R3DObj.takerefimage();
+                    obj.takeref();
                     f=fullfile(obj.SaveDir,[obj.BaseFileName s '_ReferenceImage']);
                     Image_Reference=obj.R3DObj.Image_Reference; %#ok<NASGU>
                     save(f,'Image_Reference');
@@ -400,8 +469,8 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 %align to image
                 switch obj.RegType
                     case 'None'
-                    otherwise     
-                        obj.R3DObj.align2imageFit();
+                    otherwise
+                        obj.align();
                 end
                 
                 %Setup laser for aquisition
