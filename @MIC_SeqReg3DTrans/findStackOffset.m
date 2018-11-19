@@ -99,7 +99,8 @@ switch Method
         % [0, 0, 0] offset introduced by the zero-padded edge effects),
         % scaling by max(XCorr3DBinary(:)) to re-convert to a correlation
         % coefficient.
-        XCorr3D = (XCorr3D ./ XCorr3DBinary) * max(XCorr3DBinary(:));
+        XCorr3D = (XCorr3D ./ XCorr3DBinary) ...
+            * min(numel(Stack1Binary), numel(Stack2Binary));
         
         % Shift the cross-correlation image such that an auto-correlation 
         % image will have it's energy peak at the center of the 3D image.
