@@ -31,11 +31,12 @@ FileName = fullfile(DirectoryName, FileName);
 % Prepare for .h5 file writing.
 % NOTE: For now, obj.SaveFileType must be 'h5'.
 switch obj.SaveFileType
-    case 'h5'
+    case {'h5', 'h5DataGroups'}
+        % For either .h5 file save type, we'll still use the same
+        % supergroup of Channel01.
         FileH5 = FileName;
         MIC_H5.createFile(FileH5);
         MIC_H5.createGroup(FileH5, 'Channel01');
-        MIC_H5.createGroup(FileH5, 'Channel01/Zposition001');
     otherwise
         error('StartSequence:: unknown file save type')
 end
@@ -74,10 +75,11 @@ catch
     obj.StatusString = ...
         'Exporting object Data and Children with exportState()...';
     fprintf(...
-        'Saving exportables from exportState().................... \n')
+        'Saving exportables from exportState()....................\n')
     switch obj.SaveFileType
-        % For now, we will stick to saving data to a .h5 file.
-        case 'h5'
+        case {'h5', 'h5DataGroups'}
+            % For either .h5 file save type, we'll still use the same
+            % supergroup of Channel01/Zposition001.
             SequenceName = 'Channel01/Zposition001';
             MIC_H5.createGroup(FileH5, SequenceName);
             obj.save2hdf5(FileH5, SequenceName);
@@ -198,11 +200,31 @@ for ii = 1:obj.NumberOfSequences
     obj.CameraSCMOS.setup_acquisition();
     Sequence = obj.CameraSCMOS.start_sequence();
     switch obj.SaveFileType
-        % For now, we will stick to saving data to a .h5 file.
         case 'h5'
+            % Place the current dataset in the same group as all other
+            % datasets.
             SequenceName = sprintf('Data%04d', ii);
             MIC_H5.writeAsync_uint16(FileH5, ...
                 'Channel01/Zposition001', SequenceName, Sequence);
+        case 'h5DataGroups'
+            % Create a new group for the current dataset, so each dataset
+            % will have its own group in the .h5 file.
+            DataName = sprintf('Data%04d', ii);
+            SequenceName = sprintf('Channel01/Zposition001/%s', ...
+                DataName);
+            MIC_H5.createGroup(FileH5, SequenceName);
+            MIC_H5.writeAsync_uint16(...
+                FileH5, SequenceName, DataName, Sequence);
+            
+            % Save the exportState() exportables.
+            obj.StatusString = ['Exporting object Data and ', ...
+                'Children with exportState()...'];
+            fprintf('Saving exportables from exportState().........\n')
+            MIC_H5.createGroup(FileH5, SequenceName);
+            obj.save2hdf5(FileH5, SequenceName);
+            fprintf('Exportables from exportState() have been saved\n')
+            obj.StatusString = '';
+            fprintf('Saving exportables from exportState() complete\n')
         otherwise
             error('StartSequence:: unknown SaveFileType')
     end
@@ -213,7 +235,7 @@ for ii = 1:obj.NumberOfSequences
     end
 end
 obj.StatusString = '';
-fprintf('Data collection complete \n')
+fprintf('Data collection complete\n')
 
 % Ensure that the lasers are not reaching the sample.
 obj.Shutter.close(); % close shutter instead of turning off the laser
@@ -229,18 +251,21 @@ if obj.UseActiveReg
 end
 
 % Save the acquisition data.
-obj.StatusString = ...
-    'Exporting object Data and Children with exportState()...';
-fprintf('Saving exportables from exportState().................... \n')
 switch obj.SaveFileType
-    % For now, we will stick to saving data to a .h5 file.
     case 'h5'
+        obj.StatusString = ...
+            'Exporting object Data and Children with exportState()...';
+        fprintf('Saving exportables from exportState()................ \n')
         SequenceName = 'Channel01/Zposition001';
         MIC_H5.createGroup(FileH5, SequenceName);
         obj.save2hdf5(FileH5, SequenceName);
+        fprintf('Saving exportables from exportState() complete \n')
+        obj.StatusString = '';
+    case 'h5DataGroups'
+        % In this case, we don't need to do anything since the export state
+        % was already performed previously.
     otherwise
         error('StartSequence:: unknown SaveFileType')
 end
-obj.StatusString = '';
-fprintf('Saving exportables from exportState() complete \n')
+
 end
