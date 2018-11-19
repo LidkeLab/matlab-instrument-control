@@ -109,14 +109,14 @@ classdef MIC_SPTCollect < MIC_Abstract
             [p,~]=fileparts(which('MIC_SPTCollect'));
             obj.CalFilePath=p;
             
-            if exist(fullfile(p,'SPT_AndorPixelSize.mat'),'file')
-                a=load(fullfile(p,'SPT_AndorPixelSize.mat'));
+            if exist(fullfile(p,'SPT_AndorCalibrate.mat'),'file')
+                a=load(fullfile(p,'SPT_AndorCalibrate.mat'));
                 obj.PixelSize=a.PixelSize;
                 clear a
             end
             
-            if exist(fullfile(p,'SPT_IRPixelSize.mat'),'file')
-                a=load(fullfile(p,'SPT_IRPixelSize.mat'));
+            if exist(fullfile(p,'SPT_IRCalibrate.mat'),'file')
+                a=load(fullfile(p,'SPT_IRCalibrate.mat'));
                 obj.IRPixelSize=a.PixelSize;
                 clear a
             end
@@ -166,10 +166,10 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %                 Registration object
                 fprintf('Initializing Registration object\n')
                 if strcmp(obj.RegCamType,'Andor Camera')
-                    f=fullfile(obj.CalFilePath,'SPT_AndorPixelSize.mat')
+                    f=fullfile(obj.CalFilePath,'SPT_AndorCalibrate.mat')
                     obj.R3DObj=MIC_Reg3DTransNew(obj.CameraObj,obj.StageObj,f);
                 elseif strcmp(obj.RegCamType,'IRCamera')
-                    f=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat')
+                    f=fullfile(obj.CalFilePath,'SPT_IRCalibrate.mat')
                     obj.R3DObj=MIC_Reg3DTransNew(obj.IRCameraObj,obj.StageObj,f);
                 end
                 
