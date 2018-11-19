@@ -1,19 +1,19 @@
 %Script for tracking and SR
-
-SPT.Lamp850Obj.setPower(10);
+%test Merge
+SPT.Lamp850Obj.setPower(50);
 SPT.Lamp850Obj.on;
 SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
-SPT.IRCameraObj.SequenceLength=110;
+SPT.IRCameraObj.SequenceLength=50;
 SPT.IRCameraObj.start_sequence;
-WashwithHANKS=SPT.IRCameraObj.Data;
+GA=SPT.IRCameraObj.Data;
 
-SPT.Lamp850Obj.setPower(10);
+SPT.Lamp850Obj.setPower(50);
 SPT.Lamp850Obj.on;
 SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
 SPT.IRCameraObj.start_capture;
 FullImageROI_bfTracking=SPT.IRCameraObj.Data;
 
-SPT.Lamp850Obj.setPower(15);
+SPT.Lamp850Obj.setPower(50);
 SPT.Lamp850Obj.on;
 SPT.IRCameraObj.ROI=SPT.getROI('IRThorlabs');
 SPT.IRCameraObj.start_capture;
