@@ -91,7 +91,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
         AbortNow = 0; % Flag for aborting acquisition
-        SaveFileType = 'h5'; % .h5 currently only option
+        SaveFileType = 'h5DataGroups'; % 'h5' or 'h5DataGroups'
         PublishResults = 0; % if 1, call PublishSeqSRResults after imaging
     end
     

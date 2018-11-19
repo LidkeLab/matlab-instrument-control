@@ -268,8 +268,7 @@ switch FitType
         % around the integer peak of the cross-correlation.
         % NOTE: This only fits to a total of five datapoints.
         XArray = (max(1, RawOffsetIndices(1)-2) ...
-            : min(RawOffsetIndices(1)+MaxOffset(1), ...
-            RawOffsetIndices(1)+2)).';
+            : min(2*MaxOffset(1)+1, RawOffsetIndices(1)+2)).';
         XData = XCorr3D(XArray, RawOffsetIndices(2), RawOffsetIndices(3));
         X = [ones(numel(XArray), 1), XArray, XArray.^2];
         Lambda = 0; % ridge regression parameter
@@ -280,8 +279,7 @@ switch FitType
         % Fit a second order polynomial through a line varying with y
         % at the peak of the cross-correlation in x, z.
         YArray = (max(1, RawOffsetIndices(2)-2) ...
-            : min(RawOffsetIndices(2)+MaxOffset(2), ...
-            RawOffsetIndices(2)+2)).';
+            : min(2*MaxOffset(2)+1, RawOffsetIndices(2)+2)).';
         YData = ...
             XCorr3D(RawOffsetIndices(1), YArray, RawOffsetIndices(3)).';
         X = [ones(numel(YArray), 1), YArray, YArray.^2];
@@ -293,8 +291,7 @@ switch FitType
         % Fit a second order polynomial through a line varying with z
         % at the peak of the cross-correlation in x, y.
         ZArray = (max(1, RawOffsetIndices(3)-2) ...
-            : min(RawOffsetIndices(3)+MaxOffset(3), ...
-            RawOffsetIndices(3)+2)).';
+            : min(2*MaxOffset(3)+1, RawOffsetIndices(3)+2)).';
         ZData = squeeze(...
             XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), ZArray));
         X = [ones(numel(ZArray), 1), ZArray, ZArray.^2];
