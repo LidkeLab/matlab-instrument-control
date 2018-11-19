@@ -455,8 +455,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                         %       between the peak and offset.  Otherwise, we
                         %       keep the old offset.
                         SelectBit = abs(SubPixelOffset) > MaxOffset;
-                        MaxOffset = SelectBit ...
-                            .* 2 * abs(SubPixelOffset - MaxOffset) + ...
+                        MaxOffset = SelectBit .* ceil(...
+                            (2 * abs(SubPixelOffset - MaxOffset))) + ...
                             ~SelectBit .* MaxOffset;
                     else
                         % In this case, we seem to be close to the peak and
@@ -546,7 +546,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     obj.StagePiezoZ.setPosition(Z);
                 end
                 
-                obj.ErrorSignal_History=cat(1,obj.ErrorSignal_History,obj.ErrorSignal);
+%                 obj.ErrorSignal_History = [obj.ErrorSignal_History; ...
+%                     obj.ErrorSignal];
                 
                 %show overlay
                 obj.Image_Current=obj.capture_single();
