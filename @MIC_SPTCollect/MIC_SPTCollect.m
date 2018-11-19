@@ -41,10 +41,14 @@ classdef MIC_SPTCollect < MIC_Abstract
         CameraEMGainLow=2;              % Low camera gain value
         CameraROI=1;                    % Camera ROI (see gui for specifics)
         PixelSize;                      % Pixel size determined from calibration Andor Camera
+        OrientMatrix;                   % unitary matrix to show orientation 
+                                        % between Andor Camera and Stage([a b;c d])
         IRExpTime_Focus_Set=0.01;       % Exposure time during focus IR Camera
         IRExpTime_Sequence_Set=0.01;    % Exposure time during sequence IR Camera
         IRCameraROI=2;                  % IRCamera ROI (see gui for specifics)
         IRPixelSize;                    % PixelSize for IR Camera
+        IROrientMatrix;                 % unitary matrix to show orientation 
+                                        % between IR Camera and Stage([a b;c d])
         % Light source params
         Laser638Low;          % Low power 638 laser
         Laser561Low;          % Low power 561 laser
@@ -112,12 +116,14 @@ classdef MIC_SPTCollect < MIC_Abstract
             if exist(fullfile(p,'SPT_AndorCalibrate.mat'),'file')
                 a=load(fullfile(p,'SPT_AndorCalibrate.mat'));
                 obj.PixelSize=a.PixelSize;
+                obj.OrientMatrix=a.OrientMatrix;
                 clear a
             end
             
             if exist(fullfile(p,'SPT_IRCalibrate.mat'),'file')
                 a=load(fullfile(p,'SPT_IRCalibrate.mat'));
                 obj.IRPixelSize=a.PixelSize;
+                obj.IROrientMatrix=a.OrientMatrix;
                 clear a
             end
             

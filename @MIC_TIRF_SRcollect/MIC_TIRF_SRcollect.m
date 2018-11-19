@@ -51,8 +51,10 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
         CameraEMGainHigh=100;           % High camera gain value 
         CameraEMGainLow=2;              % Low camera gain value 
         CameraROI=8;                    % Camera ROI (see gui for specifics)
-        PixelSize;                       % Pixel size determined from calibration
-        
+        PixelSize;                      % Pixel size determined from calibration
+        OrientMatrix;                   % unitary matrix to show orientation 
+                                        % between Camera and Stage([a b;c d])
+
         % Light source params
         Laser405Low;    % Low power 405 laser
         Laser488Low;    % Low power 488 laser
