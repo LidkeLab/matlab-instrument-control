@@ -569,8 +569,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             
             
             if iter==obj.MaxIter
-                error('reached max iterations')
-%                 warning('reached max iterations')
+                warning('reached max iterations')
             end
             
         end
