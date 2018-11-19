@@ -167,10 +167,10 @@ classdef MIC_SPTCollect < MIC_Abstract
                 fprintf('Initializing Registration object\n')
                 if strcmp(obj.RegCamType,'Andor Camera')
                     f=fullfile(obj.CalFilePath,'SPT_AndorCalibrate.mat')
-                    obj.R3DObj=MIC_Reg3DTransNew(obj.CameraObj,obj.StageObj,f);
+                    obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,f);
                 elseif strcmp(obj.RegCamType,'IRCamera')
                     f=fullfile(obj.CalFilePath,'SPT_IRCalibrate.mat')
-                    obj.R3DObj=MIC_Reg3DTransNew(obj.IRCameraObj,obj.StageObj,f);
+                    obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,f);
                 end
                 
                 if ~exist(f,'file')
@@ -188,7 +188,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                             obj.LampPower=obj.LampObj.MaxPower/2;
                         end
                         obj.LampObj.setPower(obj.LampPower);
-                        obj.LampObj.on;
+                        obj.LampObj.on();
                         fprintf('Calibrating camera and stage ...\n')
                         pause(obj.LampWait);
                         obj.R3DObj.calibrate();
@@ -197,7 +197,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                         CamSet.EMGain.Value = EMGTemp;
                         CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
                         obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
-                        obj.LampObj.off;
+                        obj.LampObj.off();
                         obj.PixelSize=obj.R3DObj.PixelSize;
                     else strcmp(obj.RegCamType,'IRCamera');
                         %set the lamp
@@ -205,12 +205,12 @@ classdef MIC_SPTCollect < MIC_Abstract
                             obj.Lamp850Power=obj.Lamp850Obj.MaxPower/3;
                         end
                         obj.Lamp850Obj.setPower(obj.Lamp850Power);
-                        obj.Lamp850Obj.on;
+                        obj.Lamp850Obj.on();
                         obj.R3DObj.CameraObj.ROI=[515 770 467 722];
                         fprintf('Calibrating camera and stage ...\n')
                         pause(obj.LampWait);
                         obj.R3DObj.calibrate();
-                        obj.Lamp850Obj.off;
+                        obj.Lamp850Obj.off();
                         obj.IRPixelSize=obj.R3DObj.PixelSize;
                     end
                     clear a;
@@ -283,7 +283,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.LampPower=obj.LampObj.MaxPower/2;
                 end
                 obj.LampObj.setPower(obj.LampPower);
-                obj.LampObj.on;
+                obj.LampObj.on();
                 pause(obj.LampWait);
                 obj.R3DObj.getcurrentimage();
                 % change back camera setting to the values before using the R3DTrans class
@@ -291,17 +291,17 @@ classdef MIC_SPTCollect < MIC_Abstract
                 CamSet.EMGain.Value = EMGTemp;
                 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
                 obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
-                obj.LampObj.off;
+                obj.LampObj.off();
             else strcmp(obj.RegCamType,'IRCamera');
                 %set the lamp
                 if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
                     obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
                 end
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
-                obj.Lamp850Obj.on;
+                obj.Lamp850Obj.on();
                 pause(obj.LampWait);
                 obj.R3DObj.getcurrentimage();
-                obj.Lamp850Obj.off;
+                obj.Lamp850Obj.off();
             end
         end
         
@@ -329,7 +329,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.LampPower=obj.LampObj.MaxPower/2;
                 end
                 obj.LampObj.setPower(obj.LampPower);
-                obj.LampObj.on;
+                obj.LampObj.on();
                 pause(obj.LampWait);
                 obj.R3DObj.align2imageFit();
                 % change back camera setting to the values before using the R3DTrans class
@@ -337,17 +337,17 @@ classdef MIC_SPTCollect < MIC_Abstract
                 CamSet.EMGain.Value = EMGTemp;
                 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
                 obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
-                obj.LampObj.off;
+                obj.LampObj.off();
             else strcmp(obj.RegCamType,'IRCamera');
                 %set the lamp
                 if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
                     obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
                 end
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
-                obj.Lamp850Obj.on;
+                obj.Lamp850Obj.on();
                 pause(obj.LampWait);
                 obj.R3DObj.align2imageFit();
-                obj.Lamp850Obj.off;
+                obj.Lamp850Obj.off();
             end
         end
         
@@ -371,7 +371,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.LampPower=obj.LampObj.MaxPower/2;
                 end
                 obj.LampObj.setPower(obj.LampPower);
-                obj.LampObj.on;
+                obj.LampObj.on();
                 pause(obj.LampWait);
                 obj.R3DObj.takerefimage();
                 % change back camera setting to the values before using the R3DTrans class
@@ -379,7 +379,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 CamSet.EMGain.Value = EMGTemp;
                 CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
                 obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
-                obj.LampObj.off;
+                obj.LampObj.off();
             else strcmp(obj.RegCamType,'IRCamera');
                 if isempty(obj.IRCameraObj)
                     obj.IRCameraObj=MIC_ThorlabsIR();
@@ -389,10 +389,10 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
                 end
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
-                obj.Lamp850Obj.on;
+                obj.Lamp850Obj.on();
                 pause(obj.LampWait);
                 obj.R3DObj.takerefimage();
-                obj.Lamp850Obj.off;
+                obj.Lamp850Obj.off();
             end
             
         end
@@ -410,9 +410,9 @@ classdef MIC_SPTCollect < MIC_Abstract
             %        Lasers set up to 'low' power setting
             if obj.focus638Flag
                 obj.Laser638Obj.setPower(obj.Laser638Low);
-                obj.Laser638Obj.on;
+                obj.Laser638Obj.on();
             else
-                obj.Laser638Obj.off;
+                obj.Laser638Obj.off();
             end
             %                 if obj.focus561Flag
             %                     obj.Laser561Obj.setPower(obj.Laser561Low);
@@ -428,10 +428,10 @@ classdef MIC_SPTCollect < MIC_Abstract
             obj.CameraObj.setup_acquisition();
             out=obj.CameraObj.start_focus();
             % Turning lasers off
-            obj.Laser638Obj.off;
-            %             obj.Laser561.off;
-            obj.LampObj.off;
-            obj.Lamp850Obj.off;
+            obj.Laser638Obj.off();
+            %             obj.Laser561.off();
+            obj.LampObj.off();
+            obj.Lamp850Obj.off();
         end
         
         function focusHigh(obj)
@@ -442,15 +442,15 @@ classdef MIC_SPTCollect < MIC_Abstract
             %        Lasers set up to 'high' power setting
             if obj.focus638Flag
                 obj.Laser638Obj.setPower(obj.Laser638High);
-                obj.Laser638Obj.on;
+                obj.Laser638Obj.on();
             else
-                obj.Laser638Obj.off;
+                obj.Laser638Obj.off();
             end
             %     if obj.focus561Flag
             %         obj.Laser561Obj.setPower(obj.Laser561High);
-            %         obj.Laser561Obj.on;
+            %         obj.Laser561Obj.on();
             %     else
-            %         obj.Laser561Obj.off;
+            %         obj.Laser561Obj.off();
             %     end
             
             % Aquiring and displaying images
@@ -460,8 +460,8 @@ classdef MIC_SPTCollect < MIC_Abstract
             obj.CameraObj.setup_acquisition();
             out=obj.CameraObj.start_focus();
             % Turning lasers off
-            obj.Laser638Obj.off;
-            %     obj.Laser561Obj.off;
+            obj.Laser638Obj.off();
+            %     obj.Laser561Obj.off();
         end
         
         function setLampPower(obj,LampPower_in)
@@ -484,7 +484,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             CamSet.EMGain.Value = obj.CameraEMGainLow;
             obj.CameraObj.setCamProperties(CamSet);
             obj.LampObj.setPower(obj.LampPower);
-            obj.LampObj.on;
+            obj.LampObj.on();
             obj.CameraObj.ROI=obj.getROI('Andor');
             obj.CameraObj.ExpTime_Focus=obj.ExpTime_Focus_Set;
             obj.CameraObj.AcquisitionType = 'focus';
@@ -493,7 +493,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             %dipshow(out);
             CamSet.EMGain.Value = obj.CameraEMGainHigh;
             obj.CameraObj.setCamProperties(CamSet);
-            obj.LampObj.off;
+            obj.LampObj.off();
             %           pause(obj.obj.LampWait);
         end
         
@@ -502,13 +502,13 @@ classdef MIC_SPTCollect < MIC_Abstract
             % Continuous display of image with lamp on. Useful for focusing
             % of the microscopeon IRCamera
             obj.Lamp850Obj.setPower(obj.Lamp850Power);
-            obj.Lamp850Obj.on;
+            obj.Lamp850Obj.on();
             obj.IRCameraObj.ROI=obj.getROI('IRThorlabs');
             obj.IRCameraObj.ExpTime_Focus=obj.IRExpTime_Focus_Set;
             %             obj.IRCameraObj.AcquisitionType = 'focus';
             obj.IRCameraObj.start_focus();
             %dipshow(out);
-            obj.Lamp850Obj.off;
+            obj.Lamp850Obj.off();
             %           pause(obj.obj.LampWait);
         end
         
@@ -516,9 +516,9 @@ classdef MIC_SPTCollect < MIC_Abstract
             if strcmp(obj.RegCamType,'Andor Camera');
                 CalFileName=fullfile(obj.CalFilePath,'SPT_AndorPixelSize.mat');
                 if exist(CalFileName,'file')
-                    obj.R3DObj=MIC_Reg3DTransNew(obj.CameraObj,obj.StageObj,CalFileName);
+                    obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,CalFileName);
                 else
-                    obj.R3DObj=MIC_Reg3DTransNew(obj.CameraObj,obj.StageObj);
+                    obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj);
                     warning('Put nanogris as a sample to do the calibration for Reg3dTrans class')
                     obj.R3DObj.calibrate();
                 end
@@ -531,9 +531,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
                 if exist(CalFileName,'file')
-                    obj.R3DObj=MIC_Reg3DTransNew(obj.IRCameraObj,obj.StageObj,CalFileName);
+                    obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,CalFileName);
                 else
-                    obj.R3DObj=MIC_Reg3DTransNew(obj.IRCameraObj,obj.StageObj);
+                    obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj);
                     warning('Put nanogris as a sample to do the calibration for Reg3dTrans class')
                     obj.R3DObj.calibrate();
                 end
@@ -571,7 +571,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             %define IRCameraObj from different classes if SPT+SR is running
             if strcmp(obj.sequenceType,'Tracking+SRCollect');
                 if isvalid(obj.IRCameraObj)
-                    obj.IRCameraObj.delete;
+                    obj.IRCameraObj.delete();
                 end
                 obj.IRCameraObj=MIC_IRSyringPump();
                 obj.IRCameraObj.DisplayZoom=1;
@@ -584,9 +584,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.ActRegObj=MIC_ActiveReg3D_SPT(obj.IRCameraObj,obj.StageObj);
                 obj.ActRegObj.PixelSize=obj.IRPixelSize;
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
-                obj.Lamp850Obj.on
+                obj.Lamp850Obj.on()
                 obj.IRCameraObj.ROI=obj.getROI('IRThorlabs');
-                obj.ActRegObj.takeRefImageStack;
+                obj.ActRegObj.takeRefImageStack();
                 obj.ActRegObj.X_Current=[];
                 obj.ActRegObj.Y_Current=[];
                 obj.ActRegObj.Z_Current=[];
@@ -625,21 +625,21 @@ classdef MIC_SPTCollect < MIC_Abstract
                 %Setup laser for aquisition
                 if obj.Laser638Aq
                     obj.Laser638Obj.setPower(obj.Laser638High);
-                    obj.Laser638Obj.on;
+                    obj.Laser638Obj.on();
                 end
                 if obj.Laser561Aq
                     obj.Laser561Obj.setPower(obj.Laser561High);
-                    obj.Laser561Obj.on;
+                    obj.Laser561Obj.on();
                 end
                 
                 if obj.LampAq
                     obj.LampObj.setPower(obj.LampPower);
-                    obj.LampObj.on;
+                    obj.LampObj.on();
                 end
                 
                 if obj.Lamp850Aq
                     obj.Lamp850Obj.setPower(obj.LampPower);
-                    obj.Lamp850Obj.on;
+                    obj.Lamp850Obj.on();
                 end
                 
                 %Setup Camera
@@ -744,7 +744,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     
                     %Turn off Syringe Pump
                     obj.TimerSyringe=clock;
-                    obj.IRCameraObj.SP.stop %(?)
+                    obj.IRCameraObj.SP.stop() %(?)
                     fprintf('Syringe Pump is stopped\n')
                     
                     %                                         %clear IRCamera
@@ -753,10 +753,10 @@ classdef MIC_SPTCollect < MIC_Abstract
                 end
                 
                 %Turn off Laser
-                obj.Laser638Obj.off;
-                %         obj.Laser561Obj.off;
-                obj.LampObj.off;
-                obj.Lamp850Obj.off;
+                obj.Laser638Obj.off();
+                %         obj.Laser561Obj.off();
+                obj.LampObj.off();
+                obj.Lamp850Obj.off();
                 
                 if isempty(sequence)
                     errordlg('Window was closed before capture complete.  No Data Saved.','Capture Failed');
