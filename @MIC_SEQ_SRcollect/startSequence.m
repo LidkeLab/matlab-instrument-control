@@ -158,7 +158,7 @@ if obj.UsePreActivation
     % completed.
     obj.StatusString = '';
 end
-fprintf('Collecting data.......................................... \n')
+fprintf('Collecting data..........................................\n')
 for ii = 1:obj.NumberOfSequences
     % If AbortNow flag was set, do not continue.
     if obj.AbortNow
@@ -195,7 +195,7 @@ for ii = 1:obj.NumberOfSequences
     obj.Shutter.open();
     
     % Collect the sequence.
-    obj.StatusString = 'Acquiring data...';
+    obj.StatusString = sprintf('Acquiring data sequence %i..........', ii);
     obj.CameraSCMOS.AcquisitionType = 'sequence';
     obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
     obj.CameraSCMOS.setup_acquisition();

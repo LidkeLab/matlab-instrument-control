@@ -422,10 +422,14 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         
 
         function align2imageFit(obj,RefStruct)
-            
-            iter=1;
-            withintol=0;
-            while (withintol==0)&&(iter<=obj.MaxIter)
+            % Initialize misc. parameters.
+            iter = 0;
+            withintol = 0;
+            while (withintol == 0) && (iter <= obj.MaxIter)
+                % Increment the iteration counter.
+                iter = iter + 1;
+                
+                % Determine the current piezo positions.
                 X=obj.StagePiezoX.getPosition();
                 Y=obj.StagePiezoY.getPosition();
                 Z=obj.StagePiezoZ.getPosition();
@@ -564,7 +568,6 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 
                 withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
                 fprintf('Alignment iteration %i complete \n', iter)
-                iter = iter + 1;
             end
             
             
