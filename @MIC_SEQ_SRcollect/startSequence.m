@@ -37,6 +37,7 @@ switch obj.SaveFileType
         FileH5 = FileName;
         MIC_H5.createFile(FileH5);
         MIC_H5.createGroup(FileH5, 'Channel01');
+        MIC_H5.createGroup(FileH5, 'Channel01/Zposition001');
     otherwise
         error('StartSequence:: unknown file save type')
 end
