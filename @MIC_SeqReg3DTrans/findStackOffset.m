@@ -1,4 +1,4 @@
-function [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
+function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
     findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType)
 %Estimates a sub-pixel offset between two stacks.
 % Method 'FFT' is based on the  standard FFT based XCorr with whitening, 
@@ -15,6 +15,8 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
 % FitType '1D' fits second order polynomials to the lines along each of 
 % x, y, and z through the integer location of the cross-correlation
 % maximum.
+% MaxOffset is returned because it is sometimes modified within this code,
+% and those modifications could be used outside of this method.
 
 
 % Set default parameter values if needed.

@@ -434,17 +434,31 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 % reference image or to a reference stack and proceed with
                 % the appropriate method.
                 if obj.UseStackCorrelation
-%                     % Set parameters based on the iteration.
-%                     if iter == 1
-%                         MaxOffset = [30; 30; 30];
-%                     elseif iter <= 3
-%                         MaxOffset = [5; 5; 5];
-%                     elseif iter <= 5
-%                         MaxOffset = [2; 2; 2];
-%                     else
-%                         MaxOffset = [1; 1; 1];
-%                     end
-                    MaxOffset = [30; 30; 30];
+                    % Attempt to select an appropriate value of the
+                    % MaxOffset parameter.
+                    if iter == 1
+                        % Always use a large offset for the first
+                        % iteration (especially along z).
+                        MaxOffset = [30; 30; inf];
+                    elseif any(abs(SubPixelOffset) > MaxOffset)
+                        % If the offset predicted by the polynomial fit was
+                        % greater than the inspected offset, we should
+                        % increase the offset to attempt to capture the
+                        % true peak.
+                        % NOTE: If the peak occured outside the selected
+                        %       MaxOffset, we set the new MaxOffset (in 
+                        %       that dimension) to twice the difference
+                        %       between the peak and offset.  Otherwise, we
+                        %       keep the old offset.
+                        SelectBit = abs(SubPixelOffset) > MaxOffset;
+                        MaxOffset = SelectBit ...
+                            .* 2 * abs(SubPixelOffset - MaxOffset) + ...
+                            ~SelectBit .* MaxOffset;
+                    else
+                        % In this case, we seem to be close to the peak and
+                        % can reduce the MaxOffset to speed things up.
+                        MaxOffset = [2, 2, 2];
+                    end
                     
                     % Set limits on the extent to which we can shift.
                     obj.ZStack_Step = 0.1; % in case it's changed elsewhere
@@ -459,50 +473,44 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
+                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] = ...
                         obj.findStackOffset(ReferenceStack, ...
                         CurrentStack, MaxOffset, 'FFT', '1D');
                     
                     % Decide which shift to proceed with based on
                     % PixelOffset and SubPixelOffset (SubPixelOffset can be
                     % innacurate).
-                    if iter > 1
-                        % On the first iteration, just use the raw pixel
-                        % offset (don't use the polynomial fit).
-                        % After the first iteration, proceed to use the
-                        % below formulation.
-                        PixelOffset = SubPixelOffset ...
-                            .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
-                            + PixelOffset ...
-                            .* (abs(PixelOffset-SubPixelOffset) > 0.5);
-                    end
-                    PixelOffset = PixelOffset * obj.PixelSize; % pixel->um
+                    Offset = SubPixelOffset ...
+                        .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
+                        + PixelOffset ...
+                        .* (abs(PixelOffset-SubPixelOffset) > 0.5);
+                    Offset = Offset * obj.PixelSize; % pixel->um
                     
                     % Modify PixelOffset to correspond to physical piezo
                     % dimensions.
-                    PixelOffset = ...
-                        [PixelOffset(2), -PixelOffset(1), -PixelOffset(3)];
+                    Offset = ...
+                        [Offset(2), -Offset(1), -Offset(3)];
                     
                     % Move the piezos to adjust for the predicted shift.
                     CurrentPosX = obj.StagePiezoX.getPosition();
                     CurrentPosY = obj.StagePiezoY.getPosition();
                     CurrentPosZ = obj.StagePiezoZ.getPosition();
-                    NewPosX = CurrentPosX - PixelOffset(1);
-                    NewPosY = CurrentPosY - PixelOffset(2);
-                    NewPosZ = CurrentPosZ - PixelOffset(3);
+                    NewPosX = CurrentPosX - Offset(1);
+                    NewPosY = CurrentPosY - Offset(2);
+                    NewPosZ = CurrentPosZ - Offset(3);
                     obj.StagePiezoX.setPosition(NewPosX);
                     obj.StagePiezoY.setPosition(NewPosY);
                     obj.StagePiezoZ.setPosition(NewPosZ);
                     
                     % Rename parameters for consistency with the rest of
                     % the code.
-                    Xshift = PixelOffset(1);
-                    Yshift = PixelOffset(2);
-                    Zshift = PixelOffset(3);
-                    mACfit = CorrAtOffset;
+                    Xshift = Offset(1);
+                    Yshift = Offset(2);
+                    Zshift = Offset(3);
+                    mACfit = MaxCorr;
                     
                     % Save the error signal.
-                    obj.ErrorSignal = PixelOffset.'; % col->row vector
+                    obj.ErrorSignal = Offset.'; % col->row vector
                 else
                     %find z-position and adjust in Z using Piezo:
                     if iter < 2
@@ -728,7 +736,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         end
     end
     methods (Static)
-        [PixelOffset, SubPixelOffset, CorrAtOffset] = ...
+        [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
             findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType)
     end
     
