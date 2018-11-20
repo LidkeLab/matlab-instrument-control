@@ -492,8 +492,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     
                     % Modify PixelOffset to correspond to physical piezo
                     % dimensions.
-                    Offset = ...
-                        [Offset(2), -Offset(1), -Offset(3)];
+                    Offset = [Offset(2), -Offset(1), -Offset(3)];
                     
                     % Move the piezos to adjust for the predicted shift.
                     CurrentPosX = obj.StagePiezoX.getPosition();
@@ -546,8 +545,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     obj.StagePiezoZ.setPosition(Z);
                 end
                 
-%                 obj.ErrorSignal_History = [obj.ErrorSignal_History; ...
-%                     obj.ErrorSignal];
+                obj.ErrorSignal_History = [obj.ErrorSignal_History; ...
+                    obj.ErrorSignal];
                 
                 %show overlay
                 obj.Image_Current=obj.capture_single();
