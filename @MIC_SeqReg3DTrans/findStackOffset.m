@@ -400,7 +400,7 @@ end
 %       [0, 0, 0] offset (the center of the cross-correlation).
 SubPixelOffset = RawOffsetFit - MaxOffset - 1;
 if strcmpi(Method, 'FFT')
-    PixelOffset = -PixelOffset;
+    SubPixelOffset = -SubPixelOffset;
 end
 
 % Display line sections through the integer location of the

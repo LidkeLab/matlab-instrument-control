@@ -492,7 +492,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     
                     % Modify PixelOffset to correspond to physical piezo
                     % dimensions.
-                    Offset = [Offset(2), -Offset(1), -Offset(3)];
+                    % NOTE: The additional minus sign accounts for the
+                    %       convention used in findStackOffset(). 
+                    Offset = -[Offset(2), -Offset(1), -Offset(3)];
                     
                     % Move the piezos to adjust for the predicted shift.
                     CurrentPosX = obj.StagePiezoX.getPosition();
