@@ -27,6 +27,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
         ControllerXSerialNum; % x piezo controller ser. no. (string)
         ControllerYSerialNum; % y piezo controller ser. no. (string)
         ControllerZSerialNum; % z piezo controller ser. no. (string)
+        MaxPiezoConnectAttempts = 1; % max attempts to connect to a piezo
         StrainGaugeXSerialNum; % x piezo strain gauge ser. no. (string)
         StrainGaugeYSerialNum; % y piezo strain gauge ser. no. (string)
         StrainGaugeZSerialNum; % z piezo strain gauge ser. no. (string)
@@ -54,16 +55,14 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                 MaxPiezoConnectAttempts)
             % Constructor for NanoMax Stage piezo control class.
             
-            % Define a default value for MaxPiezoConnectAttempts if needed.
-            if ~exist('MaxPiezoConnectAttempts', 'var')
-                MaxPiezoConnectAttempts = 1;
-            end
-            
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
             obj = obj@MIC_3DStage_Abstract(~nargout);
             
             % Set the object properties based on the appropriate inputs.
+            if exist('MaxPiezoConnectAttempts', 'var')
+                obj.MaxPiezoConnectAttempts = MaxPiezoConnectAttempts;
+            end
             obj.ControllerXSerialNum = ControllerXSerialNum; 
             obj.ControllerYSerialNum = ControllerYSerialNum;
             obj.ControllerZSerialNum = ControllerZSerialNum; 
