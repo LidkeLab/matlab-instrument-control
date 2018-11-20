@@ -32,15 +32,15 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         % Input
         CameraObj           % Camera Object
         StageObj            % Stage Object
-        LampObj             % Lamp Object
+%         LampObj             % Lamp Object
         CalibrationFile     % File containing previously calibrated pixel size, or path to save calibration file
         
         % These must be set by user for specific system
-        LampPower=30;       % Lamp power setting to use for transmission image acquistion 
-        LampWait=1;         % Time (s) to wait after turning on lamp before starting imaging
-        CamShutter=true;    % Flag for opening and closing camera shutter (Andor Ixon's) before acquiring a stack
-        ChangeEMgain=false; % Flag for changing EM gain before and after acquiring transmission images
-        EMgain;             % EM gain setting to use for transmission image acquisitions
+%         LampPower=30;       % Lamp power setting to use for transmission image acquistion 
+%         LampWait=1;         % Time (s) to wait after turning on lamp before starting imaging
+%         CamShutter=true;    % Flag for opening and closing camera shutter (Andor Ixon's) before acquiring a stack
+%         ChangeEMgain=false; % Flag for changing EM gain before and after acquiring transmission images
+%         EMgain;             % EM gain setting to use for transmission image acquisitions
         ChangeExpTime=true; % Flag for changing exposure time before and after acquiring transmission images
         ExposureTime=0.01;  % Exposure time setting to use for transmission image acquisitions
         
@@ -77,7 +77,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     end
     
     methods
-        function obj=MIC_Reg3DTrans(CameraObj,StageObj,LampObj,CalFileName)
+        function obj=MIC_Reg3DTrans(CameraObj,StageObj,CalFileName)
             % MIC_Reg3DTrans constructor
             % 
             %  INPUT (required)
@@ -93,14 +93,14 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
             
             % check input
-            if nargin <3
+            if nargin <2
                 error('MIC_Reg3DTrans:InvInput','You must pass in Camera, Stage and Lamp Objects')
             end
             obj.CameraObj = CameraObj;
             obj.StageObj = StageObj;
-            obj.LampObj = LampObj;
+%             obj.LampObj = LampObj;
             
-            if nargin == 4
+            if nargin == 3
                 obj.CalibrationFile = CalFileName;
                 % get pixelsize
                 if exist(obj.CalibrationFile,'file')
@@ -124,43 +124,44 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             N=10;
             StepSize=0.1; %micron
             deltaX=((0:N-1)*StepSize)';
-            ImSz=obj.CameraObj.ImageSize;
+            ImSz=obj.CameraObj.ImageSize; %:)
             ImageStack=zeros(ImSz(1),ImSz(2),N);
             % remember start position
             Xstart=X;
             %change EMgain, shutter and exposure time if needed
-            if obj.ChangeEMgain || obj.CamShutter
-                CamSet = obj.CameraObj.CameraSetting;
-            end
-            if obj.ChangeEMgain
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-            end
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=1;
-            end
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 CamSet = obj.CameraObj.CameraSetting;
+%             end
+%             if obj.ChangeEMgain
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%             end
+%             if obj.CamShutter
+%                 CamSet.ManualShutter.Bit=1;
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             % setup camera
             obj.CameraObj.AcquisitionType='capture';
             obj.CameraObj.setup_acquisition;
                         
-            % turn lamp on
-            if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
-                obj.LampObj.setPower(obj.LampObj.MaxPower/2);
-            end 
-            obj.LampObj.setPower(obj.LampObj.Power);
-            obj.LampObj.on();
-            % open shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(1);
-            end
-            
+%             % turn lamp on
+%             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+%                 obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+%             end 
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on();
+%             % open shutter if needed
+%             if obj.CamShutter
+%                 obj.CameraObj.setShutter(1);
+%             end
+%             
             % acquire stack for x_direction
             obj.StageObj.setPosition(Xstart);
             for ii=1:N
@@ -180,26 +181,26 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 pause(.1);
                 ImageStack_Y(:,:,ii)=single(obj.CameraObj.start_capture);
             end
-            % close shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(0);
-            end
+%             % close shutter if needed
+%             if obj.CamShutter
+%                 obj.CameraObj.setShutter(0);
+%             end
             % turn lamp off
-            obj.LampObj.off();
+%             obj.LampObj.off();
             
-            %change back EMgain, shutter and exposure time if needed
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=0;
-            end
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-            end
+%             %change back EMgain, shutter and exposure time if needed
+%             if obj.CamShutter
+%                 CamSet.ManualShutter.Bit=0;
+%             end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end            
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end            
            % set stage back to initial position
             obj.StageObj.setPosition(Xstart);
             dipshow(ImageStack_X(10:end-10,10:end-10,:));
@@ -271,38 +272,37 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             legend('Found Displacement','Fit');
             end
         end
-        
-       function takerefimage(obj)
+        function takerefimage(obj)
             %takerefimage Takes new reference image
 
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet = obj.CameraObj.CameraSetting;
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
                         
-            % turn lamp on
-            if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
-                obj.LampObj.setPower(obj.LampObj.MaxPower/2);
-            end 
-            obj.LampObj.setPower(obj.LampObj.Power);
-            obj.LampObj.on;
-            
+%             % turn lamp on
+%             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+%                 obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+%             end 
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on;
+%             
             obj.Image_Reference=obj.capture;
             dipshow(obj.Image_Reference);
             % turn lamp off
-            obj.LampObj.off;
+%             obj.LampObj.off;
             
             % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
@@ -341,34 +341,34 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         function getcurrentimage(obj)
             % getcurrentimage Takes transmission image with current settings
             
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet = obj.CameraObj.CameraSetting;
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
                         
-            % turn lamp on
-            if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
-                obj.LampObj.setPower(obj.LampObj.MaxPower/2);
-            end 
-            obj.LampObj.setPower(obj.LampObj.Power);
-            obj.LampObj.on;
+%             % turn lamp on
+%             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+%                 obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+%             end 
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on;
             obj.Image_Current=obj.capture;;
             im=obj.Image_Current;
             dipshow(im);
-            % turn lamp off
-            obj.LampObj.off;
-            
-            % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             % turn lamp off
+%             obj.LampObj.off;
+%             
+%             % change back EMgain and exposure time if needed
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
@@ -378,23 +378,23 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         function align2imageFit(obj)
             % align2imageFit 
 
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet = obj.CameraObj.CameraSetting;
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
                         
-            %turn lamp on
-            if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
-                obj.LampObj.setPower(obj.LampObj.MaxPower/2);
-            end 
-            obj.LampObj.setPower(obj.LampObj.Power);
-            obj.LampObj.on;
+%             %turn lamp on
+%             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+%                 obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+%             end 
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on;
             
             iter=0;
             withintol=0;
@@ -440,13 +440,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
             
             % turn lamp off
-             obj.LampObj.off;
+%              obj.LampObj.off;
             
             % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
@@ -469,33 +469,33 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.ZStack=[];
             
             %change EMgain, shutter and exposure time if needed
-            if obj.ChangeEMgain || obj.CamShutter
-                CamSet = obj.CameraObj.CameraSetting;
-            end
-            if obj.ChangeEMgain
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-            end
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=1;
-            end
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 CamSet = obj.CameraObj.CameraSetting;
+%             end
+%             if obj.ChangeEMgain
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%             end
+%             if obj.CamShutter
+%                 CamSet.ManualShutter.Bit=1;
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             % setup camera
             obj.CameraObj.AcquisitionType='capture';
             obj.CameraObj.setup_acquisition;
                         
             % turn lamp on
             %obj.turnLampOn();
-            % open shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(1);
-            end
+%             % open shutter if needed
+%             if obj.CamShutter
+%                 obj.CameraObj.setShutter(1);
+%             end
             % acquire zstack
             for nn=1:N
                 if nn==1
@@ -504,26 +504,26 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 obj.StageObj.setPosition([X_Current,Y_Current,obj.ZStack_Pos(nn)]);
                 obj.ZStack(:,:,nn)=single(obj.CameraObj.start_capture);
             end
-            % close shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(0);
-            end
+%             % close shutter if needed
+%             if obj.CamShutter
+%                 obj.CameraObj.setShutter(0);
+%             end
             % turn lamp off
             %obj.turnLampOff();
             
             %change back EMgain, shutter and exposure time if needed
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=0;
-            end
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-            end
+%             if obj.CamShutter
+%                 CamSet.ManualShutter.Bit=0;
+%             end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             
             % Move stage back to original position
             obj.StageObj.setPosition(XYZ);
@@ -629,13 +629,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         function out=capture_single(obj)
             % Sets camera and lamp parameters and captures a single image
             
-            % change EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             % change EMgain and exposure time if needed
+%             if obj.ChangeEMgain
+%                 CamSet = obj.CameraObj.CameraSetting;
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
@@ -649,10 +649,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
  %           obj.turnLampOff();
             
             % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
@@ -696,11 +696,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % structure
             
             Attribute.CalibrationFile = obj.CalibrationFile;
-            Attribute.LampPower = obj.LampObj.Power;
-            Attribute.LampWait = obj.LampWait;
-            Attribute.CamShutter = obj.CamShutter;
-            Attribute.ChangeEMgain = obj.ChangeEMgain;
-            Attribute.EMgain = obj.EMgain;
+%             Attribute.LampPower = obj.LampObj.Power;
+%             Attribute.LampWait = obj.LampWait;
+%             Attribute.CamShutter = obj.CamShutter;
+%             Attribute.ChangeEMgain = obj.ChangeEMgain;
+%             Attribute.EMgain = obj.EMgain;
             Attribute.ChangeExpTime = obj.ChangeExpTime;
             Attribute.ExposureTime = obj.ExposureTime;
             Attribute.PixelSize = obj.PixelSize;
@@ -757,9 +757,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 
             fprintf('\nTesting MIC_Reg3DTrans class...\n')
             % constructing and deleting instances of the class
-            RegObj = MIC_Reg3DTrans(camObj,stageObj,lampObj);
+            RegObj = MIC_Reg3DTrans(camObj,stageObj);
             delete(RegObj);
-            RegObj = MIC_Reg3DTrans(camObj,stageObj,lampObj);
+            RegObj = MIC_Reg3DTrans(camObj,stageObj);
             fprintf('* Construction and Destruction of object works\n')
             % loading and closing gui
             RegObj.gui;
