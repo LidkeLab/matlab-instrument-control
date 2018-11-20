@@ -52,6 +52,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         ZMaxAC;
         ErrorSignal = zeros(0, 3); %Error Signal [X Y Z] in microns
         ErrorSignal_History=[]     %Error Signal [X Y Z] in micron
+        IsInitialRegistration = 0; % boolean: initial reg. or periodic reg.
+        OffsetFitSuccess; % boolean array: 1 indicates a succesful poly fit
     end
     
     properties (Access='private')
@@ -130,6 +132,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             Attribute.MaxIter = obj.MaxIter;
             Attribute.MaxXYShift = obj.MaxXYShift;
             Attribute.MaxZShift = obj.MaxZShift;
+            Attribute.IsInitialRegistration = obj.IsInitialRegistration;
+            Attribute.OffsetFitSuccess = obj.OffsetFitSuccess;
             
             %Return 0 as null marker
             Data.ZFitPos = 0;
@@ -442,8 +446,20 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     % MaxOffset parameter.
                     if iter == 1
                         % Always use a large offset for the first
-                        % iteration (especially along z).
-                        MaxOffset = [30; 30; inf];
+                        % iteration (especially needed along z).
+                        if obj.IsInitialRegistration
+                            % If this is the initial brightfield
+                            % registration (e.g. if we are finding the cell
+                            % for first time since the reference was taken
+                            % and the shift might be large) we should use
+                            % the max possible offset.
+                            MaxOffset = [inf; inf; inf];
+                        else
+                            % We should still use a large offset, but we
+                            % don't expect the offset to be as great as it
+                            % would be for the initial registration.
+                            MaxOffset = [10; 10; 10];
+                        end
                     elseif any(abs(SubPixelOffset) > MaxOffset)
                         % If the offset predicted by the polynomial fit was
                         % greater than the inspected offset, we should
@@ -451,12 +467,12 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                         % true peak.
                         % NOTE: If the peak occured outside the selected
                         %       MaxOffset, we set the new MaxOffset (in 
-                        %       that dimension) to twice the difference
-                        %       between the peak and offset.  Otherwise, we
-                        %       keep the old offset.
+                        %       that dimension) to twice the SubPixelOffset
+                        %       with the goal being to capture the peak on
+                        %       the next iteration.
                         SelectBit = abs(SubPixelOffset) > MaxOffset;
                         MaxOffset = SelectBit .* ceil(...
-                            (2 * abs(SubPixelOffset - MaxOffset))) + ...
+                            (2 * abs(SubPixelOffset))) + ...
                             ~SelectBit .* MaxOffset;
                     else
                         % In this case, we seem to be close to the peak and
@@ -479,16 +495,20 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     % between the two stacks.
                     [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] = ...
                         obj.findStackOffset(ReferenceStack, ...
-                        CurrentStack, MaxOffset, 'FFT', '1D');
+                        CurrentStack, MaxOffset);
                     
                     % Decide which shift to proceed with based on
                     % PixelOffset and SubPixelOffset (SubPixelOffset can be
-                    % innacurate).
+                    % innacurate), setting a flag array to indicate when
+                    % the SubPixelOffset has 'failed'.
                     Offset = SubPixelOffset ...
                         .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
                         + PixelOffset ...
                         .* (abs(PixelOffset-SubPixelOffset) > 0.5);
                     Offset = Offset * obj.PixelSize; % pixel->um
+                    obj.OffsetFitSuccess = ...
+                        abs(PixelOffset-SubPixelOffset) <= 0.5 ...
+                        + abs(PixelOffset-SubPixelOffset) > 0.5;
                     
                     % Modify PixelOffset to correspond to physical piezo
                     % dimensions.
