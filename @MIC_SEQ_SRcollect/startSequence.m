@@ -65,6 +65,7 @@ obj.CameraSCMOS.AcquisitionType = 'capture';
 obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
 obj.CameraSCMOS.setup_acquisition();
 obj.AlignReg.Image_Reference = RefStruct.Image;
+obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
 try
     obj.AlignReg.align2imageFit(RefStruct);
 catch
@@ -176,6 +177,7 @@ for ii = 1:obj.NumberOfSequences
         obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
         obj.CameraSCMOS.setup_acquisition();
         obj.AlignReg.Image_Reference = RefStruct.Image;
+        obj.AlignReg.IsInitialRegistration = 0; % indicate periodic reg.
         try
             obj.AlignReg.align2imageFit(RefStruct);
         catch
