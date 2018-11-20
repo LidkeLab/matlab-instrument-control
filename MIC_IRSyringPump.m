@@ -18,6 +18,7 @@ classdef MIC_IRSyringPump < MIC_ThorlabsIR
     properties
         SP          % an obj for MIC_SyringePump to control Syringe pump
         SPwaitTime  % wait time for Syrineg Pump to start after starting IRCamera
+        tIR_end     % to check if all devices work in right time order (Andor,IRCamera,Pump)
     end
     
     methods
@@ -34,10 +35,10 @@ classdef MIC_IRSyringPump < MIC_ThorlabsIR
                 obj.ROI=[1,obj.XPixels,1,obj.YPixels];
             end
             %init empty array
-            obj.Data=zeros(obj.ROI(2),obj.ROI(4),obj.SequenceLength);
+            obj.Data=zeros(obj.ROI(2)-obj.ROI(1)+1,obj.ROI(4)-obj.ROI(3)+1,obj.SequenceLength);
             obj.AbortNow=0;
             for ii=1:obj.SequenceLength
-                ii;
+                ii
                 if ii==obj.SPwaitTime
                     obj.SP.run
                 end

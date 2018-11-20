@@ -1,5 +1,5 @@
 classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
-    %MIC_MCLNanoDrive MIC controller for the Mad City Labs 3D Piezo Stage
+    %MIC_MCLNanoDrive controls the Mad City Labs 3D Piezo Stage
     %   
     %   This class controls a 3D Peizo stage from Mad City Labs.  The class
     %   uses 'calllib' to directly call funtions from the madlib.dll. The instument 
@@ -13,6 +13,8 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     %       MATLAB 2014b or higher
     %       MCL Drivers installed on system.  
     
+    % Update:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
+
      properties (SetAccess=protected)
         InstrumentName='MCLNanoDrive'; 
         ErrorCode;  %Fixed structure listing all error codes.  Loaded by set_errorcodes()

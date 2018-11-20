@@ -91,9 +91,11 @@ switch obj.LastError
                 successmsg = ('Trigger mode set.');
             case 'Shutdown'
                 successmsg = ('Camera System shut down.');
-            case 'StartAcquisiton'
+            case 'StartAcquisition'
                 successmsg = ('Acquisition started.');
             case 'WaitForAcquisition'
+                successmsg =  ('Acquisition Event occurred');
+            case 'WaitForAcquisitionTimeOut'
                 successmsg =  ('Acquisition Event occurred');
             case 'WaitForAcquisitionByHandle'
                 successmsg =  ('Acquisition Event occurred');

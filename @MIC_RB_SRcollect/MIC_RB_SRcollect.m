@@ -23,7 +23,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
     properties
         % Hardware objects
         Camera;         % Hamamatsu Camera
-        Piezo;          % TCubePiezo
+        StageObj;       % 3D Piezo Stage
         Laser405;       % TCubeLaserDiode 405
         Laser488;       % Vortran 488
         Laser561;       % CrystaLaser 561
@@ -79,7 +79,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         % Registration
         RegType='None';     % Registration type, can be 'None', 'Passive'
         ExpTimeReg = 0.01;  % Camera exposure time during registration (s)
-        
+ 
         % Piezo
         PiezoStepSize = 0.25; % Piezo step size (um)
         StartZStack;        % Start position of Z-stack
@@ -129,8 +129,29 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 obj.Camera=MIC_HamamatsuCamera();
                 obj.Camera.ReturnType='matlab';
                 % Stage
-                fprintf('Initializing Piezo\n')
-                obj.Piezo=MIC_TCubePiezo('81843229','84842506','Z');
+                fprintf('Initializing 3D Piezo Stage\n')
+                
+                obj.StageObj = MIC_NanoMaxPiezos(SerialNumberControllerX, ...
+                SerialNumberControllerY, '81843229', ...
+                SerialNumberStrainGaugeX, SerialNumberStrainGaugeY, ...
+                '84842506')
+            
+                % '29501305','59000121'  %P, SG
+                % '29501307','59000140'
+                %obj.Piezo=MIC_TCubePiezo('81843229','84842506','Z');
+                
+                %Reg3D
+                fprintf('Initializing Registration object\n')
+                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.PixelCalFile);
+                if ~exist(obj.PixelCalFile,'file')
+                    obj.CameraObj.ROI=[1 256 1 256];
+                    obj.R3DObj.calibratePixelSize();
+                else
+                    F=load(obj.PixelCalFile);
+                    obj.PixelSize=F.PixelSize;
+                    clear F;
+                end
+                  
                 % Lasers
                 fprintf('Initializing 405 laser\n')
                 obj.Laser405 = MIC_TCubeLaserDiode('64864827','Power',40.15,40.93,1);
@@ -179,6 +200,44 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             end
         end
         
+        function loadref(obj)
+            % Load reference image file
+            [a,b]=uigetfile('*.mat','Select Reference File',obj.SaveDir);
+            if ~a
+                return
+            end
+            obj.R3DObj.RefImageFile = fullfile(b,a);
+            tmp=load(obj.R3DObj.RefImageFile,'Image_Reference');
+            obj.R3DObj.Image_Reference=tmp.Image_Reference;
+        end
+        
+        function takecurrent(obj)
+            % captures and displays current image
+            obj.LampObj.setPower(obj.LEDPower);
+            obj.R3DObj.getcurrentimage();
+        end
+        
+        function align(obj)
+            % Align to current reference image
+            obj.LampObj.setPower(obj.LEDPower);
+            obj.R3DObj.align2imageFit();
+        end
+        
+        function showref(obj)
+            % Displays current reference image
+            dipshow(obj.R3DObj.Image_Reference);
+        end
+        
+        function takeref(obj)
+            % Captures reference image
+            obj.LampObj.setPower(obj.LEDPower);
+            obj.R3DObj.takerefimage();
+        end
+        
+        function saveref(obj)
+            % Saves current reference image
+            obj.R3DObj.saverefimage();
+        end
         
         function focusLow(obj)
             % Focus function using the low laser settings
@@ -278,11 +337,33 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         
         function StartSequence(obj,guihandles)
             
-            %create save folder and time stamp
-            if ~exist(obj.SaveDir,'dir')
-                mkdir(obj.SaveDir);
+            %create save folder and filenames
+            if ~exist(obj.SaveDir,'dir');mkdir(obj.SaveDir);end
+            timenow=clock;
+            s=['-' num2str(timenow(1)) '-' num2str(timenow(2))  '-' num2str(timenow(3)) '-' num2str(timenow(4)) '-' num2str(timenow(5)) '-' num2str(round(timenow(6)))];
+            
+            %Setup camera and lamp for reg stack
+            
+            obj.LampObj.setPower(obj.LampPower);
+            
+            switch obj.RegType
+                case 'Self' %take and save the reference stack
+                    obj.R3DObj.takerefimage();
+                    f=fullfile(obj.SaveDir,[obj.BaseFileName s '_ReferenceImage']);
+                    Image_Reference=obj.R3DObj.Image_Reference; 
+                    save(f,'Image_Reference');
             end
-            TimeStamp = datestr(clock,'yyyy-mm-dd-HH-MM-SS');
+            
+            switch obj.SaveFileType
+                case 'mat'
+                case 'h5'
+                    FileH5=fullfile(obj.SaveDir,[obj.BaseFileName s '.h5']);
+                    MIC_H5.createFile(FileH5);
+                    MIC_H5.createGroup(FileH5,'Channel01');
+                    MIC_H5.createGroup(FileH5,'Channel01/Zposition001');
+                otherwise
+                    error('StartSequence:: unknown file save type')
+            end
             
             % calc Zrange
             z0=obj.Piezo.CurrentPosition;
@@ -308,44 +389,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             else
                 GRange = g0;
             end
-            
-            % acquire registration reference image
-            switch obj.RegType
-                case 'None' % do nothing
-                case 'Passive' %take and save the reference stack
-                    %calculate z-range
-                    z0=obj.Piezo.CurrentPosition;
-                    if obj.Zstack
-                        RefZRange = obj.StartZStack-1 : 0.05 : obj.EndZStack+1;
-                    else
-                        RefZRange = z0-1 : 0.05 : z0+1;
-                    end
-                    %Setup Camera
-                    obj.Camera.ExpTime_Sequence = obj.ExpTimeReg;
-                    obj.Camera.setup_fast_acquisition(numel(RefZRange));
-                    %Collect
-                    obj.LED.setPower(obj.LEDPower);
-                    obj.LED.on();
-                    pause(obj.LEDWait);
-                    for ii=1:length(RefZRange)
-                        obj.Piezo.setPosition(RefZRange(ii))
-                        pause(.1);
-                        obj.Camera.TriggeredCapture();
-                    end
-                    Data=obj.Camera.FinishTriggeredCapture(numel(RefZRange)); 
-                    %Turn off LED and reset Piezo and Camera
-                    obj.LED.off();
-                    obj.Piezo.setPosition(z0);
-                    obj.Camera.ExpTime_Sequence = obj.ExpTime;
-                    % save reference stack
-                    refName = [obj.BaseFileName '_' TimeStamp '_RefStack.mat'];
-                    save(fullfile(obj.SaveDir,refName),'Data','RefZRange');
-                    % setup for registration images
-                    regName = [obj.BaseFileName '_' TimeStamp '_RegImages.mat'];
-                    RegImages = zeros(size(Data,1),size(Data,2),numel(ZRange),obj.NumSequences);
-                    
-            end
-            
+
             % create h5 file
             switch obj.SaveType
                 case 'mat'
@@ -362,35 +406,35 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             for nn=1:obj.NumSequences
                 if obj.AbortNow; obj.AbortNow=0; break; end
                 
+                % move piezo
+                obj.Piezo.setPosition(ZRange(zz));
+                % move galvo
+                obj.Galvo.setVoltage(GRange(zz));
+                pause(0.1) % wait for piezo and galvo to finish move
+                
+                %align to image
+                switch obj.RegType
+                    case 'None'
+                    otherwise
+                        obj.R3DObj.align2imageFit();
+                end
+
                 nstring=strcat('Acquiring','...',num2str(nn),'/',num2str(obj.NumSequences));
                 set(guihandles.Button_ControlStart, 'String',nstring,'Enable','off');
                 
                 for zz = 1 : numel(ZRange)
                     if obj.AbortNow; break; end
-                    
+ 
                     % move piezo
                     obj.Piezo.setPosition(ZRange(zz));
                     % move galvo
                     obj.Galvo.setVoltage(GRange(zz));
                     pause(0.1) % wait for piezo and galvo to finish move
                     
-                    %align to image
-                    switch obj.RegType
-                        case 'None'
-                        case 'Passive'
-                            % set up camera and LED
-                            obj.Camera.ExpTime_Capture = obj.ExpTimeReg;
-                            obj.LED.setPower(obj.LEDPower);
-                            obj.LED.on();
-                            pause(obj.LEDWait);
-                            % capture image
-                            RegImages(:,:,zz,nn) = obj.Camera.start_capture();
-                            % turn off LED and reset camera
-                            obj.LED.off();
-                            obj.Camera.ExpTime_Capture = obj.ExpTime;
-                            % save image
-                            save(fullfile(obj.SaveDir,regName),'RegImages','ZRange');
-                    end
+                    if obj.AbortNow; obj.AbortNow=0; break; end
+                
+                    nstring=strcat('Acquiring','...',num2str(nn),'/',num2str(obj.NumSequences));
+                    set(guihandles.Button_ControlStart, 'String',nstring,'Enable','off');
                     
                     %Setup laser for aquisition
                     if obj.Laser405Aq
@@ -424,28 +468,30 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                     obj.LED.off;
                     
                     %Save
-                    switch obj.SaveType
+                    switch obj.SaveFileType
                         case 'mat'
-                            fn=[obj.BaseFileName '#' num2str(nn,'%03d') '-' num2str(zz,'%03d') '_' TimeStamp];
-                            Params=exportState(obj); %#ok<NASGU>
-                            save(fullfile(obj.SaveDir,fn),'sequence','Params');
-                        case 'h5' %This will become default, not working yet...
+                            fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
+                            Params=exportState(obj); 
+                            save(fn,'sequence','Params');
+                        case 'h5' %This will become default
                             S=sprintf('Data%04d',nn);
-                            MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
+                            S2=sprintf('Channel01/Zposition%03d',zz);
+                            MIC_H5.writeAsync_uint16(FileH5,S2,S,sequence);
                         otherwise
                             error('StartSequence:: unknown SaveFileType')
                     end
                 end
             end
             
-            
-            switch obj.SaveType
+            switch obj.SaveFileType
                 case 'mat'
                     %Nothing to do
                 case 'h5' %This will become default
-                    S='MIC_TIRF_SRcollect';
+                    S='Channel01/Zposition001'; 
                     MIC_H5.createGroup(FileH5,S);
-                    obj.save2hdf5(FileH5,S);  %Not working yet
+                    obj.save2hdf5(FileH5,S);  
+                otherwise
+                    error('StartSequence:: unknown SaveFileType')
             end
         end
         
@@ -453,8 +499,6 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             obj.SLM.ZernikeCoef = obj.ZCoefOptimized;
             obj.SLM.calcZernikeImage();
         end
-        
-               
         
         function [Attributes,Data,Children] = exportState(obj)
             % exportState Exports current state of all hardware objects
@@ -550,7 +594,6 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         end
         
     end
-    
     
     
     methods (Static)
