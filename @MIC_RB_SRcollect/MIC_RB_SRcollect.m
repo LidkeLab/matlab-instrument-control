@@ -131,15 +131,20 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 % Stage
                 fprintf('Initializing 3D Piezo Stage\n')
                 
-                obj.StageObj = MIC_NanoMaxPiezos(SerialNumberControllerX, ...
-                SerialNumberControllerY, '81843229', ...
-                SerialNumberStrainGaugeX, SerialNumberStrainGaugeY, ...
-                '84842506')
-            
-                % '29501305','59000121'  %P, SG
-                % '29501307','59000140'
-                %obj.Piezo=MIC_TCubePiezo('81843229','84842506','Z');
+                ControllerXSerialNum='29501305';
+                ControllerYSerialNum='29501307';
+                ControllerZSerialNum='81843229';
+                StrainGaugeXSerialNum='59000121';
+                StrainGaugeYSerialNum='59000140';
+                StrainGaugeZSerialNum='84842506';
+                MaxPiezoConnectAttempts=1;
                 
+                obj.StageObj = MIC_NanoMaxPiezos(...
+                ControllerXSerialNum, StrainGaugeXSerialNum, ...
+                ControllerYSerialNum, StrainGaugeYSerialNum, ...
+                ControllerZSerialNum, StrainGaugeZSerialNum, ...
+                MaxPiezoConnectAttempts);
+    
                 %Reg3D
                 fprintf('Initializing Registration object\n')
                 obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.PixelCalFile);
@@ -344,7 +349,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             
             %Setup camera and lamp for reg stack
             
-            obj.LampObj.setPower(obj.LampPower);
+            obj.LED.setPower(obj.LEDPower);
+            obj.LED.on();
             
             switch obj.RegType
                 case 'Self' %take and save the reference stack
@@ -353,6 +359,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                     Image_Reference=obj.R3DObj.Image_Reference; 
                     save(f,'Image_Reference');
             end
+            obj.LED.off();
             
             switch obj.SaveFileType
                 case 'mat'
@@ -407,28 +414,31 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 if obj.AbortNow; obj.AbortNow=0; break; end
                 
                 % move piezo
-                obj.Piezo.setPosition(ZRange(zz));
+                obj.Piezo.setPosition(ZRange(kk));
                 % move galvo
-                obj.Galvo.setVoltage(GRange(zz));
+                obj.Galvo.setVoltage(GRange(kk));
                 pause(0.1) % wait for piezo and galvo to finish move
                 
                 %align to image
                 switch obj.RegType
                     case 'None'
                     otherwise
+                        obj.LED.setPower(obj.LEDPower);
+                        obj.LED.on();
                         obj.R3DObj.align2imageFit();
+                        obj.LED.off();
                 end
 
                 nstring=strcat('Acquiring','...',num2str(nn),'/',num2str(obj.NumSequences));
                 set(guihandles.Button_ControlStart, 'String',nstring,'Enable','off');
                 
-                for zz = 1 : numel(ZRange)
+                for kk = 1 : numel(ZRange)
                     if obj.AbortNow; break; end
  
                     % move piezo
-                    obj.Piezo.setPosition(ZRange(zz));
+                    obj.Piezo.setPosition(ZRange(kk));
                     % move galvo
-                    obj.Galvo.setVoltage(GRange(zz));
+                    obj.Galvo.setVoltage(GRange(kk));
                     pause(0.1) % wait for piezo and galvo to finish move
                     
                     if obj.AbortNow; obj.AbortNow=0; break; end
@@ -475,7 +485,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                             save(fn,'sequence','Params');
                         case 'h5' %This will become default
                             S=sprintf('Data%04d',nn);
-                            S2=sprintf('Channel01/Zposition%03d',zz);
+                            S2=sprintf('Channel01/Zposition%03d',kk);
                             MIC_H5.writeAsync_uint16(FileH5,S2,S,sequence);
                         otherwise
                             error('StartSequence:: unknown SaveFileType')
