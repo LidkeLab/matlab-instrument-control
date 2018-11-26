@@ -24,9 +24,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         XPiezoSerialNums = {'81850186', '84850145'}; % controller, gauge
         YPiezoSerialNums = {'81850193', '84850146'}; % controller, gauge
         ZPiezoSerialNums = {'81850176', '84850203'}; % controller, gauge
-        StagePiezoX; % Linear Piezo Stage in X direction
-        StagePiezoY; % Linear Piezo Stage in Y direction
-        StagePiezoZ; % Linear Piezo Stage in Z direction
+        StagePiezo; % piezo stage
         StageStepper; % Stepper Motor Stage
         Lamp850; % LED Lamp at 850 nm
         Lamp660; % LED Lamp at 660 nm
@@ -50,8 +48,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         ExposureTimeLaserFocus = 0.2;
         ExposureTimeSequence = 0.01;
         ExposureTimeCapture = 0.02;
-        NumberOfFrames = 2000;
-        NumberOfSequences = 20;
+        NumberOfFrames = 6000;
+        NumberOfSequences = 7;
         UsePreActivation = 1; % excite fluors. before acquiring data
         DurationPreActivation = 1; % (seconds) time of pre-activation
         StabPeriod = 5; % Time between stabilization events (seconds)
@@ -86,7 +84,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseActiveReg = 1; % boolean: 1 uses active registration, 0 doesn't
         UsePeriodicReg = 0; % boolean: 1 periodically re-aligns, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
-        NSeqBeforePeriodicReg = 3; % seq. collected before periodic reg.
+        NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
                 
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
@@ -142,11 +140,9 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.setupStageStepper();
             obj.setupFlipMountTTL();
             obj.setupShutterTTL();
-            obj.AlignReg = MIC_SeqReg3DTrans(obj.CameraSCMOS, ...
-                obj.StagePiezoX, obj.StagePiezoY, obj.StagePiezoZ, ...
-                obj.StageStepper);
+            obj.AlignReg = MIC_Reg3DTrans(obj.CameraSCMOS, obj.StagePiezo);
             obj.AlignReg.PixelSize = 0.104; % microns (SCMOS camera)
-            obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
+%             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
             obj.unloadSample(); % move stage up so user can mount sample
             obj.StatusString = '';
         end
@@ -268,50 +264,12 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Update the status indicator for the GUI.
             obj.StatusString = 'Setting up sample stage piezos...';
             
-            % Setup the piezos on the NanoMax stage, ensuring a proper
-            % connection was made by setting the piezo to an arbitrary
-            % position and checking that the strain gauge reading matches
-            % the set position.
-            TestPosition = 12.3; % arbitrary set position for the piezos
-            for ii = ['X', 'Y', 'Z']
-                for jj = 1:obj.MaxPiezoConnectAttempts
-                    % Create a string defining the piezo object class
-                    % property name (e.g. StagePiezoX).
-                    PiezoObject = sprintf('StagePiezo%c', ii);
-                    
-                    % Grab the serial numbers for the current piezo.
-                    SerialNumbers = obj.(sprintf('%cPiezoSerialNums', ii));
-                    
-                    % Attempt the connection to the piezo, pausing after
-                    % the call to allow the piezo setup to complete.
-                    obj.(PiezoObject) = MIC_TCubePiezo(...
-                        SerialNumbers{1}, SerialNumbers{2}, ii);
-                    pause(2);
-                    
-                    % Attempt to set the position of the piezo and then 
-                    % pause briefly to allow the piezo to reach it's set
-                    % position.
-                    obj.(PiezoObject).setPosition(TestPosition);
-                    pause(2);
-                    
-                    % Read the strain gauge to determine the piezo 
-                    % position, and determine if it matches the test 
-                    % position.
-                    Position = (20 / 2^15) ...
-                        * Kinesis_SG_GetReading(SerialNumbers{2});
-                    
-                    if round(Position, 1) == TestPosition
-                        % Position matches TestPosition to the nearest 
-                        % 1/10um: re-center piezo and break the loop.
-                        obj.(PiezoObject).center();
-                        break
-                    elseif jj == obj.MaxPiezoConnectAttempts
-                        % This was the last attempt, warn the user and
-                        % proceed.
-                        warning('Connection to %c piezo has failed', ii)
-                    end
-                end
-            end
+            % Connect to the piezos and create the piezo stage object.
+            obj.StagePiezo = MIC_NanoMaxPiezos(...
+                obj.XPiezoSerialNums{1}, obj.XPiezoSerialNums{2}, ...
+                obj.YPiezoSerialNums{1}, obj.YPiezoSerialNums{2}, ...
+                obj.ZPiezoSerialNums{1}, obj.ZPiezoSerialNums{2}, ...
+                obj.MaxPiezoConnectAttempts);
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
@@ -447,9 +405,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % initially placed on the sample stage.
             
             % Center the piezos before proceeding.
-            obj.StagePiezoX.center();
-            obj.StagePiezoY.center();
-            obj.StagePiezoZ.center();
+            obj.StagePiezo.center();
             
             % Set some camera parameters and begin a focus acquisition.
             obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLampFocus;
@@ -571,16 +527,16 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function movePiezoUpSmall(obj)
             % Small stage step up in the z dimension with piezo.
-            PosPiezoZ = obj.StagePiezoZ.getPosition; % get z position
-            PosPiezoZ = PosPiezoZ + obj.PiezoStep; % proposed z pos.
-            obj.StagePiezoZ.setPosition(PosPiezoZ); % set new z pos.
+            OldPosPiezoZ = obj.StagePiezo.StagePiezoZ.getPosition();
+            NewPosPiezoZ = OldPosPiezoZ + obj.PiezoStep; % proposed z pos.
+            obj.StagePiezo.StagePiezoZ.setPosition(NewPosPiezoZ); 
         end
         
         function movePiezoDownSmall(obj)
             % Small stage step down in the z dimension with piezo.
-            PosPiezoZ = obj.StagePiezoZ.getPosition; % get z position
-            PosPiezoZ = PosPiezoZ - obj.PiezoStep; % proposed z pos.
-            obj.StagePiezoZ.setPosition(PosPiezoZ); % set new z pos.
+            OldPosPiezoZ = obj.StagePiezo.StagePiezoZ.getPosition();
+            NewPosPiezoZ = OldPosPiezoZ - obj.PiezoStep; % proposed z pos.
+            obj.StagePiezo.StagePiezoZ.setPosition(NewPosPiezoZ); 
         end
     end
     

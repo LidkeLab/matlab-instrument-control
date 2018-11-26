@@ -34,17 +34,16 @@ function saveReferenceImage(obj)
     Data=obj.CameraSCMOS.start_capture();
     obj.Lamp660.setPower(0);
     RefStruct.Image_Full=Data;
-    %Center Piezo and add to stepper
-    PPx=obj.StagePiezoX.getPosition; %new
-    PPy=obj.StagePiezoY.getPosition; %new
-    PPz=obj.StagePiezoZ.getPosition; %new
+    
+    % Center Piezo and add to stepper
+    PPx=obj.StagePiezo.StagePiezoX.getPosition();
+    PPy=obj.StagePiezo.StagePiezoY.getPosition();
+    PPz=obj.StagePiezo.StagePiezoZ.getPosition();
     PP=[PPx, PPy, PPz];
-    obj.StagePiezoX.center(); %new
-    obj.StagePiezoY.center(); %new
-    obj.StagePiezoZ.center(); %new
-    PPCx=obj.StagePiezoX.getPosition; %new
-    PPCy=obj.StagePiezoY.getPosition; %new
-    PPCz=obj.StagePiezoZ.getPosition; %new
+    obj.StagePiezo.center();
+    PPCx=obj.StagePiezo.StagePiezoX.getPosition();
+    PPCy=obj.StagePiezo.StagePiezoY.getPosition();
+    PPCz=obj.StagePiezo.StagePiezoZ.getPosition();
     PPC=[PPCx, PPCy, PPCz];
     OS=PP-PPC; %difference between piezo at center and at current
     % position of each cell

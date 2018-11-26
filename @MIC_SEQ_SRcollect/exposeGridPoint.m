@@ -2,13 +2,14 @@ function exposeGridPoint(obj)
     %Move to a grid point, take full cam lamp image, give figure to
     %click on cell.
 
-    obj.StagePiezoX.center();
-    obj.StagePiezoY.center();
-    obj.StagePiezoZ.center();
+    % Center the piezos.
+    obj.StagePiezo.center();
+    
     ImSize=obj.SCMOS_ROI_Full(2)-obj.SCMOS_ROI_Full(1)+1;
-    OldPos_X=obj.StageStepper.getPosition(2); %new
-    OldPos_Y=obj.StageStepper.getPosition(1); %new
-    OldPos_Z=obj.StageStepper.getPosition(3); %new
+    OldPos_X=obj.StageStepper.getPosition(2);
+    OldPos_Y=obj.StageStepper.getPosition(1);
+    OldPos_Z=obj.StageStepper.getPosition(3);
+    
     %Move to Grid Point
     Grid_mm=obj.CurrentGridIdx*ImSize*obj.SCMOS_PixelSize/1000+obj.GridCorner;
     obj.StageStepper.moveToPosition(1,Grid_mm(2)); %new y %units are mm
