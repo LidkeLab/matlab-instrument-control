@@ -452,8 +452,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                             % registration (e.g. if we are finding the cell
                             % for first time since the reference was taken
                             % and the shift might be large) we should use
-                            % the max possible offset.
-                            MaxOffset = [inf; inf; inf];
+                            % a very large offset.
+                            MaxOffset = [30; 30; 30];
                         else
                             % We should still use a large offset, but we
                             % don't expect the offset to be as great as it
