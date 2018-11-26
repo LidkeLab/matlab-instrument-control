@@ -425,7 +425,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         end
         
 
-        function align2imageFit(obj,RefStruct)
+        function align2imageFit(obj, RefStruct)
             % Initialize misc. parameters.
             iter = 0;
             withintol = 0;
@@ -434,9 +434,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 iter = iter + 1;
                 
                 % Determine the current piezo positions.
-                X=obj.StagePiezoX.getPosition();
-                Y=obj.StagePiezoY.getPosition();
-                Z=obj.StagePiezoZ.getPosition();
+                X=obj.StagePiezo.StagePiezoX.getPosition();
+                Y=obj.StagePiezo.StagePiezoY.getPosition();
+                Z=obj.StagePiezo.StagePiezoZ.getPosition();
                 
                 % Determine if we are making comparisons to a single
                 % reference image or to a reference stack and proceed with
@@ -517,15 +517,15 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     Offset = -[Offset(2), -Offset(1), -Offset(3)];
                     
                     % Move the piezos to adjust for the predicted shift.
-                    CurrentPosX = obj.StagePiezoX.getPosition();
-                    CurrentPosY = obj.StagePiezoY.getPosition();
-                    CurrentPosZ = obj.StagePiezoZ.getPosition();
+                    CurrentPosX = obj.StagePiezo.StagePiezoX.getPosition();
+                    CurrentPosY = obj.StagePiezo.StagePiezoY.getPosition();
+                    CurrentPosZ = obj.StagePiezo.StagePiezoZ.getPosition();
                     NewPosX = CurrentPosX - Offset(1);
                     NewPosY = CurrentPosY - Offset(2);
                     NewPosZ = CurrentPosZ - Offset(3);
-                    obj.StagePiezoX.setPosition(NewPosX);
-                    obj.StagePiezoY.setPosition(NewPosY);
-                    obj.StagePiezoZ.setPosition(NewPosZ);
+                    obj.StagePiezo.StagePiezoX.setPosition(NewPosX);
+                    obj.StagePiezo.StagePiezoY.setPosition(NewPosY);
+                    obj.StagePiezo.StagePiezoZ.setPosition(NewPosZ);
                     
                     % Rename parameters for consistency with the rest of
                     % the code.
@@ -548,9 +548,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     [Zfit,mACfit]=obj.findZPos();
                     Zshift=Z-abs(Zfit); %new
                     Z=Zfit; %new
-                    obj.StagePiezoX.setPosition(X); %new
-                    obj.StagePiezoY.setPosition(Y); %new
-                    obj.StagePiezoZ.setPosition(Z); %new
+                    obj.StagePiezo.StagePiezoX.setPosition(X); %new
+                    obj.StagePiezo.StagePiezoY.setPosition(Y); %new
+                    obj.StagePiezo.StagePiezoZ.setPosition(Z); %new
                     
                     %find XY position and adjust in XY using Piezo:
                     [Xshift,Yshift]=findXYShift(obj); % in um
@@ -558,13 +558,13 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                     obj.ErrorSignal(3) = Zshift;
                     
                     % current position on Piezo
-                    CurrentPosX=obj.StagePiezoX.getPosition;
-                    CurrentPosY=obj.StagePiezoY.getPosition;
+                    CurrentPosX=obj.StagePiezo.StagePiezoX.getPosition();
+                    CurrentPosY=obj.StagePiezo.StagePiezoY.getPosition();
                     NewPosX = CurrentPosX - Xshift;
                     NewPosY = CurrentPosY - Yshift;
-                    obj.StagePiezoX.setPosition(NewPosX);
-                    obj.StagePiezoY.setPosition(NewPosY);
-                    obj.StagePiezoZ.setPosition(Z);
+                    obj.StagePiezo.StagePiezoX.setPosition(NewPosX);
+                    obj.StagePiezo.StagePiezoY.setPosition(NewPosY);
+                    obj.StagePiezo.StagePiezoZ.setPosition(Z);
                 end
                 
                 obj.ErrorSignal_History = [obj.ErrorSignal_History; ...

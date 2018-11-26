@@ -62,10 +62,10 @@ obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
 obj.CameraSCMOS.AcquisitionType = 'capture';
 obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
 obj.CameraSCMOS.setup_acquisition();
-obj.AlignReg.Image_Reference = RefStruct.Image;
+obj.AlignReg.Image_Reference = double(RefStruct.Image);
 obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
 try
-    obj.AlignReg.align2imageFit(RefStruct);
+    obj.AlignReg.align2imageFit();
 catch
     % We don't want to throw an error since there are still other cells
     % to be measured from here on: warn the user, attempt to export
@@ -166,7 +166,8 @@ for ii = 1:obj.NumberOfSequences
     
     % Use periodic registration after NSeqBeforePeriodicReg
     % sequences have been collected.
-    if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg)
+    if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
+            && ~(ii == 1)
         obj.StatusString = 'Attempting periodic registration...';
         obj.Lamp660.setPower(obj.Lamp660Power);
         pause(obj.LampWait);
@@ -174,10 +175,9 @@ for ii = 1:obj.NumberOfSequences
         obj.CameraSCMOS.AcquisitionType = 'capture';
         obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
         obj.CameraSCMOS.setup_acquisition();
-        obj.AlignReg.Image_Reference = RefStruct.Image;
         obj.AlignReg.IsInitialRegistration = 0; % indicate periodic reg.
         try
-            obj.AlignReg.align2imageFit(RefStruct);
+            obj.AlignReg.align2imageFit();
         catch
             % If the alignment fails, don't stop auto collect for
             % other cells.

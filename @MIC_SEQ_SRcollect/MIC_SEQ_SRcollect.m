@@ -81,8 +81,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Registration classes.
         ActiveReg; % Active registration with IR Camera
         AlignReg; % Active alignment object
-        UseActiveReg = 1; % boolean: 1 uses active registration, 0 doesn't
-        UsePeriodicReg = 0; % boolean: 1 periodically re-aligns, 0 doesn't
+        UseActiveReg = 0; % boolean: 1 uses active registration, 0 doesn't
+        UsePeriodicReg = 1; % boolean: 1 periodically re-aligns, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
                 
@@ -140,9 +140,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.setupStageStepper();
             obj.setupFlipMountTTL();
             obj.setupShutterTTL();
-            obj.AlignReg = MIC_Reg3DTrans(obj.CameraSCMOS, obj.StagePiezo);
-            obj.AlignReg.PixelSize = 0.104; % microns (SCMOS camera)
-%             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
+            obj.setupAlignReg();
             obj.unloadSample(); % move stage up so user can mount sample
             obj.StatusString = '';
         end
@@ -366,6 +364,18 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
+        end
+        
+        function setupAlignReg(obj)
+            % Create the registration object.
+            CalibrationFilePath = ['C:\Users\lidkelab\Documents\', ...
+                'MATLAB\matlab-instrument-control\Reg3DCalFile.mat'];
+            obj.AlignReg = MIC_Reg3DTrans(obj.CameraSCMOS, ...
+                obj.StagePiezo, CalibrationFilePath);
+            
+            % Modify properties of the registration object as needed.
+            obj.AlignReg.PixelSize = 0.104; % microns (SCMOS camera)
+%             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
         end
         
         function unloadSample(obj)

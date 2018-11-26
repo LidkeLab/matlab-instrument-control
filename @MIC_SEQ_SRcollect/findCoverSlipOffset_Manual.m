@@ -10,9 +10,7 @@ function Success=findCoverSlipOffset_Manual(obj,RefStruct)
     F_Ref=figure;
     imshow(RefStruct.Image,[],'Border','tight');
     F_Ref.Name='Ref Image';
-    obj.StagePiezoX.center();
-    obj.StagePiezoY.center();
-    obj.StagePiezoZ.center();
+    obj.StagePiezo.center();
 %             obj.gui_Stage();
 
     P0=RefStruct.StepperPos; %[P0x, P0y, P0z] where P0y=obj.StageStepper.getPosition(1)

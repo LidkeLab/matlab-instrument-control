@@ -158,7 +158,7 @@ handles.ButtonStepperGUI = uicontrol('Parent', StageControlPanel, ...
     'Position', TopButtonPosition + [125+5, 0, 0, 0], ...
     'Callback', @openStepperGUI);
 handles.ButtonPiezoGUI = uicontrol('Parent', StageControlPanel, ...
-    'Style', 'pushbutton', 'String', 'Open Piezo GUIs', ...
+    'Style', 'pushbutton', 'String', 'Open Piezo GUI', ...
     'Position', TopButtonPosition + [125+5, -25, 0, 0], ...
     'Callback', @openPiezoGUI);
 handles.ButtonResetPiezos = uicontrol('Parent', StageControlPanel, ...
@@ -521,11 +521,10 @@ properties2gui();
             handles.TextStepperZ.String = ...
                 sprintf('Z: %1.3f', StepperPositionZ);
         end
-        if ~isempty(obj.StagePiezoX) && ~isempty(obj.StagePiezoY) && ...
-                ~isempty(obj.StagePiezoZ)
-            PiezoPositionY = obj.StagePiezoY.getPosition();
-            PiezoPositionX = obj.StagePiezoX.getPosition();
-            PiezoPositionZ = obj.StagePiezoZ.getPosition();
+        if ~isempty(obj.StagePiezo)
+            PiezoPositionY = obj.StagePiezo.StagePiezoY.getPosition();
+            PiezoPositionX = obj.StagePiezo.StagePiezoX.getPosition();
+            PiezoPositionZ = obj.StagePiezo.StagePiezoZ.getPosition();
             handles.TextPiezoY.String = ...
                 sprintf('Y: %2.5f', PiezoPositionY);
             handles.TextPiezoX.String = ...
@@ -685,9 +684,7 @@ properties2gui();
         gui2properties();
         
         % Open each of the piezo GUIs.
-        obj.StagePiezoX.gui();
-        obj.StagePiezoY.gui();
-        obj.StagePiezoZ.gui();
+        obj.StagePiezo.gui();
         
         % Ensure the GUI reflects object properties.
         properties2gui();
@@ -705,11 +702,10 @@ properties2gui();
         
         % Ensure that the piezo objects exist and then proceed with the
         % reset.
-        if ~isempty(obj.StagePiezoX) && ~isempty(obj.StagePiezoY) && ...
-                ~isempty(obj.StagePiezoZ)
-            obj.StagePiezoX.resetDevices();
-            obj.StagePiezoY.resetDevices();
-            obj.StagePiezoZ.resetDevices();
+        if ~isempty(obj.StagePiezo)
+            obj.StagePiezo.StagePiezoX.resetDevices();
+            obj.StagePiezo.StagePiezoY.resetDevices();
+            obj.StagePiezo.StagePiezoZ.resetDevices();
         end
     
         % Update the status indicator for the GUI.
@@ -735,20 +731,17 @@ properties2gui();
         end
         
         % If the piezo objects exist, delete them.
-        if ~isempty(obj.StagePiezoX) && ~isempty(obj.StagePiezoY) && ...
-                ~isempty(obj.StagePiezoZ)
-            obj.StagePiezoX.delete();
-            obj.StagePiezoY.delete();
-            obj.StagePiezoZ.delete();
+        if ~isempty(obj.StagePiezo)
+            obj.StagePiezo.StagePiezoX.delete();
+            obj.StagePiezo.StagePiezoY.delete();
+            obj.StagePiezo.StagePiezoZ.delete();
         end
         
         % Attempt to reconnect to the piezos.
         obj.setupStagePiezo();        
         
         % Reset the AlignReg object to contain the new piezo handles.
-        obj.AlignReg = MIC_SeqReg3DTrans(obj.CameraSCMOS, ...
-                obj.StagePiezoX, obj.StagePiezoY, obj.StagePiezoZ, ...
-                obj.StageStepper);
+        obj.setupAlignReg();
         
         % Ensure the GUI reflects object properties.
         properties2gui();
