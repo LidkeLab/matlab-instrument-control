@@ -428,6 +428,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                             % would be for the initial registration.
                             MaxOffset = [10; 10; 10];
                         end
+                        
+                        % For the first iteration, we expect sharp changes
+                        % w.r.t. the offset, so we don't want to use to
+                        % many points in the fit.
+                        FitOffset = [2; 2; 2];
                     elseif any(abs(SubPixelOffset) > MaxOffset)
                         % If the offset predicted by the polynomial fit was
                         % greater than the inspected offset, we should
@@ -442,17 +447,21 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         MaxOffset = SelectBit .* ceil(...
                             (2 * abs(SubPixelOffset))) + ...
                             ~SelectBit .* MaxOffset;
+                        
+                        % As before, we should probably keep the number of
+                        % fit points low for large values of MaxOffset.
+                        FitOffset = [2; 2; 2];
                     else
                         % In this case, we seem to be close to the peak and
                         % can reduce the MaxOffset to speed things up.
                         MaxOffset = [5, 5, 5];
+                        
+                        % When close to the true peak, the
+                        % cross-correlation varies relatively slowly so we
+                        % can increase the number of points used in the
+                        % fit.
+                        FitOffset = [5; 5; 5];
                     end
-                    
-                    % Define the FitOffset, the number of points in either
-                    % direction from the peak of the cross-correlation 
-                    % curve which will be fit to estimate a sub-pixel
-                    % offset.
-                    FitOffset = [2; 2; 2];
                     
                     % Acquire a z-stack for the current stage location.
                     % NOTE: This stores the z-stack in the object property 
