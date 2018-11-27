@@ -85,7 +85,9 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UsePeriodicReg = 1; % boolean: 1 periodically re-aligns, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
-                
+        Reg3DStepSize = 0.1; % (um) step size along z during cell reg.
+        Reg3DMaxDev = 2; % (um) max deviation along z during cell reg.
+        
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
         AbortNow = 0; % Flag for aborting acquisition
@@ -374,8 +376,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 obj.StagePiezo, CalibrationFilePath);
             
             % Modify properties of the registration object as needed.
-            obj.AlignReg.PixelSize = 0.104; % microns (SCMOS camera)
-%             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
+            obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
+            obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
         end
         
         function unloadSample(obj)

@@ -63,6 +63,7 @@ obj.CameraSCMOS.AcquisitionType = 'capture';
 obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
 obj.CameraSCMOS.setup_acquisition();
 obj.AlignReg.Image_Reference = double(RefStruct.Image);
+obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
 obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
 try
     obj.AlignReg.align2imageFit();
