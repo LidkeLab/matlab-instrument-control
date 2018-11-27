@@ -448,6 +448,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         MaxOffset = [5, 5, 5];
                     end
                     
+                    % Define the FitOffset, the number of points in either
+                    % direction from the peak of the cross-correlation 
+                    % curve which will be fit to estimate a sub-pixel
+                    % offset.
+                    FitOffset = [2; 2; 2];
+                    
                     % Acquire a z-stack for the current stage location.
                     % NOTE: This stores the z-stack in the object property 
                     %       obj.ZStack.
@@ -455,9 +461,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] = ...
+                    [PixelOffset, SubPixelOffset, ~, MaxOffset] = ...
                         obj.findStackOffset(obj.ReferenceStack, ...
-                        obj.ZStack, MaxOffset);
+                        obj.ZStack, MaxOffset, 'FFT', '1D', FitOffset);
                     
                     % Decide which shift to proceed with based on
                     % PixelOffset and SubPixelOffset (SubPixelOffset can be
@@ -852,7 +858,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         end
 
         [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
-            findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType)
+            findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
+            FitType, FitOffset)
     
         function State = unitTest(camObj,stageObj,lampObj)
             %unitTest Tests all functionality of MIC_Reg3DTrans

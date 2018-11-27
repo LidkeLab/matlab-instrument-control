@@ -1,5 +1,5 @@
 function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
-    findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType)
+    findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType, FitOffset)
 %findStackOffset estimates a sub-pixel offset between two stacks.
 % findStackoffset() will estimate the offset between two 3D stacks of
 % images.  This method computes an integer pixel offset between the two
@@ -58,6 +58,10 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %                   Note that only 2 points on either side of the peak are 
 %                   incorporated into the fitting (5 points total, unless 
 %                   near an edge).
+%   FitOffset:  (3x1 or 1x3)(default = [2; 2; 2]) Maximum offset from the
+%               peak of the cross-correlation curve for which data will be
+%               fit to determine SubPixelOffset.  This only applies to
+%               FitType = '1D' or '3DLineFits'.
 %
 % OUTPUTS:
 %   PixelOffset:    (3x1)(integer) The integer pixel offset of Stack2
@@ -330,12 +334,12 @@ switch FitType
         % example, at the peak, the line parallel to x could correspond to
         % x = [1, 2, 3], so y = [y_at_max, y_at_max, y_at_max] 
         % and z = [z_at_max, z_at_max, z_at_max].
-        XArray = (max(1, RawOffsetIndices(1)-2) ...
-            : min(2*MaxOffset(1)+1, RawOffsetIndices(1)+2)).'; % initialize
-        YArray = (max(1, RawOffsetIndices(2)-2) ...
-            : min(2*MaxOffset(2)+1, RawOffsetIndices(2)+2)).'; % initialize
-        ZArray = (max(1, RawOffsetIndices(3)-2) ...
-            : min(2*MaxOffset(3)+1, RawOffsetIndices(3)+2)).'; % initialize
+        XArray = (max(1, RawOffsetIndices(1)-FitOffset(1)) ...
+            : min(2*MaxOffset(1)+1, RawOffsetIndices(1)+FitOffset(1))).';
+        YArray = (max(1, RawOffsetIndices(2)-FitOffset(2)) ...
+            : min(2*MaxOffset(2)+1, RawOffsetIndices(2)+FitOffset(2))).';
+        ZArray = (max(1, RawOffsetIndices(3)-FitOffset(3)) ...
+            : min(2*MaxOffset(3)+1, RawOffsetIndices(3)+FitOffset(3))).';
         RepArrayX = [XArray; ...
             ones(numel(YArray) + numel(ZArray), 1) ...
             * RawOffsetIndices(1)]; % full x array for all three lines
@@ -396,8 +400,8 @@ switch FitType
         % polynomial to predict an offset.  If possible, center the fit 
         % around the integer peak of the cross-correlation.
         % NOTE: This only fits to a total of five datapoints.
-        XArray = (max(1, RawOffsetIndices(1)-2) ...
-            : min(2*MaxOffset(1)+1, RawOffsetIndices(1)+2)).';
+        XArray = (max(1, RawOffsetIndices(1)-FitOffset(1)) ...
+            : min(2*MaxOffset(1)+1, RawOffsetIndices(1)+FitOffset(1))).';
         XData = XCorr3D(XArray, RawOffsetIndices(2), RawOffsetIndices(3));
         X = [ones(numel(XArray), 1), XArray, XArray.^2];
         Lambda = 0; % ridge regression parameter
@@ -407,8 +411,8 @@ switch FitType
         
         % Fit a second order polynomial through a line varying with y
         % at the peak of the cross-correlation in x, z.
-        YArray = (max(1, RawOffsetIndices(2)-2) ...
-            : min(2*MaxOffset(2)+1, RawOffsetIndices(2)+2)).';
+        YArray = (max(1, RawOffsetIndices(2)-FitOffset(2)) ...
+            : min(2*MaxOffset(2)+1, RawOffsetIndices(2)+FitOffset(2))).';
         YData = ...
             XCorr3D(RawOffsetIndices(1), YArray, RawOffsetIndices(3)).';
         X = [ones(numel(YArray), 1), YArray, YArray.^2];
@@ -419,8 +423,8 @@ switch FitType
         
         % Fit a second order polynomial through a line varying with z
         % at the peak of the cross-correlation in x, y.
-        ZArray = (max(1, RawOffsetIndices(3)-2) ...
-            : min(2*MaxOffset(3)+1, RawOffsetIndices(3)+2)).';
+        ZArray = (max(1, RawOffsetIndices(3)-FitOffset(3)) ...
+            : min(2*MaxOffset(3)+1, RawOffsetIndices(3)+FitOffset(3))).';
         ZData = squeeze(...
             XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), ZArray));
         X = [ones(numel(ZArray), 1), ZArray, ZArray.^2];
