@@ -97,6 +97,9 @@ end
 if ~exist('FitType', 'var')
     FitType = '1D';
 end
+if ~exist('FitOffset', 'var')
+    FitOffset = [2; 2; 2];
+end
 
 % Ensure the stacks are floating point arrays.
 if ~isfloat(Stack1) || ~isfloat(Stack2)
