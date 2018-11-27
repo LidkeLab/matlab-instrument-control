@@ -35,7 +35,7 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %                   like a xcorr but the overlapping portions of Stack1 and 
 %                   Stack2 are  re-whitened for the computation of each
 %                   point in the xcorr coefficient field.
-%   FitType:    (string/character array)(default = '3DLineFits') The type 
+%   FitType:    (string/character array)(default = '1D') The type 
 %               of polynomial fit used to fit the 3D xcorr coefficient 
 %               field.
 %               '1D' fits 2nd order polynomials to three lines parallel to
@@ -70,12 +70,8 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %                   the FitType input and finding the peak of that 
 %                   polynomial.
 %   CorrAtOffset:   (float) The maximum value of the correlation
-%                   coefficient/fit.  For FitType = '1D', this is the value 
-%                   of the max xcorr coefficient corresponding to
-%                   PixelOffset.  For FitType = '3D' and '3DLineFits', this
-%                   is one of the extrema (ideally a maximum) of the 
-%                   polynomial fit, corresponding to the location of the
-%                   returned SubPixelOffset.
+%                   coefficient, corresponding to the correlation
+%                   coefficient at the offset given by PixelOffset.
 %   MaxOffset:      (3x1 or 1x3) Maximum offset between Stack1 and Stack2 
 %                   considered in the calculation of PixelOffset and 
 %                   SubPixelOffset.  This is returned because the user
@@ -95,7 +91,7 @@ if ~exist('Method', 'var')
     Method = 'FFT';
 end
 if ~exist('FitType', 'var')
-    FitType = '3DLineFits';
+    FitType = '1D';
 end
 
 % Ensure the stacks are floating point arrays.
@@ -244,7 +240,7 @@ end
 StackedCorrCube = XCorr3D(:);
 
 % Determine the integer offset between the two stacks.
-[CorrAtPixelOffset, IndexOfMax] = max(StackedCorrCube);
+[CorrAtOffset, IndexOfMax] = max(StackedCorrCube);
 [PeakRow, PeakColumn, PeakHeight] = ind2sub(size(XCorr3D), IndexOfMax);
 RawOffsetIndices = [PeakRow; PeakColumn; PeakHeight];
 
@@ -311,32 +307,20 @@ switch FitType
             + Beta(9)*R(2, :).*R(3, :) ...
             + Beta(10)*R(3, :).*R(1, :);
         
-        % Determine the correlation coefficient of the polynomial fit at 
-        % the predicted offset.
-        CorrAtOffset = PolyFitFunction(RawOffsetFit);
-        
         % Construct appropriate arrays corresponding to x,y,z that 
         % intersect the max integer offset found above (to be used later).
-        XPeakArray = ones(1, numel(RepArrayX)) * RawOffsetIndices(1);
-        YPeakArray = ones(1, numel(RepArrayY)) * RawOffsetIndices(2);
-        ZPeakArray = ones(1, numel(RepArrayZ)) * RawOffsetIndices(3);
         XArrayDense = linspace(1, 2*MaxOffset(1)+1, size(Stack1, 1));
-        YArrayDense = linspace(1, 2*MaxOffset(2)+1, size(Stack1, 2));
-        ZArrayDense = linspace(1, 2*MaxOffset(3)+1, size(Stack1, 3));
+        YArrayDense = linspace(1, 2*MaxOffset(2)+1, size(Stack1, 1));
+        ZArrayDense = linspace(1, 2*MaxOffset(3)+1, size(Stack1, 1));
+        XPeakArray = ones(1, numel(XArrayDense)) * RawOffsetIndices(1);
+        YPeakArray = ones(1, numel(YArrayDense)) * RawOffsetIndices(2);
+        ZPeakArray = ones(1, numel(ZArrayDense)) * RawOffsetIndices(3);
         XFitAtPeak = PolyFitFunction(...
             [XArrayDense; YPeakArray; ZPeakArray]);
         YFitAtPeak = PolyFitFunction(...
             [XPeakArray; YArrayDense; ZPeakArray]);
         ZFitAtPeak = PolyFitFunction(...
             [XPeakArray; YPeakArray; ZArrayDense]);
-
-        % PolyFitArray = Beta(1) + Beta(2)*RepArrayX + Beta(3)*RepArrayX.^2 ...
-        %     + Beta(4)*RepArrayY + Beta(5)*RepArrayY.^2 ...
-        %     + Beta(6)*RepArrayZ + Beta(7)*RepArrayZ.^2 ...
-        %     + Beta(8)*RepArrayX.*RepArrayY ...
-        %     + Beta(9)*RepArrayY.*RepArrayZ ...
-        %     + Beta(10)*RepArrayZ.*RepArrayX;
-        % PolyFitMatrix = reshape(PolyFitArray, size(XCorr3D));
     case '3DLineFits'
         % Fit a second order polynomial through the 3 lines parallel to
         % x, y, z of the cross-correlation which intersect the (integer)
@@ -391,10 +375,6 @@ switch FitType
             + Beta(2)*R(1, :) + Beta(3)*R(1, :).^2 ...
             + Beta(4)*R(2, :) + Beta(5)*R(2, :).^2 ...
             + Beta(6)*R(3, :) + Beta(7)*R(3, :).^2;
-        
-        % Determine the correlation coefficient of the polynomial fit at 
-        % the predicted offset.
-        CorrAtOffset = PolyFitFunction(RawOffsetFit);
         
         % Construct appropriate arrays corresponding to x,y,z that 
         % intersect the max integer offset found above (to be used later).
@@ -460,10 +440,6 @@ switch FitType
         
         % Compute the predicted offset based on the polynomial fits.
         RawOffsetFit = [RawOffsetFitX; RawOffsetFitY; RawOffsetFitZ];
-        
-        % Output the value value of the correlation at the (integer) pixel
-        % offset.
-        CorrAtOffset = CorrAtPixelOffset;
 end
 
 % Determine the predicted offset between the stack.
