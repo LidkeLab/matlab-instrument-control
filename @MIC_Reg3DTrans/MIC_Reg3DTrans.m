@@ -444,9 +444,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         %       with the goal being to capture the peak on
                         %       the next iteration.
                         SelectBit = abs(SubPixelOffset) > MaxOffset;
-                        MaxOffset = SelectBit .* ceil(...
-                            (2 * abs(SubPixelOffset))) + ...
-                            ~SelectBit .* MaxOffset;
+                        MaxOffset = ...
+                            SelectBit .* ceil((2*abs(SubPixelOffset))) ...
+                            + ~SelectBit .* MaxOffset;
                         
                         % As before, we should probably keep the number of
                         % fit points low for large values of MaxOffset.
@@ -460,7 +460,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         % cross-correlation varies relatively slowly so we
                         % can increase the number of points used in the
                         % fit.
-                        FitOffset = [5; 5; 5];
+                        FitOffset = [3; 3; 3];
                     end
                     
                     % Acquire a z-stack for the current stage location.
