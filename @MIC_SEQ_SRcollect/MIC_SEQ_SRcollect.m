@@ -87,6 +87,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
         Reg3DStepSize = 0.1; % (um) step size along z during cell reg.
         Reg3DMaxDev = 2; % (um) max deviation along z during cell reg.
+        Reg3DMaxCorrTol = 0.9; % xcorr peak val. to claim reg. convergence
         
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
@@ -378,6 +379,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Modify properties of the registration object as needed.
             obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
             obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
+            obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
+            obj.AlignReg.MaxCorrTol = obj.Reg3DMaxCorrTol;
         end
         
         function unloadSample(obj)

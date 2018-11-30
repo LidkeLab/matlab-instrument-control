@@ -56,6 +56,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZStack_MaxDev=0.5;  % distance from current zposition where to start and end zstack (um)
         ZStack_Step=0.05;   % z step size for zstack acquisition (um)
         ZStack_Pos;         % z positions where a frame should be acquired in zstack (um)
+        TolMaxCorr = 0.9;   % min val. of max xcorr coeff. for convergence
         Tol_X=.01;          % max X shift to reach convergence(um)
         Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
@@ -67,7 +68,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZMaxAC;             % autocorrelations of zstack
         maxACmodel;
         UseStackCorrelation = 0; % use 3D stack correlation reg. method
-        ErrorSignal = zeros(0, 3); %Error Signal [X Y Z] in microns
+        ErrorSignal = zeros(0, 3); % Error Signal [X Y Z] in microns
+        ErrorSignalHistory = zeros(0, 3); % Error signla history in microns
         IsInitialRegistration = 0; % boolean: initial reg. or periodic reg.
         OffsetFitSuccess; % boolean array: 1 indicates a succesful poly fit
     end
@@ -402,8 +404,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             obj.LampObj.on;
             
             iter=0;
-            withintol=0;
-            while (withintol==0)&&(iter<obj.MaxIter)
+            WithinTol=0;
+            while (WithinTol==0)&&(iter<obj.MaxIter)
                 if obj.AbortNow
                     obj.AbortNow = 0;
                     break
@@ -440,12 +442,14 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         % true peak.
                         % NOTE: If the peak occured outside the selected
                         %       MaxOffset, we set the new MaxOffset (in 
-                        %       that dimension) to twice the SubPixelOffset
+                        %       that dimension) to the SubPixelOffset
                         %       with the goal being to capture the peak on
-                        %       the next iteration.
+                        %       the next iteration (we don't want to make
+                        %       the offset too great though or we'll start
+                        %       to see edge effects of the xcorr).
                         SelectBit = abs(SubPixelOffset) > MaxOffset;
                         MaxOffset = ...
-                            SelectBit .* ceil((2*abs(SubPixelOffset))) ...
+                            SelectBit .* ceil((abs(SubPixelOffset))) ...
                             + ~SelectBit .* MaxOffset;
                         
                         % As before, we should probably keep the number of
@@ -456,11 +460,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         % can reduce the MaxOffset to speed things up.
                         MaxOffset = [5, 5, 5];
                         
-                        % When close to the true peak, the
-                        % cross-correlation varies relatively slowly so we
-                        % can increase the number of points used in the
-                        % fit.
-                        FitOffset = [3; 3; 3];
+                        FitOffset = [2; 2; 2];
+%                         % When close to the true peak, the
+%                         % cross-correlation varies relatively slowly so we
+%                         % can increase the number of points used in the
+%                         % fit.
+%                         FitOffset = [3; 3; 3];
                     end
                     
                     % Acquire a z-stack for the current stage location.
@@ -470,7 +475,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    [PixelOffset, SubPixelOffset, ~, MaxOffset] = ...
+                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] = ...
                         obj.findStackOffset(obj.ReferenceStack, ...
                         obj.ZStack, MaxOffset, 'FFT', '1D', FitOffset);
                     
@@ -509,14 +514,17 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     CurrentPos = obj.StageObj.Position;
                     NewPos = CurrentPos - StageOffset.';
                     obj.StageObj.setPosition(NewPos);
-
-                    % Define some parameters to match the naming
-                    % convention(s) used below.
-                    XYshift = CameraOffset(1:2);
-                    Zshift = CameraOffset(3);
+                    
+                    % Check if the current iteration succeeded within the
+                    % set tolerance.
+                    CameraOffsetTol = [obj.Tol_X, obj.Tol_Y, obj.Tol_Z] ...
+                        ./ obj.PixelSize;
+                    WithinTol = ...
+                        all(abs(CameraOffset) < CameraOffsetTol) ...
+                        && (MaxCorr >= obj.MaxCorrTol);
                     
                     % Save the error signal.
-                    obj.ErrorSignal = StageOffset;
+                    obj.ErrorSignal = StageOffset.';
                 else
                     %find z-position and adjust
                     [Zfit]=obj.findZPos();
@@ -534,9 +542,17 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 
                     obj.StageObj.setPosition(Pos);
                     
+                    %check convergence
+                    WithinTol=(abs(XYshift(1))<obj.Tol_X/obj.PixelSize)&...
+                    (abs(XYshift(2))<obj.Tol_Y/obj.PixelSize)&(abs(Zshift)<obj.Tol_Z/obj.PixelSize);
+                
                     % Save the error signal.
-                    obj.ErrorSignal = [StageShiftXY; Zshift];
+                    obj.ErrorSignal = [StageShiftXY, Zshift];
                 end
+                
+                % Append the new ErrorSignal to ErrorSignalHistory.
+                obj.ErrorSignalHistory = [obj.ErrorSignalHistory; ...
+                    obj.ErrorSignal];
                 
                 %show overlay
                 obj.Image_Current=obj.capture;
@@ -547,9 +563,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 diptruesize(h,'tight');
                 drawnow;
                 
-                %check convergence
-                withintol=(abs(XYshift(1))<obj.Tol_X/obj.PixelSize)&...
-                    (abs(XYshift(2))<obj.Tol_Y/obj.PixelSize)&(abs(Zshift)<obj.Tol_Z/obj.PixelSize);
+                % Increment the iteration counter.
                 iter=iter+1;
                 fprintf('Alignment iteration %i complete \n', iter)
             end
@@ -844,6 +858,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Data.Image_Reference = obj.Image_Reference;
             Data.Image_Current = obj.Image_Current;
             Data.ZStack = obj.ZStack;
+            Data.ReferenceStack = obj.ReferenceStack;
             Data.ErrorSignal = obj.ErrorSignal;
             
             Children=[];
