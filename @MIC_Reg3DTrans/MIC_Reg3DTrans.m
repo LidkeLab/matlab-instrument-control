@@ -71,7 +71,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ErrorSignal = zeros(0, 3); % Error Signal [X Y Z] in microns
         ErrorSignalHistory = zeros(0, 3); % Error signla history in microns
         IsInitialRegistration = 0; % boolean: initial reg. or periodic reg.
-        OffsetFitSuccess; % boolean array: 1 indicates a succesful poly fit
+        OffsetFitSuccess = zeros(0, 3); % bool. array for poly fit success
+        OffsetFitSuccessHistory  = zeros(0, 3); 
     end
     
     properties (SetAccess=protected)
@@ -430,11 +431,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                             % would be for the initial registration.
                             MaxOffset = [10; 10; 10];
                         end
-                        
-                        % For the first iteration, we expect sharp changes
-                        % w.r.t. the offset, so we don't want to use to
-                        % many points in the fit.
-                        FitOffset = [2; 2; 2];
                     elseif any(abs(SubPixelOffset) > MaxOffset)
                         % If the offset predicted by the polynomial fit was
                         % greater than the inspected offset, we should
@@ -451,21 +447,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         MaxOffset = ...
                             SelectBit .* ceil((abs(SubPixelOffset))) ...
                             + ~SelectBit .* MaxOffset;
-                        
-                        % As before, we should probably keep the number of
-                        % fit points low for large values of MaxOffset.
-                        FitOffset = [2; 2; 2];
                     else
                         % In this case, we seem to be close to the peak and
                         % can reduce the MaxOffset to speed things up.
                         MaxOffset = [5, 5, 5];
-                        
-                        FitOffset = [2; 2; 2];
-%                         % When close to the true peak, the
-%                         % cross-correlation varies relatively slowly so we
-%                         % can increase the number of points used in the
-%                         % fit.
-%                         FitOffset = [3; 3; 3];
                     end
                     
                     % Acquire a z-stack for the current stage location.
@@ -477,7 +462,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % between the two stacks.
                     [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] = ...
                         obj.findStackOffset(obj.ReferenceStack, ...
-                        obj.ZStack, MaxOffset, 'FFT', '1D', FitOffset);
+                        obj.ZStack, MaxOffset, 'FFT', '1D');
                     
                     % Decide which shift to proceed with based on
                     % PixelOffset and SubPixelOffset (SubPixelOffset can be
@@ -488,7 +473,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         + PixelOffset ...
                         .* (abs(PixelOffset-SubPixelOffset) > 0.5);
                     obj.OffsetFitSuccess = ...
-                        abs(PixelOffset-SubPixelOffset) <= 0.5;
+                        (abs(PixelOffset-SubPixelOffset) <= 0.5).';
+                    obj.OffsetFitSuccessHistory = ...
+                        [obj.OffsetFitSuccessHistory; ...
+                        obj.OffsetFitSuccess];
                     
                     % Modify PixelOffset to correspond to physical piezo
                     % (sample stage) dimensions, taking care of minus sign
@@ -517,11 +505,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     
                     % Check if the current iteration succeeded within the
                     % set tolerance.
-                    CameraOffsetTol = [obj.Tol_X, obj.Tol_Y, obj.Tol_Z] ...
-                        ./ obj.PixelSize;
+                    StageOffsetTol = [obj.Tol_X, obj.Tol_Y, obj.Tol_Z];
                     WithinTol = ...
-                        all(abs(CameraOffset.') < CameraOffsetTol) ...
-                        && (MaxCorr >= obj.MaxCorrTol);
+                        all(abs(StageOffset.') < StageOffsetTol) ...
+                        && (MaxCorr >= obj.TolMaxCorr);
                     
                     % Save the error signal.
                     obj.ErrorSignal = StageOffset.';
@@ -842,6 +829,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.ZStack_MaxDev = obj.ZStack_MaxDev;
             Attribute.ZStack_Step = obj.ZStack_Step;
             Attribute.ZStack_Pos = obj.ZStack_Pos;
+            Attribute.TolMaxCorr = obj.TolMaxCorr;
             Attribute.Tol_X = obj.Tol_X;
             Attribute.Tol_Y = obj.Tol_Y;
             Attribute.Tol_Z = obj.Tol_Z;
@@ -849,17 +837,34 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.MaxXYShift = obj.MaxXYShift;
             Attribute.MaxZShift = obj.MaxZShift;
             Attribute.IsInitialRegistration = obj.IsInitialRegistration;
-            Attribute.OffsetFitSuccess = obj.OffsetFitSuccess;
             Attribute.UseStackCorrelation = obj.UseStackCorrelation;
             
-            Data.ZFitPos = obj.ZFitPos;
-            Data.ZFitModel = obj.ZFitModel;
-            Data.ZMaxAC = obj.ZMaxAC;
+            if ~isempty(obj.ZFitPos)
+                Data.ZFitPos = obj.ZFitPos;
+            end
+            if ~isempty(obj.ZFitModel)
+                Data.ZFitModel = obj.ZFitModel;
+            end
+            if ~isempty(obj.ZMaxAC)
+                Data.ZMaxAC = obj.ZMaxAC;
+            end         
             Data.Image_Reference = obj.Image_Reference;
             Data.Image_Current = obj.Image_Current;
             Data.ZStack = obj.ZStack;
             Data.ReferenceStack = obj.ReferenceStack;
-            Data.ErrorSignal = obj.ErrorSignal;
+            if ~isempty(obj.ErrorSignal)
+                Data.ErrorSignal = obj.ErrorSignal;
+            end
+            if ~isempty(obj.ErrorSignalHistory)
+                Data.ErrorSignalHistory = obj.ErrorSignalHistory;
+            end
+            if ~isempty(obj.OffsetFitSuccess)
+                Data.OffsetFitSuccess = uint8(obj.OffsetFitSuccess);
+            end
+            if ~isempty(obj.OffsetFitSuccessHistory)
+                Data.OffsetFitSuccessHistory = ...
+                    uint8(obj.OffsetFitSuccessHistory);
+            end
             
             Children=[];
             
