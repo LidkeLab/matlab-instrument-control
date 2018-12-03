@@ -205,8 +205,8 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.AbortNow=1;
             DcamCapture(obj.CameraHandle);
             out=obj.getdata();
-            dipshow(out);
-            obj.abort;
+            obj.displaylastimage();
+            obj.abort();
             obj.AbortNow=0;
             
             if obj.KeepData
