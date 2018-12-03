@@ -505,9 +505,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     
                     % Check if the current iteration succeeded within the
                     % set tolerance.
-                    StageOffsetTol = [obj.Tol_X, obj.Tol_Y, obj.Tol_Z];
+                    StageOffsetTol = [obj.Tol_X; obj.Tol_Y; obj.Tol_Z];
                     WithinTol = ...
-                        all(abs(StageOffset.') < StageOffsetTol) ...
+                        all(abs(StageOffset) < StageOffsetTol) ...
                         && (MaxCorr >= obj.TolMaxCorr);
                     
                     % Save the error signal.
