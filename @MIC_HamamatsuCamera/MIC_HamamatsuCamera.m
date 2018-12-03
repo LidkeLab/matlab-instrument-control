@@ -200,12 +200,16 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
 %             if strcmp(status,'Ready')||strcmp(status,'Busy')
 %                 obj.abort;
 %             end
-            obj.setup_acquisition;
+
+            % Call the setup_acquisition method, but do so 'quietly' i.e.
+            % prevent the method from displaying anything in the Command
+            % Window.
+            evalc('obj.setup_acquisition()');
            
             obj.AbortNow=1;
             DcamCapture(obj.CameraHandle);
             out=obj.getdata();
-            obj.displaylastimage();
+%             obj.displaylastimage();
             obj.abort();
             obj.AbortNow=0;
             
