@@ -1,6 +1,11 @@
 function saveReferenceImage(obj)
     %Take reference image and save
 
+    
+    % Update the status of the instrument to indicate we are collecting
+    % reference data.
+    obj.StatusString = 'Collecting reference data for selected cell...';
+    
     % Collect a z-stack if needed (probably not a good way to do this, 
     % but it's important to collect the z-stack in the same manner as it 
     % will be collected in the AlignReg class).
@@ -66,4 +71,8 @@ function saveReferenceImage(obj)
     F.RefStruct=RefStruct;
     %Update cell count
     obj.CurrentCellIdx=obj.CurrentCellIdx+1;
+    
+    % Clear the status of the instrument to indicate the reference has
+    % been saved.
+    obj.StatusString = '';
 end
