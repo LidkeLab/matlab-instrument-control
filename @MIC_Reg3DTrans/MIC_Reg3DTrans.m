@@ -625,7 +625,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 % Display the current stack position being collected in the
                 % command window.
                 NumChar = fprintf(...
-                    'Acquiring stack index %3.i out of %3.i\n', nn, N);
+                    'Acquiring z-stack image index %i out of %i\n', nn, N);
                 
                 obj.StageObj.setPosition([X_Current,Y_Current,obj.ZStack_Pos(nn)]);
                 obj.ZStack(:,:,nn)=single(obj.CameraObj.start_capture);
