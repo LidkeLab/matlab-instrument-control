@@ -534,7 +534,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     (abs(XYshift(2))<obj.Tol_Y/obj.PixelSize)&(abs(Zshift)<obj.Tol_Z/obj.PixelSize);
                 
                     % Save the error signal.
-                    obj.ErrorSignal = [StageShiftXY, Zshift];
+                    obj.ErrorSignal = [StageShiftXY.', Zshift];
                 end
                 
                 % Append the new ErrorSignal to ErrorSignalHistory.
