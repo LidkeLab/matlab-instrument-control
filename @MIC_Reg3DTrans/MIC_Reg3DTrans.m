@@ -69,7 +69,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         maxACmodel;
         UseStackCorrelation = 0; % use 3D stack correlation reg. method
         ErrorSignal = zeros(0, 3); % Error Signal [X Y Z] in microns
-        ErrorSignalHistory = zeros(0, 3); % Error signla history in microns
+        ErrorSignalHistory = zeros(0, 3); % Error signal history in microns
         IsInitialRegistration = 0; % boolean: initial reg. or periodic reg.
         OffsetFitSuccess = zeros(0, 3); % bool. array for poly fit success
         OffsetFitSuccessHistory  = zeros(0, 3); 
