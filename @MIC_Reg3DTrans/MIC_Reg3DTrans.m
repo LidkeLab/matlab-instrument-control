@@ -608,7 +608,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             end
             % setup camera
             obj.CameraObj.AcquisitionType='capture';
-            obj.CameraObj.setup_acquisition;
+            obj.CameraObj.setup_acquisition();
                         
             % turn lamp on
             %obj.turnLampOn();
@@ -621,8 +621,24 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 if nn==1
                     pause(0.5);
                 end
+                
+                % Display the current stack position being collected in the
+                % command window.
+                NumChar = fprintf(...
+                    'Acquiring stack index %3.i out of %3.i\n', nn, N);
+                
                 obj.StageObj.setPosition([X_Current,Y_Current,obj.ZStack_Pos(nn)]);
                 obj.ZStack(:,:,nn)=single(obj.CameraObj.start_capture);
+                
+                % Remove the characters identifying stack index and stack
+                % number from command line so that they can be updated.  
+                % This is being done to avoid clutter to the command
+                % line.
+                % NOTE: \b deletes previous character displayed in the
+                %       command window.
+                for ii = 1:NumChar
+                    fprintf('\b');
+                end
             end
 %             % close shutter if needed
 %             if obj.CamShutter
