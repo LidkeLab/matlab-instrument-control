@@ -64,6 +64,7 @@ obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
 obj.CameraSCMOS.setup_acquisition();
 obj.AlignReg.Image_Reference = double(RefStruct.Image);
 obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
+obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
 obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
 obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
 obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
