@@ -450,7 +450,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     else
                         % In this case, we seem to be close to the peak and
                         % can reduce the MaxOffset to speed things up.
-                        MaxOffset = [5, 5, 5];
+                        MaxOffset = [5; 5; 5];
                     end
                     
                     % Acquire a z-stack for the current stage location.
@@ -460,9 +460,43 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] = ...
-                        obj.findStackOffset(obj.ReferenceStack, ...
-                        obj.ZStack, MaxOffset, 'FFT', '1D');
+                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] ...
+                        = obj.findStackOffset(...
+                        obj.ReferenceStack, obj.ZStack, ...
+                        MaxOffset, 'FFT', '1D');
+                    
+                    % If the sub-pixel prediction exceeds MaxOffset, 
+                    % re-try until this is no longer true or when MaxOffset
+                    % takes on its maximum possible value.
+                    % NOTE: When MaxOffsetInput == MaxOffset, we have
+                    %       selected a valid offset.  If these
+                    %       arrays are not equal, that means we've reached
+                    %       the maximum possible offset along one of the
+                    %       dimensions.
+                    MaxOffsetInput = [0; 0; 0]; % initialize
+                    SelectBit = abs(SubPixelOffset) > MaxOffset;                   MaxOffsetInput = [0; 0; 0]; % initializer
+                    while any(SelectBit) ...
+                            && ~all(MaxOffsetInput == MaxOffset)
+                        % The SubPixelOffset predicts a peak in the
+                        % xcorr which is beyond the offset checked by
+                        % findStackOffset(), so we should increase the
+                        % input offset and re-try before proceeding
+                        % with the rest of this registration iteration.
+                        MaxOffsetInput = SelectBit ...
+                            .* ceil((abs(SubPixelOffset))) ...
+                            + ~SelectBit .* MaxOffset;
+                        
+                        % Determine a predicted offset between the two
+                        % stacks.
+                        [PixelOffset, SubPixelOffset, MaxCorr, ...
+                            MaxOffset] = obj.findStackOffset(...
+                            obj.ReferenceStack, obj.ZStack, ...
+                            MaxOffsetInput, 'FFT', '1D');
+                        
+                        % Re-compute the SelectBit.
+                        SelectBit = abs(SubPixelOffset) > MaxOffset;
+                    end
+                    
                     
                     % Decide which shift to proceed with based on
                     % PixelOffset and SubPixelOffset (SubPixelOffset can be
