@@ -380,7 +380,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
             obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
-            obj.AlignReg.MaxCorrTol = obj.Reg3DMaxCorrTol;
+            obj.AlignReg.TolMaxCorr = obj.Reg3DMaxCorrTol;
         end
         
         function unloadSample(obj)
