@@ -167,10 +167,10 @@ switch Method
         XCorr3D = ifftn(conj(Stack1PaddedFFT) .* Stack2PaddedFFT);
         
         % Compute the binary cross-correlation for later use in scaling.
-        Stack1Binary = ones(size(Stack1Whitened));
-        Stack2Binary = ones(size(Stack2Whitened));
-        Stack1BinaryFFT = fftn(Stack1Binary, 2*size(Stack1Whitened)-1);
-        Stack2BinaryFFT = fftn(Stack2Binary, 2*size(Stack2Whitened)-1);
+        Stack1Binary = (Stack1 ~= 0);
+        Stack2Binary = (Stack2 ~= 0);
+        Stack1BinaryFFT = fftn(Stack1Binary, 2*size(Stack1)-1);
+        Stack2BinaryFFT = fftn(Stack2Binary, 2*size(Stack2)-1);
         XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
 
         % Scale the 3D cross-correlation by the cross-correlation of the

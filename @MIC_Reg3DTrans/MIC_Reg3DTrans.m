@@ -497,7 +497,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         SelectBit = abs(SubPixelOffset) > MaxOffset;
                     end
                     
-                    
                     % Decide which shift to proceed with based on
                     % PixelOffset and SubPixelOffset (SubPixelOffset can be
                     % innacurate), setting a flag array to indicate when
