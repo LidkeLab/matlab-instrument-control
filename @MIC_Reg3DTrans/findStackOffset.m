@@ -1,5 +1,6 @@
 function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
-    findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType, FitOffset)
+    findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
+    FitType, FitOffset, PlotFlag)
 %findStackOffset estimates a sub-pixel offset between two stacks.
 % findStackoffset() will estimate the offset between two 3D stacks of
 % images.  This method computes an integer pixel offset between the two
@@ -58,10 +59,16 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %                   Note that only 2 points on either side of the peak are 
 %                   incorporated into the fitting (5 points total, unless 
 %                   near an edge).
+%               'None' will not fit the cross-correlation, and
+%                   SubPixelOffset will be set to PixelOffset.
 %   FitOffset:  (3x1 or 1x3)(default = [2; 2; 2]) Maximum offset from the
 %               peak of the cross-correlation curve for which data will be
 %               fit to determine SubPixelOffset.  This only applies to
 %               FitType = '1D' or '3DLineFits'.
+%   PlotFlag: (boolean)(default = 1) Specifies whether or not the 1D line
+%             plots through the peak of the xcorr will be shown.  
+%             PlotFlag = 1 will allow the plots to be shown, PlotFlag = 0
+%             will not allow plots to be displayed.
 %
 % OUTPUTS:
 %   PixelOffset:    (3x1)(integer) The integer pixel offset of Stack2
@@ -99,6 +106,9 @@ if ~exist('FitType', 'var')
 end
 if ~exist('FitOffset', 'var')
     FitOffset = [2; 2; 2];
+end
+if ~exist('PlotFlag', 'var')
+    PlotFlag = 1;
 end
 
 % Ensure the stacks are floating point arrays.
@@ -447,6 +457,19 @@ switch FitType
         
         % Compute the predicted offset based on the polynomial fits.
         RawOffsetFit = [RawOffsetFitX; RawOffsetFitY; RawOffsetFitZ];
+    case 'None'
+        % Don't fit the cross-correlation.  In this case, we want
+        % SubPixelOffset to be equal to PixelOffset, which I'll do here by
+        % setting RawOffsetFit to RawOffsetIndices.
+        RawOffsetFit = RawOffsetIndices;
+        
+        % Set the arrays needed for plotting to empty arrays.
+        XArrayDense = [];
+        YArrayDense = [];
+        ZArrayDense = [];
+        XFitAtPeak = [];
+        YFitAtPeak = [];
+        ZFitAtPeak = [];
 end
 
 % Determine the predicted offset between the stack.
@@ -459,31 +482,33 @@ end
 
 % Display line sections through the integer location of the
 % cross-correlation, overlain on the fit along those lines.
-FigureWindow = findobj('Tag', 'CorrWindow');
-if isempty(FigureWindow)
-    FigureWindow = figure('Tag', 'CorrWindow');
+if PlotFlag
+    FigureWindow = findobj('Tag', 'CorrWindow');
+    if isempty(FigureWindow)
+        FigureWindow = figure('Tag', 'CorrWindow');
+    end
+    clf(FigureWindow); % clear the figure window
+    figure(FigureWindow); % ensure we plot into the correct figure
+    subplot(3, 1, 1)
+    plot(-MaxOffset(1):MaxOffset(1), ...
+        XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3)), 'x')
+    hold on
+    plot(XArrayDense-MaxOffset(1)-1, XFitAtPeak)
+    title('X Correlation')
+    subplot(3, 1, 2)
+    plot(-MaxOffset(2):MaxOffset(2), ...
+        XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)), 'x')
+    hold on
+    plot(YArrayDense-MaxOffset(2)-1, YFitAtPeak)
+    title('Y Correlation')
+    ylabel('Correlation Coefficient')
+    subplot(3, 1, 3)
+    plot(-MaxOffset(3):MaxOffset(3), ...
+        squeeze(XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :)), 'x')
+    hold on
+    plot(ZArrayDense-MaxOffset(3)-1, ZFitAtPeak)
+    title('Z Correlation')
+    xlabel('Pixel Offset')
 end
-clf(FigureWindow); % clear the figure window
-figure(FigureWindow); % ensure we plot into the correct figure
-subplot(3, 1, 1)
-plot(-MaxOffset(1):MaxOffset(1), ...
-    XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3)), 'x')
-hold on
-plot(XArrayDense-MaxOffset(1)-1, XFitAtPeak)
-title('X Correlation')
-subplot(3, 1, 2)
-plot(-MaxOffset(2):MaxOffset(2), ...
-    XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)), 'x')
-hold on
-plot(YArrayDense-MaxOffset(2)-1, YFitAtPeak)
-title('Y Correlation')
-ylabel('Correlation Coefficient')
-subplot(3, 1, 3)
-plot(-MaxOffset(3):MaxOffset(3), ...
-    squeeze(XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :)), 'x')
-hold on
-plot(ZArrayDense-MaxOffset(3)-1, ZFitAtPeak)
-title('Z Correlation')
-xlabel('Pixel Offset')
 
 end
