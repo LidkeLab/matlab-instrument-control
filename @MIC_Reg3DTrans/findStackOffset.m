@@ -1,6 +1,6 @@
 function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
     findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
-    FitType, FitOffset, PlotFlag)
+    FitType, FitOffset, BinaryMask, PlotFlag)
 %findStackOffset estimates a sub-pixel offset between two stacks.
 % findStackoffset() will estimate the offset between two 3D stacks of
 % images.  This method computes an integer pixel offset between the two
@@ -65,6 +65,9 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %               peak of the cross-correlation curve for which data will be
 %               fit to determine SubPixelOffset.  This only applies to
 %               FitType = '1D' or '3DLineFits'.
+%   BinaryMask: (mxnxo)(default = ones(m, n, o)) Mask to multiply the
+%               stacks with before computing to cross-correlation.
+%               NOTE: This is only used if Method = 'FFT'.
 %   PlotFlag: (boolean)(default = 1) Specifies whether or not the 1D line
 %             plots through the peak of the xcorr will be shown.  
 %             PlotFlag = 1 will allow the plots to be shown, PlotFlag = 0
@@ -109,6 +112,9 @@ if ~exist('FitOffset', 'var')
 end
 if ~exist('PlotFlag', 'var')
     PlotFlag = 1;
+end
+if ~exist('BinaryMask', 'var')
+    BinaryMask = ones(size(Stack1));
 end
 
 % Ensure the stacks are floating point arrays.
@@ -163,12 +169,21 @@ switch Method
         % inspect only the central portion corresponding to MaxOffset
         % offsets along each dimension.
         
-        % Whiten each image in the stack with respect to the entire stack.
-        Stack1Whitened = (Stack1 - mean(Stack1(:))) ...
-            / (std(Stack1(:)) * sqrt(numel(Stack1(:)) - 1));
-        Stack2Whitened = (Stack2 - mean(Stack2(:))) ...
-            / (std(Stack2(:)) * sqrt(numel(Stack2(:)) - 1));
+        % Whiten each image in the stack with respect to the entire stack,
+        % ignoring the parts which are covered by the BinaryMask when
+        % computing mean, std., etc.
+        Stack1Masked = Stack1(boolean(BinaryMask));
+        Stack2Masked = Stack2(boolean(BinaryMask));
+        Stack1Whitened = (Stack1 - mean(Stack1Masked)) ...
+            / (std(Stack1Masked) * sqrt(numel(Stack1Masked) - 1));
+        Stack2Whitened = (Stack2 - mean(Stack2Masked)) ...
+            / (std(Stack2Masked) * sqrt(numel(Stack2Masked) - 1));
 
+        % Re-apply the binary mask to ensure the masked points cannot
+        % contribute to the cross-correlation.
+        Stack1Whitened = BinaryMask .* Stack1Whitened;
+        Stack2Whitened = BinaryMask .* Stack2Whitened;
+        
         % Compute the zero-padded 3D FFT's of each stack.
         Stack1PaddedFFT = fftn(Stack1Whitened, 2*size(Stack1Whitened)-1);
         Stack2PaddedFFT = fftn(Stack2Whitened, 2*size(Stack2Whitened)-1);
@@ -177,10 +192,10 @@ switch Method
         XCorr3D = ifftn(conj(Stack1PaddedFFT) .* Stack2PaddedFFT);
         
         % Compute the binary cross-correlation for later use in scaling.
-        Stack1Binary = (Stack1 ~= 0);
-        Stack2Binary = (Stack2 ~= 0);
-        Stack1BinaryFFT = fftn(Stack1Binary, 2*size(Stack1)-1);
-        Stack2BinaryFFT = fftn(Stack2Binary, 2*size(Stack2)-1);
+        Stack1Binary = (Stack1Whitened ~= 0);
+        Stack2Binary = (Stack2Whitened ~= 0);
+        Stack1BinaryFFT = fftn(Stack1Binary, 2*size(Stack1Whitened)-1);
+        Stack2BinaryFFT = fftn(Stack2Binary, 2*size(Stack2Whitened)-1);
         XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
 
         % Scale the 3D cross-correlation by the cross-correlation of the
@@ -189,7 +204,7 @@ switch Method
         % scaling by max(XCorr3DBinary(:)) to re-convert to a correlation
         % coefficient.
         XCorr3D = (XCorr3D ./ XCorr3DBinary) ...
-            * min(numel(Stack1Binary), numel(Stack2Binary));
+            * min(sum(Stack1Binary(:)), sum(Stack2Binary(:)));
         
         % Shift the cross-correlation image such that an auto-correlation 
         % image will have it's energy peak at the center of the 3D image.
