@@ -67,6 +67,7 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %               FitType = '1D' or '3DLineFits'.
 %   BinaryMask: (mxnxo)(default = ones(m, n, o)) Mask to multiply the
 %               stacks with before computing to cross-correlation.
+%               BinaryMask = [] will force the use of the default.
 %               NOTE: This is only used if Method = 'FFT'.
 %   PlotFlag: (boolean)(default = 1) Specifies whether or not the 1D line
 %             plots through the peak of the xcorr will be shown.  
@@ -113,7 +114,7 @@ end
 if ~exist('PlotFlag', 'var')
     PlotFlag = 1;
 end
-if ~exist('BinaryMask', 'var')
+if ~exist('BinaryMask', 'var') || isempty(BinaryMask)
     BinaryMask = ones(size(Stack1));
 end
 
