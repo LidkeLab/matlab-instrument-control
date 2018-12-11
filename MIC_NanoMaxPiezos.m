@@ -180,7 +180,6 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                 obj.StagePiezoZ.exportState();
             Attributes.InstrumentName = obj.InstrumentName;
             Data=[];
-            Children=[];
         end
         
         function delete(obj)

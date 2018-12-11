@@ -25,7 +25,7 @@ guiFig = figure('Units','pixels','Position',[xst yst xsz ysz],...
 obj.GuiFigure = guiFig;
 
 % update gui when window is selected
-guiFig.WindowButtonDownFcn = @properties2gui;
+%guiFig.WindowButtonDownFcn = @properties2gui;
 
 % mouse over TL slider wheel control
 guiFig.WindowScrollWheelFcn = @wheel;
@@ -101,7 +101,7 @@ handles.Edit_CameraDefCor = uicontrol('Parent',hCameraPanel, 'Style', ...
     'Position', [editst+200 php-90 50 20]);
 
 % Registration Panel
-ph=0.08;
+ph=0.12;
 php = ph*ysz;
 hRegPanel = uipanel('Parent',guiFig,'Title','REGISTRATION','Position',[(1-pw)/2 refh-ph-psep pw ph]);
 refh=refh-ph-psep;
@@ -490,6 +490,39 @@ setDefaults();
         handles.Slider_TL.Value = FPnew;
     end
 
+    function LoadRef(~,~)
+        obj.loadref();
+        set(handles.Edit_RegFileName,'String',obj.R3DObj.RefImageFile);
+    end
+
+    function Align(~,~)
+        gui2properties();
+        obj.align();
+    end
+
+    function ShowRef(~,~)
+        obj.showref();
+    end
+
+    function TakeCurrent(~,~)
+        gui2properties();
+        obj.takecurrent();
+    end
+
+    function CenterStage(~,~)
+        obj.StageObj.center();
+    end
+
+    function TakeReference(~,~)
+        gui2properties();
+        obj.takeref();
+    end
+
+    function SaveReference(~,~)
+        obj.saveref();
+        properties2gui();
+    end
+
     function focusLamp(~,~)
         gui2properties();
         obj.focusLamp();
@@ -589,7 +622,9 @@ setDefaults();
             handles.Edit_CameraDefCor.String{handles.Edit_CameraDefCor.Value};
         % REGISTRATION
         obj.R3DObj.ExposureTime=str2double(get(handles.Edit_RegExpTime,'string'));
+        obj.ExpTimeReg=str2double(get(handles.Edit_RegExpTime,'string'));
         obj.R3DObj.RefImageFile=get(handles.Edit_RegFileName,'string');
+        
         % LIGHT SOURCE
         obj.Laser405Focus = handles.Focus405.Value;
         obj.Laser488Focus = handles.Focus488.Value;
@@ -703,7 +738,7 @@ setDefaults();
         end
         
         % PIEZO
-        handles.Edit_PositionPiezo.String = num2str(obj.Piezo.getPosition);
+        handles.Edit_PositionPiezo.String = num2str(obj.StageObj.StagePiezoZ.getPosition());
         handles.Edit_StepSizePiezo.String = num2str(obj.PiezoStepSize); 
         handles.Edit_Zstart.String = num2str(obj.StartZStack);
         handles.Edit_Zend.String = num2str(obj.EndZStack);
