@@ -20,7 +20,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Hardware objects
         CameraSCMOS; % Main Data Collection Camera
         CameraIR; % Active Stabilization Camera
-        MaxPiezoConnectAttempts = 5; % max # of attempts to connect piezo
+        MaxPiezoConnectAttempts = 2; % max # of attempts to connect piezo
         XPiezoSerialNums = {'81850186', '84850145'}; % controller, gauge
         YPiezoSerialNums = {'81850193', '84850146'}; % controller, gauge
         ZPiezoSerialNums = {'81850176', '84850203'}; % controller, gauge
@@ -70,8 +70,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseManualFindCell = 0;
         
         % Misc. file directories, directories, and indices.
-        TopDir;
-        CoverslipName;
+        TopDir = '';
+        CoverslipName = '';
         LabelIdx = 1;
         CellGridIdx;
         CurrentCellIdx = 1;
