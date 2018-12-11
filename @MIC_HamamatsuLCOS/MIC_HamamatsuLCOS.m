@@ -87,17 +87,16 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
             Attributes.Lambda = obj.Lambda;
             Attributes.File_Correction=obj.File_Correction;
             Attributes.ScaleFactor=obj.ScaleFactor;
-            Attributes.Image_Correction=obj.Image_Correction;
-            Attributes.Image_Blaze=obj.Image_Blaze;
-            Attributes.Image_OptimPSF=obj.Image_OptimPSF;
-            Attributes.Image_Pattern=obj.Image_Pattern;
-            Attributes.Image_Display=obj.Image_Display;
             Attributes.ZernikeCoef=obj.ZernikeCoef;
             Attributes.PupilCenter=obj.PupilCenter;
             Attributes.PupilRadius=obj.PupilRadius;
             
-            Data=[];
-            
+            Data.Image_Correction=obj.Image_Correction;
+            Data.Image_Blaze=obj.Image_Blaze;
+            Data.Image_OptimPSF=obj.Image_OptimPSF;
+            Data.Image_Pattern=obj.Image_Pattern;
+            Data.Image_Display=obj.Image_Display;
+  
             Children=[];
         end
         
