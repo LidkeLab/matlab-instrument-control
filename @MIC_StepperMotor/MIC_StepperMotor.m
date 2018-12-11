@@ -40,7 +40,7 @@ classdef MIC_StepperMotor < MIC_Abstract
         function obj = MIC_StepperMotor(SerialNum)
             %constructor start the communications with all three motors and
             %also sets some of the class properties.
-%             addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\mex64');
+            addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\mex64');
             obj=obj@MIC_Abstract(~nargout);
             obj.SerialN = SerialNum;
             Kinesis_SBC_Open(obj.SerialN);
@@ -87,9 +87,13 @@ classdef MIC_StepperMotor < MIC_Abstract
             %gives the current jog step size in mm.
             Step = Kinesis_SBC_GetJogStepSize(obj.SerialN,Channel);
         end
-        function delete(obj)
+        function closeSBC(obj)
+            %called inside the delete function to close the communication ports for all the motors.
             Kinesis_SBC_Close(obj.SerialN);
-            Kinesis_LD_Close(obj.SerialN);
+            Kinesis_LD_Close('SerialNoString',Channel); %FF
+        end
+        function delete(obj)
+            obj.closeSBC();
             delete(obj.GuiFigure);
             clear obj;
         end
@@ -140,4 +144,3 @@ classdef MIC_StepperMotor < MIC_Abstract
     end
     
 end
-
