@@ -473,42 +473,8 @@ properties2gui();
     function gui2properties()
         % Set the object properties based on the GUI controls.
         
-        % Misc. file saving properties.
-        obj.TopDir = handles.EditSaveDirectory.String;
-        obj.CoverslipName = handles.EditCoverslipName.String;
-        obj.LabelIdx = str2double(handles.EditLabelNumber.String);
-        
-        % Alignment/registration properties.
-        obj.NSeqBeforePeriodicReg = ...
-            str2double(handles.EditboxPeriodicReg.String);
-        
         % Misc. acquisition properties.
-        obj.NumberOfSequences = ...
-            str2double(handles.EditNumberOfSequences.String);
-        obj.NumberOfFrames = str2double(handles.EditNumberOfFrames.String);
         obj.IsBleach = handles.CheckboxPhotobleach.Value;
-        obj.DurationPreActivation = ...
-            str2double(handles.EditboxPreActivateFluorophores.String);
-        
-        % sCMOS properties.
-        obj.ExposureTimeLampFocus = ...
-            str2double(handles.EditExposureTimeLampFocus.String);
-        obj.ExposureTimeCapture = ...
-            str2double(handles.EditExposureTimeLampCapture.String);
-        obj.ExposureTimeLaserFocus = ...
-            str2double(handles.EditExposureTimeLaserFocus.String);
-        obj.ExposureTimeSequence = ...
-            str2double(handles.EditExposureTimeLaserSequence.String);
-        
-        % Laser properties.
-        obj.LaserPowerSequence = ...
-            str2double(handles.Edit647PowerSequence.String);
-        obj.LaserPowerFocus = ...
-            str2double(handles.Edit647PowerFocus.String);
-        obj.LaserPower405Activate = ...
-            str2double(handles.Edit405PowerActivate.String);
-        obj.LaserPower405Bleach = ...
-            str2double(handles.Edit405PowerBleach.String);
     end
 
     function properties2gui()
