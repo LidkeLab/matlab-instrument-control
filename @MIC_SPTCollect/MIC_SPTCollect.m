@@ -41,14 +41,14 @@ classdef MIC_SPTCollect < MIC_Abstract
         CameraEMGainLow=2;              % Low camera gain value
         CameraROI=1;                    % Camera ROI (see gui for specifics)
         PixelSize;                      % Pixel size determined from calibration Andor Camera
-        OrientMatrix;                   % unitary matrix to show orientation 
-                                        % between Andor Camera and Stage([a b;c d])
+        OrientMatrix;                   % unitary matrix to show orientation
+        % between Andor Camera and Stage([a b;c d])
         IRExpTime_Focus_Set=0.01;       % Exposure time during focus IR Camera
         IRExpTime_Sequence_Set=0.01;    % Exposure time during sequence IR Camera
         IRCameraROI=2;                  % IRCamera ROI (see gui for specifics)
         IRPixelSize;                    % PixelSize for IR Camera
-        IROrientMatrix;                 % unitary matrix to show orientation 
-                                        % between IR Camera and Stage([a b;c d])
+        IROrientMatrix;                 % unitary matrix to show orientation
+        % between IR Camera and Stage([a b;c d])
         % Light source params
         Laser638Low;          % Low power 638 laser
         Laser561Low;          % Low power 561 laser
@@ -520,31 +520,63 @@ classdef MIC_SPTCollect < MIC_Abstract
         
         function set_RegCamType(obj)
             if strcmp(obj.RegCamType,'Andor Camera');
-                CalFileName=fullfile(obj.CalFilePath,'SPT_AndorPixelSize.mat');
+                CalFileName=fullfile(obj.CalFilePath,'SPT_AndorCalibrate.mat');
                 if exist(CalFileName,'file')
                     obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,CalFileName);
                 else
-                    obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj);
+                    obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,CalFileName);
                     warning('Put nanogris as a sample to do the calibration for Reg3dTrans class')
+                    %set the Andor Camera
+                    CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
+                    CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
+                    EMGTemp = CamSet.EMGain.Value;
+                    CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                    obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                    obj.R3DObj.CameraObj.setShutter(1);
+                    
+                    %set the lamp
+                    if isempty(obj.LampPower) || obj.LampPower==0
+                        obj.LampPower=obj.LampObj.MaxPower/2;
+                    end
+                    obj.LampObj.setPower(obj.LampPower);
+                    obj.LampObj.on();
+                    fprintf('Calibrating camera and stage ...\n')
+                    pause(obj.LampWait);
                     obj.R3DObj.calibrate();
+                    % change back camera setting to the values before using the R3DTrans class
+                    obj.R3DObj.CameraObj.setShutter(0);
+                    CamSet.EMGain.Value = EMGTemp;
+                    CamSet.ManualShutter.Bit=0; %set the mannualShutter be one
+                    obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
+                    obj.LampObj.off();
+                    obj.PixelSize=obj.R3DObj.PixelSize;
                 end
-                obj.R3DObj.ChangeExpTime=true;
-                obj.R3DObj.ExposureTime=0.01;
                 
             elseif strcmp(obj.RegCamType,'IRCamera')
                 if isempty(obj.IRCameraObj)
                     obj.IRCameraObj=MIC_ThorlabsIR();
                 end
-                CalFileName=fullfile(obj.CalFilePath,'SPT_IRPixelSize.mat');
+                CalFileName=fullfile(obj.CalFilePath,'SPT_IRCalibrate.mat');
                 if exist(CalFileName,'file')
                     obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,CalFileName);
                 else
-                    obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj);
+                    obj.R3DObj=MIC_Reg3DTrans(obj.IRCameraObj,obj.StageObj,CalFileName);
                     warning('Put nanogris as a sample to do the calibration for Reg3dTrans class')
+                    obj.R3DObj.ChangeExpTime=true;
+                    obj.R3DObj.ExposureTime=0.01;
+                    obj.R3DObj.CameraObj.ROI=[515 770 467 722];
+                    %set the lamp
+                    if isempty(obj.Lamp850Power) || obj.Lamp850Power==0
+                        obj.Lamp850Power=obj.Lamp850Obj.MaxPower/2;
+                    end
+                    obj.Lamp850Obj.setPower(obj.Lamp850Power);
+                    obj.Lamp850Obj.on();
+                    pause(obj.LampWait);
                     obj.R3DObj.calibrate();
+                    obj.Lamp850Obj.off();
+                    obj.IRPixelSize=obj.R3DObj.PixelSize;
                 end
-                obj.R3DObj.ChangeExpTime=true;
-                obj.R3DObj.ExposureTime=0.01;
+                
             end
             
         end
@@ -660,7 +692,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.CameraObj.setCamProperties(CamSet);
                 obj.CameraObj.ExpTime_Sequence=obj.ExpTime_Sequence_Set;
                 obj.CameraObj.SequenceLength=obj.NumFrames;
-                obj.CameraObj.AcquisitionTimeOutOffset=10000;
+                %                 obj.CameraObj.AcquisitionTimeOutOffset=10000;
                 obj.CameraObj.ROI=obj.getROI('Andor');
                 %                 fprintf('EM Gain\n')
                 obj.CameraObj.CameraSetting.EMGain
@@ -942,4 +974,3 @@ classdef MIC_SPTCollect < MIC_Abstract
         
     end
 end
-
