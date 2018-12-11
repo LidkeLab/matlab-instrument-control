@@ -148,6 +148,7 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 fprintf('Initializing Registration object\n')
                 obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,f);
                 if ~exist(f,'file')
+<<<<<<< HEAD
                     %set the Andor Camera
                         CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
                         CamSet.ManualShutter.Bit=1; %set the mannualShutter be one
@@ -167,6 +168,10 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                         obj.R3DObj.CameraObj.ROI=[1 256 257 512];
                         obj.R3DObj.calibrate();
                         obj.LampObj.off();
+=======
+                    obj.CameraObj.ROI=[1 256 1 256];
+                    obj.R3DObj.calibrate();
+>>>>>>> a9bbde77920d1e49f17afd8a9f535f0299d46e52
                 end  
                 if exist(f,'file')
                     a=load(f);

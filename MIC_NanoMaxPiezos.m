@@ -133,8 +133,16 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                     % NOTE: 15 bits cover a range of 20um -> convert a
                     %       0-(2^15-1) range to ~0-20um with a factor of 
                     %       (20um / 2^15).
-                    PiezoPosition = (20 / 2^15) ...
+                    
+                    switch DeviceVersionTagArray.(cc)
+                        case '29' %Kcube
+                             PiezoPosition = (20 / 2^15) ...
+                        * Kinesis_KCube_SG_GetReading(StrainGaugeSN);
+                        case '81' %TCube
+                             PiezoPosition = (20 / 2^15) ...
                         * Kinesis_SG_GetReading(StrainGaugeSN);
+                    end
+                        
                     if round(PiezoPosition, 1) == TestPosition
                         % Position matches TestPosition to the nearest
                         % 1/10um: re-center piezo and break the loop.
@@ -144,6 +152,8 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                         % This was the last attempt, warn the user and
                         % proceed.
                         warning('Connection to %c piezo has failed', cc)
+                    else
+                        obj.(StagePiezo).delete;
                     end
                 end
             end
