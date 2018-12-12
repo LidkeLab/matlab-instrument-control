@@ -888,6 +888,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.IsInitialRegistration = obj.IsInitialRegistration;
             Attribute.UseStackCorrelation = obj.UseStackCorrelation;
             
+            Data.Image_Reference = obj.Image_Reference;
+            Data.Image_Current = obj.Image_Current;
             if ~isempty(obj.ZFitPos)
                 Data.ZFitPos = obj.ZFitPos;
             end
@@ -896,11 +898,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
             if ~isempty(obj.ZMaxAC)
                 Data.ZMaxAC = obj.ZMaxAC;
-            end         
-            Data.Image_Reference = obj.Image_Reference;
-            Data.Image_Current = obj.Image_Current;
-            Data.ZStack = obj.ZStack;
-            Data.ReferenceStack = obj.ReferenceStack;
+            end
+            if ~isempty(obj.ZStack)
+                Data.ZStack = obj.ZStack;
+            end
+            if ~isempty(obj.ReferenceStack)
+                Data.ReferenceStack = obj.ReferenceStack;
+            end  
             if ~isempty(obj.ErrorSignal)
                 Data.ErrorSignal = obj.ErrorSignal;
             end
