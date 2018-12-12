@@ -33,7 +33,7 @@ classdef MIC_ActiveReg3D_Seq < handle
         Correction      %Amount corrected [X Y Z] in micron
         PosPostCorrect  %Piezo Set Position after correction [X Y Z] in micron
         
-        ErrorSignal_History=[]     %Error Signal [X Y Z] in micron
+        ErrorSignal_History = zeros(0, 3); %Error Signal [X Y Z] in microns
         ErrorSignal_HistoryZ %FF
         ErrorSignal_HistoryX %FF
         ErrorSignal_HistoryY %FF
@@ -230,9 +230,7 @@ classdef MIC_ActiveReg3D_Seq < handle
             
             %Image before corrections
             obj.Image_preCorrection=cat(3,obj.Image_preCorrection,CurrentImage);
-            gcf; %FF
-            delete(ans); %FF
-
+            
 %            obj.Correction(3)=sign(obj.ErrorSignal(3))*min(obj.MaxZShift,abs(obj.ErrorSignal(3))); % P-only correction
 
             % PI-Control in Z:       
@@ -291,22 +289,7 @@ classdef MIC_ActiveReg3D_Seq < handle
             
             obj.Correction_History=cat(1,obj.Correction_History,obj.Correction);
             obj.PosPostCorrect_History=cat(1,obj.PosPostCorrect_History,obj.PosPostCorrect);
-            
-%             figure
-% %             plot(obj.ErrorSignal_History(:,3)*1000,'r')
-% %             hold on
-%             plot(obj.Correction_History(:,3)*1000,'b')
-%             hold on
-% %              plot(obj.ErrorSignal_History(:,1)*1000,'r')
-%             plot(obj.Correction_History(:,1)*1000,'r')
-%             hold on
-% %              plot(obj.ErrorSignal_History(:,2),'g*')
-% %             hold on
-%             plot(obj.Correction_History(:,2)*1000,'g')
-% %             hold on
-% %              plot(obj.PosPostCorrect_History(:,2),'y')
-%             legend('correctionZ','correctionX','correction Y')
-            
+                       
             %Image after all corrections
             obj.Stage_Piezo_X.setPosition(XYZ(1)); %new
             obj.Stage_Piezo_Y.setPosition(XYZ(2)); %new

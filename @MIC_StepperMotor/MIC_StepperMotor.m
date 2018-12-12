@@ -144,4 +144,3 @@ classdef MIC_StepperMotor < MIC_Abstract
     end
     
 end
-
