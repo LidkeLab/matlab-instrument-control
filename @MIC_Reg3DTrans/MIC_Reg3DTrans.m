@@ -414,6 +414,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 end
                 
                 if obj.UseStackCorrelation
+                    % Ensure that the reference image is set to the central
+                    % image in the reference stack (this corresponds to the
+                    % focal plane of interest).
+                    RefInd = (obj.ZStack_MaxDev / obj.ZStack_Step) + 1;
+                    obj.Image_Reference = obj.ReferenceStack(:, :, RefInd);
+                    
                     % Attempt to select an appropriate value of the
                     % MaxOffset parameter.
                     if iter == 0
