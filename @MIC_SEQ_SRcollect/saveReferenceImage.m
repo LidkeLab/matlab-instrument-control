@@ -6,9 +6,7 @@ function saveReferenceImage(obj)
     % reference data.
     obj.StatusString = 'Collecting reference data for selected cell...';
     
-    % Collect a z-stack if needed (probably not a good way to do this, 
-    % but it's important to collect the z-stack in the same manner as it 
-    % will be collected in the AlignReg class).
+    % Collect a z-stack for use in brightfield registration.
     obj.Lamp660.setPower(obj.Lamp660Power);
     pause(obj.LampWait);
     obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
@@ -17,16 +15,11 @@ function saveReferenceImage(obj)
     RefStruct.ReferenceStack = obj.AlignReg.ZStack;
     obj.Lamp660.setPower(0);
     
-    %Collect ROI Image
-    obj.Lamp660.setPower(obj.Lamp660Power);
-    pause(obj.LampWait);
-    obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
-    obj.CameraSCMOS.AcquisitionType = 'capture';
-    obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Collect;
-    obj.CameraSCMOS.setup_acquisition();
-    Data=obj.CameraSCMOS.start_capture();
-    obj.Lamp660.setPower(0);
-    RefStruct.Image=Data;
+    % Set the ROI reference image to be the image at the center of the 
+    % z-stack (the focal plane of interest).
+    RefInd = (obj.ZStack_MaxDev / obj.ZStack_Step) + 1;
+    RefStruct.Image = obj.ReferenceStack(:, :, RefInd);
+   
     %Collect Full Image
     obj.Lamp660.setPower(obj.Lamp660Power);
     pause(obj.LampWait);
