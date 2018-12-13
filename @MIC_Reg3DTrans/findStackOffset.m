@@ -173,8 +173,8 @@ switch Method
         % Whiten each image in the stack with respect to the entire stack,
         % ignoring the parts which are covered by the BinaryMask when
         % computing mean, std., etc.
-        Stack1Masked = Stack1(boolean(BinaryMask));
-        Stack2Masked = Stack2(boolean(BinaryMask));
+        Stack1Masked = Stack1(logical(BinaryMask));
+        Stack2Masked = Stack2(logical(BinaryMask));
         Stack1Whitened = (Stack1 - mean(Stack1Masked)) ...
             / (std(Stack1Masked) * sqrt(numel(Stack1Masked) - 1));
         Stack2Whitened = (Stack2 - mean(Stack2Masked)) ...
