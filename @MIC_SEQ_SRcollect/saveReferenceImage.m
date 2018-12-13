@@ -17,8 +17,8 @@ function saveReferenceImage(obj)
     
     % Set the ROI reference image to be the image at the center of the 
     % z-stack (the focal plane of interest).
-    RefInd = (obj.ZStack_MaxDev / obj.ZStack_Step) + 1;
-    RefStruct.Image = obj.ReferenceStack(:, :, RefInd);
+    RefInd = (obj.AlignReg.ZStack_MaxDev / obj.AlignReg.ZStack_Step) + 1;
+    RefStruct.Image = RefStruct.ReferenceStack(:, :, RefInd);
    
     %Collect Full Image
     obj.Lamp660.setPower(obj.Lamp660Power);
