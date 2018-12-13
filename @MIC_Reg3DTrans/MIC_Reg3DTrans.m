@@ -68,6 +68,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZMaxAC;             % autocorrelations of zstack
         maxACmodel;
         UseStackCorrelation = 0; % use 3D stack correlation reg. method
+        MaxOffsetScaleIter = 2; % max # of scaling iter. for MaxOffset
         ErrorSignal = zeros(0, 3); % Error Signal [X Y Z] in microns
         ErrorSignalHistory = zeros(0, 3); % Error signal history in microns
         IsInitialRegistration = 0; % boolean: initial reg. or periodic reg.
@@ -474,16 +475,22 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     %       the maximum possible offset along one of the
                     %       dimensions.
                     MaxOffsetInput = [0; 0; 0]; % initialize
-                    SelectBit = abs(SubPixelOffset) > MaxOffset;                   MaxOffsetInput = [0; 0; 0]; % initializer
+                    OffsetScaleIter = 0; % initialize
+                    SelectBit = abs(SubPixelOffset) > MaxOffset;
                     while any(SelectBit) ...
-                            && ~all(MaxOffsetInput == MaxOffset)
+                            && ~all(MaxOffsetInput == MaxOffset) ...
+                            && (OffsetScaleIter < obj.MaxOffsetScaleIter)
+                        
+                        % Increment the counter.
+                        OffsetScaleIter = OffsetScaleIter + 1; 
+                        
                         % The SubPixelOffset predicts a peak in the
                         % xcorr which is beyond the offset checked by
                         % findStackOffset(), so we should increase the
                         % input offset and re-try before proceeding
                         % with the rest of this registration iteration.
-                        MaxOffsetInput = SelectBit ...
-                            .* ceil((abs(SubPixelOffset))) ...
+                        MaxOffsetInput = ...
+                            SelectBit .* ceil((abs(SubPixelOffset))) ...
                             + ~SelectBit .* MaxOffset;
                         
                         % Determine a predicted offset between the two
