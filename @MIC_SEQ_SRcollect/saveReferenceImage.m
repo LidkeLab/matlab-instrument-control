@@ -11,14 +11,14 @@ function saveReferenceImage(obj)
     pause(obj.LampWait);
     obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
     obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
-    obj.AlignReg.collect_zstack();
-    RefStruct.ReferenceStack = obj.AlignReg.ZStack;
+    obj.AlignReg.takeRefStack();
+    RefStruct.ReferenceStack = obj.AlignReg.ReferenceStack;
     obj.Lamp660.setPower(0);
     
     % Set the ROI reference image to be the image at the center of the 
     % z-stack (the focal plane of interest).
     RefInd = (obj.AlignReg.ZStack_MaxDev / obj.AlignReg.ZStack_Step) + 1;
-    RefStruct.Image = RefStruct.ReferenceStack(:, :, RefInd);
+    RefStruct.Image =obj.AlignReg.ReferenceStack(:, :, RefInd);
    
     %Collect Full Image
     obj.Lamp660.setPower(obj.Lamp660Power);
