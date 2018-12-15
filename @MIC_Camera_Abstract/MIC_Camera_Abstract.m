@@ -231,10 +231,10 @@ classdef MIC_Camera_Abstract < MIC_Abstract
     
     methods(Access=protected)
         
-        function displaylastimage(obj)
+        function Data=displaylastimage(obj)
             
-            im=obj.getlastimage();
-            
+            Data=obj.getlastimage();
+            im=Data;
             %open window if necessary
             if isempty(obj.FigureHandle)||~ishandle(obj.FigureHandle)
                 obj.FigureHandle=figure;
