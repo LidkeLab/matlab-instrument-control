@@ -33,6 +33,9 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         TunableLens;    % Optotune Lens
         SLM;            % Hamamatsu LCOS
         
+        % Control Classes
+        R3DObj;         %Registration object
+        
         % Camera params
         ExpTime                         % Camera exposure time (s)
         NumFrames                       % Number of frames per sequence
@@ -50,7 +53,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         Laser405High;   % High power 405 laser
         Laser488High;   % High power 488 laser
         Laser642High;   % High power 642 laser
-        LEDPower;       % Power of LED
+        LEDPower=50;    % Power of LED
         Laser405Focus   % Flag for using 405 laser during focus
         Laser488Focus   % Flag for using 488 laser during focus
         Laser561Focus   % Flag for using 561 laser during focus
@@ -61,7 +64,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         Laser561Aq      % Flag for using 561 laser during acquisition
         Laser642Aq      % Flag for using 642 laser during acquisition
         LEDAq;          % Flag for using LED during acquisition
-        LEDWait=0.1;    % LED wait time
+        LEDWait=0.5;    % LED wait time
         
         % Microscope
         NA=1.3;             % NA of objective
@@ -77,8 +80,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         FP2Shift = 26;      % TL shift in waist position per focal power (um/dpt)
         
         % Registration
-        RegType='None';     % Registration type, can be 'None', 'Passive'
-        ExpTimeReg = 0.01;  % Camera exposure time during registration (s)
+        RegType='Self';     % Registration type, can be 'None', 'Self'
+        ExpTimeReg = 0.1;  % Camera exposure time during registration (s)
  
         % Piezo
         PiezoStepSize = 0.25; % Piezo step size (um)
@@ -96,7 +99,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         SaveDir='y:\Marjolein';  % Save Directory
         BaseFileName='Cell01';   % Base File Name
         AbortNow=0;     % Flag for aborting acquisition
-        SaveType='mat'  %Save to *.mat or *.h5.  Options are 'mat' or 'h5'
+        SaveType='h5'  %Save to *.mat or *.h5.  Options are 'mat' or 'h5'
     end
     
     properties (SetAccess = protected)
@@ -118,10 +121,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             
             % Get calibrated pixel size
             [p,~]=fileparts(which('MIC_RB_SRcollect'));
-            pix = load(fullfile(p,'RB_PixelSize.mat'));
-            obj.PixelSizeX = pix.PixelSizeX;
-            obj.PixelSizeY = pix.PixelSizeY;
-            
+            PixelCalFile=fullfile(p,'RB_PixelSize.mat');
+      
             % Initialize hardware objects
             try
                 % Camera
@@ -131,24 +132,30 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 % Stage
                 fprintf('Initializing 3D Piezo Stage\n')
                 
-                obj.StageObj = MIC_NanoMaxPiezos(SerialNumberControllerX, ...
-                SerialNumberControllerY, '81843229', ...
-                SerialNumberStrainGaugeX, SerialNumberStrainGaugeY, ...
-                '84842506')
-            
-                % '29501305','59000121'  %P, SG
-                % '29501307','59000140'
-                %obj.Piezo=MIC_TCubePiezo('81843229','84842506','Z');
+                ControllerXSerialNum='29501305';
+                ControllerYSerialNum='29501307';
+                ControllerZSerialNum='81843229';
+                StrainGaugeXSerialNum='59000121';
+                StrainGaugeYSerialNum='59000140';
+                StrainGaugeZSerialNum='84842506';
+                MaxPiezoConnectAttempts=1;
                 
+                obj.StageObj = MIC_NanoMaxPiezos(...
+                ControllerXSerialNum, StrainGaugeXSerialNum, ...
+                ControllerYSerialNum, StrainGaugeYSerialNum, ...
+                ControllerZSerialNum, StrainGaugeZSerialNum, ...
+                MaxPiezoConnectAttempts);
+    
                 %Reg3D
                 fprintf('Initializing Registration object\n')
-                obj.R3DObj=MIC_Reg3DTrans(obj.CameraObj,obj.StageObj,obj.PixelCalFile);
-                if ~exist(obj.PixelCalFile,'file')
+                obj.R3DObj=MIC_Reg3DTrans(obj.Camera,obj.StageObj,PixelCalFile);
+                obj.R3DObj.ExposureTime=obj.ExpTimeReg;
+                if ~exist(PixelCalFile,'file')
                     obj.CameraObj.ROI=[1 256 1 256];
                     obj.R3DObj.calibratePixelSize();
                 else
-                    F=load(obj.PixelCalFile);
-                    obj.PixelSize=F.PixelSize;
+                    F=load(PixelCalFile);
+                    PixelSize=F.PixelSize;
                     clear F;
                 end
                   
@@ -170,7 +177,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 % LED
                 fprintf('Initializing LED\n')
                 obj.LED=MIC_RebelStarLED('Dev1','ao0');
-                obj.LEDPower = 10;
+                
                 % Galvo
                 fprintf('Initializing Galvo\n')
                 obj.Galvo=MIC_GalvoAnalog('Dev1','ao1');
@@ -182,7 +189,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 obj.TunableLens = MIC_OptotuneLens('COM3');
             catch ME
                 disp(ME);
-                error('hardware startup error');
+                error('hardware startup error');      
             end
             
             % Start gui (not using StartGUI property because GUI shouldn't
@@ -213,14 +220,25 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         
         function takecurrent(obj)
             % captures and displays current image
-            obj.LampObj.setPower(obj.LEDPower);
+            obj.LED.setPower(obj.LEDPower);
+            LEDState=obj.LED.IsOn;
+            obj.LED.on();
+            pause(.1);
             obj.R3DObj.getcurrentimage();
+            if ~LEDState %turn off if off before. 
+                obj.LED.off();
+            end
         end
         
         function align(obj)
             % Align to current reference image
-            obj.LampObj.setPower(obj.LEDPower);
+            obj.LED.setPower(obj.LEDPower);
+            LEDState=obj.LED.IsOn;
+            obj.LED.on();
             obj.R3DObj.align2imageFit();
+            if ~LEDState %turn off if off before. 
+                obj.LED.off();
+            end
         end
         
         function showref(obj)
@@ -230,8 +248,13 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         
         function takeref(obj)
             % Captures reference image
-            obj.LampObj.setPower(obj.LEDPower);
+            obj.LED.setPower(obj.LEDPower);
+            LEDState=obj.LED.IsOn;
+            obj.LED.on();
             obj.R3DObj.takerefimage();
+             if ~LEDState %turn off if off before. 
+                obj.LED.off();
+            end
         end
         
         function saveref(obj)
@@ -344,7 +367,9 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             
             %Setup camera and lamp for reg stack
             
-            obj.LampObj.setPower(obj.LampPower);
+            obj.LED.setPower(obj.LEDPower);
+            obj.LED.on();
+            pause(obj.LEDWait);
             
             switch obj.RegType
                 case 'Self' %take and save the reference stack
@@ -353,8 +378,9 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                     Image_Reference=obj.R3DObj.Image_Reference; 
                     save(f,'Image_Reference');
             end
+            obj.LED.off();
             
-            switch obj.SaveFileType
+            switch obj.SaveType
                 case 'mat'
                 case 'h5'
                     FileH5=fullfile(obj.SaveDir,[obj.BaseFileName s '.h5']);
@@ -366,7 +392,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             end
             
             % calc Zrange
-            z0=obj.Piezo.CurrentPosition;
+            Pos=obj.StageObj.Position;
+            z0=Pos(3); %z position
             if obj.Zstack
                 ZRange = obj.StartZStack : obj.PiezoStepSize : obj.EndZStack;
             else
@@ -390,52 +417,37 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 GRange = g0;
             end
 
-            % create h5 file
-            switch obj.SaveType
-                case 'mat'
-                case 'h5'
-                    FileH5=fullfile(obj.SaveDir,[obj.BaseFileName '_' TimeStamp '.h5']);
-                    MIC_H5.createFile(FileH5);
-                    MIC_H5.createGroup(FileH5,'Data');
-                    MIC_H5.createGroup(FileH5,'Data/Channel01');
-                otherwise
-                    error('MIC_RB_SRcollect:StartSequence','Unknown Save Type, must be h5 or mat')
-            end
-            
             % acquire data
             for nn=1:obj.NumSequences
                 if obj.AbortNow; obj.AbortNow=0; break; end
                 
                 % move piezo
-                obj.Piezo.setPosition(ZRange(zz));
+                obj.StageObj.StagePiezoZ.setPosition(ZRange(1));
                 % move galvo
-                obj.Galvo.setVoltage(GRange(zz));
+                obj.Galvo.setVoltage(GRange(1));
                 pause(0.1) % wait for piezo and galvo to finish move
                 
                 %align to image
                 switch obj.RegType
                     case 'None'
                     otherwise
+                        obj.LED.setPower(obj.LEDPower);
+                        obj.LED.on();
                         obj.R3DObj.align2imageFit();
+                        obj.LED.off();
                 end
 
-                nstring=strcat('Acquiring','...',num2str(nn),'/',num2str(obj.NumSequences));
-                set(guihandles.Button_ControlStart, 'String',nstring,'Enable','off');
-                
-                for zz = 1 : numel(ZRange)
+                for kk = 1 : numel(ZRange)
                     if obj.AbortNow; break; end
  
                     % move piezo
-                    obj.Piezo.setPosition(ZRange(zz));
+                    obj.StageObj.StagePiezoZ.setPosition(ZRange(kk));
                     % move galvo
-                    obj.Galvo.setVoltage(GRange(zz));
+                    obj.Galvo.setVoltage(GRange(kk));
                     pause(0.1) % wait for piezo and galvo to finish move
                     
                     if obj.AbortNow; obj.AbortNow=0; break; end
                 
-                    nstring=strcat('Acquiring','...',num2str(nn),'/',num2str(obj.NumSequences));
-                    set(guihandles.Button_ControlStart, 'String',nstring,'Enable','off');
-                    
                     %Setup laser for aquisition
                     if obj.Laser405Aq
                         obj.Laser405.setPower(obj.Laser405High);
@@ -468,30 +480,25 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                     obj.LED.off;
                     
                     %Save
-                    switch obj.SaveFileType
+                    switch obj.SaveType
                         case 'mat'
                             fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
                             Params=exportState(obj); 
                             save(fn,'sequence','Params');
                         case 'h5' %This will become default
+                            if nn==1 %create the z position group
+                                S=sprintf('Channel01/Zposition%03d',kk);
+                                MIC_H5.createGroup(FileH5,S);
+                            end
                             S=sprintf('Data%04d',nn);
-                            S2=sprintf('Channel01/Zposition%03d',zz);
+                            S2=sprintf('Channel01/Zposition%03d/Data%04d',kk,nn);
+                            MIC_H5.createGroup(FileH5,S2);
+                            obj.save2hdf5(FileH5,S2);  
                             MIC_H5.writeAsync_uint16(FileH5,S2,S,sequence);
                         otherwise
                             error('StartSequence:: unknown SaveFileType')
                     end
                 end
-            end
-            
-            switch obj.SaveFileType
-                case 'mat'
-                    %Nothing to do
-                case 'h5' %This will become default
-                    S='Channel01/Zposition001'; 
-                    MIC_H5.createGroup(FileH5,S);
-                    obj.save2hdf5(FileH5,S);  
-                otherwise
-                    error('StartSequence:: unknown SaveFileType')
             end
         end
         
@@ -507,8 +514,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             % Children
             [Children.Camera.Attributes,Children.Camera.Data,Children.Camera.Children]=...
                 obj.Camera.exportState();
-            [Children.Piezo.Attributes,Children.Piezo.Data,Children.Piezo.Children]=...
-                obj.Piezo.exportState();
+            [Children.StageObj.Attributes,Children.StageObj.Data,Children.StageObj.Children]=...
+                obj.StageObj.exportState();
             [Children.Galvo.Attributes,Children.Galvo.Data,Children.Galvo.Children]=...
                 obj.Galvo.exportState();
             [Children.Laser405.Attributes,Children.Laser405.Data,Children.Laser405.Children]=...
@@ -525,18 +532,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 obj.TunableLens.exportState();
             [Children.SLM.Attributes,Children.SLM.Data,Children.SLM.Children]=...
                 obj.SLM.exportState();
-            
-            % instrument object properties
-            Attributes.Camera = Children.Camera.Attributes;
-            Attributes.Piezo = Children.Piezo.Attributes;
-            Attributes.Galvo = Children.Galvo.Attributes;
-            Attributes.Laser405 = Children.Laser405.Attributes;
-            Attributes.Laser488 = Children.Laser488.Attributes;
-            Attributes.Laser561 = Children.Laser561.Attributes;
-            Attributes.Laser642 = Children.Laser642.Attributes;
-            Attributes.LED = Children.LED.Attributes;
-            Attributes.SLM = Children.SLM.Attributes;
-            Attributes.TunableLens = Children.TunableLens.Attributes;
+            [Children.R3DObj.Attributes,Children.R3DObj.Data,Children.R3DObj.Children]=...
+                obj.R3DObj.exportState();
             
             % Camera params
             Attributes.ExpTime = obj.ExpTime;
@@ -592,6 +589,14 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             
             Data=[];
         end
+        
+        %Get and Set methods
+        
+        function set.ExpTimeReg(obj,In)
+            obj.ExpTimeReg=In;
+            obj.R3DObj.ExposureTime=obj.ExpTimeReg;
+        end
+        
         
     end
     

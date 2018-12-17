@@ -1,8 +1,8 @@
 function getcamera(obj)
 
 % choose betwee a list of camera models w/ serials
-[CameraInd]=DcamGetCameras
-NumCameras=length(CameraInd)
+[CameraInd]=DcamGetCameras;
+NumCameras=length(CameraInd);
 if NumCameras > 1
     cameras{1}=[Index '' num2str(CameraInd(1))];
     cameras{2}=[Index '' num2str(CameraInd(2))];
