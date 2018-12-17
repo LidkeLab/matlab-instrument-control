@@ -351,7 +351,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Setup the flip mount object to control the neutral density
             % filter.
             obj.FlipMount = MIC_FlipMountTTL('Dev1', 'Port0/Line0');
-            obj.FlipMount.FilterIn; % place the ND filter in 647 laser path
+            obj.FlipMount.FilterIn(); % place ND filter in 647 laser path
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
