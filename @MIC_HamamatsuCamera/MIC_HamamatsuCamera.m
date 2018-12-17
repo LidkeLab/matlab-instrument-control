@@ -371,6 +371,13 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             end
         end
         
+        function fireTrigger(obj)
+            %fireTrigger sends a software trigger to the camera.
+            
+            % Fire the software trigger.
+            DcamFireTrigger(obj.CameraHandle);
+        end
+        
         function TriggeredCapture(obj)
             DcamFireTrigger(obj.CameraHandle)
             obj.displaylastimage;
