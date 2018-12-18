@@ -342,8 +342,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
             
-            % Collect the z-stack and store it in obj.ReferenceStack.
-            obj.collect_zstack();
+            % Collect the full size z-stack (which can be used for intiial
+            % registration) and store it in obj.ReferenceStack.
+            obj.collect_zstack(obj.ZStackMaxDevInitialReg);
             obj.ReferenceStack = obj.ZStack;
             
             % Change to exposure time of the camera back to it's original
@@ -441,8 +442,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % Ensure that the reference image is set to the central
                     % image in the reference stack (this corresponds to the
                     % focal plane of interest).
-                    RefInd = (obj.ZStack_MaxDev / obj.ZStack_Step) + 1;
-                    obj.Image_Reference = obj.ReferenceStack(:, :, RefInd);
+                    StackSteps = obj.ZStack_MaxDev / obj.ZStack_Step;
+                    FocalInd = StackSteps + 1;
+                    obj.Image_Reference = ...
+                        obj.ReferenceStack(:, :, FocalInd);
                     
                     % Attempt to select an appropriate value of the
                     % MaxOffset parameter.
@@ -484,10 +487,33 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         MaxOffset = [5; 5; 5];
                     end
                     
-                    % Acquire a z-stack for the current stage location.
-                    % NOTE: This stores the z-stack in the object property 
-                    %       obj.ZStack.
-                    obj.collect_zstack();
+                    % Collect a z-stack whose size depends on whether we
+                    % are performing an initial registration step or a
+                    % periodic re-registration step.
+                    if obj.IsInitialRegistration
+                        % Acquire a large z-stack for the current stage
+                        % location.
+                        % NOTE: This stores the z-stack in the object
+                        %       property obj.ZStack.
+                        obj.collect_zstack(obj.ZStackMaxDevInitialReg);
+                        
+                        % Define the indices of the full size reference
+                        % stack (for better code continuity with the else 
+                        % statement).
+                        ZStackRefInds = 1:size(obj.ZStack, 3);
+                    else
+                        % Acquire a small z-stack for the current stage
+                        % location.
+                        % NOTE: This stores the z-stack in the object
+                        %       property obj.ZStack.
+                        obj.collect_zstack(obj.ZStack_MaxDev);
+                        
+                        % Define the indices of the full size reference
+                        % stack which correspond to this smaller
+                        % sub-stack.
+                        ZStackRefInds = FocalInd - StackSteps ...
+                            :FocalInd + StackSteps;
+                    end
                     
                     % Isolate the reference stack and the current stack of
                     % interest, removing the boundaries in x and y to 
@@ -495,7 +521,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % compared. 
                     RefStack = obj.ReferenceStack(...
                         obj.XYBorderPx:end-obj.XYBorderPx, ...
-                        obj.XYBorderPx:end-obj.XYBorderPx, :);
+                        obj.XYBorderPx:end-obj.XYBorderPx, ZStackRefInds);
                     CurrentStack = obj.ZStack(...
                         obj.XYBorderPx:end-obj.XYBorderPx, ...
                         obj.XYBorderPx:end-obj.XYBorderPx, :);

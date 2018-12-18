@@ -86,7 +86,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
         Reg3DStepSize = 0.1; % (um) step size along z during cell reg.
-        Reg3DMaxDev = 2; % (um) max deviation along z during cell reg.
+        Reg3DMaxDev = 0.5; % (um) max deviation along z during cell reg.
+        Reg3DMaxDevInit = 1; % (um) max dev. along z for initial cell reg.
         Reg3DXTol = 0.005; % (um) correction along x to claim convergence
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
         Reg3DZTol = 0.03; % (um) correction along z to claim convergence
@@ -380,6 +381,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 obj.StagePiezo, CalibrationFilePath);
             
             % Modify properties of the registration object as needed.
+            obj.AlignReg.ZStackMaxDevInitialReg = obj.Reg3DMaxDevInit;
             obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
             obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
