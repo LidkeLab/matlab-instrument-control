@@ -56,6 +56,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZStack_MaxDev=0.5;  % distance from current zposition where to start and end zstack (um)
         ZStack_Step=0.05;   % z step size for zstack acquisition (um)
         ZStack_Pos;         % z positions where a frame should be acquired in zstack (um)
+        ZStackMaxDevInitialReg = 1; % max. dev. in z for initial reg.
         XYBorderPx = 10; % # of px. to remove from x and y borders.
         TolMaxCorr = 0.9;   % min val. of max xcorr coeff. for convergence
         Tol_X=.01;          % max X shift to reach convergence(um)
@@ -655,19 +656,26 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
         end
         
-        function collect_zstack(obj)
+        function collect_zstack(obj, ZStackMaxDev, ZStackStep)
             % collect_zstack Collects Zstack 
+            
+            % Set defaults if not passed as inputs to this method.
+            if ~exist('ZStackMaxDev', 'var')
+                ZStackMaxDev = obj.ZStack_MaxDev; % microns
+            end
+            if ~exist('ZStackStep', 'var')
+                ZStackStep = obj.ZStack_Step; % microns
+            end
             
             % get current position of stage
             XYZ=obj.StageObj.Position;
             X_Current=XYZ(1);
             Y_Current=XYZ(2);
             Z_Current=XYZ(3);
-                      
-            Zmax=obj.ZStack_MaxDev;     %micron
-            Zstep=obj.ZStack_Step;      %micron
+
         
-            obj.ZStack_Pos=(Z_Current-Zmax:Zstep:Z_Current+Zmax);
+            obj.ZStack_Pos = ...
+                (Z_Current-ZStackMaxDev:ZStackStep:Z_Current+ZStackMaxDev);
             N=length(obj.ZStack_Pos);
             obj.ZStack=[];
             
@@ -693,12 +701,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.CameraObj.AcquisitionType='capture';
             obj.CameraObj.setup_acquisition();
                         
-            % turn lamp on
-            %obj.turnLampOn();
-%             % open shutter if needed
-%             if obj.CamShutter
-%                 obj.CameraObj.setShutter(1);
-%             end
             % acquire zstack
             for nn=1:N
                 if nn==1
@@ -710,8 +712,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 NumChar = fprintf(...
                     'Acquiring z-stack image index %i out of %i\n', nn, N);
                 
-                obj.StageObj.setPosition([X_Current,Y_Current,obj.ZStack_Pos(nn)]);
-                obj.ZStack(:,:,nn)=single(obj.CameraObj.start_capture);
+                obj.StageObj.setPosition(...
+                    [X_Current, Y_Current, obj.ZStack_Pos(nn)]);
+                obj.ZStack(:, :, nn)=single(obj.CameraObj.start_capture);
                 
                 % Remove the characters identifying stack index and stack
                 % number from command line so that they can be updated.  
@@ -727,9 +730,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             if obj.CamShutter
 %                 obj.CameraObj.setShutter(0);
 %             end
-            % turn lamp off
-            %obj.turnLampOff();
-            
+
             %change back EMgain, shutter and exposure time if needed
 %             if obj.CamShutter
 %                 CamSet.ManualShutter.Bit=0;
