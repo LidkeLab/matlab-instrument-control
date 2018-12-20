@@ -130,7 +130,8 @@ for ii = 1:numel(DesiredGroups)
     
     % Determine if the current group is either a data group or the child of
     % a data group (this will be needed later).
-    InDataGroup = 0; % boolean flag to indicate membership to data group
+    IsDataGroup = 0; % boolean flag to indicate membership to data group
+    IsDataGroupChild = 0; % indicate group is child of data group
     if DataFormat
         % We'll only check if the InDataGroup flag needs to be changed if
         % the DataFormat flag is set (otherwise, we don't have any data
@@ -138,10 +139,10 @@ for ii = 1:numel(DesiredGroups)
         DesiredGroupName = extractGroupName(DesiredGroup.Name, 1);
         DesiredGroupParentName = extractGroupName(DesiredGroup.Name, 2);
         if contains(DesiredGroupName, 'Data')
-            InDataGroup = 1;
+            IsDataGroup = 1;
             DataGroupName = DesiredGroupName;
         elseif contains(DesiredGroupParentName, 'Data')
-            InDataGroup = 1;
+            IsDataGroupChild = 1;
             DataGroupName = DesiredGroupParentName;
         end
     end
@@ -155,7 +156,7 @@ for ii = 1:numel(DesiredGroups)
             % DesiredGroup is a data group, we'll place the attribute
             % information one level deeper into the output structure.
             AttributeName = DesiredGroup.Attributes(jj).Name;
-            if InDataGroup
+            if IsDataGroup
                 % This is a data group in a file in which each dataset is
                 % contained within its own group.
                 H5Structure.Children.(DataGroupName) ...
@@ -171,7 +172,7 @@ for ii = 1:numel(DesiredGroups)
         % issues with functions that may be using this method, proceeding
         % depending on whether or not we are currently storing a data group
         % (for files that contain separate groups for each dataset).
-        if InDataGroup
+        if IsDataGroup
             % This is a data group in a file in which each dataset is
             % contained within its own group.
             H5Structure.Children.(DataGroupName).Attributes = [];
@@ -191,7 +192,7 @@ for ii = 1:numel(DesiredGroups)
             % the dataset information one level deeper into the output 
             % structure.
             DatasetName = DesiredGroup.Datasets(jj).Name;
-            if InDataGroup
+            if IsDataGroup
                 % This is a data group in a file in which each dataset is
                 % contained within its own group.
                 H5Structure.Children.(DataGroupName).Data ...
@@ -209,7 +210,7 @@ for ii = 1:numel(DesiredGroups)
         % with functions that may be using this method, proceeding
         % depending on whether or not we are currently storing a data group
         % (for files that contain separate groups for each dataset).
-        if InDataGroup
+        if IsDataGroup
             % This is a data group in a file in which each dataset is
             % contained within its own group.
             H5Structure.Children.(DataGroupName).Data = [];
@@ -242,7 +243,7 @@ for ii = 1:numel(DesiredGroups)
             % Store the subgroup structure into the output H5Structure.  
             % If the DesiredGroup is a data group, we'll place the child
             % structure one level deeper into the output structure.
-            if InDataGroup
+            if IsDataGroup
                 % This is a data group in a file in which each dataset is
                 % contained within its own group.
                 H5Structure.Children.(DataGroupName).Children ...
@@ -256,7 +257,7 @@ for ii = 1:numel(DesiredGroups)
         % issues with functions that may be using this method, proceeding
         % depending on whether or not we are currently storing a data group
         % (for files that contain separate groups for each dataset).
-        if InDataGroup
+        if IsDataGroup
             % This is a data group in a file in which each dataset is
             % contained within its own group.
             H5Structure.Children.(DataGroupName).Children = [];
