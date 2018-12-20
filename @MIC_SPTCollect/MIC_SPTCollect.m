@@ -314,8 +314,8 @@ classdef MIC_SPTCollect < MIC_Abstract
         function align(obj)
             % Align to current reference image
             switch obj.RegType
-                case 'Self'
-                    obj.takeref();
+%                 case 'Self'
+% %                     obj.takeref();
                 case 'Ref'
                     if isempty(obj.R3DObj.Image_Reference)
                         obj.loadref();
