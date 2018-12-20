@@ -42,7 +42,6 @@ end
 % Read in all of the information available in the h5 file using
 % MATLAB's built-in h5info() method.
 H5Info = h5info(FilePath);
-
    
 % Determine the .h5 file structure being used (i.e. is each
 % dataset in its own group or does one group contain all of
@@ -66,8 +65,13 @@ DesiredGroups = []; % groups that we wish to save
 % Search the .h5 file for the desired groups and store their location
 % within the file for later extraction.
 if DataFormat
-    DataGroupsSearched = 0; % boolean: 1 all datagroups have been searched
+    % For .h5 files in the DataFormat, we need to continue searching
+    % through the data groups so that we find all instances of the
+    % requested group.
+    DataGroupsSearched = 0; % boolean
 else
+    % For .h5 files that do not have the DataFormat, there is only one data
+    % group to search.
     DataGroupsSearched = 1;
 end
 while isempty(DesiredGroups) || ~DataGroupsSearched
@@ -324,5 +328,6 @@ if numel(LastSlashIndex) > 1
 else
     GroupName = FullGroupName(LastSlashIndex+1:end);
 end
+
 
 end
