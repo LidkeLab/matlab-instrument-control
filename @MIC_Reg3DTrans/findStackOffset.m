@@ -135,6 +135,13 @@ if size(MaxOffset, 1) < size(MaxOffset, 2)
     MaxOffset = MaxOffset.';
 end
 
+% Convert the stacks to gpuArrays if needed.
+if UseGPU
+    Stack1 = gpuArray(Stack1);
+    Stack2 = gpuArray(Stack2);
+    BinaryMask = gpuArray(BinaryMask);
+end
+
 % Determine dimensions relevant to the problem to improve code readability.
 Stack1Size = size(Stack1).';
 Stack2Size = size(Stack2).';
@@ -192,34 +199,18 @@ switch Method
         Stack2Whitened = BinaryMask .* Stack2Whitened;
         
         % Compute the zero-padded 3D FFT's of each stack.
-        if UseGPU
-            Stack1Whitened = gpuArray(Stack1Whitened);
-            Stack2Whitened = gpuArray(Stack2Whitened);
-        end
         Stack1PaddedFFT = fftn(Stack1Whitened, 2*size(Stack1Whitened)-1);
         Stack2PaddedFFT = fftn(Stack2Whitened, 2*size(Stack2Whitened)-1);
         
         % Compute the 3D cross-correlation in the Fourier domain.
-        XCorrFFT = conj(Stack1PaddedFFT) .* Stack2PaddedFFT;
-        if UseGPU
-            XCorrFFT = gpuArray(XCorrFFT);
-        end
-        XCorr3D = ifftn(XCorrFFT);
+        XCorr3D = ifftn(conj(Stack1PaddedFFT) .* Stack2PaddedFFT);
         
         % Compute the binary cross-correlation for later use in scaling.
         Stack1Binary = (Stack1Whitened ~= 0);
         Stack2Binary = (Stack2Whitened ~= 0);
-        if UseGPU
-            Stack1Binary = gpuArray(Stack1Binary);
-            Stack2Binary = gpuArray(Stack2Binary);
-        end
         Stack1BinaryFFT = fftn(Stack1Binary, 2*size(Stack1Whitened)-1);
         Stack2BinaryFFT = fftn(Stack2Binary, 2*size(Stack2Whitened)-1);
-        XCorrBinaryFFT = conj(Stack1BinaryFFT) .* Stack2BinaryFFT;
-        if UseGPU 
-            XCorrBinaryFFT = gpuArray(XCorrBinaryFFT);
-        end
-        XCorr3DBinary = ifftn(XCorrBinaryFFT);
+        XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
 
         % Scale the 3D cross-correlation by the cross-correlation of the
         % zero-padded binary images (an attempt to reduce the bias to a 
