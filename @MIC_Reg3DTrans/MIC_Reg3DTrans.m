@@ -1024,7 +1024,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 
         [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
             findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
-            FitType, FitOffset)
+            FitType, FitOffset, BinaryMask, PlotFlag, UseGPU)
     
         function State = unitTest(camObj,stageObj,lampObj)
             %unitTest Tests all functionality of MIC_Reg3DTrans

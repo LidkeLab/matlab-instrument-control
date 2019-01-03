@@ -1,6 +1,6 @@
 function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
     findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
-    FitType, FitOffset, BinaryMask, PlotFlag)
+    FitType, FitOffset, BinaryMask, PlotFlag, UseGPU)
 %findStackOffset estimates a sub-pixel offset between two stacks.
 % findStackoffset() will estimate the offset between two 3D stacks of
 % images.  This method computes an integer pixel offset between the two
@@ -13,6 +13,8 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %       Stack1 = Stack(m:n, m:n, m:n) 
 %       Stack2 = Stack((m:n)+x, (m:n)+y, (m:n)+z)
 %       then PixelOffset = findStackOffset(Stack1, Stack2) == [x; y; z]
+% NOTE: All inputs besides Stack1 and Stack2 are optional and can be
+%       replaced by [] (an empty array).
 %
 % INPUTS:
 %   Stack1:     (mxnxo) The stack to which Stack2 is compared to, i.e. 
@@ -73,6 +75,8 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %             plots through the peak of the xcorr will be shown.  
 %             PlotFlag = 1 will allow the plots to be shown, PlotFlag = 0
 %             will not allow plots to be displayed.
+%   UseGPU: (boolean)(default = 1) When using Method = 'FFT', this flag
+%           allows for the fft() methods to be computed on the GPU. 
 %
 % OUTPUTS:
 %   PixelOffset:    (3x1)(integer) The integer pixel offset of Stack2
@@ -99,23 +103,26 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 
 
 % Set default parameter values if needed.
-if ~exist('MaxOffset', 'var')
+if ~exist('MaxOffset', 'var') || isempty(MaxOffset)
     MaxOffset = [2; 2; 2];
 end
-if ~exist('Method', 'var')
+if ~exist('Method', 'var') || isempty(Method)
     Method = 'FFT';
 end
-if ~exist('FitType', 'var')
+if ~exist('FitType', 'var') || isempty(FitType)
     FitType = '1D';
 end
-if ~exist('FitOffset', 'var')
+if ~exist('FitOffset', 'var') || isempty(FitOffset)
     FitOffset = [2; 2; 2];
 end
-if ~exist('PlotFlag', 'var')
+if ~exist('PlotFlag', 'var') || isempty(PlotFlag)
     PlotFlag = 1;
 end
 if ~exist('BinaryMask', 'var') || isempty(BinaryMask)
     BinaryMask = ones(size(Stack1));
+end
+if ~exist('UseGPU', 'var') || isempty(UseGPU)
+    UseGPU = 1;
 end
 
 % Ensure the stacks are floating point arrays.
@@ -186,18 +193,34 @@ switch Method
         Stack2Whitened = BinaryMask .* Stack2Whitened;
         
         % Compute the zero-padded 3D FFT's of each stack.
+        if UseGPU
+            Stack1Whitened = gpuArray(Stack1Whitened);
+            Stack2Whitened = gpuArray(Stack2Whitened);
+        end
         Stack1PaddedFFT = fftn(Stack1Whitened, 2*size(Stack1Whitened)-1);
         Stack2PaddedFFT = fftn(Stack2Whitened, 2*size(Stack2Whitened)-1);
         
         % Compute the 3D cross-correlation in the Fourier domain.
-        XCorr3D = ifftn(conj(Stack1PaddedFFT) .* Stack2PaddedFFT);
+        XCorrFFT = conj(Stack1PaddedFFT) .* Stack2PaddedFFT;
+        if UseGPU
+            XCorrFFT = gpuArray(XCorrFFT);
+        end
+        XCorr3D = ifftn(XCorrFFT);
         
         % Compute the binary cross-correlation for later use in scaling.
         Stack1Binary = (Stack1Whitened ~= 0);
         Stack2Binary = (Stack2Whitened ~= 0);
+        if UseGPU
+            Stack1Binary = gpuArray(Stack1Binary);
+            Stack2Binary = gpuArray(Stack2Binary);
+        end
         Stack1BinaryFFT = fftn(Stack1Binary, 2*size(Stack1Whitened)-1);
         Stack2BinaryFFT = fftn(Stack2Binary, 2*size(Stack2Whitened)-1);
-        XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
+        XCorrBinaryFFT = conj(Stack1BinaryFFT) .* Stack2BinaryFFT;
+        if UseGPU 
+            XCorrBinaryFFT = gpuArray(XCorrBinaryFFT);
+        end
+        XCorr3DBinary = ifftn(XCorrBinaryFFT);
 
         % Scale the 3D cross-correlation by the cross-correlation of the
         % zero-padded binary images (an attempt to reduce the bias to a 
@@ -213,9 +236,9 @@ switch Method
 
         % Isolate the central chunk of the cross-correlation and the
         % binary cross-correlation.
-        XCorr3D = XCorr3D(CorrOffsetIndicesX, ...
+        XCorr3D = real(XCorr3D(CorrOffsetIndicesX, ...
             CorrOffsetIndicesY, ...
-            CorrOffsetIndicesZ); % center of our cross-correlation 
+            CorrOffsetIndicesZ)); % center of our cross-correlation 
     case 'OLRW'
         % Compute the brute-forced cross-correlation, considering only
         % "small" offsets between the stacks.
