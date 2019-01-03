@@ -39,24 +39,21 @@ else
     SaveAll = 1;
 end
 
-% Read in all of the information available in the h5 file using
-% MATLAB's built-in h5info() method.
-H5Info = h5info(FilePath);
-   
+% Read in all of the information available about the structure of the h5
+% file using MATLAB's built-in h5info() method.
+CurrentGroups = h5info(FilePath); % named for later convenience
+
 % Determine the .h5 file structure being used (i.e. is each
 % dataset in its own group or does one group contain all of
 % the datasets).
 % NOTE: DataFormat==1 means each dataset is in its own group,
 %       DataFormat==0 means each dataset is contained in one
 %       "supergroup" of all datasets.
-DataFormat = contains(H5Info.Groups.Groups.Groups(1).Name, 'Data');
-
-% Collect the names of the groups at the top level of the .h5 file.
-CurrentGroups = H5Info.Groups; % groups to be explored
-DesiredGroups = []; % groups that we wish to save
+DataFormat = contains(CurrentGroups.Groups.Groups.Groups(1).Name, 'Data');
 
 % Search the .h5 file for the desired groups and store their location
 % within the file for later extraction.
+DesiredGroups = []; % groups that we wish to save
 if DataFormat
     % For .h5 files in the DataFormat, we need to continue searching
     % through the data groups so that we find all instances of the
@@ -287,7 +284,7 @@ if ~exist('PathLength', 'var')
 end
 
 % If the last character of FullGroupName is a '/', we should remove it.
-if FullGroupName(end) == '/'
+if (FullGroupName(end) == '/') && (numel(FullGroupName) > 1)
     FullGroupName = FullGroupName(end-1);
 end
 
