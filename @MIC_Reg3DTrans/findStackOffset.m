@@ -126,8 +126,8 @@ end
 
 % Ensure the stacks are floating point arrays.
 if ~isfloat(Stack1) || ~isfloat(Stack2)
-    Stack1 = double(Stack1);
-    Stack2 = double(Stack2);
+    Stack1 = single(Stack1);
+    Stack2 = single(Stack2);
 end
 
 % Ensure MaxOffset is a column vector for consistency.
