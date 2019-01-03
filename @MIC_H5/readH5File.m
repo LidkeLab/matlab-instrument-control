@@ -13,6 +13,15 @@ function [H5Structure] = readH5File(FilePath, GroupName)
 %       of the group 'Laser647' from file.h5 given a full group
 %       path.
 %
+% INPUTS: 
+%   FilePath: String containing the path to the .h5 file of interest.
+%   GroupName: (optional) Name of a specific group in the .h5 file to be
+%              extracted.
+%
+% OUTPUTS:
+%   H5Structure: Structured array containing the information extracted from
+%                the .h5 file at FilePath.
+%
 % REQUIRES:
 %   MATLAB 2016b or later
 %
