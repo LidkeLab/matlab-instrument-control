@@ -52,14 +52,7 @@ H5Info = h5info(FilePath);
 DataFormat = contains(H5Info.Groups.Groups.Groups(1).Name, 'Data');
 
 % Collect the names of the groups at the top level of the .h5 file.
-if DataFormat
-    % For .h5 files in which each dataset belongs to a separate group, 
-    % multi-channel or 3D data is not yet supported (i.e. those higher 
-    % level groups are ignored here).
-    CurrentGroups = H5Info.Groups.Groups.Groups; % groups to be explored
-else
-    CurrentGroups = H5Info.Groups;
-end
+CurrentGroups = H5Info.Groups; % groups to be explored
 DesiredGroups = []; % groups that we wish to save
 
 % Search the .h5 file for the desired groups and store their location
@@ -262,21 +255,11 @@ for ii = 1:numel(DesiredGroups)
             % Remove the path information from the subgroup name, e.g. 
             % /Channel01/Zposition001 will become Zposition001.
             SubgroupName = extractGroupName(SubgroupNames{jj});
-            
-            % Store the subgroup structure into the output H5Structure.  
-            % If the DesiredGroup is a data group, we'll place the child
-            % structure one level deeper into the output structure.
+
+            % Store the subgroup structure into the output H5Structure.
             if IsDataGroup
-                % This is a data group in a file in which each dataset is
-                % contained within its own group.
-                H5Structure.Children.(DataGroupName).Children ...
-                    .(SubgroupName) = SubgroupStructure;
-            elseif IsDataGroupChild
-                % For children of a datagroup, we need yet another path
-                % format within the structure (for consistency with the
-                % structure produced for non-datagroup files).
-                H5Structure(ii).Children.(SubgroupName) = ...
-                    SubgroupStructure;
+                H5Structure.Children.(DataGroupName) ...
+                    .Children.(SubgroupName) = SubgroupStructure;
             else
                 H5Structure.Children.(SubgroupName) = SubgroupStructure;
             end
