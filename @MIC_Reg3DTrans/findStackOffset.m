@@ -197,8 +197,8 @@ switch Method
         Stack2Whitened = BinaryMask .* Stack2Whitened;
         
         % Compute the zero-padded 3D FFT's of each stack.
-        Stack1PaddedFFT = fftn(Stack1Whitened, 2*size(Stack1Whitened)-1);
-        Stack2PaddedFFT = fftn(Stack2Whitened, 2*size(Stack2Whitened)-1);
+        Stack1PaddedFFT = fftn(Stack1Whitened, 2 * size(Stack1Whitened));
+        Stack2PaddedFFT = fftn(Stack2Whitened, 2 * size(Stack2Whitened));
         
         % Compute the 3D cross-correlation in the Fourier domain.
         XCorr3D = ifftn(conj(Stack1PaddedFFT) .* Stack2PaddedFFT);
@@ -206,8 +206,8 @@ switch Method
         % Compute the binary cross-correlation for later use in scaling.
         Stack1Binary = (Stack1Whitened ~= 0);
         Stack2Binary = (Stack2Whitened ~= 0);
-        Stack1BinaryFFT = fftn(Stack1Binary, 2*size(Stack1Whitened)-1);
-        Stack2BinaryFFT = fftn(Stack2Binary, 2*size(Stack2Whitened)-1);
+        Stack1BinaryFFT = fftn(Stack1Binary, 2 * size(Stack1Whitened));
+        Stack2BinaryFFT = fftn(Stack2Binary, 2 * size(Stack2Whitened));
         XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
 
         % Scale the 3D cross-correlation by the cross-correlation of the
@@ -274,6 +274,11 @@ switch Method
                 end
             end
         end
+end
+
+% Fetch the cross-correlation result from the GPU (if needed).
+if UseGPU
+    XCorr3D = gather(XCorr3D);
 end
 
 % Stack the 3D xcorr cube into a 1D array.  
