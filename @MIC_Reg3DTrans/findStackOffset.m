@@ -122,12 +122,6 @@ if ~exist('UseGPU', 'var') || isempty(UseGPU)
     UseGPU = 1;
 end
 
-% Ensure the stacks are floating point arrays.
-if ~isfloat(Stack1) || ~isfloat(Stack2)
-    Stack1 = single(Stack1);
-    Stack2 = single(Stack2);
-end
-
 % Ensure MaxOffset is a column vector for consistency.
 if size(MaxOffset, 1) < size(MaxOffset, 2)
     MaxOffset = MaxOffset.';
@@ -139,6 +133,12 @@ if UseGPU
     Stack2 = gpuArray(Stack2);
     BinaryMask = gpuArray(BinaryMask);
 end
+
+% Ensure the stacks are floating point arrays.
+% NOTE: If using the GPU, we should convert to single after sending the
+%       stacks to the GPU with gpuArray() (it's faster this way).
+Stack1 = single(Stack1);
+Stack2 = single(Stack2);
 
 % Determine dimensions relevant to the problem to improve code readability.
 Stack1Size = size(Stack1).';
