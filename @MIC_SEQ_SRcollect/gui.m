@@ -1008,7 +1008,7 @@ properties2gui();
         obj.CameraSCMOS.abort();
         
         % Set the AbortNow flag to hault further acquisition.
-        obj.AbortNow = 1;
+        obj.AlignReg.AbortNow = 1;
         obj.AlignReg.AbortNow = 1;
         
         % Ensure the object properties are set based on the GUI.
