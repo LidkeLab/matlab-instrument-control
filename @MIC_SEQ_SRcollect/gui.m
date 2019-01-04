@@ -488,6 +488,7 @@ properties2gui();
         obj.TopDir = handles.EditSaveDirectory.String;
         obj.CoverslipName = handles.EditCoverslipName.String;
         obj.LabelIdx = str2double(handles.EditLabelNumber.String);
+        obj.FilenameTag = handles.EditFileTag.String;
         
         % Alignment/registration properties.
         obj.NSeqBeforePeriodicReg = ...
