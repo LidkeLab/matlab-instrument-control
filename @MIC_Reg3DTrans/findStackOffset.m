@@ -196,7 +196,12 @@ switch Method
         Stack1Whitened = BinaryMask .* Stack1Whitened;
         Stack2Whitened = BinaryMask .* Stack2Whitened;
         
-        % Compute the zero-padded 3D FFT's of each stack.
+        % Compute the 3D FFT's of each stack, padding with zeros before
+        % computing. The padding size selected such that the result is 
+        % approximately equivalent to the brute forced cross-correlation. 
+        % NOTE: Ideally, we would pad to 2*size(Stack)-1. Using
+        %       2*size(Stack) will improve the performance of the FFT when
+        %       the dimensions of Stack are powers of 2. 
         Stack1PaddedFFT = fftn(Stack1Whitened, 2 * size(Stack1Whitened));
         Stack2PaddedFFT = fftn(Stack2Whitened, 2 * size(Stack2Whitened));
         
