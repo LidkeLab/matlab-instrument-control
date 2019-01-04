@@ -149,11 +149,11 @@ SizeOfFullXCorr = Stack1Size + Stack2Size - 1; % size of a full xcorr stack
 % needed.
 % NOTE: This is just ensuring that the MaxOffset corresponds to shifts
 %       between the two stacks that still maintain some overlap.
-IndicesToModify = find(MaxOffset > floor((SizeOfFullXCorr-1) / 2));
+IndicesToModify = find(MaxOffset > floor(SizeOfFullXCorr / 2));
 for ii = IndicesToModify.' % tranpose needed for for loop syntax
     warning('MaxOffset(%i) = %g is too big and was reset to %i', ...
-        ii, MaxOffset(ii), floor((SizeOfFullXCorr(ii)-1) / 2))
-    MaxOffset(ii) = floor((SizeOfFullXCorr(ii)-1) / 2);
+        ii, MaxOffset(ii), floor(SizeOfFullXCorr(ii) / 2))
+    MaxOffset(ii) = floor(SizeOfFullXCorr(ii) / 2);
 end
 
 % Scale each image in each stack by intensity to reduce linear trends in 
