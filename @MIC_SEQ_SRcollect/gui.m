@@ -18,7 +18,7 @@ XSize = BigPanelWidth + MediumPanelWidth + 20; % width of figure
 YSize = 2 * BigPanelHeight + SmallPanelHeight + 50; % height of figure
 BottomLeftX = floor(ScreenSize(3)/2 - XSize/2); % ~centers figure on screen
 BottomLeftY = floor(ScreenSize(4)/2 - YSize/2);
-FirstRowStartPosition = [5, YSize-BigPanelHeight, 0, 0]; 
+FirstRowStartPosition = [5, YSize-BigPanelHeight, 0, 0];
 SecondRowStartPosition = [5, YSize-2*BigPanelHeight, ...
     0, 0]; % starting position of the 2nd row panels
 ThirdRowStartPosition = [5, YSize-SmallPanelHeight-2*BigPanelHeight, ...
@@ -261,7 +261,7 @@ for ii = 1:10
     end
 end
 
-% Create a control panel for laser controls and add the needed controls.
+% Create a control panel for laser controls.
 LaserControlPanel = uipanel(GuiFig, 'Title', 'Lasers', ...
     'FontWeight', 'bold', 'Units', 'pixels', ...
     'Position', FirstRowStartPosition ...
@@ -323,8 +323,7 @@ handles.ButtonOpen405LaserGUI = uicontrol(...
     [floor(MediumPanelWidth/2-125/2), MediumPanelHeight-195, 125, 25], ...
     'Callback', @open405LaserGUI);
 
-% Create a control panel for alignment/registration controls and add the 
-% needed controls.
+% Create a control panel for alignment/registration controls.
 RegistrationControlPanel = uipanel(GuiFig, ...
     'Title', 'Alignment/Registration', 'FontWeight', 'bold', ...
     'Units', 'pixels', ...
@@ -348,11 +347,11 @@ handles.CheckboxPeriodicReg = uicontrol(...
     'Callback', @usePeriodicReg); 
 handles.TextPeriodicReg = uicontrol('Parent', RegistrationControlPanel, ...
     'Style', 'text', 'String', 'after every         sequence(s)', ...
-    'Position', [25, MediumPanelHeight-85, 150, 15], 'Visible', 'off');
+    'Position', [25, MediumPanelHeight-85, 150, 15]);
 handles.EditboxPeriodicReg = uicontrol(...
     'Parent', RegistrationControlPanel, 'Style', 'edit', ...
     'String', obj.NSeqBeforePeriodicReg, ...
-    'Position', [85, MediumPanelHeight-85, 20, 15], 'Visible', 'off', ...
+    'Position', [85, MediumPanelHeight-85, 20, 15], ...
     'Tag', 'NSeqBeforePeriodicReg', 'Callback', @modifyClassProperty);
 TopButtonPosition = ...
     [floor(MediumPanelWidth/2 - 125/2), MediumPanelHeight-125, 125, 25];
@@ -437,11 +436,11 @@ handles.TextTimeToActivateFluorophores = uicontrol(...
     'Parent', CollectionPanel, 'Style', 'text', ...
     'String', 'for         second(s)', ...
     'Position', [25, MediumPanelHeight-115, 125, 30], ...
-    'HorizontalAlignment', 'left', 'Visible', 'off');
+    'HorizontalAlignment', 'left');
 handles.EditboxPreActivateFluorophores = uicontrol(...
     'Parent', CollectionPanel, 'Style', 'edit', ...
     'String', obj.DurationPreActivation, ...
-    'Position', [45, MediumPanelHeight-100, 20, 15], 'Visible', 'off');
+    'Position', [45, MediumPanelHeight-100, 20, 15]);
 
 % Add the final set of controls (i.e. those used once everything is set,
 % such as Start Autocollect).
@@ -1012,12 +1011,10 @@ properties2gui();
         obj.UseActiveReg = Source.Value;
         
         % If using active registration, ensure periodic registration is
-        % turned off and hide the periodic registration parameter choices.
+        % turned off.
         if Source.Value
             obj.UsePeriodicReg = 0;
             handles.CheckboxPeriodicReg.Value = 0;
-            handles.TextPeriodicReg.Visible = 'off';
-            handles.EditboxPeriodicReg.Visible = 'off';
         end
         
         % Ensure the GUI reflects object properties.
@@ -1035,16 +1032,10 @@ properties2gui();
         obj.UsePeriodicReg = Source.Value;
         
         % If using periodic registration, ensure active registration is
-        % turned off and make the periodic registration parameter choices
-        % visible.
+        % turned off.
         if Source.Value
             obj.UseActiveReg = 0;
             handles.CheckboxActiveReg.Value = 0;
-            handles.TextPeriodicReg.Visible = 'on';
-            handles.EditboxPeriodicReg.Visible = 'on';
-        else
-            handles.TextPeriodicReg.Visible = 'off';
-            handles.EditboxPeriodicReg.Visible = 'off';
         end
         
         % Ensure the GUI reflects object properties.
@@ -1060,16 +1051,6 @@ properties2gui();
         
         % Set UsePreActivation to the desired value.
         obj.UsePreActivation = Source.Value;
-        
-        % If using pre-activation, make the pre-activation parameter 
-        % choices visible.
-        if Source.Value
-            handles.TextTimeToActivateFluorophores.Visible = 'on';
-            handles.EditboxPreActivateFluorophores.Visible = 'on';
-        else
-            handles.TextTimeToActivateFluorophores.Visible = 'off';
-            handles.EditboxPreActivateFluorophores.Visible = 'off';
-        end
         
         % Ensure the GUI reflects object properties.
         properties2gui();
