@@ -22,8 +22,8 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %   Stack2: (pxqxr) The stack for which the offset relative to Stack1 
 %           is to be determined.
 %   MaxOffset: (3x1 or 1x3)(default = [2; 2; 2]) Maximum offset between 
-%              Stack1 and Stack2 to be considered in the calculation of
-%              PixelOffset and SubPixelOffset.
+%           Stack1 and Stack2 to be considered in the calculation of
+%           PixelOffset and SubPixelOffset.
 %   Method: (string/character array)(default = 'FFT') Method used to
 %           compute the 3D xcorr coefficient field or xcorr like 
 %           coefficient field.  
@@ -39,16 +39,16 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %               re-whitened for the computation of each point in the xcorr 
 %               coefficient field.
 %   FitType: (string/character array)(default = '1D') The type of 
-%            polynomial fit used to fit the 3D xcorr coefficient field.
-%            '1D' fits 2nd order polynomials to three lines parallel to
+%           polynomial fit used to fit the 3D xcorr coefficient field.
+%           '1D' fits 2nd order polynomials to three lines parallel to
 %               x, y, and z which intersect the integer peak of the xcorr 
 %               coefficient field.  The fit is determined via least-squares 
 %               independently for each of the three polynomials. Note that 
 %               only 2 points on either side of the peak are incorporated 
 %               into the fitting (5 points total, unless near an edge).
-%            '3D' fits a 2nd order polynomial (with cross terms) to the 
+%           '3D' fits a 2nd order polynomial (with cross terms) to the 
 %               3D xcorr coefficient field using the least-squares method.
-%            '3DLineFits' fits a 2nd order polynomial (w/o cross terms) 
+%           '3DLineFits' fits a 2nd order polynomial (w/o cross terms) 
 %               to three lines parallel to x, y, and z which intersect the
 %               integer peak of the xcorr coefficient field.  Unlike in the
 %               '1D' method, the polynomial fit for this method is computed 
@@ -57,39 +57,37 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %               data along all three lines.  Note that only 2 points on 
 %               either side of the peak are incorporated into the fitting 
 %               (5 points total, unless near an edge).
-%            'None' will not fit the cross-correlation, and SubPixelOffset
+%           'None' will not fit the cross-correlation, and SubPixelOffset
 %               will be set to PixelOffset.
 %   FitOffset: (3x1 or 1x3)(default = [2; 2; 2]) Maximum offset from the
-%              peak of the cross-correlation curve for which data will be
-%              fit to determine SubPixelOffset.  This only applies to
-%              FitType = '1D' or '3DLineFits'.
+%           peak of the cross-correlation curve for which data will be fit
+%           to determine SubPixelOffset.  This only applies to
+%           FitType = '1D' or '3DLineFits'.
 %   BinaryMask: (mxnxo)(default = ones(m, n, o)) Mask to multiply the
-%               stacks with before computing to cross-correlation.
-%               BinaryMask = [] will force the use of the default.
-%               NOTE: This is only used if Method = 'FFT'.
+%           stacks with before computing to cross-correlation.
+%           NOTE: This is only used if Method = 'FFT'.
 %   PlotFlag: (boolean)(default = 1) Specifies whether or not the 1D line
-%             plots through the peak of the xcorr will be shown.  
-%             PlotFlag = 1 will allow the plots to be shown, PlotFlag = 0
-%             will not allow plots to be displayed.
+%           plots through the peak of the xcorr will be shown.  
+%           PlotFlag = 1 will allow the plots to be shown, PlotFlag = 0
+%           will not allow plots to be displayed.
 %   UseGPU: (boolean)(default = 1) When using Method = 'FFT', this flag
 %           allows for the fft() methods to be computed on the GPU. 
 %
 % OUTPUTS:
 %   PixelOffset: (3x1)(integer) The integer pixel offset of Stack2 relative
-%                to Stack1, determined based on the location of the peak of 
-%                the xcorr coefficient field between the two stacks.
+%           to Stack1, determined based on the location of the peak of the
+%           xcorr coefficient field between the two stacks.
 %   SubPixelOffset: (3x1)(float) The sub-pixel offset of Stack2 relative to
-%                   Stack1, approximated based on a 2nd order polynomial 
-%                   fit(s) to the xcorr coefficient field as specified by 
-%                   the FitType input and finding the peak of that 
-%                   polynomial.
+%           Stack1, approximated based on a 2nd order polynomial fit(s) to 
+%           the xcorr coefficient field as specified by the FitType input 
+%           and finding the peak of that polynomial.
 %   CorrAtOffset: (float) The maximum value of the correlation coefficient,
-%                 corresponding to the correlation coefficient at the 
-%                 offset given by PixelOffset.
+%           corresponding to the correlation coefficient at the offset 
+%           given by PixelOffset.
 %   MaxOffset: (3x1 or 1x3) Maximum offset between Stack1 and Stack2 
-%              considered in the calculation of PixelOffset and 
-%              SubPixelOffset.  This is returned because the user input 
-%              value of MaxOffset is truncated if too large. 
+%           considered in the calculation of PixelOffset and 
+%           SubPixelOffset.  This is returned because the user input value
+%           of MaxOffset is truncated if too large. 
 % 
 % REQUIRES:
 %   MATLAB Parallel Computing Toolbox (if setting UseGPU = 1)
