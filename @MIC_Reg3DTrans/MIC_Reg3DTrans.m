@@ -442,8 +442,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % Ensure that the reference image is set to the central
                     % image in the reference stack (this corresponds to the
                     % focal plane of interest).
-                    StackSteps = obj.ZStack_MaxDev / obj.ZStack_Step;
-                    FocalInd = StackSteps + 1;
+                    FocalInd = 1 + obj.ZStackMaxDevInitialReg ...
+                        / obj.ZStack_Step;
                     obj.Image_Reference = ...
                         obj.ReferenceStack(:, :, FocalInd);
                     
@@ -511,6 +511,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         % Define the indices of the full size reference
                         % stack which correspond to this smaller
                         % sub-stack.
+                        StackSteps = obj.ZStack_MaxDev / obj.ZStack_Step;
                         ZStackRefInds = FocalInd - StackSteps ...
                             :FocalInd + StackSteps;
                     end
