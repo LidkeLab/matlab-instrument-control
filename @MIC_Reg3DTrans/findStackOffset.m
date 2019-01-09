@@ -357,8 +357,8 @@ switch FitType
         % Create arrays of the polynomial fits to use for visualization
         % later on.
         XArrayDense = linspace(XArray(1), XArray(end), size(Stack1, 1));
-        YArrayDense = linspace(YArray(1), YArray(end), size(Stack1, 2));
-        ZArrayDense = linspace(ZArray(1), ZArray(end), size(Stack1, 3));
+        YArrayDense = linspace(YArray(1), YArray(end), size(Stack1, 1));
+        ZArrayDense = linspace(ZArray(1), ZArray(end), size(Stack1, 1));
         XFitAtPeak = PolyFitFunctionX(XArrayDense);
         YFitAtPeak = PolyFitFunctionY(YArrayDense);
         ZFitAtPeak = PolyFitFunctionZ(ZArrayDense);
