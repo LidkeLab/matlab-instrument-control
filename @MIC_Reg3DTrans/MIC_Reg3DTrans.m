@@ -58,7 +58,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZStack_Pos;         % z positions where a frame should be acquired in zstack (um)
         ZStackMaxDevInitialReg = 1; % max. dev. in z for initial reg.
         XYBorderPx = 10; % # of px. to remove from x and y borders.
-        TolMaxCorr = 0.9;   % min val. of max xcorr coeff. for convergence
+        TolMaxCorr = 0.8;   % min val. of max xcorr coeff. for convergence
         Tol_X=.01;          % max X shift to reach convergence(um)
         Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
