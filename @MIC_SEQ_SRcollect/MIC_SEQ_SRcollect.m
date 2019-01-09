@@ -86,7 +86,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
         Reg3DStepSize = 0.1; % (um) step size along z during cell reg.
-        Reg3DMaxDev = 0.5; % (um) max deviation along z during cell reg.
+        Reg3DMaxDev = 0.2; % (um) max deviation along z during cell reg.
         Reg3DMaxDevInit = 1; % (um) max dev. along z for initial cell reg.
         Reg3DXTol = 0.005; % (um) correction along x to claim convergence
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
