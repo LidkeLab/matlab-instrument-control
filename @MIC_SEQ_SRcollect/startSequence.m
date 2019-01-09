@@ -64,7 +64,11 @@ obj.CameraSCMOS.AcquisitionType = 'capture';
 obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
 obj.CameraSCMOS.setup_acquisition();
 obj.AlignReg.Image_Reference = double(RefStruct.Image);
+obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
+obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
 obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
+obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
+obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
 try
     obj.AlignReg.align2imageFit();
 catch
@@ -215,18 +219,19 @@ for ii = 1:obj.NumberOfSequences
             SequenceName = sprintf('Channel01/Zposition001/%s', ...
                 DataName);
             MIC_H5.createGroup(FileH5, SequenceName);
-            MIC_H5.writeAsync_uint16(...
-                FileH5, SequenceName, DataName, Sequence);
             
             % Save the exportState() exportables.
             obj.StatusString = ['Exporting object Data and ', ...
                 'Children with exportState()...'];
             fprintf('Saving exportables from exportState().........\n')
-            MIC_H5.createGroup(FileH5, SequenceName);
             obj.save2hdf5(FileH5, SequenceName);
             fprintf('Exportables from exportState() have been saved\n')
             obj.StatusString = '';
             fprintf('Saving exportables from exportState() complete\n')
+            
+            % Begin writing the data.
+            MIC_H5.writeAsync_uint16(...
+                FileH5, SequenceName, DataName, Sequence);
         otherwise
             error('StartSequence:: unknown SaveFileType')
     end

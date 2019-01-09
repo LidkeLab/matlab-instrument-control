@@ -20,7 +20,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Hardware objects
         CameraSCMOS; % Main Data Collection Camera
         CameraIR; % Active Stabilization Camera
-        MaxPiezoConnectAttempts = 5; % max # of attempts to connect piezo
+        MaxPiezoConnectAttempts = 2; % max # of attempts to connect piezo
         XPiezoSerialNums = {'81850186', '84850145'}; % controller, gauge
         YPiezoSerialNums = {'81850193', '84850146'}; % controller, gauge
         ZPiezoSerialNums = {'81850176', '84850203'}; % controller, gauge
@@ -70,8 +70,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseManualFindCell = 0;
         
         % Misc. file directories, directories, and indices.
-        TopDir;
-        CoverslipName;
+        TopDir = '';
+        CoverslipName = '';
         LabelIdx = 1;
         FilenameTag = ''; % tag appended to filename of saved results
         CellGridIdx;
@@ -86,7 +86,14 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UsePeriodicReg = 1; % boolean: 1 periodically re-aligns, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
-                
+        Reg3DStepSize = 0.1; % (um) step size along z during cell reg.
+        Reg3DMaxDev = 0.5; % (um) max deviation along z during cell reg.
+        Reg3DMaxDevInit = 1; % (um) max dev. along z for initial cell reg.
+        Reg3DXTol = 0.005; % (um) correction along x to claim convergence
+        Reg3DYTol = 0.005; % (um) correction along y to claim convergence
+        Reg3DZTol = 0.03; % (um) correction along z to claim convergence
+        Reg3DMaxCorrTol = 0.5; % xcorr peak val. to claim reg. convergence
+        
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
         AbortNow = 0; % Flag for aborting acquisition
@@ -349,7 +356,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Setup the flip mount object to control the neutral density
             % filter.
             obj.FlipMount = MIC_FlipMountTTL('Dev1', 'Port0/Line0');
-            obj.FlipMount.FilterIn; % place the ND filter in 647 laser path
+            obj.FlipMount.FilterIn(); % place ND filter in 647 laser path
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
@@ -375,8 +382,14 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 obj.StagePiezo, CalibrationFilePath);
             
             % Modify properties of the registration object as needed.
-            obj.AlignReg.PixelSize = 0.104; % microns (SCMOS camera)
-%             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
+            obj.AlignReg.ZStackMaxDevInitialReg = obj.Reg3DMaxDevInit;
+            obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
+            obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
+            obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
+            obj.AlignReg.Tol_X = obj.Reg3DXTol;
+            obj.AlignReg.Tol_Y = obj.Reg3DZTol;
+            obj.AlignReg.Tol_Z = obj.Reg3DZTol;
+            obj.AlignReg.TolMaxCorr = obj.Reg3DMaxCorrTol;
         end
         
         function unloadSample(obj)
