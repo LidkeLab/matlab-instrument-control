@@ -55,8 +55,8 @@ obj.StageStepper.moveToPosition(3, ...
 obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 
 % Attempt to align the cell to the reference image in brightfield.
-obj.StatusString = ...
-    'Attempting initial brightfield alignment of cell...';
+obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+    'Attempting initial brightfield alignment'], RefStruct.CellIdx);
 obj.Lamp660.setPower(obj.Lamp660Power);
 pause(obj.LampWait);
 obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
@@ -110,7 +110,8 @@ if obj.UseActiveReg
 end
 
 % Setup the main sCMOS to acquire the sequence.
-obj.StatusString = 'Preparing for acquisition...';
+obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+    'Preparing for acquisition...'], RefStruct.CellIdx);
 obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
 obj.CameraSCMOS.SequenceLength = obj.NumberOfFrames;
 obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
@@ -131,7 +132,8 @@ end
 if obj.UsePreActivation
     % Update the status string to indicate that the pre-activation is
     % happening.
-    obj.StatusString = 'Pre-activating fluorophores...';
+    obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+        'Pre-activating fluorophores...'], RefStruct.CellIdx);
     
     % Turn on the 405nm laser (if needed) and open the shutter to
     % allow the 647nm laser to reach the sample.
@@ -173,7 +175,9 @@ for ii = 1:obj.NumberOfSequences
     % sequences have been collected.
     if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
             && ~(ii == 1)
-        obj.StatusString = 'Attempting periodic registration...';
+        obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
+            'Attempting periodic registration...'], ...
+            RefStruct.CellIdx, ii);
         obj.Lamp660.setPower(obj.Lamp660Power);
         pause(obj.LampWait);
         obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
@@ -200,7 +204,9 @@ for ii = 1:obj.NumberOfSequences
     obj.Shutter.open();
     
     % Collect the sequence.
-    obj.StatusString = sprintf('Acquiring data sequence %i..........', ii);
+    obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
+            'Acquiring data...'], ...
+            RefStruct.CellIdx, ii);
     obj.CameraSCMOS.AcquisitionType = 'sequence';
     obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
     obj.CameraSCMOS.setup_acquisition();
@@ -221,8 +227,9 @@ for ii = 1:obj.NumberOfSequences
             MIC_H5.createGroup(FileH5, SequenceName);
             
             % Save the exportState() exportables.
-            obj.StatusString = ['Exporting object Data and ', ...
-                'Children with exportState()...'];
+            obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
+                'Exporting object Data and Children...'], ...
+                RefStruct.CellIdx, ii);
             fprintf('Saving exportables from exportState().........\n')
             obj.save2hdf5(FileH5, SequenceName);
             fprintf('Exportables from exportState() have been saved\n')
@@ -274,5 +281,6 @@ switch obj.SaveFileType
     otherwise
         error('StartSequence:: unknown SaveFileType')
 end
+
 
 end
