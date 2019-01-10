@@ -578,7 +578,6 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                     ROI=[257 512 257 512];% Right Bottom quadrant
                 case 11
                     ROI=[1 512 1 256];% Top half
-                    
                 case 12
                     ROI=[1 512 257 512];% Bottom half
                 case 13
