@@ -128,7 +128,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             if strcmp(status,'Ready')||strcmp(status,'Busy')
                 obj.abort;
             end
-            status=obj.HtsuGetStatus
+            status=obj.HtsuGetStatus;
             switch obj.AcquisitionType
                 case 'focus'        %Run-Till-Abort
                     captureMode=1; %sequence
@@ -593,13 +593,13 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                 A.KeepData=1;
                 A.setup_acquisition()
                 A.start_focus()
-                A.AcquisitionType='capture'
+                A.AcquisitionType='capture';
                 A.ExpTime_Capture=.1;
                 A.setup_acquisition()
                 A.KeepData=1;
                 A.start_capture()
                 dipshow(A.Data)
-                A.AcquisitionType='sequence'
+                A.AcquisitionType='sequence';
                 A.ExpTime_Sequence=.01;
                 A.SequenceLength=100;
                 A.setup_acquisition()

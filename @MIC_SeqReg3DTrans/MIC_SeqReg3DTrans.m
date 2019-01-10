@@ -23,11 +23,11 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     properties
         CameraObj
 %       StageObj %old
-        Stage_Piezo_X %new
-        Stage_Piezo_Y %new
-        Stage_Piezo_Z %new
+        StagePiezoX %new
+        StagePiezoY %new
+        StagePiezoZ %new
         MotorObj
-        PixelSize;          %micron
+        PixelSize = .104;          %micron
         RefImageFile
         Image_Reference
         Image_Current
@@ -43,12 +43,17 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         Tol_X=0.01; %F
         Tol_Y=0.01; %F
         Tol_Z=.05;          %micron
+        UseStackCorrelation = 1; % find [x,y,z] shifts by stack comparison
         MaxIter=20; %FF
         MaxXYShift = 5;     %micron
         MaxZShift  = 1;   %micron
         ZFitPos;
         ZFitModel;
         ZMaxAC;
+        ErrorSignal = zeros(0, 3); %Error Signal [X Y Z] in microns
+        ErrorSignal_History=[]     %Error Signal [X Y Z] in micron
+        IsInitialRegistration = 0; % boolean: initial reg. or periodic reg.
+        OffsetFitSuccess; % boolean array: 1 indicates a succesful poly fit
     end
     
     properties (Access='private')
@@ -72,7 +77,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     
     methods
 %         function obj=SeqReg3DTrans(CameraObj,StageObj,MotorObj)
-          function obj=MIC_SeqReg3DTrans(SCMOS,Stage_Piezo_X,Stage_Piezo_Y,Stage_Piezo_Z,Stage_Stepper) %new
+          function obj=MIC_SeqReg3DTrans(SCMOS,StagePiezoX,StagePiezoY,StagePiezoZ,Stage_Stepper) %new
 
             % pass in input for autonaming feature MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
@@ -83,9 +88,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             end
             
             %obj.StageObj=StageObj;
-            obj.Stage_Piezo_X=Stage_Piezo_X;
-            obj.Stage_Piezo_Y=Stage_Piezo_Y;
-            obj.Stage_Piezo_Z=Stage_Piezo_Z;
+            obj.StagePiezoX=StagePiezoX;
+            obj.StagePiezoY=StagePiezoY;
+            obj.StagePiezoZ=StagePiezoZ;
             obj.CameraObj=SCMOS;
             obj.MotorObj=Stage_Stepper;
             [p,~]=fileparts(which('Reg3DTrans'));
@@ -100,10 +105,10 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             
             if nargout==0 %% This doesn't work, nargout is always 1
                 warning('You must assign this object to a variable: r3d=Reg3DTrans(cam,mcl). This time, I assign for you..')
-                varname = 'r3d'
+                varname = 'r3d';
                 n=1;
                 while exist('varname','var')
-                    s=sprintf('%s%d',varname,n)
+                    s=sprintf('%s%d',varname,n);
                     n=n+1;
                 end
                 assignin('base',s,obj);
@@ -127,6 +132,8 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             Attribute.MaxIter = obj.MaxIter;
             Attribute.MaxXYShift = obj.MaxXYShift;
             Attribute.MaxZShift = obj.MaxZShift;
+            Attribute.IsInitialRegistration = obj.IsInitialRegistration;
+            Attribute.OffsetFitSuccess = obj.OffsetFitSuccess;
             
             %Return 0 as null marker
             Data.ZFitPos = 0;
@@ -135,6 +142,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             Data.Image_Reference = 0;
             Data.Image_Current = 0;
             Data.ZStack = 0;
+            Data.ErrorSignal_History = obj.ErrorSignal_History;
             
             if ~isempty(obj.ZFitPos);Data.ZFitPos = obj.ZFitPos;end
             if ~isempty(obj.ZFitModel);Data.ZFitModel = obj.ZFitModel;end
@@ -274,9 +282,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         
         function calibrate(obj)
             %move stage over 5 microns and fit line
-            X=obj.Stage_Piezo_X.Position; %new
-            Y=obj.Stage_Piezo_Y.Position; %new
-            Z=obj.Stage_Piezo_Z.Position; %new
+            X=obj.StagePiezoX.Position; %new
+            Y=obj.StagePiezoY.Position; %new
+            Z=obj.StagePiezoZ.Position; %new
             N=10;
             StepSize=0.1; %micron
             deltaX=((0:N-1)*StepSize)'; %old
@@ -293,9 +301,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 Y(1)=Ystart(1)+deltaY(ii); %new
                 Z(1)=Zstart(1)+deltaZ(ii); %new
 %               obj.StageObj.set_position(X); %old
-                obj.Stage_Piezo_X.set_position(X); %new
-                obj.Stage_Piezo_Y.set_position(Y); %new
-                obj.Stage_Piezo_Z.set_position(Z); %new
+                obj.StagePiezoX.set_position(X); %new
+                obj.StagePiezoY.set_position(Y); %new
+                obj.StagePiezoZ.set_position(Z); %new
                 pause(.1);
                 ImageStack(:,:,ii)=single(obj.CameraObj.start_capture);
             end
@@ -337,9 +345,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             obj.CameraObj.setup_acquisition;
 
 %           X=obj.StageObj.Position;
-            X=obj.Stage_Piezo_X.Position; %new
-            Y=obj.Stage_Piezo_Y.Position; %new
-            Z=obj.Stage_Piezo_Z.Position; %new
+            X=obj.StagePiezoX.Position; %new
+            Y=obj.StagePiezoY.Position; %new
+            Z=obj.StagePiezoZ.Position; %new
             N=length(deltaX);
             ImSz=obj.CameraObj.ImageSize;
             ImageStack=zeros(ImSz(1),ImSz(2),N);
@@ -353,16 +361,16 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
 %               X(2)=Xstart(2)+deltaY(ii); %old
                 Y=Ystart+deltaY(ii); %new
 %               obj.StageObj.set_position(X); %old
-                obj.Stage_Piezo_X.set_position(X); %new
-                obj.Stage_Piezo_Y.set_position(Y); %new
-                obj.Stage_Piezo_Z.set_position(Z); %new
+                obj.StagePiezoX.set_position(X); %new
+                obj.StagePiezoY.set_position(Y); %new
+                obj.StagePiezoZ.set_position(Z); %new
                 pause(1)
                 ImageStack(:,:,ii)=single(obj.CameraObj.start_capture);
             end
 %           obj.StageObj.set_position(Xstart); %old
-            obj.Stage_Piezo_X.set_position(Xstart); %new 
-            obj.Stage_Piezo_Y.set_position(Ystart); %new
-            obj.Stage_Piezo_Z.set_position(Zstart); %new
+            obj.StagePiezoX.set_position(Xstart); %new 
+            obj.StagePiezoY.set_position(Ystart); %new
+            obj.StagePiezoZ.set_position(Zstart); %new
             dipshow(ImageStack);
             sequence=ImageStack;
             Params.CameraObj.ROI=obj.CameraObj.ROI;
@@ -381,7 +389,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             % start timer
             TimerST=timer('StartDelay',0,'period',fmr,'TasksToExecute',numf,'ExecutionMode','fixedRate');
 %           TimerST.TimerFcn={@ImpulseTimerFcn,obj.StageObj,deltaX,fmr/2};  %old
-            TimerST.TimerFcn={@ImpulseTimerFcn,obj.Stage_Piezo_X,obj.Stage_Piezo_Y,obj.Stage_Piezo_Z,deltaX,fmr/2}; %new
+            TimerST.TimerFcn={@ImpulseTimerFcn,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ,deltaX,fmr/2}; %new
             start(TimerST);
             sequence=obj.CameraObj.start_sequence();
             % delete timer
@@ -417,42 +425,150 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         end
         
 
-        function align2imageFit(obj,RefStruct)
-            
-            iter=0;
-            withintol=0;
-            while (withintol==0)&&(iter<obj.MaxIter) 
-                X=obj.Stage_Piezo_X.getPosition; %new
-                Y=obj.Stage_Piezo_Y.getPosition; %new
-                Z=obj.Stage_Piezo_Z.getPosition; %new
-                X0=X; %new
-                Y0=Y; %new
-                Z0=Z; %new
-                %find z-position and adjust in Z using Piezo:
-                if iter < 2
-                    obj.ZStack_MaxDev=4;
-                    obj.ZStack_Step=0.05; %50 nm
+        function align2imageFit(obj, RefStruct)
+            % Initialize misc. parameters.
+            iter = 0;
+            withintol = 0;
+            while (withintol == 0) && (iter <= obj.MaxIter)
+                % Increment the iteration counter.
+                iter = iter + 1;
+                
+                % Determine the current piezo positions.
+                X=obj.StagePiezo.StagePiezoX.getPosition();
+                Y=obj.StagePiezo.StagePiezoY.getPosition();
+                Z=obj.StagePiezo.StagePiezoZ.getPosition();
+                
+                % Determine if we are making comparisons to a single
+                % reference image or to a reference stack and proceed with
+                % the appropriate method.
+                if obj.UseStackCorrelation
+                    % Attempt to select an appropriate value of the
+                    % MaxOffset parameter.
+                    if iter == 1
+                        % Always use a large offset for the first
+                        % iteration (especially needed along z).
+                        if obj.IsInitialRegistration
+                            % If this is the initial brightfield
+                            % registration (e.g. if we are finding the cell
+                            % for first time since the reference was taken
+                            % and the shift might be large) we should use
+                            % a very large offset.
+                            MaxOffset = [30; 30; 30];
+                        else
+                            % We should still use a large offset, but we
+                            % don't expect the offset to be as great as it
+                            % would be for the initial registration.
+                            MaxOffset = [10; 10; 10];
+                        end
+                    elseif any(abs(SubPixelOffset) > MaxOffset)
+                        % If the offset predicted by the polynomial fit was
+                        % greater than the inspected offset, we should
+                        % increase the offset to attempt to capture the
+                        % true peak.
+                        % NOTE: If the peak occured outside the selected
+                        %       MaxOffset, we set the new MaxOffset (in 
+                        %       that dimension) to twice the SubPixelOffset
+                        %       with the goal being to capture the peak on
+                        %       the next iteration.
+                        SelectBit = abs(SubPixelOffset) > MaxOffset;
+                        MaxOffset = SelectBit .* ceil(...
+                            (2 * abs(SubPixelOffset))) + ...
+                            ~SelectBit .* MaxOffset;
+                    else
+                        % In this case, we seem to be close to the peak and
+                        % can reduce the MaxOffset to speed things up.
+                        MaxOffset = [2, 2, 2];
+                    end
+                    
+                    % Set limits on the extent to which we can shift.
+                    obj.ZStack_Step = 0.1; % in case it's changed elsewhere
+                    obj.ZStack_MaxDev = 2;
+                    
+                    % Extract the z-stack from the RefStruct.
+                    ReferenceStack = RefStruct.ReferenceStack;
+                    
+                    % Collect a z-stack for the current location.
+                    obj.collect_zstack();
+                    CurrentStack = obj.ZStack;
+                    
+                    % Determine the pixel and sub-pixel predicted shifts
+                    % between the two stacks.
+                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] = ...
+                        obj.findStackOffset(ReferenceStack, ...
+                        CurrentStack, MaxOffset);
+                    
+                    % Decide which shift to proceed with based on
+                    % PixelOffset and SubPixelOffset (SubPixelOffset can be
+                    % innacurate), setting a flag array to indicate when
+                    % the SubPixelOffset has 'failed'.
+                    Offset = SubPixelOffset ...
+                        .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
+                        + PixelOffset ...
+                        .* (abs(PixelOffset-SubPixelOffset) > 0.5);
+                    Offset = Offset * obj.PixelSize; % pixel->um
+                    obj.OffsetFitSuccess = ...
+                        abs(PixelOffset-SubPixelOffset) <= 0.5 ...
+                        + abs(PixelOffset-SubPixelOffset) > 0.5;
+                    
+                    % Modify PixelOffset to correspond to physical piezo
+                    % dimensions.
+                    % NOTE: The additional minus sign accounts for the
+                    %       convention used in findStackOffset(). 
+                    Offset = -[Offset(2), -Offset(1), -Offset(3)];
+                    
+                    % Move the piezos to adjust for the predicted shift.
+                    CurrentPosX = obj.StagePiezo.StagePiezoX.getPosition();
+                    CurrentPosY = obj.StagePiezo.StagePiezoY.getPosition();
+                    CurrentPosZ = obj.StagePiezo.StagePiezoZ.getPosition();
+                    NewPosX = CurrentPosX - Offset(1);
+                    NewPosY = CurrentPosY - Offset(2);
+                    NewPosZ = CurrentPosZ - Offset(3);
+                    obj.StagePiezo.StagePiezoX.setPosition(NewPosX);
+                    obj.StagePiezo.StagePiezoY.setPosition(NewPosY);
+                    obj.StagePiezo.StagePiezoZ.setPosition(NewPosZ);
+                    
+                    % Rename parameters for consistency with the rest of
+                    % the code.
+                    Xshift = Offset(1);
+                    Yshift = Offset(2);
+                    Zshift = Offset(3);
+                    mACfit = MaxCorr;
+                    
+                    % Save the error signal.
+                    obj.ErrorSignal = Offset.'; % col->row vector
                 else
-                    obj.ZStack_MaxDev=0.5;
-                    obj.ZStack_Step=0.05; %50 nm
+                    %find z-position and adjust in Z using Piezo:
+                    if iter < 2
+                        obj.ZStack_MaxDev=4;
+                        obj.ZStack_Step=0.05; %50 nm
+                    else
+                        obj.ZStack_MaxDev=0.5;
+                        obj.ZStack_Step=0.05; %50 nm
+                    end
+                    [Zfit,mACfit]=obj.findZPos();
+                    Zshift=Z-abs(Zfit); %new
+                    Z=Zfit; %new
+                    obj.StagePiezo.StagePiezoX.setPosition(X); %new
+                    obj.StagePiezo.StagePiezoY.setPosition(Y); %new
+                    obj.StagePiezo.StagePiezoZ.setPosition(Z); %new
+                    
+                    %find XY position and adjust in XY using Piezo:
+                    [Xshift,Yshift]=findXYShift(obj); % in um
+                    obj.ErrorSignal(1:2)=[Xshift,Yshift];
+                    obj.ErrorSignal(3) = Zshift;
+                    
+                    % current position on Piezo
+                    CurrentPosX=obj.StagePiezo.StagePiezoX.getPosition();
+                    CurrentPosY=obj.StagePiezo.StagePiezoY.getPosition();
+                    NewPosX = CurrentPosX - Xshift;
+                    NewPosY = CurrentPosY - Yshift;
+                    obj.StagePiezo.StagePiezoX.setPosition(NewPosX);
+                    obj.StagePiezo.StagePiezoY.setPosition(NewPosY);
+                    obj.StagePiezo.StagePiezoZ.setPosition(Z);
                 end
-                [Zfit,mACfit]=obj.findZPos();
-                Zshift=Z-abs(Zfit); %new
-                Z=Zfit; %new
-                obj.Stage_Piezo_X.setPosition(X); %new
-                obj.Stage_Piezo_Y.setPosition(Y); %new
-                obj.Stage_Piezo_Z.setPosition(Z); %new
-                %find XY position and adjust in XY using Piezo:
-                [Xshift,Yshift]=findXYShift(obj); % in um 
-
-                % current position on Piezo
-                CurrentPos_X=obj.Stage_Piezo_X.getPosition;
-                CurrentPos_Y=obj.Stage_Piezo_Y.getPosition;
-                NewPos_X = CurrentPos_X - Xshift;
-                NewPos_Y = CurrentPos_Y - Yshift;
-                obj.Stage_Piezo_X.setPosition(NewPos_X);
-                obj.Stage_Piezo_Y.setPosition(NewPos_Y);
-                obj.Stage_Piezo_Z.setPosition(Z);
+                
+                obj.ErrorSignal_History = [obj.ErrorSignal_History; ...
+                    obj.ErrorSignal];
                 
                 %show overlay
                 obj.Image_Current=obj.capture_single();
@@ -469,13 +585,14 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
                 h=dipshow(obj.Fig_h_ov,o);
                 diptruesize(h,'tight');
                 drawnow;
-
+                
                 %check convergence
                 
-               withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
-               iter=iter+1
-            
+                withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z)&(mACfit>0.9);
+                fprintf('Alignment iteration %i complete \n', iter)
             end
+            
+            
             if iter==obj.MaxIter
                 warning('reached max iterations')
             end
@@ -483,9 +600,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
         end
         
         function collect_zstack(obj)
-            X=obj.Stage_Piezo_X.getPosition; %new
-            Y=obj.Stage_Piezo_Y.getPosition; %new
-            Z=obj.Stage_Piezo_Z.getPosition; %new
+            X=obj.StagePiezoX.getPosition; %new
+            Y=obj.StagePiezoY.getPosition; %new
+            Z=obj.StagePiezoZ.getPosition; %new
             obj.X_Current=X; %new
             obj.Y_Current=Y; %new
             obj.Z_Current=Z; %new
@@ -503,9 +620,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             obj.CameraObj.setup_fast_acquisition(N);
             %out=single(obj.CameraObj.start_capture);
             for nn=1:N
-                obj.Stage_Piezo_X.setPosition(obj.X_Current); %now
-                obj.Stage_Piezo_Y.setPosition(obj.Y_Current); %now
-                obj.Stage_Piezo_Z.setPosition(obj.ZStack_Pos(nn)); %now
+                obj.StagePiezoX.setPosition(obj.X_Current); %now
+                obj.StagePiezoY.setPosition(obj.Y_Current); %now
+                obj.StagePiezoZ.setPosition(obj.ZStack_Pos(nn)); %now
                 if nn==1
                     pause(.2); %it was 0.5 originally
                 end
@@ -513,9 +630,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             end
             out=obj.CameraObj.FinishTriggeredCapture(N);
             obj.ZStack=single(out);
-            obj.Stage_Piezo_X.setPosition(X); %new
-            obj.Stage_Piezo_Y.setPosition(Y); %new
-            obj.Stage_Piezo_Z.setPosition(Z); %new
+            obj.StagePiezoX.setPosition(X); %new
+            obj.StagePiezoY.setPosition(Y); %new
+            obj.StagePiezoZ.setPosition(Z); %new
             %put EMGain/Shutter back
         end
         
@@ -601,7 +718,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             %Zfit=zinterp(ind);
             Zfit=zAtMax;
         end
- 
+        
         function [fval,model]=GaussFit(obj,X,CC,Zpos)
            u = X(1);    %mean
            s = X(2);    %sigma
@@ -642,6 +759,11 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
             [];
         end
     end
+    methods (Static)
+        [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
+            findStackOffset(Stack1, Stack2, MaxOffset, Method, FitType)
+    end
+    
     
 end
 
