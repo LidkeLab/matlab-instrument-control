@@ -73,6 +73,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         TopDir = '';
         CoverslipName = '';
         LabelIdx = 1;
+        FilenameTag = ''; % tag appended to filename of saved results
         CellGridIdx;
         CurrentCellIdx = 1;
         CurrentGridIdx = [1, 1];
