@@ -813,7 +813,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             %   reference image
             
             %collect z-data stack
-            obj.collect_zstack();
+            if obj.IsInitialRegistration
+                % Collect a larger z-stack if the IsInitialRegistration
+                % flag is set.
+                obj.collect_zstack(obj.ZStackMaxDevInitialReg);
+            else
+                obj.collect_zstack(obj.ZStack_MaxDev);
+            end          
             
             %whiten data to give zero mean and unit variance
             Ref=obj.Image_Reference(obj.XYBorderPx:end-obj.XYBorderPx, ...
