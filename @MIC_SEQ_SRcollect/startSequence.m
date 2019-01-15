@@ -118,15 +118,11 @@ obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
 obj.CameraSCMOS.AcquisitionType = 'sequence';
 obj.CameraSCMOS.setup_acquisition();
 
-% Send the 647nm laser to the sample.  If requested, also send the
-% 405nm laser to the sample.
+% Prepare the lasers for the sequence based on the appropriate object
+% properties.
 obj.FlipMount.FilterOut(); % removes ND filter from optical path
-if obj.Use405
-    obj.Laser405.setPower(obj.LaserPower405Activate);
-end
-if obj.IsBleach
-    obj.Laser405.setPower(obj.LaserPower405Bleach);
-end
+obj.Laser647.setPower(obj.LaserPowerSequence647);
+obj.Laser405.setPower(obj.LaserPowerSequence405);
 
 % Begin the acquisition, performing a pre-activation step if requested.
 if obj.UsePreActivation
@@ -135,12 +131,14 @@ if obj.UsePreActivation
     obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
         'Pre-activating fluorophores...'], RefStruct.CellIdx);
     
-    % Turn on the 405nm laser (if needed) and open the shutter to
-    % allow the 647nm laser to reach the sample.
-    if obj.Use405
+    % Allow the lasers to reach the sample as requested by the set flags.
+    if obj.OnDuringSequence405
         obj.Laser405.on();
     end
-    obj.Shutter.open();
+    if obj.OnDuringSequence647
+        % Only open the shutter if requested by the set flag.
+        obj.Shutter.open();
+    end
     
     % Pause for the prescribed amount of time to allow for
     % pre-activation, first ensuring the user hasn't disabled the
@@ -151,10 +149,7 @@ if obj.UsePreActivation
     % Turn off the 405nm laser (if used) and close the shutter to
     % prevent the 647nm laser from reaching the sample.
     obj.Shutter.close();
-    if obj.Use405
-        % Turn off the 405nm laser.
-        obj.Laser405.off();
-    end
+    obj.Laser405.off();
     
     % Restore the previous pause setting (in case this was important
     % elsewhere/to the user).
@@ -196,12 +191,14 @@ for ii = 1:obj.NumberOfSequences
         obj.Lamp660.setPower(0);
     end
     
-    % Turn on the 405nm laser (if needed) and open the shutter to
-    % allow the 647nm laser to reach the sample.
-    if obj.Use405
+    % Allow the lasers to reach the sample as requested by the set flags.
+    if obj.OnDuringSequence405
         obj.Laser405.on();
     end
-    obj.Shutter.open();
+    if obj.OnDuringSequence647
+        % Only open the shutter if requested by the set flag.
+        obj.Shutter.open();
+    end
     
     % Collect the sequence.
     obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
@@ -243,10 +240,7 @@ for ii = 1:obj.NumberOfSequences
             error('StartSequence:: unknown SaveFileType')
     end
     obj.Shutter.close(); % block 647nm from reaching sample
-    if obj.Use405
-        % Turn off the 405nm laser.
-        obj.Laser405.off();
-    end
+    obj.Laser405.off(); % ensure the 405nm is turned off
 end
 obj.StatusString = '';
 fprintf('Data collection complete\n')
@@ -254,10 +248,8 @@ fprintf('Data collection complete\n')
 % Ensure that the lasers are not reaching the sample.
 obj.Shutter.close(); % close shutter instead of turning off the laser
 obj.FlipMount.FilterIn();
-if obj.Use405
-    obj.Laser405.setPower(0);
-    obj.Laser405.off();
-end
+obj.Laser405.setPower(0);
+obj.Laser405.off();
 
 % If it was used, end the active stabilization process.
 if obj.UseActiveReg

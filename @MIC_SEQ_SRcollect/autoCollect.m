@@ -72,10 +72,11 @@ for nn = StartCell:NumCells
     end
 end
 
-% Ensure the laser is not longer illuminating the sample.
+% Ensure the lasers are no longer illuminating the sample.
 obj.FlipMount.FilterIn(); % move ND filter into beam path
 obj.Shutter.close();
 obj.Laser647.off();
+obj.Laser405.off();
 
 % Publish the results if requested.
 if obj.PublishResults
@@ -85,5 +86,6 @@ if obj.PublishResults
         obj.SCMOSCalFilePath);
     obj.StatusString = '';
 end
+
 
 end
