@@ -58,10 +58,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
-        OnDuringFocus647 = 1; % flag indicates 647nm laser on for focusing
-        OnDuringSequence647 = 1; % flag indicates 647nm on for sequence
-        OnDuringFocus405 = 1; % flag indicates 405nm laser on for focusing
-        OnDuringSequence405 = 1; % flag indicates 405nm on for sequence
+        OnDuringFocus647 = 0; % flag indicates 647nm laser on for focusing
+        OnDuringSequence647 = 0; % flag indicates 647nm on for sequence
+        OnDuringFocus405 = 0; % flag indicates 405nm laser on for focusing
+        OnDuringSequence405 = 0; % flag indicates 405nm on for sequence
         LaserPowerFocus647 = 50;
         LaserPowerSequence647 = 300;
         LaserPowerFocus405 = 11.84;
