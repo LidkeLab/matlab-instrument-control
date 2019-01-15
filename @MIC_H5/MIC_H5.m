@@ -33,13 +33,16 @@ classdef MIC_H5
             end
         end
         
-        function writeAsync_uint16(File,Group,DataName,Data)
+        function writeAsync_uint16(File,Group,DataName,Data,CompressionLevel)
             %Async write to an existing group in an existing H5 file. 
             %Returns immediately to MATLAB
-            IsBusy=H5Write_Async(File,Group,DataName,Data);
+            if nargin<5
+                CompressionLevel=5;
+            end
+            IsBusy=H5Write_Async(File,Group,DataName,Data,CompressionLevel);
             while IsBusy
                 pause(0.05);
-                IsBusy=H5Write_Async(File,Group,DataName,Data);
+                IsBusy=H5Write_Async(File,Group,DataName,Data,CompressionLevel);
             end
         end
         
