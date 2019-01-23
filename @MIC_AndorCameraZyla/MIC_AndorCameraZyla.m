@@ -140,7 +140,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             obj.setup_acquisition();
             obj.CameraFrameIndex=0;
             %queue buffers
-            for ii=1:10
+            for ii=1:10 
                 [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
             end
             obj.Data=zeros(obj.Width,obj.Height,obj.SequenceLength,'uint16');
@@ -148,7 +148,6 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             obj.AbortNow=0;
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStart');
             AT_CheckWarning(obj.LastError);
-            
             IsRunning=1;
             while IsRunning
                 if obj.AbortNow
@@ -159,13 +158,13 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 
                 Im=obj.displaylastimage(); 
                 obj.CameraFrameIndex=obj.CameraFrameIndex+1;
-                obj.CameraFrameIndex
                 obj.Data(:,:,obj.CameraFrameIndex)=Im;
                 obj.Data(1,1,obj.CameraFrameIndex)
+                
                 if obj.CameraFrameIndex==obj.SequenceLength
                     break
                 end
-                
+               
                 [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
                 AT_CheckWarning(obj.LastError);
             end
@@ -331,8 +330,15 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             [obj.LastError,buf] = AT_WaitBuffer(obj.CamHandle,10000);
             AT_CheckWarning(obj.LastError);
             [obj.LastError,Out] = AT_ConvertMono16ToMatrix(buf,obj.Height,obj.Width,obj.Stride);
+            
+%             %%Hanieh to remove hot pixel
+%             P=prctile(Out(Out>0),99.9);
+%             Out(Out>P)=P;
+%             obj.ImageHandle=imagesc(Out);
+%             set(obj.ImageHandle,'cdata',Out);
+%             %%Hanieh
             AT_CheckWarning(obj.LastError);
-            obj.Data=Out;
+            
         end
         
         function errorcheck(obj)
@@ -423,7 +429,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 A.start_capture()
                 dipshow(A.Data)
                 A.AcquisitionType='sequence'
-                A.ExpTime_Sequence=.01;
+                A.ExpTime_Sequence=.1;%changed from .1 Elton
                 A.SequenceLength=100;
                 A.setup_acquisition()
                 
