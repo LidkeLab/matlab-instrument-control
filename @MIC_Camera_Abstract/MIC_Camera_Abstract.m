@@ -7,7 +7,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
     %These are not abstract so we can give set functions
     properties
         AcquisitionType='focus';    %'sequence','capture','focus'
-        AutoScale=1;                %   1: on,0: off
+        DisplayScaling;             %   'Auto','Percentile','LUT'
         DisplayZoom=1;              %   live display zoom
         KeepData=1;                 %   1: store in 'Data', 0: discard
         LUTScale=[0 16000];         %   [min max] live view stretch
@@ -262,11 +262,13 @@ classdef MIC_Camera_Abstract < MIC_Abstract
             %scaling
             mx=double(max(max(im)));
             mn=double(min(min(im)));
-            if obj.AutoScale
+            if strcmp(obj.DisplayScaling,'Auto')
                 im = single(im-mn)/(mx-mn);
                 im=255*im';
-            else
-                im = single(in-obj.LUTScale(1))/(obj.LUTScale(2)-obj.LUTScale(1));
+            elseif strcmp(obj.DisplayScaling,'Percentile')
+                
+            elseif strcmp(obj.DisplayScaling,'LUT')
+                im = single(im-obj.LUTScale(1))/(obj.LUTScale(2)-obj.LUTScale(1));
                 im=255*im';
             end
             
