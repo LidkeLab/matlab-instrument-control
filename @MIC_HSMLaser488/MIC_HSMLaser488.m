@@ -56,13 +56,13 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
             obj=obj@MIC_LightSource_Abstract(~nargout);
             
             % Initialize Shutter
-            obj.Shutter=MIC_ShutterTTL('Dev1','Port1/Line2');
+            obj.Shutter=MIC_ShutterTTL('Dev1','Port1/Line1');
             
             % Initialize Attenuator
             obj.Attenuator=MIC_Attenuator('Dev1','ao1');
             
             % Obtain MaxPower and MinPower for gui
-            obj.Attenuator.loadCalibration('Filter 2');
+            obj.Attenuator.loadCalibration('Att_Calib_Elton');
             obj.MaxPower=obj.Attenuator.MaxTransmission*obj.MaxPower_LaserFilter/100;
             obj.MinPower=obj.Attenuator.MinTransmission*obj.MaxPower_LaserFilter/100;
             obj.Power=obj.MinPower;
