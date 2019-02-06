@@ -563,14 +563,19 @@ setDefaults();
         switch handles.Popup_CameraROI.Value
             case 1
                 obj.Camera.ROI=[961 1088 961 1088];% center 128
+                obj.CameraROI=[961 1088 961 1088];% center 128
             case 2
                 obj.Camera.ROI=[897 1152 897 1152];% center 256
+                obj.CameraROI=[897 1152 897 1152];% center 256
             case 3
                 obj.Camera.ROI=[769 1280 769 1280];% center 512
+                obj.CameraROI=[769 1280 769 1280];% center 512
             case 4
                 obj.Camera.ROI=[513 1536 513 1536]; % center 1024
+                obj.CameraROI=[513 1536 513 1536]; % center 1024
             case 5
                 obj.Camera.ROI=[1 2048 1 2048]; % full 2048
+                obj.CameraROI=[1 2048 1 2048]; % full 2048
         end
         % Display zoom
         switch handles.Popup_CameraDispZoom.Value
@@ -612,8 +617,9 @@ setDefaults();
         obj.SaveType = handles.saveFileType.String{handles.saveFileType.Value};
         % CAMERA
         gui2camera()
-        obj.CameraROI = ...
+        obj.CameraROISelect = ...
             handles.Popup_CameraROI.String{handles.Popup_CameraROI.Value};
+        
         obj.ExpTime = str2double(handles.Edit_CameraExpTime.String);
         obj.NumFrames = str2double(handles.Edit_CameraNumFrames.String);
         obj.CameraReadoutMode = ...
@@ -667,21 +673,21 @@ setDefaults();
             find(strcmp(handles.saveFileType.String,obj.SaveType));
         % CAMERA
         if all(obj.Camera.ROI == [1 2048 1 2048])
-            obj.CameraROI = 'full';
+            obj.CameraROISelect = 'full';
         elseif all(obj.Camera.ROI == [513 1536 513 1536])
-            obj.CameraROI = 'center 1024';
+            obj.CameraROISelect = 'center 1024';
         elseif all(obj.Camera.ROI == [769 1280 769 1280])
-            obj.CameraROI = 'center 512';
+            obj.CameraROISelect = 'center 512';
         elseif all(obj.Camera.ROI == [897 1152 897 1152])
-            obj.CameraROI = 'center 256';
+            obj.CameraROISelect = 'center 256';
         elseif all(obj.Camera.ROI == [961 1088 961 1088])
-            obj.CameraROI = 'center 128';
+            obj.CameraROISelect = 'center 128';
         else
             obj.Camera.ROI = [1 2048 1 2048];
-            obj.CameraROI = 'full';
+            obj.CameraROISelect = 'full';
         end
         handles.Popup_CameraROI.Value = ...
-            find(strcmp(handles.Popup_CameraROI.String,obj.CameraROI));
+            find(strcmp(handles.Popup_CameraROI.String,obj.CameraROISelect));
         obj.ExpTime = obj.Camera.ExpTime_Sequence;
         obj.Camera.ExpTime_Focus = obj.Camera.ExpTime_Sequence;
         handles.Edit_CameraExpTime.String = num2str(obj.ExpTime);
