@@ -58,11 +58,14 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
-        Use405 = 1;
-        LaserPowerSequence = 300;
-        LaserPowerFocus = 50;
-        LaserPower405Activate = 11.84; % max power, for now
-        LaserPower405Bleach = 11.84;
+        OnDuringFocus647 = 0; % flag indicates 647nm laser on for focusing
+        OnDuringSequence647 = 0; % flag indicates 647nm on for sequence
+        OnDuringFocus405 = 0; % flag indicates 405nm laser on for focusing
+        OnDuringSequence405 = 0; % flag indicates 405nm on for sequence
+        LaserPowerFocus647 = 50;
+        LaserPowerSequence647 = 300;
+        LaserPowerFocus405 = 11.84;
+        LaserPowerSequence405 = 11.84;
         IsBleach = 0; % boolean: 1 for a photobleach round, 0 otherwise
         StepperLargeStep = 0.05; % Large Stepper motor step (mm)
         StepperSmallStep = 0.002; % Small Stepper motor step (mm)
@@ -216,10 +219,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Attributes.SCMOS_ROI_Full = obj.SCMOS_ROI_Full;
             Attributes.IRCamera_ROI = obj.IRCamera_ROI;
             Attributes.SaveDir = obj.SaveDir;
-            Attributes.LaserPower405Activate = obj.LaserPower405Activate;
-            Attributes.LaserPower405Bleach = obj.LaserPower405Bleach;
-            Attributes.LaserPowerSequence = obj.LaserPowerSequence;
-            Attributes.LaserPowerFocus = obj.LaserPowerFocus;
+            Attributes.LaserPowerFocus647 = obj.LaserPowerFocus647;
+            Attributes.LaserPowerSequence647 = obj.LaserPowerSequence647;
+            Attributes.LaserPowerFocus405 = obj.LaserPowerFocus405;
+            Attributes.LaserPowerSequence405 = obj.LaserPowerSequence405;
             Attributes.UsePreActivation = obj.UsePreActivation;
             Attributes.DurationPreActivation = obj.DurationPreActivation;
             
@@ -487,13 +490,23 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
-            obj.Laser647.setPower(obj.LaserPowerFocus);
+            obj.Laser647.setPower(obj.LaserPowerFocus647);
+            obj.Laser405.setPower(obj.LaserPowerFocus405);
             obj.FlipMount.FilterIn();
-            obj.Shutter.open(); % opens shutter for laser
             obj.Laser647.on();
+            if obj.OnDuringFocus647
+                % Only open the shutter if requested by the set flag.
+                obj.Shutter.open();
+            end
+            if obj.OnDuringFocus405
+                % Only turn on the 405nm laser if requested by the set
+                % flag.
+                obj.Laser405.on();
+            end
             obj.Lamp660.setPower(0);
             obj.CameraSCMOS.start_focus();
             obj.Shutter.close(); % closes shutter to prevent photobleaching
+            obj.Laser405.off(); % turn of the 405nm laser
             
             % Ask user if they would like to save the current cell and
             % focus as a reference (question dialog will appear once the
@@ -512,13 +525,22 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
-            obj.Laser647.setPower(obj.LaserPowerSequence);
-            obj.Laser647.WaitForLaser = 0;
-            obj.Shutter.open(); % open shutter
-            obj.FlipMount.FilterOut(); 
+            obj.Laser647.setPower(obj.LaserPowerSequence647);
+            obj.Laser405.setPower(obj.LaserPowerSequence405);
             obj.Laser647.on();
+            if obj.OnDuringFocus647
+                % Only open the shutter if requested by the set flag.
+                obj.Shutter.open();
+            end
+            if obj.OnDuringFocus405
+                % Only turn on the 405nm laser if requested by the set
+                % flag.
+                obj.Laser405.on();
+            end
+            obj.FlipMount.FilterOut(); 
             obj.CameraSCMOS.start_focus();
-            obj.Laser647.off();
+            obj.Shutter.close(); % closes shutter to prevent photobleaching
+            obj.Laser405.off(); % turn of the 405nm laser
         end
         
         function moveStepperUpLarge(obj)
