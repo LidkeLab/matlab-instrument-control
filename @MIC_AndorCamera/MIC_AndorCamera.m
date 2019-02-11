@@ -259,9 +259,11 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 obj.setup_acquisition;
             end
             
-%             if ~obj.CameraSetting.ManualShutter.Bit
-                obj.openShutter;    
-%             end
+            if isfield(obj.CameraSetting,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.openShutter;    
+                end
+            end
          
             obj.setcurrentcamera();
             obj.LastError = StartAcquisition();
@@ -271,9 +273,11 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             obj.LastError=WaitForAcquisition();
             out=obj.getdata();
           
-%             if ~obj.CameraSetting.ManualShutter.Bit
-                obj.closeShutter();  
-%             end
+            if isfield(obj.CameraSetting,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.closeShutter();
+                end
+            end
             
             if obj.KeepData
                 obj.Data=out;
