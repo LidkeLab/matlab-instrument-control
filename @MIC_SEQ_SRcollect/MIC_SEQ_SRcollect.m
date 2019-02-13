@@ -306,11 +306,11 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         function setupIRCamera(obj)
             % Update the status indicator for the GUI.
             obj.StatusString = 'Setting up IR camera...';
-            
-            % Setup the IR camera used for active registration.
-            obj.CameraIR = MIC_ThorlabsIR();
-            obj.CameraIR.ROI = obj.IRCamera_ROI;
-            obj.CameraIR.ExpTime_Capture = 0.5;
+%             
+%             % Setup the IR camera used for active registration.
+%             obj.CameraIR = MIC_ThorlabsIR();
+%             obj.CameraIR.ROI = obj.IRCamera_ROI;
+%             obj.CameraIR.ExpTime_Capture = 0.5;
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
@@ -322,7 +322,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             
             % Setup the LED lamp objects.
             obj.Lamp660 = MIC_ThorlabsLED('Dev2', 'ao0');
-            obj.Lamp850 = MIC_ThorlabsLED('Dev2', 'ao1');
+%             obj.Lamp850 = MIC_ThorlabsLED('Dev2', 'ao1');
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
