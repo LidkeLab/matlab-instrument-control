@@ -34,7 +34,7 @@ NumCells = numel(FileList);
 % Proceed with the data acquisition, looping through each of the cells
 % specified in the FileList.
 obj.Shutter.close(); % close shutter before the laser turns on
-obj.Laser647.setPower(obj.LaserPowerSequence);
+obj.Laser647.setPower(obj.LaserPowerSequence647);
 obj.Laser647.on();
 for nn = StartCell:NumCells
     % If AbortNow flag was set, do not continue.

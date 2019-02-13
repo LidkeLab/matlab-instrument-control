@@ -63,7 +63,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         OnDuringFocus405 = 0; % flag indicates 405nm laser on for focusing
         OnDuringSequence405 = 0; % flag indicates 405nm on for sequence
         LaserPowerFocus647 = 50;
-        LaserPowerSequence647 = 300;
+        LaserPowerSequence647 = 50;
         LaserPowerFocus405 = 11.84;
         LaserPowerSequence405 = 11.84;
         IsBleach = 0; % boolean: 1 for a photobleach round, 0 otherwise
