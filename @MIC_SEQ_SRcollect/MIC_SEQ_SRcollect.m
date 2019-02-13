@@ -419,7 +419,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Lower the sample stage towards the objective
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
-            obj.StageStepper.moveToPosition(3, 0); % z stepper
+            obj.StageStepper.moveToPosition(3, 0.1); % z stepper
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
