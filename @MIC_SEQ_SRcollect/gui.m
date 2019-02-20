@@ -806,9 +806,7 @@ properties2gui();
         
         % If the piezo objects exist, delete them.
         if ~isempty(obj.StagePiezo)
-            obj.StagePiezo.StagePiezoX.delete();
-            obj.StagePiezo.StagePiezoY.delete();
-            obj.StagePiezo.StagePiezoZ.delete();
+            obj.StagePiezo.delete();
         end
         
         % Attempt to reconnect to the piezos.
