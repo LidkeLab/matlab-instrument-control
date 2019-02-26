@@ -81,8 +81,7 @@ obj.Laser405.off();
 % Publish the results if requested.
 if obj.PublishResults
     obj.StatusString = 'Publishing results...';
-    PublishSeqSRResults(...
-        fullfile(obj.TopDir, obj.CoverslipName), ...
+    SMA_Publish(fullfile(obj.TopDir, obj.CoverslipName), ...
         obj.SCMOSCalFilePath);
     obj.StatusString = '';
 end

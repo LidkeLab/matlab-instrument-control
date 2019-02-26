@@ -512,7 +512,6 @@ uicontrol('Parent', GuiFig, 'Style', 'text', ...
 handles.CheckboxPhotobleach = uicontrol('Parent', GuiFig, ...
     'Style', 'checkbox', 'Position', ThirdRowStartPosition ...
     + [BigPanelWidth+165, SmallPanelHeight-30, MediumPanelWidth, 25], ...
-    'Callback', @publishResults, ...
     'TooltipString', 'Select if this acquisition is a bleaching round');
 uicontrol('Parent', GuiFig, 'Style', 'text', ...
     'String', 'Automatically Publish Results:', ...
@@ -939,12 +938,12 @@ properties2gui();
         % calibration file, ensuring a file is actually selected to avoid
         % errors later on.  
         if Source.Value
-            % Make sure PublishSeqSRResults actually exists in the users 
+            % Make sure SMA_Publish actually exists in the users 
             % filepath so as to not cause errors later on.
-            if isempty(which('PublishSeqSRResults'))
+            if isempty(which('SMA_Publish'))
                 % Warn the user about the missing file and change
                 % properties as needed.
-                warning('PublishSeqSRResults.m not found')
+                warning('SMA_Publish.m not found')
                 Source.Value = 0;
                 obj.PublishResults = 0;
                 
