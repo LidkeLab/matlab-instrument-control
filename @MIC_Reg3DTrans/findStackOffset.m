@@ -127,6 +127,35 @@ if size(MaxOffset, 1) < size(MaxOffset, 2)
     MaxOffset = MaxOffset.';
 end
 
+% Check if the stacks are actually stacks (i.e. multiple images in each
+% stack).  If they are not, copy the given image to match the stack size of
+% the other stack.
+NImagesStack1 = size(Stack1, 3);
+NImagesStack2 = size(Stack2, 3);
+if (NImagesStack1 == 1) || (NImagesStack2 == 1)    
+    % One of the two stacks is just a single image, copy that image to
+    % match the size of the other stack.
+    if NImagesStack1 < NImagesStack2
+        % Stack1 is a single image: create copies of this image to ensure
+        % Stack1 and Stack2 are the same size.
+        Stack1 = repmat(Stack1, [1, 1, NImagesStack2]);
+    elseif NImagesStack1 > NImagesStack2
+        % Stack2 is a single image: create copies of this image to ensure
+        % Stack1 and Stack2 are the same size.
+        Stack2 = repmat(Stack2, [1, 1, NImagesStack1]);
+    else
+        % Both stacks contain only a single image.  Make these stacks of
+        % two images so that we can still proceed with the shift finding in
+        % the x and y dimensions.
+        Stack1 = repmat(Stack1, [1, 1, 2]);
+        Stack2 = repmat(Stack2, [1, 1, 2]);
+    end
+    
+    % We no longer care about the z shift, so change the third element of
+    % MaxOffset to 0 to reduce computation time.
+    MaxOffset(3) = 0;
+end
+
 % Convert the stacks to gpuArrays if needed.
 if UseGPU
     Stack1 = gpuArray(Stack1);
