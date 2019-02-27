@@ -8,10 +8,10 @@ if ~(isempty(h))
 end
 
 % Define reference parameters for the GUI dimensions.
-BigPanelWidth = 500; % width of big uipanels
+BigPanelWidth = 450; % width of big uipanels
 BigPanelHeight = 500; % height of big uipanels
-MediumPanelWidth = floor(BigPanelWidth / 2);
-MediumPanelHeight = floor(BigPanelHeight / 2);
+MediumPanelWidth = floor(BigPanelHeight / 2);
+MediumPanelHeight = MediumPanelWidth;
 SmallPanelHeight = floor(BigPanelHeight / 4);
 ScreenSize = get(groot, 'ScreenSize'); % size of displaying screen
 XSize = BigPanelWidth + MediumPanelWidth + 20; % width of figure
@@ -172,7 +172,8 @@ handles.TextPiezoZ = uicontrol('Parent', StageControlPanel, ...
     'Position', [BigPanelWidth-120, MediumPanelHeight-175, 110, 15], ...
     'TooltipString', 'Control z piezo with mousewheel');
 TopButtonPosition = ...
-    [5, MediumPanelHeight-210, 125, 25];
+    [floor(BigPanelWidth/2) - (3*125+10)/2, MediumPanelHeight-210, ...
+    125, 25];
 handles.ButtonLoadSample = uicontrol('Parent', StageControlPanel, ...
     'Style', 'pushbutton', 'String', 'Load Sample', ...
     'Position', TopButtonPosition, ...
