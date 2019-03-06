@@ -58,7 +58,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
-        CoverslipZPosition = 0.5; % relative pos. of coverslip to stage
+        CoverslipZPosition = -0.2; % relative pos. of coverslip to stage
         OnDuringFocus647 = 0; % flag indicates 647nm laser on for focusing
         OnDuringSequence647 = 0; % flag indicates 647nm on for sequence
         OnDuringFocus405 = 0; % flag indicates 405nm laser on for focusing
