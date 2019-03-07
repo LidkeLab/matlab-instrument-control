@@ -337,6 +337,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on();
                 pause(obj.LampWait);
+                obj.R3DObj.UseStackCorrelation=0; %for 3D Reg correlation
                 obj.R3DObj.align2imageFit();
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
@@ -352,6 +353,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on();
                 pause(obj.LampWait);
+                obj.R3DObj.UseStackCorrelation=0; %for 3D Reg correlation
                 obj.R3DObj.align2imageFit();
                 obj.Lamp850Obj.off();
             end
@@ -767,7 +769,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
                     
                     %set timer for IRcamera
-                    obj.TimerIRCamera=timer('StartDelay',.5);
+                    obj.TimerIRCamera=timer('StartDelay',.9);
                     obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
                     
                     %set timer for SyringePump
