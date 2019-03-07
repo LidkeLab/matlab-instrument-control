@@ -34,7 +34,7 @@ NumCells = numel(FileList);
 % Proceed with the data acquisition, looping through each of the cells
 % specified in the FileList.
 obj.Shutter.close(); % close shutter before the laser turns on
-obj.Laser647.setPower(obj.LaserPowerSequence);
+obj.Laser647.setPower(obj.LaserPowerSequence647);
 obj.Laser647.on();
 for nn = StartCell:NumCells
     % If AbortNow flag was set, do not continue.
@@ -72,10 +72,11 @@ for nn = StartCell:NumCells
     end
 end
 
-% Ensure the laser is not longer illuminating the sample.
+% Ensure the lasers are no longer illuminating the sample.
 obj.FlipMount.FilterIn(); % move ND filter into beam path
 obj.Shutter.close();
 obj.Laser647.off();
+obj.Laser405.off();
 
 % Publish the results if requested.
 if obj.PublishResults
@@ -85,5 +86,6 @@ if obj.PublishResults
         obj.SCMOSCalFilePath);
     obj.StatusString = '';
 end
+
 
 end

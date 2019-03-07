@@ -56,7 +56,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZStack_MaxDev=0.5;  % distance from current zposition where to start and end zstack (um)
         ZStack_Step=0.05;   % z step size for zstack acquisition (um)
         ZStack_Pos;         % z positions where a frame should be acquired in zstack (um)
-        TolMaxCorr = 0.9;   % min val. of max xcorr coeff. for convergence
+        ZStackMaxDevInitialReg = 1; % max. dev. in z for initial reg.
+        XYBorderPx = 10; % # of px. to remove from x and y borders.
+        TolMaxCorr = 0.8;   % min val. of max xcorr coeff. for convergence
         Tol_X=.01;          % max X shift to reach convergence(um)
         Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
@@ -68,6 +70,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZMaxAC;             % autocorrelations of zstack
         maxACmodel;
         UseStackCorrelation = 0; % use 3D stack correlation reg. method
+        MaxOffsetScaleIter = 2; % max # of scaling iter. for MaxOffset
         ErrorSignal = zeros(0, 3); % Error Signal [X Y Z] in microns
         ErrorSignalHistory = zeros(0, 3); % Error signal history in microns
         IsInitialRegistration = 0; % boolean: initial reg. or periodic reg.
@@ -327,6 +330,29 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.updateGui();
         end
         
+        function takeRefStack(obj)
+            % Takes a reference stack from -obj.ZStack_MaxDev to
+            % +obj.ZStack_MaxDev in steps of obj.ZStack_Step relative to
+            % the current focal plane.  The resulting z-stack will be
+            % stored as obj.ReferenceStack.
+
+            % If needed, change the exposure time of the camera.
+            if obj.ChangeExpTime
+                ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
+                obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
+            end
+            
+            % Collect the full size z-stack (which can be used for intiial
+            % registration) and store it in obj.ReferenceStack.
+            obj.collect_zstack(obj.ZStackMaxDevInitialReg);
+            obj.ReferenceStack = obj.ZStack;
+            
+            % Change to exposure time of the camera back to it's original
+            % value.
+            if obj.ChangeExpTime
+                obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
+            end
+        end        
        
         function c=showoverlay(obj)
             %showoverlay Shows aligned image on top of reference image
@@ -413,6 +439,14 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 end
                 
                 if obj.UseStackCorrelation
+                    % Ensure that the reference image is set to the central
+                    % image in the reference stack (this corresponds to the
+                    % focal plane of interest).
+                    FocalInd = 1 + obj.ZStackMaxDevInitialReg ...
+                        / obj.ZStack_Step;
+                    obj.Image_Reference = ...
+                        obj.ReferenceStack(:, :, FocalInd);
+                    
                     % Attempt to select an appropriate value of the
                     % MaxOffset parameter.
                     if iter == 0
@@ -453,16 +487,50 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         MaxOffset = [5; 5; 5];
                     end
                     
-                    % Acquire a z-stack for the current stage location.
-                    % NOTE: This stores the z-stack in the object property 
-                    %       obj.ZStack.
-                    obj.collect_zstack();
+                    % Collect a z-stack whose size depends on whether we
+                    % are performing an initial registration step or a
+                    % periodic re-registration step.
+                    if obj.IsInitialRegistration
+                        % Acquire a large z-stack for the current stage
+                        % location.
+                        % NOTE: This stores the z-stack in the object
+                        %       property obj.ZStack.
+                        obj.collect_zstack(obj.ZStackMaxDevInitialReg);
+                        
+                        % Define the indices of the full size reference
+                        % stack (for better code continuity with the else 
+                        % statement).
+                        ZStackRefInds = 1:size(obj.ZStack, 3);
+                    else
+                        % Acquire a small z-stack for the current stage
+                        % location.
+                        % NOTE: This stores the z-stack in the object
+                        %       property obj.ZStack.
+                        obj.collect_zstack(obj.ZStack_MaxDev);
+                        
+                        % Define the indices of the full size reference
+                        % stack which correspond to this smaller
+                        % sub-stack.
+                        StackSteps = obj.ZStack_MaxDev / obj.ZStack_Step;
+                        ZStackRefInds = FocalInd - StackSteps ...
+                            :FocalInd + StackSteps;
+                    end
+                    
+                    % Isolate the reference stack and the current stack of
+                    % interest, removing the boundaries in x and y to 
+                    % ensure only the images of interest are being 
+                    % compared. 
+                    RefStack = obj.ReferenceStack(...
+                        obj.XYBorderPx:end-obj.XYBorderPx, ...
+                        obj.XYBorderPx:end-obj.XYBorderPx, ZStackRefInds);
+                    CurrentStack = obj.ZStack(...
+                        obj.XYBorderPx:end-obj.XYBorderPx, ...
+                        obj.XYBorderPx:end-obj.XYBorderPx, :);
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
                     [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] ...
-                        = obj.findStackOffset(...
-                        obj.ReferenceStack, obj.ZStack, ...
+                        = obj.findStackOffset(RefStack, CurrentStack, ...
                         MaxOffset, 'FFT', '1D');
                     
                     % If the sub-pixel prediction exceeds MaxOffset, 
@@ -474,23 +542,29 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     %       the maximum possible offset along one of the
                     %       dimensions.
                     MaxOffsetInput = [0; 0; 0]; % initialize
-                    SelectBit = abs(SubPixelOffset) > MaxOffset;                   MaxOffsetInput = [0; 0; 0]; % initializer
+                    OffsetScaleIter = 0; % initialize
+                    SelectBit = abs(SubPixelOffset) > MaxOffset;
                     while any(SelectBit) ...
-                            && ~all(MaxOffsetInput == MaxOffset)
+                            && ~all(MaxOffsetInput == MaxOffset) ...
+                            && (OffsetScaleIter < obj.MaxOffsetScaleIter)
+                        
+                        % Increment the counter.
+                        OffsetScaleIter = OffsetScaleIter + 1; 
+                        
                         % The SubPixelOffset predicts a peak in the
                         % xcorr which is beyond the offset checked by
                         % findStackOffset(), so we should increase the
                         % input offset and re-try before proceeding
                         % with the rest of this registration iteration.
-                        MaxOffsetInput = SelectBit ...
-                            .* ceil((abs(SubPixelOffset))) ...
+                        MaxOffsetInput = ...
+                            SelectBit .* ceil((abs(SubPixelOffset))) ...
                             + ~SelectBit .* MaxOffset;
                         
                         % Determine a predicted offset between the two
                         % stacks.
                         [PixelOffset, SubPixelOffset, MaxCorr, ...
                             MaxOffset] = obj.findStackOffset(...
-                            obj.ReferenceStack, obj.ZStack, ...
+                            RefStack, CurrentStack, ...
                             MaxOffsetInput, 'FFT', '1D');
                         
                         % Re-compute the SelectBit.
@@ -576,8 +650,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 
                 %show overlay
                 obj.Image_Current=obj.capture;
-                im=obj.Image_Reference(10:end-10,10:end-10);
-                zs=obj.Image_Current(10:end-10,10:end-10);
+                im=obj.Image_Reference(...
+                    obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx);
+                zs=obj.Image_Current(...
+                    obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx);
                 o=joinchannels('RGB',stretch(im),stretch(zs));
                 h=dipshow(1234,o);
                 diptruesize(h,'tight');
@@ -605,19 +683,26 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
         end
         
-        function collect_zstack(obj)
+        function collect_zstack(obj, ZStackMaxDev, ZStackStep)
             % collect_zstack Collects Zstack 
+            
+            % Set defaults if not passed as inputs to this method.
+            if ~exist('ZStackMaxDev', 'var')
+                ZStackMaxDev = obj.ZStack_MaxDev; % microns
+            end
+            if ~exist('ZStackStep', 'var')
+                ZStackStep = obj.ZStack_Step; % microns
+            end
             
             % get current position of stage
             XYZ=obj.StageObj.Position;
             X_Current=XYZ(1);
             Y_Current=XYZ(2);
             Z_Current=XYZ(3);
-                      
-            Zmax=obj.ZStack_MaxDev;     %micron
-            Zstep=obj.ZStack_Step;      %micron
+
         
-            obj.ZStack_Pos=(Z_Current-Zmax:Zstep:Z_Current+Zmax);
+            obj.ZStack_Pos = ...
+                (Z_Current-ZStackMaxDev:ZStackStep:Z_Current+ZStackMaxDev);
             N=length(obj.ZStack_Pos);
             obj.ZStack=[];
             
@@ -643,12 +728,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.CameraObj.AcquisitionType='capture';
             obj.CameraObj.setup_acquisition();
                         
-            % turn lamp on
-            %obj.turnLampOn();
-%             % open shutter if needed
-%             if obj.CamShutter
-%                 obj.CameraObj.setShutter(1);
-%             end
             % acquire zstack
             for nn=1:N
                 if nn==1
@@ -660,8 +739,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 NumChar = fprintf(...
                     'Acquiring z-stack image index %i out of %i\n', nn, N);
                 
-                obj.StageObj.setPosition([X_Current,Y_Current,obj.ZStack_Pos(nn)]);
-                obj.ZStack(:,:,nn)=single(obj.CameraObj.start_capture);
+                obj.StageObj.setPosition(...
+                    [X_Current, Y_Current, obj.ZStack_Pos(nn)]);
+                obj.ZStack(:, :, nn)=single(obj.CameraObj.start_capture);
                 
                 % Remove the characters identifying stack index and stack
                 % number from command line so that they can be updated.  
@@ -677,9 +757,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             if obj.CamShutter
 %                 obj.CameraObj.setShutter(0);
 %             end
-            % turn lamp off
-            %obj.turnLampOff();
-            
+
             %change back EMgain, shutter and exposure time if needed
 %             if obj.CamShutter
 %                 CamSet.ManualShutter.Bit=0;
@@ -710,13 +788,17 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 error('MIC_Reg3DTrans:noOrientMatrix', 'no OrientMatrix given in obj.OrientMatrix, please calibrate OrientMatrix first. Run obj.calibrateOrientation')
             end
             %cut edges
-            Ref=dip_image(obj.Image_Reference(10:end-10,10:end-10));
+            Ref=dip_image(obj.Image_Reference(...
+                    obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx));
             Ref=Ref-mean(Ref);
             Ref=Ref/std(Ref(:));
 
             %get image at current z-position
             Current=obj.capture_single;
-            Current=dip_image(Current(10:end-10,10:end-10)); 
+            Current=dip_image(Current(...
+                    obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx));
             Current=Current-mean(Current);
             Current=Current/std(Current(:));
                 
@@ -731,14 +813,22 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             %   reference image
             
             %collect z-data stack
-            obj.collect_zstack();
+            if obj.IsInitialRegistration
+                % Collect a larger z-stack if the IsInitialRegistration
+                % flag is set.
+                obj.collect_zstack(obj.ZStackMaxDevInitialReg);
+            else
+                obj.collect_zstack(obj.ZStack_MaxDev);
+            end          
             
             %whiten data to give zero mean and unit variance
-            Ref=obj.Image_Reference(10:end-10,10:end-10);
+            Ref=obj.Image_Reference(obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx);
             Ref=Ref-mean(Ref(:));
             Ref=Ref/std(Ref(:));
             zs=obj.ZStack;
-            zs=zs(10:end-10,10:end-10,:);
+            zs=zs(obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx, :);
             N=size(zs,3);
             n=numel(Ref);
             for ii=1:N
@@ -941,7 +1031,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 
         [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
             findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
-            FitType, FitOffset)
+            FitType, FitOffset, BinaryMask, PlotFlag, UseGPU)
     
         function State = unitTest(camObj,stageObj,lampObj)
             %unitTest Tests all functionality of MIC_Reg3DTrans

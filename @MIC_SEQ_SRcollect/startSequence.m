@@ -22,9 +22,10 @@ DateString = [num2str(CurrentTime(1)), '-', ...
     num2str(round(CurrentTime(6)))];
 if obj.IsBleach
     % Indicate that this is a photobleaching sequence if necessary.
-    FileName = sprintf('Data_%s_bleaching.h5', DateString);
+    FileName = sprintf('Data_%s_bleaching%s.h5', ...
+        DateString, obj.FilenameTag);
 else
-    FileName = sprintf('Data_%s.h5', DateString);
+    FileName = sprintf('Data_%s%s.h5', DateString, obj.FilenameTag);
 end
 FileName = fullfile(DirectoryName, FileName);
 
@@ -54,8 +55,8 @@ obj.StageStepper.moveToPosition(3, ...
 obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 
 % Attempt to align the cell to the reference image in brightfield.
-obj.StatusString = ...
-    'Attempting initial brightfield alignment of cell...';
+obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+    'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
 obj.Lamp660.setPower(obj.Lamp660Power);
 pause(obj.LampWait);
 obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
@@ -109,35 +110,35 @@ if obj.UseActiveReg
 end
 
 % Setup the main sCMOS to acquire the sequence.
-obj.StatusString = 'Preparing for acquisition...';
+obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+    'Preparing for acquisition...'], RefStruct.CellIdx);
 obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
 obj.CameraSCMOS.SequenceLength = obj.NumberOfFrames;
 obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
 obj.CameraSCMOS.AcquisitionType = 'sequence';
 obj.CameraSCMOS.setup_acquisition();
 
-% Send the 647nm laser to the sample.  If requested, also send the
-% 405nm laser to the sample.
+% Prepare the lasers for the sequence based on the appropriate object
+% properties.
 obj.FlipMount.FilterOut(); % removes ND filter from optical path
-if obj.Use405
-    obj.Laser405.setPower(obj.LaserPower405Activate);
-end
-if obj.IsBleach
-    obj.Laser405.setPower(obj.LaserPower405Bleach);
-end
+obj.Laser647.setPower(obj.LaserPowerSequence647);
+obj.Laser405.setPower(obj.LaserPowerSequence405);
 
 % Begin the acquisition, performing a pre-activation step if requested.
 if obj.UsePreActivation
     % Update the status string to indicate that the pre-activation is
     % happening.
-    obj.StatusString = 'Pre-activating fluorophores...';
+    obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+        'Pre-activating fluorophores...'], RefStruct.CellIdx);
     
-    % Turn on the 405nm laser (if needed) and open the shutter to
-    % allow the 647nm laser to reach the sample.
-    if obj.Use405
+    % Allow the lasers to reach the sample as requested by the set flags.
+    if obj.OnDuringSequence405
         obj.Laser405.on();
     end
-    obj.Shutter.open();
+    if obj.OnDuringSequence647
+        % Only open the shutter if requested by the set flag.
+        obj.Shutter.open();
+    end
     
     % Pause for the prescribed amount of time to allow for
     % pre-activation, first ensuring the user hasn't disabled the
@@ -148,10 +149,7 @@ if obj.UsePreActivation
     % Turn off the 405nm laser (if used) and close the shutter to
     % prevent the 647nm laser from reaching the sample.
     obj.Shutter.close();
-    if obj.Use405
-        % Turn off the 405nm laser.
-        obj.Laser405.off();
-    end
+    obj.Laser405.off();
     
     % Restore the previous pause setting (in case this was important
     % elsewhere/to the user).
@@ -172,7 +170,9 @@ for ii = 1:obj.NumberOfSequences
     % sequences have been collected.
     if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
             && ~(ii == 1)
-        obj.StatusString = 'Attempting periodic registration...';
+        obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
+            'Attempting periodic registration...'], ...
+            RefStruct.CellIdx, ii);
         obj.Lamp660.setPower(obj.Lamp660Power);
         pause(obj.LampWait);
         obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
@@ -191,15 +191,19 @@ for ii = 1:obj.NumberOfSequences
         obj.Lamp660.setPower(0);
     end
     
-    % Turn on the 405nm laser (if needed) and open the shutter to
-    % allow the 647nm laser to reach the sample.
-    if obj.Use405
+    % Allow the lasers to reach the sample as requested by the set flags.
+    if obj.OnDuringSequence405
         obj.Laser405.on();
     end
-    obj.Shutter.open();
+    if obj.OnDuringSequence647
+        % Only open the shutter if requested by the set flag.
+        obj.Shutter.open();
+    end
     
     % Collect the sequence.
-    obj.StatusString = sprintf('Acquiring data sequence %i..........', ii);
+    obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
+            'Acquiring data...'], ...
+            RefStruct.CellIdx, ii);
     obj.CameraSCMOS.AcquisitionType = 'sequence';
     obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
     obj.CameraSCMOS.setup_acquisition();
@@ -220,8 +224,9 @@ for ii = 1:obj.NumberOfSequences
             MIC_H5.createGroup(FileH5, SequenceName);
             
             % Save the exportState() exportables.
-            obj.StatusString = ['Exporting object Data and ', ...
-                'Children with exportState()...'];
+            obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
+                'Exporting object Data and Children...'], ...
+                RefStruct.CellIdx, ii);
             fprintf('Saving exportables from exportState().........\n')
             obj.save2hdf5(FileH5, SequenceName);
             fprintf('Exportables from exportState() have been saved\n')
@@ -235,10 +240,7 @@ for ii = 1:obj.NumberOfSequences
             error('StartSequence:: unknown SaveFileType')
     end
     obj.Shutter.close(); % block 647nm from reaching sample
-    if obj.Use405
-        % Turn off the 405nm laser.
-        obj.Laser405.off();
-    end
+    obj.Laser405.off(); % ensure the 405nm is turned off
 end
 obj.StatusString = '';
 fprintf('Data collection complete\n')
@@ -246,10 +248,8 @@ fprintf('Data collection complete\n')
 % Ensure that the lasers are not reaching the sample.
 obj.Shutter.close(); % close shutter instead of turning off the laser
 obj.FlipMount.FilterIn();
-if obj.Use405
-    obj.Laser405.setPower(0);
-    obj.Laser405.off();
-end
+obj.Laser405.setPower(0);
+obj.Laser405.off();
 
 % If it was used, end the active stabilization process.
 if obj.UseActiveReg
@@ -273,5 +273,6 @@ switch obj.SaveFileType
     otherwise
         error('StartSequence:: unknown SaveFileType')
 end
+
 
 end
