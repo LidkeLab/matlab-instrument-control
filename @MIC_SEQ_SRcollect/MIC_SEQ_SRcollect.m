@@ -336,17 +336,18 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Setup the needed laser(s).
             obj.Laser647 = MIC_MPBLaser();
             obj.Laser405 = MIC_TCubeLaserDiode('64841724', ...
-                'Power', 11.84, 2.49, 10);
+                'Power', 32.25, 20.05, 10);
             % Usage: 
             % TLD = MIC_TCubeLaserDiode(SerialNo, Mode, ...
             %                           MaxPower, WperA, TIARange)
-            % Max power was found to be 11.84 mA when driving the diode at
-            % 80% of it's maximum rated current (80.14 mA, ~80 mA).  WperA
-            % was found by reading the photodiode current at 1-11 mW laser
-            % output in steps of 1 mW and fitting a line to the result,
-            % taking the slope to be WperA.  The TIARange was set to the 
-            % photodiode setting as set by the dip switches on the laser
-            % driver controller.  See DS lab notes 9/10/18.
+            % Max power was set to 32.25 mW (~80% of max), corresponding
+            % to a current of 32.25 mA.  WperA was found by measuring the 
+            % output power for input currents of 34 mA to 64 mA in 10 mA 
+            % steps, fitting a line to the plot of PD current vs. power, 
+            % and taking the slope. The TIARange was set to the photodiode
+            % setting as set  by the dip switches on the laser driver 
+            % controller.  
+            % See DS lab notes 3/8/19.
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
