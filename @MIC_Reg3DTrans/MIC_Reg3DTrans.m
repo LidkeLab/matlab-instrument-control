@@ -70,6 +70,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZMaxAC;             % autocorrelations of zstack
         maxACmodel;
         UseStackCorrelation = 0; % use 3D stack correlation reg. method
+        UseGPU = 1; % if UseStackCorrelation, use GPU for findStackOffset
         MaxOffsetScaleIter = 2; % max # of scaling iter. for MaxOffset
         ErrorSignal = zeros(0, 3); % Error Signal [X Y Z] in microns
         ErrorSignalHistory = zeros(0, 3); % Error signal history in microns
@@ -531,7 +532,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % between the two stacks.
                     [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] ...
                         = obj.findStackOffset(RefStack, CurrentStack, ...
-                        MaxOffset, 'FFT', '1D');
+                        MaxOffset, 'FFT', '1D', [], [], [], obj.UseGPU);
                     
                     % If the sub-pixel prediction exceeds MaxOffset, 
                     % re-try until this is no longer true or when MaxOffset
@@ -564,8 +565,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         % stacks.
                         [PixelOffset, SubPixelOffset, MaxCorr, ...
                             MaxOffset] = obj.findStackOffset(...
-                            RefStack, CurrentStack, ...
-                            MaxOffsetInput, 'FFT', '1D');
+                            RefStack, CurrentStack, MaxOffsetInput, ...
+                            'FFT', '1D', [], [], [], obj.UseGPU);
                         
                         % Re-compute the SelectBit.
                         SelectBit = abs(SubPixelOffset) > MaxOffset;
