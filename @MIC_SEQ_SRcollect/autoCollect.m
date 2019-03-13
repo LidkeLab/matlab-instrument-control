@@ -80,6 +80,11 @@ obj.Laser405.off();
 
 % Publish the results if requested.
 if obj.PublishResults
+    % Attempt to reset/clear the memory on the default GPU before
+    % proceeding with the analysis.
+    reset(gpuDevice(1));
+    
+    % Proceed with the results publishing attempt.
     obj.StatusString = 'Publishing results...';
     SMA_Publish(fullfile(obj.TopDir, obj.CoverslipName), ...
         obj.SCMOSCalFilePath);
