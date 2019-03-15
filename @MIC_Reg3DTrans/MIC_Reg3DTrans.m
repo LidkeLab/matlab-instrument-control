@@ -996,6 +996,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             if ~isempty(obj.ReferenceStack)
                 Data.ReferenceStack = obj.ReferenceStack;
             end  
+            if ~isempty(obj.ZStack)
+                Data.CurrentStack = obj.ZStack; 
+            end
             if ~isempty(obj.ErrorSignal)
                 Data.ErrorSignal = obj.ErrorSignal;
             end
