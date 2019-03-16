@@ -59,16 +59,16 @@ for nn = StartCell:NumCells
     % Begin the acquisition for the current cell.
     obj.startSequence(RefStruct, obj.LabelIdx);
     
-    % If this is the first cell of the acquisition, update the coverslip
-    % offset property to reflect changes determined during the collection
-    % process.
+    % Update the CoverSlipOffset to account for the observed drift on the
+    % previous cell.
     if nn == StartCell
-        XStepperPosition = Kinesis_SBC_GetPosition('70850323', 2);
-        YStepperPosition = Kinesis_SBC_GetPosition('70850323', 1);
-        ZStepperPosition = Kinesis_SBC_GetPosition('70850323', 3);
-        StepperPosition = [XStepperPosition, YStepperPosition, ...
-            ZStepperPosition];
-        obj.CoverSlipOffset = StepperPosition - RefStruct.StepperPos;
+        % Ensure the error signal in AlignReg is set to its default, just
+        % in case it was changed (e.g. if an acquisition was previously 
+        % performed and the class didn't get cleared).
+        obj.AlignReg.ErrorSignalHistory = zeros(0, 3); 
+    else
+        obj.CoverSlipOffset = obj.CoverSlipOffset ...
+            - sum(obj.AlignReg.ErrorSignalHistory) * 1e-3; % convert to mm
     end
 end
 
