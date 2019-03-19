@@ -22,10 +22,10 @@ DateString = [num2str(CurrentTime(1)), '-', ...
     num2str(round(CurrentTime(6)))];
 if obj.IsBleach
     % Indicate that this is a photobleaching sequence if necessary.
-    FileName = sprintf('Data_%s_bleaching%s.h5', ...
+    FileName = sprintf('Data_%s_bleaching_%s.h5', ...
         DateString, obj.FilenameTag);
 else
-    FileName = sprintf('Data_%s%s.h5', DateString, obj.FilenameTag);
+    FileName = sprintf('Data_%s_%s.h5', DateString, obj.FilenameTag);
 end
 FileName = fullfile(DirectoryName, FileName);
 
