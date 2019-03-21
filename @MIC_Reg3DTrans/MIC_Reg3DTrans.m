@@ -46,6 +46,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         
         % Other properties
         PixelSize;          % image pixel size (um)
+        CameraTriggerMode = 'internal'; % 'internal', 'external', 'software'
         OrientMatrix;       % unitary matrix to show orientation between Camera and Stage([a b;c d])
         AbortNow=0;         % flag for aborting the alignment
         RefImageFile;       % full path to reference image
@@ -725,11 +726,21 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             if obj.ChangeEMgain || obj.CamShutter
 %                 obj.CameraObj.setCamProperties(CamSet);
 %             end
-            % setup camera
-            obj.CameraObj.AcquisitionType='capture';
+                        
+            % Setup the camera based on the TriggerMode. 
+            if strcmpi(obj.CameraTriggerMode, 'software')
+                % When using a software trigger, we'll actually setup the
+                % camera for a 'sequence' instead of a 'capture'. 
+                % NOTE: we'll still use the exposure time as set for a
+                %       'capture' since the user will likely not want to
+                %       change the exposure time based on the trigger mode. 
+                obj.CameraObj.AcquisitionType = 'sequence'; 
+            else
+                obj.CameraObj.AcquisitionType = 'capture';
+            end
             obj.CameraObj.setup_acquisition();
                         
-            % acquire zstack
+            % Collect the z-stack
             for nn=1:N
                 if nn==1
                     pause(0.5);
@@ -740,9 +751,19 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 NumChar = fprintf(...
                     'Acquiring z-stack image index %i out of %i\n', nn, N);
                 
+                % Move the stage and take the image. 
                 obj.StageObj.setPosition(...
                     [X_Current, Y_Current, obj.ZStack_Pos(nn)]);
-                obj.ZStack(:, :, nn)=single(obj.CameraObj.start_capture);
+                if strcmpi(obj.CameraTriggerMode, 'software')
+                    % When TriggerMode is 'software', we're doing a
+                    % triggered capture sequence and must fire the trigger
+                    % and collect the stack at the end.
+                    obj.CameraObj.fireTrigger(); 
+                else
+                    % Capture the image as usual. 
+                    obj.ZStack(:, :, nn) = single(...
+                        obj.CameraObj.start_capture);
+                end
                 
                 % Remove the characters identifying stack index and stack
                 % number from command line so that they can be updated.  
@@ -754,6 +775,15 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     fprintf('\b');
                 end
             end
+            
+            % If a software trigger was used to perform a fast acquisition,
+            % we need to collect the stack now that all of the desired
+            % triggers were fired.
+            if strcmpi(obj.CameraTriggerMode, 'software')
+                obj.ZStack = single(...
+                    obj.CameraObj.FinishTriggeredCapture(N));
+            end
+            
 %             % close shutter if needed
 %             if obj.CamShutter
 %                 obj.CameraObj.setShutter(0);
