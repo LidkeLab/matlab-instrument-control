@@ -734,7 +734,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 % NOTE: we'll still use the exposure time as set for a
                 %       'capture' since the user will likely not want to
                 %       change the exposure time based on the trigger mode. 
-                obj.CameraObj.AcquisitionType = 'sequence'; 
+                obj.CameraObj.AcquisitionType = 'sequence';
+                
+                % Change the sequence length property of the camera, saving
+                % the old value so that we can undo this change later on.
+                PreviousSequenceLength = obj.CameraObj.SequenceLength; 
+                obj.CameraObj.SequenceLength = N; % change back later on
             else
                 obj.CameraObj.AcquisitionType = 'capture';
             end
@@ -778,10 +783,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             % If a software trigger was used to perform a fast acquisition,
             % we need to collect the stack now that all of the desired
-            % triggers were fired.
+            % triggers were fired.  Also, we need to 'clean up' our changes
+            % made to camera parameters (e.g. the length of a sequence). 
             if strcmpi(obj.CameraTriggerMode, 'software')
                 obj.ZStack = single(...
                     obj.CameraObj.FinishTriggeredCapture(N));
+                obj.CameraObj.SequenceLength = PreviousSequenceLength;
             end
             
 %             % close shutter if needed
