@@ -107,7 +107,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.ExpTime_Sequence=single(0.004);
             
             obj.CameraSetting.Binning.Bit=obj.Binning;
-            obj.CameraSetting.TriggerMode.Bit=obj.TriggerMode;
+%             obj.CameraSetting.TriggerMode.Bit=obj.TriggerMode;
             obj.CameraSetting.ScanMode.Bit=obj.ScanMode;
             obj.CameraSetting.DefectCorrection.Bit=obj.DefectCorrection;
             
@@ -187,12 +187,10 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                         % Refer to GuiDialog to get right Bit value.
                         obj.CameraSetting.TriggerMode.Bit = ...
                             obj.GuiDialog.TriggerMode.Bit(TriggerModeIdx);
-                        obj.TriggerMode = ...
-                            obj.CameraSetting.TriggerMode.Bit;
                         
                         % Apply the trigger mode to the camera. 
                         DcamSetTriggerMode(obj.CameraHandle, ...
-                            obj.TriggerMode);
+                            obj.CameraSetting.TriggerMode.Bit);
                     end
             end
             
