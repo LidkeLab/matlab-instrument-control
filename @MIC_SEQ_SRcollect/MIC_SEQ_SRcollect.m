@@ -391,6 +391,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
             obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
+            obj.AlignReg.CameraTriggerMode = 'software'; 
+            obj.AlignReg.StageSettlingTime = 0;
             obj.AlignReg.Tol_X = obj.Reg3DXTol;
             obj.AlignReg.Tol_Y = obj.Reg3DZTol;
             obj.AlignReg.Tol_Z = obj.Reg3DZTol;
