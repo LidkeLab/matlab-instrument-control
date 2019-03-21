@@ -180,9 +180,8 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.CameraSetting.TriggerMode.Ind = TriggerModeIdx;
             % need to refer to GuiDialog to get right Bit value
             obj.CameraSetting.TriggerMode.Bit = obj.GuiDialog.TriggerMode.Bit(TriggerModeIdx);
-            obj.TriggerMode = obj.CameraSetting.TriggerMode.Bit;
             % apply trigger mode
-            DcamSetTriggerMode(obj.CameraHandle,obj.TriggerMode);
+            DcamSetTriggerMode(obj.CameraHandle,obj.CameraSetting.TriggerMode.Bit);
             
             % start capture so triggering can start
             DcamCapture(obj.CameraHandle);
@@ -393,9 +392,8 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.CameraSetting.TriggerMode.Ind = TriggerModeIdx;
             % need to refer to GuiDialog to get right Bit value
             obj.CameraSetting.TriggerMode.Bit = obj.GuiDialog.TriggerMode.Bit(TriggerModeIdx);
-            obj.TriggerMode = obj.CameraSetting.TriggerMode.Bit;
             % apply trigger mode
-            DcamSetTriggerMode(obj.CameraHandle,obj.TriggerMode);
+            DcamSetTriggerMode(obj.CameraHandle,obj.CameraSetting.TriggerMode.Bit);
         end
         
         function out=take_sequence(obj)
@@ -515,7 +513,19 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             end
             DcamSetBinning(obj.CameraHandle,obj.Binning);
             DcamSetScanMode(obj.CameraHandle,obj.ScanMode);
-            DcamSetTriggerMode(obj.CameraHandle,obj.TriggerMode);
+            % Determine the appropriate TriggerMode bit given the specified
+            % TriggerMode.
+            switch obj.TriggerMode
+                case 'internal'
+                    TriggerModeBit = 1;
+                case 'software'
+                    TriggerModeBit = 4;
+                otherwise
+                    % Not sure what the bit for external is, this ought to
+                    % be changed later on...
+                    TriggerModeBit = 1;
+            end
+            DcamSetTriggerMode(obj.CameraHandle, TriggerModeBit);
             DCAMSetDefectCorrection(obj.CameraHandle,obj.DefectCorrection);
         end
     
