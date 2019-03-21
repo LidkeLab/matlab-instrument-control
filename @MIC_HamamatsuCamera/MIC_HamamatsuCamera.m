@@ -142,12 +142,58 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                     [currentET]=DcamSetExposureTime(obj.CameraHandle,obj.ExpTime_Capture);
                     DcamCaptureSettings(obj.CameraHandle,captureMode,TotalFrame);
                     obj.ExpTime_Capture=currentET;
-                case 'sequence'     %Kinetic Series
-                    captureMode=0; %snap
-                    [currentET]=DcamSetExposureTime(obj.CameraHandle,obj.ExpTime_Sequence);
-                    % allocate memory for capturing data
-                    DcamCaptureSettings(obj.CameraHandle,captureMode,obj.SequenceLength);
-                    obj.ExpTime_Sequence=currentET;
+                case 'sequence'     %Kinetic Series           
+                    % Set the exposure time of the camera. 
+                    [currentET] = DcamSetExposureTime(obj.CameraHandle, ...
+                        obj.ExpTime_Sequence);
+                    obj.ExpTime_Sequence = currentET;
+                    
+                    % Allocate memory for the sequence.
+                    % NOTE: The above comment was a remnant of the previous
+                    %       version of this code and I'm not sure if it's
+                    %       accurate.  I'm leaving the comment just in
+                    %       case. DS 3/21/19
+                    captureMode = 0;
+                    DcamCaptureSettings(obj.CameraHandle, ...
+                        captureMode, obj.SequenceLength);
+                                            
+                    % Based on the TriggerMode property, decide if further
+                    % action is needed to setup the sequence. 
+                    if strcmpi(obj.TriggerMode, 'software')
+                        % When TriggerMode is set to 'software', we want to
+                        % prepare for a 'fast' acquisition in which we send
+                        % software triggers to the camera through MATLAB.
+                        
+                        % I have no idea what the following code is trying
+                        % to do, but I'm leaving it to avoid breaking
+                        % things... Maybe it's just forcing the camera to 
+                        % be prepared? DS 3/21/19.
+                        Status = obj.HtsuGetStatus();
+                        if strcmp(Status, 'Ready') ...
+                                || strcmp(Status, 'Busy')
+                            obj.abort();
+                        end
+                        
+                        % Ensure that the camera is ready to proceed.
+                        Status = obj.HtsuGetStatus();
+                        if strcmp(Status, 'Ready')
+                            obj.ReadyForAcq = 1;
+                        end
+                        
+                        % Set the TriggerMode on the camera as appropriate.
+                        TriggerModeIdx = 4; % 4 = Software mode
+                        obj.CameraSetting.TriggerMode.Ind = TriggerModeIdx;
+                        
+                        % Refer to GuiDialog to get right Bit value.
+                        obj.CameraSetting.TriggerMode.Bit = ...
+                            obj.GuiDialog.TriggerMode.Bit(TriggerModeIdx);
+                        obj.TriggerMode = ...
+                            obj.CameraSetting.TriggerMode.Bit;
+                        
+                        % Apply the trigger mode to the camera. 
+                        DcamSetTriggerMode(obj.CameraHandle, ...
+                            obj.TriggerMode);
+                    end
             end
             
             status=obj.HtsuGetStatus;
@@ -194,18 +240,22 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         function out=start_capture(obj)
             %obj.AcquisitionType='capture';
             obj.abort;
-             obj.AcquisitionType='capture';
+            obj.AcquisitionType='capture';
 %             status=obj.HtsuGetStatus;
 %             if strcmp(status,'Ready')||strcmp(status,'Busy')
 %                 obj.abort;
 %             end
-             obj.setup_acquisition;
+
+            % Call the setup_acquisition method, but do so 'quietly' i.e.
+            % prevent the method from displaying anything in the Command
+            % Window.
+            evalc('obj.setup_acquisition()');
            
             obj.AbortNow=1;
             DcamCapture(obj.CameraHandle);
-            out=obj.getdata;
-%             dipshow(out);
-            obj.abort;
+            out=obj.getdata();
+%             obj.displaylastimage();
+            obj.abort();
             obj.AbortNow=0;
             
             if obj.KeepData
@@ -325,48 +375,59 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             end
         end
         
-        function out=start_sequence(obj)
-            %obj.AcquisitionType='sequence';
-            obj.abort;
-            obj.AcquisitionType='sequence';
-%             status=obj.HtsuGetStatus;
-%             if strcmp(status,'Ready')||strcmp(status,'Busy')
-%                 obj.abort;
-%             end
-            obj.setup_acquisition;
+        function out = start_sequence(obj)
+            % Prepare the camera to collect the sequence. 
+            obj.abort();
+            obj.AcquisitionType = 'sequence';
+            obj.setup_acquisition();
+            obj.AbortNow = 0;
             
-            obj.AbortNow=0;
+            % Start the capture (what the camera does with this command
+            % will depend on the TriggerMode). 
             DcamCapture(obj.CameraHandle);
             
-            Camstatus=obj.HtsuGetStatus;
-            while strcmp(Camstatus,'Busy')
+            % Determine how to proceed based on the TriggerMode, i.e. if
+            % TriggerMode = 'software', we just want to tell the camera to
+            % await the trigger and then return to the code that called
+            % start_sequence().
+            if strcmpi(obj.TriggerMode, 'software')
+                % For a software trigger, we just need to exit this method
+                % and return control to the invoking function.
+                return
+            else
+                % If the TriggerMode isn't software, we'll assume we can
+                % just proceed as normal (this will not work as needed for
+                % TriggerMode = 'external'). 
+                Camstatus=obj.HtsuGetStatus();
+                while strcmp(Camstatus,'Busy')
+                    if obj.AbortNow
+                        obj.AbortNow=0;
+                        out=[];
+                        break;
+                    end
+                    obj.displaylastimage();
+                    Camstatus=obj.HtsuGetStatus();
+                end
+                
                 if obj.AbortNow
+                    obj.abort();
                     obj.AbortNow=0;
                     out=[];
-                    break;
+                    return;
                 end
-                obj.displaylastimage;
-                Camstatus=obj.HtsuGetStatus;
-            end
-            
-            if obj.AbortNow
-                obj.abort;
-                obj.AbortNow=0;
-                out=[];
-                return;
-            end
-            
-            out=obj.getdata;
-             
-            if obj.KeepData
-                obj.Data=out;
-            end
-            
-            switch obj.ReturnType
-                case 'dipimage'
-                    out=dip_image(out,'uint16');
-                case 'matlab'
-                    %already in uint16
+                
+                out=obj.getdata();
+                
+                if obj.KeepData
+                    obj.Data=out;
+                end
+                
+                switch obj.ReturnType
+                    case 'dipimage'
+                        out=dip_image(out,'uint16');
+                    case 'matlab'
+                        %already in uint16
+                end
             end
         end
         
