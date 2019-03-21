@@ -579,12 +579,12 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                     TriggerModeBit = 1;
                 case 'software'
                     TriggerModeBit = 4;
-                otherwise
+                case 'external'
                     % Not sure what the bit for external is, this ought to
                     % be changed later on...
-                    TriggerModeBit = 1;
+                    TriggerModeBit = 4;
             end
-            DcamSetTriggerMode(obj.CameraHandle, TriggerModeBit);
+            DcamSetTriggerMode(obj.CameraHandle, int32(TriggerModeBit));
             DCAMSetDefectCorrection(obj.CameraHandle,obj.DefectCorrection);
         end
     
