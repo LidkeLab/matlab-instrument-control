@@ -47,6 +47,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         % Other properties
         PixelSize;          % image pixel size (um)
         CameraTriggerMode = 'internal'; % 'internal', 'external', 'software'
+        Stage
         OrientMatrix;       % unitary matrix to show orientation between Camera and Stage([a b;c d])
         AbortNow=0;         % flag for aborting the alignment
         RefImageFile;       % full path to reference image
@@ -59,7 +60,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZStack_Pos;         % z positions where a frame should be acquired in zstack (um)
         ZStackMaxDevInitialReg = 1; % max. dev. in z for initial reg.
         XYBorderPx = 10; % # of px. to remove from x and y borders.
-        TolMaxCorr = 0.8;   % min val. of max xcorr coeff. for convergence
+        StageSettlingTime = 0; % time for stage to settle after moving (s)
+        TolMaxCorr = 0.5;   % min val. of max xcorr coeff. for convergence
         Tol_X=.01;          % max X shift to reach convergence(um)
         Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
@@ -747,7 +749,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         
             % Collect the z-stack
             for nn=1:N
-                if nn==1
+                % Add a short pause to give misc. system components time to
+                % settle. 
+                if nn == 1
                     pause(0.5);
                 end
                 
@@ -756,9 +760,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 NumChar = fprintf(...
                     'Acquiring z-stack image index %i out of %i\n', nn, N);
                 
-                % Move the stage and take the image. 
+                % Move the stage and allow it to settle (if needed).
                 obj.StageObj.setPosition(...
                     [X_Current, Y_Current, obj.ZStack_Pos(nn)]);
+                pause(obj.StageSettlingTime);
+                    
+                 % Capture an image at the current stage location.
                 if strcmpi(obj.CameraTriggerMode, 'software')
                     % When TriggerMode is 'software', we're doing a
                     % triggered capture sequence and must fire the trigger
