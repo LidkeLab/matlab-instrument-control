@@ -42,7 +42,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         SequenceLength=1;   %   Kinetic Series length
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
         ScanMode;           %   scan mode for Hamamatsu sCMOS camera
-        TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
+        TriggerMode = 'internal'; %   trigger mode for Hamamatsu sCMOS
         TriggerModeStruct;  %   struct. containing bit and ind for trigger
         DefectCorrection;   %   defect correction  for Hamamatsu sCMOS camera
         GuiDialog;
@@ -52,6 +52,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         
         function obj=MIC_HamamatsuCamera() %constructor
             obj = obj@MIC_Camera_Abstract(~nargout);
+            disp('test')
         end
         
         function delete(obj) %destructor
@@ -109,12 +110,13 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.ExpTime_Sequence=single(0.004);
             
             obj.CameraSetting.Binning.Bit=obj.Binning;
-            obj.CameraSetting.TriggerMode.Bit=obj.TriggerModeStruct.Bit;
+            obj.CameraSetting.TriggerModeStruct.Bit = ...
+                obj.TriggerModeStruct.Bit;
             obj.CameraSetting.ScanMode.Bit=obj.ScanMode;
             obj.CameraSetting.DefectCorrection.Bit=obj.DefectCorrection;
             
             obj.CameraSetting.Binning.Ind=1;
-            obj.CameraSetting.TriggerMode.Ind=1;
+            obj.CameraSetting.TriggerModeStruct.Ind=1;
             obj.CameraSetting.ScanMode.Ind=1;
             obj.CameraSetting.DefectCorrection.Ind=1;
             
