@@ -742,10 +742,18 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 % the old value so that we can undo this change later on.
                 PreviousSequenceLength = obj.CameraObj.SequenceLength; 
                 obj.CameraObj.SequenceLength = N; % change back later on
+                
+                % Setup the acquisition to prepare for the triggered
+                % captures. 
+                obj.CameraObj.setup_acquisition();
+                
+                % Call the camera start_sequence() method to initiate the
+                % triggered capture process. 
+                obj.CameraObj.start_sequence(); 
             else
                 obj.CameraObj.AcquisitionType = 'capture';
+                obj.CameraObj.setup_acquisition();
             end
-            obj.CameraObj.setup_acquisition();
                         
             % Collect the z-stack
             for nn=1:N
