@@ -46,6 +46,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
         ROI;                %   [Xstart Xend Ystart Yend]
         SequenceLength;     %   Kinetic Series length
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
+        TriggerMode;        %   'software', 'internal', 'external'
     end
     
     methods
@@ -304,6 +305,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
         start_capture(obj)
         start_focus(obj)
         start_sequence(obj)
+        fireTrigger(obj)
     end
     
     methods(Abstract,Access=protected)
