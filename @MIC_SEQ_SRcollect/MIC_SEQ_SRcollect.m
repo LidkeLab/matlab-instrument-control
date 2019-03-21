@@ -510,14 +510,25 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.Shutter.close(); % closes shutter to prevent photobleaching
             obj.Laser405.off(); % turn of the 405nm laser
             
-            % Ask user if they would like to save the current cell and
-            % focus as a reference (question dialog will appear once the
-            % figure window for the CameraSCMOS object is closed).
-            UseCell = ...
-                questdlg('Use this cell and Save Reference Image?', ...
-                'Save and Use', 'Yes', 'No', 'Yes'); % default Yes
-            if strcmpi(UseCell, 'Yes')
-                obj.saveReferenceImage();
+            % Ask the user if they would like to proceed to high power
+            % focus mode.  If not, ask if they would like to save the
+            % reference at the current focus. 
+            UseHighPowerFocus = questdlg('Proceed to high power focus?', ...
+                'Use High Power Focus', 'Yes', 'No', 'No'); % default No
+            if strcmpi(UseHighPowerFocus, 'Yes')
+                % The user would like to re-adjust the focus in High Power
+                % Focus Mode.
+                obj.startROILaserFocusHigh();
+            else
+                % Ask user if they would like to save the current cell and
+                % focus as a reference (question dialog will appear once 
+                % the figure window for the CameraSCMOS object is closed).
+                UseCell = ...
+                    questdlg('Use this cell and Save Reference Image?', ...
+                    'Save and Use', 'Yes', 'No', 'Yes'); % default Yes
+                if strcmpi(UseCell, 'Yes')
+                    obj.saveReferenceImage();
+                end
             end
         end
 
@@ -527,8 +538,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
-            obj.Laser647.setPower(obj.LaserPowerSequence647);
-            obj.Laser405.setPower(obj.LaserPowerSequence405);
+            obj.Laser647.setPower(obj.LaserPowerFocus647);
+            obj.Laser405.setPower(obj.LaserPowerFocus405);
             obj.Laser647.on();
             if obj.OnDuringFocus647
                 % Only open the shutter if requested by the set flag.
@@ -543,6 +554,16 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.start_focus();
             obj.Shutter.close(); % closes shutter to prevent photobleaching
             obj.Laser405.off(); % turn of the 405nm laser
+            
+            % Ask user if they would like to save the current cell and
+            % focus as a reference (question dialog will appear once
+            % the figure window for the CameraSCMOS object is closed).
+            UseCell = ...
+                questdlg('Use this cell and Save Reference Image?', ...
+                'Save and Use', 'Yes', 'No', 'Yes'); % default Yes
+            if strcmpi(UseCell, 'Yes')
+                obj.saveReferenceImage();
+            end
         end
         
         function moveStepperUpLarge(obj)
