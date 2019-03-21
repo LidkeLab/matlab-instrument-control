@@ -43,6 +43,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
         ScanMode;           %   scan mode for Hamamatsu sCMOS camera
         TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
+        TriggerModeStruct;  %   struct. containing bit and ind for trigger
         DefectCorrection;   %   defect correction  for Hamamatsu sCMOS camera
         GuiDialog;
     end
@@ -67,7 +68,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         end
         
         function out=getlastimage(obj) %?
-            if obj.TriggerMode == 32
+            if obj.TriggerModeStruct.Bit == 32
                 [img]=DcamGetLastImageFast(obj.CameraHandle);
             else
                 [img]=DcamGetNewestFrame(obj.CameraHandle);
@@ -101,13 +102,14 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.YPixels=2048;
             obj.ImageSize=[obj.XPixels,obj.YPixels];
             obj.ROI=[1,obj.XPixels,1,obj.YPixels];
-            obj.TriggerMode=int32(hex2dec('0001'));
+            obj.TriggerModeStruct.Bit = int32(1);
+            obj.TriggerModeStruct.Ind = int32(1);
             obj.ExpTime_Focus=single(0.004);
             obj.ExpTime_Capture=single(0.004);
             obj.ExpTime_Sequence=single(0.004);
             
             obj.CameraSetting.Binning.Bit=obj.Binning;
-%             obj.CameraSetting.TriggerMode.Bit=obj.TriggerMode;
+            obj.CameraSetting.TriggerMode.Bit=obj.TriggerModeStruct.Bit;
             obj.CameraSetting.ScanMode.Bit=obj.ScanMode;
             obj.CameraSetting.DefectCorrection.Bit=obj.DefectCorrection;
             
@@ -576,15 +578,15 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             % TriggerMode.
             switch obj.TriggerMode
                 case 'internal'
-                    TriggerModeBit = 1;
+                    obj.TriggerModeStruct.Bit = int32(1);
                 case 'software'
-                    TriggerModeBit = 4;
+                    obj.TriggerModeStruct.Bit = int32(4);
                 case 'external'
                     % Not sure what the bit for external is, this ought to
                     % be changed later on...
-                    TriggerModeBit = 4;
+                    obj.TriggerModeStruct.Bit = int32(4);
             end
-            DcamSetTriggerMode(obj.CameraHandle, int32(TriggerModeBit));
+            DcamSetTriggerMode(obj.CameraHandle, obj.TriggerModeStruct.Bit);
             DCAMSetDefectCorrection(obj.CameraHandle,obj.DefectCorrection);
         end
     
