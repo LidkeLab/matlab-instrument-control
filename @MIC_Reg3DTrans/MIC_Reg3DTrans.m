@@ -730,6 +730,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             end
                         
             % Setup the camera based on the TriggerMode. 
+            obj.CameraObj.TriggerMode = obj.CameraTriggerMode;
             if strcmpi(obj.CameraTriggerMode, 'software')
                 % When using a software trigger, we'll actually setup the
                 % camera for a 'sequence' instead of a 'capture'. 
