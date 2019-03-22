@@ -704,7 +704,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Y_Current=XYZ(2);
             Z_Current=XYZ(3);
 
-        
             obj.ZStack_Pos = ...
                 (Z_Current-ZStackMaxDev:ZStackStep:Z_Current+ZStackMaxDev);
             N=length(obj.ZStack_Pos);
