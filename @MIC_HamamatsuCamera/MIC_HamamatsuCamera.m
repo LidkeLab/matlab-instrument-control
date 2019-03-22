@@ -52,7 +52,6 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         
         function obj=MIC_HamamatsuCamera() %constructor
             obj = obj@MIC_Camera_Abstract(~nargout);
-            disp('test')
         end
         
         function delete(obj) %destructor
