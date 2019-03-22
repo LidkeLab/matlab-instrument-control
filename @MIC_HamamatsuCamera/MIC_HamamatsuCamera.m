@@ -192,6 +192,10 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                         % Apply the trigger mode to the camera. 
                         DcamSetTriggerMode(obj.CameraHandle, ...
                             obj.CameraSetting.TriggerModeNum.Bit);
+                        
+                        % Avoid hitting the rest of the code here (not
+                        % needed for triggered captures). 
+                        return
                     end
             end
             
