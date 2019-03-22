@@ -68,6 +68,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         LaserPowerFocus405 = 11.84;
         LaserPowerSequence405 = 11.84;
         IsBleach = 0; % boolean: 1 for a photobleach round, 0 otherwise
+        PiezoSettlingTime = 0.2; % settling time of piezos (s)
         StepperLargeStep = 0.05; % Large Stepper motor step (mm)
         StepperSmallStep = 0.002; % Small Stepper motor step (mm)
         PiezoStep = 0.1; % Piezo step (micron)
@@ -91,7 +92,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
         Reg3DStepSize = 0.1; % (um) step size along z during cell reg.
-        Reg3DMaxDev = 0.2; % (um) max deviation along z during cell reg.
+        Reg3DMaxDev = 1; % (um) max deviation along z during cell reg.
         Reg3DMaxDevInit = 1; % (um) max dev. along z for initial cell reg.
         Reg3DXTol = 0.005; % (um) correction along x to claim convergence
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
@@ -387,12 +388,14 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 obj.StagePiezo, CalibrationFilePath);
             
             % Modify properties of the registration object as needed.
+            obj.AlignReg.ChangeExpTime = 1;
+            obj.AlignReg.ExposureTime = obj.ExposureTimeCapture;
             obj.AlignReg.ZStackMaxDevInitialReg = obj.Reg3DMaxDevInit;
             obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
             obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
+            obj.AlignReg.StageSettlingTime = obj.PiezoSettlingTime;
             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
             obj.AlignReg.CameraTriggerMode = 'software'; 
-            obj.AlignReg.StageSettlingTime = 0;
             obj.AlignReg.Tol_X = obj.Reg3DXTol;
             obj.AlignReg.Tol_Y = obj.Reg3DZTol;
             obj.AlignReg.Tol_Z = obj.Reg3DZTol;

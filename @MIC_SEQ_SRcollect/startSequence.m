@@ -115,6 +115,7 @@ obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
 obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
 obj.CameraSCMOS.SequenceLength = obj.NumberOfFrames;
 obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
+obj.CameraSCMOS.TriggerMode = 'internal';
 obj.CameraSCMOS.AcquisitionType = 'sequence';
 obj.CameraSCMOS.setup_acquisition();
 
@@ -205,8 +206,8 @@ for ii = 1:obj.NumberOfSequences
             'Acquiring data...'], ...
             RefStruct.CellIdx, ii);
     obj.CameraSCMOS.AcquisitionType = 'sequence';
+    obj.CameraSCMOS.TriggerMode = 'internal';
     obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
-    obj.CameraSCMOS.setup_acquisition();
     Sequence = obj.CameraSCMOS.start_sequence();
     switch obj.SaveFileType
         case 'h5'
