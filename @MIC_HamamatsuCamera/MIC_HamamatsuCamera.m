@@ -129,7 +129,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             if strcmp(status,'Ready')||strcmp(status,'Busy')
                 obj.abort;
             end
-            status=obj.HtsuGetStatus;
+
             switch obj.AcquisitionType
                 case 'focus'        %Run-Till-Abort
                     captureMode=1; %sequence
@@ -165,16 +165,6 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                         % prepare for a 'fast' acquisition in which we send
                         % software triggers to the camera through MATLAB.
                         
-                        % I have no idea what the following code is trying
-                        % to do, but I'm leaving it to avoid breaking
-                        % things... Maybe it's just forcing the camera to 
-                        % be prepared? DS 3/21/19.
-                        Status = obj.HtsuGetStatus();
-                        if strcmp(Status, 'Ready') ...
-                                || strcmp(Status, 'Busy')
-                            obj.abort();
-                        end
-                        
                         % Ensure that the camera is ready to proceed.
                         Status = obj.HtsuGetStatus();
                         if strcmp(Status, 'Ready')
@@ -183,11 +173,13 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                         
                         % Set the TriggerMode on the camera as appropriate.
                         TriggerModeIdx = 4; % 4 = Software mode
-                        obj.CameraSetting.TriggerModeNum.Ind = TriggerModeIdx;
+                        obj.CameraSetting.TriggerModeNum.Ind = ...
+                            TriggerModeIdx;
                         
                         % Refer to GuiDialog to get right Bit value.
                         obj.CameraSetting.TriggerModeNum.Bit = ...
-                            obj.GuiDialog.TriggerModeNum.Bit(TriggerModeIdx);
+                            obj.GuiDialog.TriggerModeNum.Bit(...
+                            TriggerModeIdx);
                         
                         % Apply the trigger mode to the camera. 
                         DcamSetTriggerMode(obj.CameraHandle, ...
