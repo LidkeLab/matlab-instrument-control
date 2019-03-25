@@ -20,7 +20,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Hardware objects
         CameraSCMOS; % Main Data Collection Camera
         CameraIR; % Active Stabilization Camera
-        MaxPiezoConnectAttempts = 2; % max # of attempts to connect piezo
         XPiezoSerialNums = {'81850186', '84850145'}; % controller, gauge
         YPiezoSerialNums = {'81850193', '84850146'}; % controller, gauge
         ZPiezoSerialNums = {'81850176', '84850203'}; % controller, gauge
@@ -68,6 +67,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         LaserPowerFocus405 = 11.84;
         LaserPowerSequence405 = 11.84;
         IsBleach = 0; % boolean: 1 for a photobleach round, 0 otherwise
+        StepperWaitTime = 20; % max time (s) to wait for stepper to move
+        MaxPiezoConnectAttempts = 2; % max # of attempts to connect piezo
         PiezoSettlingTime = 0.2; % settling time of piezos (s)
         StepperLargeStep = 0.05; % Large Stepper motor step (mm)
         StepperSmallStep = 0.002; % Small Stepper motor step (mm)
@@ -290,19 +291,13 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Update the status indicator for the GUI.
             obj.StatusString = 'Setting up sample stage stepper motors...';
             
-            % Setup the stepper motors for the NanoMax stage.
-            % The StepperMotor Serial Number is 70850323.
-            % NOTE: The x,y convention used is that y<->left-right,
-            %       x<->up-down.
-            % NOTE: The positions set here are chosen such that the center
-            %       GUI button will ~correspond to the center of the well.
+            % Setup the stepper motors for the NanoMax stage and move the
+            % stage to a safe position so as to avoid hitting the
+            % objective.
             obj.StageStepper = MIC_StepperMotor('70850323');
+            obj.StageStepper.moveToPosition(3, 4); % z stepper
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
-            obj.StageStepper.moveToPosition(3, 2); % z stepper
-            
-            % Update the status indicator for the GUI.
-            obj.StatusString = '';
         end
         
         function setupIRCamera(obj)
