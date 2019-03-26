@@ -545,6 +545,8 @@ properties2gui();
         % Misc. file saving properties.
         if ~isempty(handles.EditFileTag.String)
             obj.FilenameTag = sprintf('_%s', handles.EditFileTag.String);
+        else
+            obj.FilenameTag = '';
         end
         
         % Misc. acquisition properties.
