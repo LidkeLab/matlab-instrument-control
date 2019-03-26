@@ -722,7 +722,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
-                obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
+                if strcmpi(obj.CameraTriggerMode, 'software')
+                    % Software triggering will use a sequence, thus we have
+                    % to change the sequence acquisition time.
+                    obj.CameraObj.ExpTime_Sequence = obj.ExposureTime;
+                else
+                    obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
+                end
             end
 %             if obj.ChangeEMgain || obj.CamShutter
 %                 obj.CameraObj.setCamProperties(CamSet);
