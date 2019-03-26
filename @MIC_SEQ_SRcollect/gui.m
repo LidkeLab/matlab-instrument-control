@@ -543,7 +543,7 @@ properties2gui();
         % Set the object properties based on the GUI controls.
         
         % Misc. file saving properties.
-        obj.FilenameTag = handles.EditFileTag.String;
+        obj.FilenameTag = sprintf('_%s', handles.EditFileTag.String);
         
         % Misc. acquisition properties.
         obj.IsBleach = handles.CheckboxPhotobleach.Value;
