@@ -6,30 +6,33 @@ function saveReferenceImage(obj)
     % reference data.
     obj.StatusString = 'Collecting reference data for selected cell...';
     
-    % Collect a z-stack for use in brightfield registration.
-    obj.Lamp660.setPower(obj.Lamp660Power);
-    pause(obj.LampWait);
-    obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
-    obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
-    obj.AlignReg.takeRefStack();
-    RefStruct.ReferenceStack = obj.AlignReg.ReferenceStack;
-    obj.Lamp660.setPower(0);
-    
-    % Set the ROI reference image to be the image at the center of the 
-    % z-stack (the focal plane of interest).
-    RefInd = (obj.AlignReg.ZStack_MaxDev / obj.AlignReg.ZStack_Step) + 1;
-    RefStruct.Image =obj.AlignReg.ReferenceStack(:, :, RefInd);
-   
-    %Collect Full Image
-    obj.Lamp660.setPower(obj.Lamp660Power);
-    pause(obj.LampWait);
-    obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
-    obj.CameraSCMOS.AcquisitionType = 'capture';
-    obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
-    obj.CameraSCMOS.setup_acquisition();
-    Data=obj.CameraSCMOS.start_capture();
-    obj.Lamp660.setPower(0);
-    RefStruct.Image_Full=Data;
+    % Collect a z-stack for use in brightfield registration (if requested).
+    if obj.UsePeriodicReg
+        obj.Lamp660.setPower(obj.Lamp660Power);
+        pause(obj.LampWait);
+        obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
+        obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
+        obj.AlignReg.takeRefStack();
+        RefStruct.ReferenceStack = obj.AlignReg.ReferenceStack;
+        obj.Lamp660.setPower(0);
+        
+        % Set the ROI reference image to be the image at the center of the
+        % z-stack (the focal plane of interest).
+        RefInd = ...
+            (obj.AlignReg.ZStack_MaxDev / obj.AlignReg.ZStack_Step) + 1;
+        RefStruct.Image =obj.AlignReg.ReferenceStack(:, :, RefInd);
+        
+        %Collect Full Image
+        obj.Lamp660.setPower(obj.Lamp660Power);
+        pause(obj.LampWait);
+        obj.CameraSCMOS.ExpTime_Capture=obj.ExposureTimeCapture;
+        obj.CameraSCMOS.AcquisitionType = 'capture';
+        obj.CameraSCMOS.ROI=obj.SCMOS_ROI_Full;
+        obj.CameraSCMOS.setup_acquisition();
+        Data=obj.CameraSCMOS.start_capture();
+        obj.Lamp660.setPower(0);
+        RefStruct.Image_Full=Data;
+    end
     
     % Center Piezo and add to stepper
     PPx=obj.StagePiezo.StagePiezoX.getPosition();
