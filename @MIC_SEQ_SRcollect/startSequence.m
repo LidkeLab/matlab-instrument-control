@@ -54,48 +54,51 @@ obj.StageStepper.moveToPosition(3, ...
     RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
 obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 
-% Attempt to align the cell to the reference image in brightfield.
-obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
-    'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
-obj.Lamp660.setPower(obj.Lamp660Power);
-pause(obj.LampWait);
-obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
-obj.CameraSCMOS.AcquisitionType = 'capture';
-obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
-obj.CameraSCMOS.setup_acquisition();
-obj.AlignReg.Image_Reference = double(RefStruct.Image);
-obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
-obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
-obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
-obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
-obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
-try
-    obj.AlignReg.align2imageFit();
-catch
-    % We don't want to throw an error since there are still other cells
-    % to be measured from here on: warn the user, attempt to export
-    % data that might be useful, and return control to the calling
-    % method.
-    warning('Problem with AlignReg.align2imageFit()')
-    obj.StatusString = ...
-        'Exporting object Data and Children with exportState()...';
-    fprintf(...
-        'Saving exportables from exportState()....................\n')
-    switch obj.SaveFileType
-        case {'h5', 'h5DataGroups'}
-            % For either .h5 file save type, we'll still use the same
-            % supergroup of Channel01/Zposition001.
-            SequenceName = 'Channel01/Zposition001';
-            MIC_H5.createGroup(FileH5, SequenceName);
-            obj.save2hdf5(FileH5, SequenceName);
-        otherwise
-            error('StartSequence:: unknown SaveFileType')
+% Attempt to align the cell to the reference image in brightfield (if
+% requested).
+if obj.UsePeriodicReg
+    obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+        'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
+    obj.Lamp660.setPower(obj.Lamp660Power);
+    pause(obj.LampWait);
+    obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
+    obj.CameraSCMOS.AcquisitionType = 'capture';
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
+    obj.CameraSCMOS.setup_acquisition();
+    obj.AlignReg.Image_Reference = double(RefStruct.Image);
+    obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
+    obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
+    obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
+    obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
+    obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
+    try
+        obj.AlignReg.align2imageFit();
+    catch
+        % We don't want to throw an error since there are still other cells
+        % to be measured from here on: warn the user, attempt to export
+        % data that might be useful, and return control to the calling
+        % method.
+        warning('Problem with AlignReg.align2imageFit()')
+        obj.StatusString = ...
+            'Exporting object Data and Children with exportState()...';
+        fprintf(...
+            'Saving exportables from exportState()....................\n')
+        switch obj.SaveFileType
+            case {'h5', 'h5DataGroups'}
+                % For either .h5 file save type, we'll still use the same
+                % supergroup of Channel01/Zposition001.
+                SequenceName = 'Channel01/Zposition001';
+                MIC_H5.createGroup(FileH5, SequenceName);
+                obj.save2hdf5(FileH5, SequenceName);
+            otherwise
+                error('StartSequence:: unknown SaveFileType')
+        end
+        obj.StatusString = '';
+        fprintf('Saving exportables from exportState() complete \n')
+        return
     end
-    obj.StatusString = '';
-    fprintf('Saving exportables from exportState() complete \n')
-    return
+    obj.Lamp660.setPower(0);
 end
-obj.Lamp660.setPower(0);
 
 % Setup Active Stabilization (if desired).
 if obj.UseActiveReg
