@@ -59,7 +59,7 @@ obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 if obj.UseBrightfieldReg
     obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
         'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
-    obj.Lamp660.setPower(obj.Lamp660Power);
+    obj.Lamp660.setPower(RefStruct.LampPower);
     pause(obj.LampWait);
     obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
     obj.CameraSCMOS.AcquisitionType = 'capture';
@@ -177,7 +177,7 @@ for ii = 1:obj.NumberOfSequences
         obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
             'Attempting periodic registration...'], ...
             RefStruct.CellIdx, ii);
-        obj.Lamp660.setPower(obj.Lamp660Power);
+        obj.Lamp660.setPower(RefStruct.LampPower);
         pause(obj.LampWait);
         obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
         obj.CameraSCMOS.AcquisitionType = 'capture';

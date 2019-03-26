@@ -476,8 +476,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.Lamp660.setPower(obj.Lamp660Power);
             obj.FlipMount.FilterIn(); 
             obj.CameraSCMOS.start_focus();
+            obj.Lamp660.off();
             obj.startROILaserFocusLow();
-            obj.Lamp660.setPower(0);
         end
         
         function startROILaserFocusLow(obj)
@@ -507,7 +507,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 % flag.
                 obj.Laser405.on();
             end
-            obj.Lamp660.setPower(0);
             obj.CameraSCMOS.start_focus();
             obj.Shutter.close(); % closes shutter to prevent photobleaching
             obj.Laser405.off(); % turn of the 405nm laser
