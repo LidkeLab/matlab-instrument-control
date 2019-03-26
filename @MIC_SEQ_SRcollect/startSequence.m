@@ -56,7 +56,7 @@ obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 
 % Attempt to align the cell to the reference image in brightfield (if
 % requested).
-if obj.UsePeriodicReg
+if obj.UseBrightfieldReg
     obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
         'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
     obj.Lamp660.setPower(obj.Lamp660Power);
@@ -172,7 +172,7 @@ for ii = 1:obj.NumberOfSequences
     
     % Use periodic registration after NSeqBeforePeriodicReg
     % sequences have been collected.
-    if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
+    if obj.UseBrightfieldReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
             && ~(ii == 1)
         obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
             'Attempting periodic registration...'], ...

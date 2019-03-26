@@ -432,7 +432,7 @@ uicontrol('Parent', RegistrationControlPanel, 'Style', 'text', ...
 handles.CheckboxPeriodicReg = uicontrol(...
     'Parent', RegistrationControlPanel, 'Style', 'checkbox', ...
     'Position', [170, SmallPanelHeight-60, 15, 15], ...
-    'Callback', @usePeriodicReg); 
+    'Callback', @useBrightfieldReg); 
 handles.TextPeriodicReg = uicontrol('Parent', RegistrationControlPanel, ...
     'Style', 'text', 'String', 'every         sequence(s)', ...
     'Position', [25, SmallPanelHeight-75, 150, 15]);
@@ -583,7 +583,7 @@ properties2gui();
         % Registration/alignment properties.
         handles.EditboxPeriodicReg.String = obj.NSeqBeforePeriodicReg;
         handles.CheckboxActiveReg.Value = obj.UseActiveReg;
-        handles.CheckboxPeriodicReg.Value = obj.UsePeriodicReg;
+        handles.CheckboxPeriodicReg.Value = obj.UseBrightfieldReg;
         if handles.CheckboxPeriodicReg.Value
             % Ensure additional parameter selections are available.
             handles.TextPeriodicReg.Visible = 'on';
@@ -1070,7 +1070,7 @@ properties2gui();
         % If using active registration, ensure periodic registration is
         % turned off.
         if Source.Value
-            obj.UsePeriodicReg = 0;
+            obj.UseBrightfieldReg = 0;
             handles.CheckboxPeriodicReg.Value = 0;
         end
         
@@ -1078,15 +1078,15 @@ properties2gui();
         properties2gui();
     end
 
-    function usePeriodicReg(Source, ~)
-        % Callback which sets the UsePeriodicReg property of
+    function useBrightfieldReg(Source, ~)
+        % Callback which sets the UseBrightfieldReg property of
         % MIC_SEQ_SRcollect to 1 when checked and 0 otherwise.
         
         % Ensure the object properties are set based on the GUI.
         gui2properties();
         
-        % Set UsePeriodicReg to the desired value.
-        obj.UsePeriodicReg = Source.Value;
+        % Set UseBrightfieldReg to the desired value.
+        obj.UseBrightfieldReg = Source.Value;
         
         % If using periodic registration, ensure active registration is
         % turned off.
