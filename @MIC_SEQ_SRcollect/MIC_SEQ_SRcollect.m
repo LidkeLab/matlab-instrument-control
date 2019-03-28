@@ -451,6 +451,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function Data = captureLamp(obj, ROISelect)
             % Capture an image with 660nm lamp.
+            obj.Lamp660.on(); 
             obj.Lamp660.setPower(obj.Lamp660Power);
             pause(obj.LampWait);
             switch ROISelect
