@@ -333,6 +333,17 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.RefImageFile = f;
             obj.updateGui();
         end
+
+        function saveRefStack(obj)
+            % saverefimage Saves reference image
+
+            [a,b]=uiputfile('*.mat', 'Save Reference stack as');
+            f=fullfile(b,a);
+            ReferenceStack=obj.ReferenceStack; %#ok<NASGU,PROP> 
+            save(f,'ReferenceStack');
+            obj.RefImageFile = f;
+            obj.updateGui();
+        end
         
         function takeRefStack(obj)
             % Takes a reference stack from -obj.ZStack_MaxDev to
