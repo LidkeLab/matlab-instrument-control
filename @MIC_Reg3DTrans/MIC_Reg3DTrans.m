@@ -362,6 +362,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.collect_zstack(obj.ZStackMaxDevInitialReg);
             obj.ReferenceStack = obj.ZStack;
             
+            % Ensure that the reference image is set to the central
+            % image in the reference stack (this corresponds to the
+            % focal plane of interest).
+            FocalInd = 1 + obj.ZStackMaxDevInitialReg/obj.ZStack_Step;
+            obj.Image_Reference = obj.ReferenceStack(:, :, FocalInd);
+            
             % Change to exposure time of the camera back to it's original
             % value.
             if obj.ChangeExpTime
@@ -453,15 +459,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     break
                 end
                 
-                if obj.UseStackCorrelation
-                    % Ensure that the reference image is set to the central
-                    % image in the reference stack (this corresponds to the
-                    % focal plane of interest).
-                    FocalInd = 1 + obj.ZStackMaxDevInitialReg ...
-                        / obj.ZStack_Step;
-                    obj.Image_Reference = ...
-                        obj.ReferenceStack(:, :, FocalInd);
-                    
+                if obj.UseStackCorrelation                    
                     % Attempt to select an appropriate value of the
                     % MaxOffset parameter.
                     if iter == 0
