@@ -822,6 +822,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 obj.CameraObj.SequenceLength = PreviousSequenceLength;
             end
             
+            % Ensure that Image_Current is set to the center image of the
+            % newly collected z-stack (this corresponds to the current
+            % focal plane).
+            FocalInd = 1 + obj.ZStackMaxDev/obj.ZStack_Step;
+            obj.Image_Current = obj.ZStack(:, :, FocalInd);
+            
 %             % close shutter if needed
 %             if obj.CamShutter
 %                 obj.CameraObj.setShutter(0);
