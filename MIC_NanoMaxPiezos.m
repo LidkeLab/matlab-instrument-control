@@ -39,10 +39,12 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     
     properties (SetAccess = protected) % users shouldn't set these directly
        InstrumentName = 'NanoMaxStagePiezos'; % Meaningful instrument name
-       Position; % Vector [x, y, z] giving the current piezo positions
        PositionUnit; % Units of position parameter (e.g. um, mm, etc.)
     end
     
+    properties (Dependent)
+       Position; % Vector [x, y, z] giving the current piezo positions
+    end
     properties (Hidden)
         StartGUI = 0; % don't open GUI on object creation
     end
@@ -217,6 +219,15 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                 % vector.
                 obj.Position = Position.';
             end
+        end
+        
+        function Position = get.Position(obj)
+            % This is a get method for the Position property which allows
+            % us to ensure the position accurately reflects what the
+            % instrument is doing.
+            Position = [obj.StagePiezoX.getPosition(), ...
+                obj.StagePiezoY.getPosition(), ...
+                obj.StagePiezoZ.getPosition()];
         end
 
         function connectTCubePiezo(obj, StagePiezo, ...
