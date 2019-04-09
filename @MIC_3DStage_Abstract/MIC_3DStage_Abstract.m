@@ -17,11 +17,8 @@ classdef MIC_3DStage_Abstract < MIC_Abstract
     % CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
     
     properties (Abstract,SetAccess=protected)
-        PositionUnit;      % Units of position parameter (eg. um/mm)
-    end
-    
-    properties (Abstract)
         Position;          % Current position.
+        PositionUnit;      % Units of position parameter (eg. um/mm)
     end
     
    
@@ -38,7 +35,6 @@ classdef MIC_3DStage_Abstract < MIC_Abstract
     end
     
 end
-
 
 
 
