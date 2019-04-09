@@ -598,16 +598,16 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function movePiezoUpSmall(obj)
             % Small stage step up in the z dimension with piezo.
-            OldPosPiezoZ = obj.StagePiezo.StagePiezoZ.getPosition();
-            NewPosPiezoZ = OldPosPiezoZ + obj.PiezoStep; % proposed z pos.
-            obj.StagePiezo.StagePiezoZ.setPosition(NewPosPiezoZ); 
+            OldPosPiezo = obj.StagePiezo.Position;
+            NewPosPiezo = OldPosPiezo + [0, 0, obj.PiezoStep];
+            obj.StagePiezo.setPosition(NewPosPiezo); 
         end
         
         function movePiezoDownSmall(obj)
             % Small stage step down in the z dimension with piezo.
-            OldPosPiezoZ = obj.StagePiezo.StagePiezoZ.getPosition();
-            NewPosPiezoZ = OldPosPiezoZ - obj.PiezoStep; % proposed z pos.
-            obj.StagePiezo.StagePiezoZ.setPosition(NewPosPiezoZ); 
+            OldPosPiezo = obj.StagePiezo.Position;
+            NewPosPiezo = OldPosPiezo - [0, 0, obj.PiezoStep];
+            obj.StagePiezo.setPosition(NewPosPiezo); 
         end
     end
     
