@@ -42,7 +42,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
        PositionUnit; % Units of position parameter (e.g. um, mm, etc.)
     end
     
-    properties (Dependent)
+    properties (GetObservable)
        Position; % Vector [x, y, z] giving the current piezo positions
     end
     properties (Hidden)
@@ -60,6 +60,9 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
             obj = obj@MIC_3DStage_Abstract(~nargout);
+            
+            % Set a property listener for the StatusString property.
+            addlistener(obj, 'Position', 'PreGet', @obj.updatePosition);
             
             % Set the object properties based on the appropriate inputs.
             if exist('MaxPiezoConnectAttempts', 'var')
@@ -221,11 +224,10 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             end
         end
         
-        function Position = get.Position(obj)
-            % This is a get method for the Position property which allows
-            % us to ensure the position accurately reflects what the
-            % instrument is doing.
-            Position = [obj.StagePiezoX.getPosition(), ...
+        function updatePosition(obj, ~, ~)
+            % Listener callback for a change of the object property
+            % Position. 
+            obj.Position = [obj.StagePiezoX.getPosition(), ...
                 obj.StagePiezoY.getPosition(), ...
                 obj.StagePiezoZ.getPosition()];
         end
