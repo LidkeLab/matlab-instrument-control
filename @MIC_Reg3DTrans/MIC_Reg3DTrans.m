@@ -525,6 +525,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         % stack which correspond to this smaller
                         % sub-stack.
                         StackSteps = obj.ZStack_MaxDev / obj.ZStack_Step;
+                        FocalInd = 1 + obj.ZStack_MaxDev/obj.ZStack_Step;
                         ZStackRefInds = FocalInd - StackSteps ...
                             :FocalInd + StackSteps;
                     end
