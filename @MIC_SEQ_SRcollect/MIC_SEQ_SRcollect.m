@@ -49,6 +49,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         ExposureTimeCapture = 0.02;
         NumberOfFrames = 6000;
         NumberOfSequences = 7;
+        NAcquisitionCycles = 1; % number of acquisition cycles per cell
+        PostSeqPause = 0; % seconds to pause after each sequence
         UsePreActivation = 1; % excite fluors. before acquiring data
         DurationPreActivation = 10; % (seconds) time of pre-activation
         StabPeriod = 5; % Time between stabilization events (seconds)

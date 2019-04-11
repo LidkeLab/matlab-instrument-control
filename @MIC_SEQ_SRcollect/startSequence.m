@@ -245,6 +245,13 @@ for ii = 1:obj.NumberOfSequences
     end
     obj.Shutter.close(); % block 647nm from reaching sample
     obj.Laser405.off(); % ensure the 405nm is turned off
+    
+    % If needed, pause before proceeding to the next sequence (this is
+    % useful for test conditions, probably not for a normal acquisition).
+    if ii ~= obj.NumberOfSequences
+        % No need to pause on the last sequence of the cell.
+        pause(obj.PostSeqPause);
+    end
 end
 obj.StatusString = '';
 fprintf('Data collection complete\n')
