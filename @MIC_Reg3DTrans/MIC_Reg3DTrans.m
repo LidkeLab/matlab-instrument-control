@@ -61,7 +61,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZStackMaxDevInitialReg = 1; % max. dev. in z for initial reg.
         XYBorderPx = 10; % # of px. to remove from x and y borders.
         StageSettlingTime = 0; % time for stage to settle after moving (s)
-        TolMaxCorr = 0.5;   % min val. of max xcorr coeff. for convergence
         Tol_X=.01;          % max X shift to reach convergence(um)
         Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
@@ -543,7 +542,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] ...
+                    [PixelOffset, SubPixelOffset, ~, MaxOffset] ...
                         = obj.findStackOffset(RefStack, CurrentStack, ...
                         MaxOffset, 'FFT', '1D', [], [], [], obj.UseGPU);
                     
@@ -576,8 +575,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         
                         % Determine a predicted offset between the two
                         % stacks.
-                        [PixelOffset, SubPixelOffset, MaxCorr, ...
-                            MaxOffset] = obj.findStackOffset(...
+                        [PixelOffset, SubPixelOffset, ~,MaxOffset] = ...
+                            obj.findStackOffset(...
                             RefStack, CurrentStack, MaxOffsetInput, ...
                             'FFT', '1D', [], [], [], obj.UseGPU);
                         
@@ -628,8 +627,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % set tolerance.
                     StageOffsetTol = [obj.Tol_X; obj.Tol_Y; obj.Tol_Z];
                     WithinTol = ...
-                        all(abs(StageOffset) < StageOffsetTol) ...
-                        && (MaxCorr >= obj.TolMaxCorr);
+                        all(abs(StageOffset) < StageOffsetTol);
                     
                     % Save the error signal.
                     obj.ErrorSignal = StageOffset.';
@@ -1044,7 +1042,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.ZStack_MaxDev = obj.ZStack_MaxDev;
             Attribute.ZStack_Step = obj.ZStack_Step;
             Attribute.ZStack_Pos = obj.ZStack_Pos;
-            Attribute.TolMaxCorr = obj.TolMaxCorr;
             Attribute.Tol_X = obj.Tol_X;
             Attribute.Tol_Y = obj.Tol_Y;
             Attribute.Tol_Z = obj.Tol_Z;
