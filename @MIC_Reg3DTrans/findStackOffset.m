@@ -101,7 +101,7 @@ function [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
 
 % Set default parameter values if needed.
 if ~exist('MaxOffset', 'var') || isempty(MaxOffset)
-    MaxOffset = [2; 2; 2];
+    MaxOffset = [5; 5; 5];
 end
 if ~exist('Method', 'var') || isempty(Method)
     Method = 'FFT';
