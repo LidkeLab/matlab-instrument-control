@@ -1,4 +1,4 @@
-function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
+function [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
     findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
     FitType, FitOffset, BinaryMask, PlotFlag, UseGPU)
 %findStackOffset estimates a sub-pixel offset between two stacks.
@@ -81,9 +81,9 @@ function [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
 %           Stack1, approximated based on a 2nd order polynomial fit(s) to 
 %           the xcorr coefficient field as specified by the FitType input 
 %           and finding the peak of that polynomial.
-%   CorrAtOffset: (float) The maximum value of the correlation coefficient,
-%           corresponding to the correlation coefficient at the offset 
-%           given by PixelOffset.
+%   CorrData: (struct) Structured array containing the scaled
+%             cross-correlation corresponding to MaxOffset as well as the
+%             fitting results which were used to determine SubPixelOffset.
 %   MaxOffset: (3x1 or 1x3) Maximum offset between Stack1 and Stack2 
 %           considered in the calculation of PixelOffset and 
 %           SubPixelOffset.  This is returned because the user input value
@@ -323,7 +323,7 @@ end
 StackedCorrCube = XCorr3D(:);
 
 % Determine the integer offset between the two stacks.
-[CorrAtOffset, IndexOfMax] = max(StackedCorrCube);
+[~, IndexOfMax] = max(StackedCorrCube);
 [PeakRow, PeakColumn, PeakHeight] = ind2sub(size(XCorr3D), IndexOfMax);
 RawOffsetIndices = [PeakRow; PeakColumn; PeakHeight];
 
@@ -545,6 +545,13 @@ SubPixelOffset = RawOffsetFit - MaxOffset - 1;
 if strcmpi(Method, 'FFT')
     SubPixelOffset = -SubPixelOffset;
 end
+
+% Populate the CorrData struct with information that we might wish to use
+% later.
+CorrData.XCorr3D = XCorr3D;
+CorrData.XFitAtPeak = XFitAtPeak;
+CorrData.YFitAtPeak = YFitAtPeak;
+CorrData.ZFitAtPeak = ZFitAtPeak;
 
 % Display line sections through the integer location of the
 % cross-correlation, overlain on the fit along those lines.
