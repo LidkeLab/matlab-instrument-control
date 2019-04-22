@@ -337,7 +337,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on();
                 pause(obj.LampWait);
-                obj.R3DObj.UseStackCorrelation=0; %for 3D Reg correlation
+                obj.R3DObj.ZStackMaxDevInitialReg=.5;
+                obj.R3DObj.UseStackCorrelation=1; %for 3D Reg correlation
                 obj.R3DObj.align2imageFit();
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
@@ -353,8 +354,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on();
                 pause(obj.LampWait);
-                obj.R3DObj.UseStackCorrelation=0; %for 3D Reg correlation
-                obj.R3DObj.align2imageFit();
+                obj.R3DObj.ZStackMaxDevInitialReg=.5;
+                obj.R3DObj.UseStackCorrelation=1; %for 3D Reg correlation
+                 obj.R3DObj.align2imageFit();
                 obj.Lamp850Obj.off();
             end
         end
@@ -381,7 +383,15 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on();
                 pause(obj.LampWait);
+                %%update this lines after new version of Reg3DTrans till
+                %%line 390
+                obj.R3DObj.ZStackMaxDevInitialReg=.5;
+                if ~obj.R3DObj.UseStackCorrelation
                 obj.R3DObj.takerefimage();
+                else
+                    obj.R3DObj.takeRefStack();
+                end
+                
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
                 CamSet.EMGain.Value = EMGTemp;
@@ -399,8 +409,16 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on();
                 pause(obj.LampWait);
+                 %%update this lines after new version of Reg3DTrans till
+                %%line 415
+                                obj.R3DObj.ZStackMaxDevInitialReg=.5;
+
+if ~obj.R3DObj.UseStackCorrelation
                 obj.R3DObj.takerefimage();
-                obj.Lamp850Obj.off();
+                else
+                    obj.R3DObj.takeRefStack();
+end
+obj.Lamp850Obj.off();
             end
             
         end
@@ -769,7 +787,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
                     
                     %set timer for IRcamera
-                    obj.TimerIRCamera=timer('StartDelay',.9);
+                    obj.TimerIRCamera=timer('StartDelay',1);
                     obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
                     
                     %set timer for SyringePump
