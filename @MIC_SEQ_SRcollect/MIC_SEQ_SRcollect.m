@@ -100,7 +100,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         Reg3DXTol = 0.005; % (um) correction along x to claim convergence
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
         Reg3DZTol = 0.03; % (um) correction along z to claim convergence
-        Reg3DMaxCorrTol = 0.5; % xcorr peak val. to claim reg. convergence
         
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
@@ -398,7 +397,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.Tol_X = obj.Reg3DXTol;
             obj.AlignReg.Tol_Y = obj.Reg3DZTol;
             obj.AlignReg.Tol_Z = obj.Reg3DZTol;
-            obj.AlignReg.TolMaxCorr = obj.Reg3DMaxCorrTol;
         end
         
         function unloadSample(obj)
