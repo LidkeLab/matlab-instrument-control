@@ -65,6 +65,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
         MaxIter=10;         % max number of iterations for finding back reference position 
+        MaxIterReached = 0; % indicate max number of iterations was reached
         MaxXYShift=5;       % max XY distance (um) stage should move, if found shift is larger it will move this distance
         MaxZShift=0.5;      % max Z distance (um) stage should move, if found shift is larger it will move this distance
         ZFitPos;            % found Z positions
@@ -452,6 +453,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             iter=0;
             WithinTol=0;
+            obj.MaxIterReached = 0;
             while (WithinTol==0)&&(iter<obj.MaxIter)
                 if obj.AbortNow
                     obj.AbortNow = 0;
@@ -679,6 +681,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
             
             if iter==obj.MaxIter
+                obj.MaxIterReached = 1;
                 warning('MIC_Reg3DTrans:MaxIter','Reached max iterations');
             end
             
@@ -1053,6 +1056,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             Data.Image_Reference = obj.Image_Reference;
             Data.Image_Current = obj.Image_Current;
+            Data.MaxIterReached = obj.MaxIterReached;
             if ~isempty(obj.ZFitPos)
                 Data.ZFitPos = obj.ZFitPos;
             end
