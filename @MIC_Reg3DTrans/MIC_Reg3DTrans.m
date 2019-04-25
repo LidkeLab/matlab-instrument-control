@@ -61,11 +61,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZStackMaxDevInitialReg = 1; % max. dev. in z for initial reg.
         XYBorderPx = 10; % # of px. to remove from x and y borders.
         StageSettlingTime = 0; % time for stage to settle after moving (s)
-        TolMaxCorr = 0.5;   % min val. of max xcorr coeff. for convergence
         Tol_X=.01;          % max X shift to reach convergence(um)
         Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
         MaxIter=10;         % max number of iterations for finding back reference position 
+        MaxIterReached = 0; % indicate max number of iterations was reached
         MaxXYShift=5;       % max XY distance (um) stage should move, if found shift is larger it will move this distance
         MaxZShift=0.5;      % max Z distance (um) stage should move, if found shift is larger it will move this distance
         ZFitPos;            % found Z positions
@@ -453,6 +453,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             iter=0;
             WithinTol=0;
+            obj.MaxIterReached = 0;
             while (WithinTol==0)&&(iter<obj.MaxIter)
                 if obj.AbortNow
                     obj.AbortNow = 0;
@@ -543,7 +544,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] ...
+                    [PixelOffset, SubPixelOffset, ~, MaxOffset] ...
                         = obj.findStackOffset(RefStack, CurrentStack, ...
                         MaxOffset, 'FFT', '1D', [], [], [], obj.UseGPU);
                     
@@ -576,8 +577,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         
                         % Determine a predicted offset between the two
                         % stacks.
-                        [PixelOffset, SubPixelOffset, MaxCorr, ...
-                            MaxOffset] = obj.findStackOffset(...
+                        [PixelOffset, SubPixelOffset, ~,MaxOffset] = ...
+                            obj.findStackOffset(...
                             RefStack, CurrentStack, MaxOffsetInput, ...
                             'FFT', '1D', [], [], [], obj.UseGPU);
                         
@@ -628,8 +629,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % set tolerance.
                     StageOffsetTol = [obj.Tol_X; obj.Tol_Y; obj.Tol_Z];
                     WithinTol = ...
-                        all(abs(StageOffset) < StageOffsetTol) ...
-                        && (MaxCorr >= obj.TolMaxCorr);
+                        all(abs(StageOffset) < StageOffsetTol);
                     
                     % Save the error signal.
                     obj.ErrorSignal = StageOffset.';
@@ -681,6 +681,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
             
             if iter==obj.MaxIter
+                obj.MaxIterReached = 1;
                 warning('MIC_Reg3DTrans:MaxIter','Reached max iterations');
             end
             
@@ -1044,7 +1045,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.ZStack_MaxDev = obj.ZStack_MaxDev;
             Attribute.ZStack_Step = obj.ZStack_Step;
             Attribute.ZStack_Pos = obj.ZStack_Pos;
-            Attribute.TolMaxCorr = obj.TolMaxCorr;
             Attribute.Tol_X = obj.Tol_X;
             Attribute.Tol_Y = obj.Tol_Y;
             Attribute.Tol_Z = obj.Tol_Z;
@@ -1056,6 +1056,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             Data.Image_Reference = obj.Image_Reference;
             Data.Image_Current = obj.Image_Current;
+            Data.MaxIterReached = obj.MaxIterReached;
             if ~isempty(obj.ZFitPos)
                 Data.ZFitPos = obj.ZFitPos;
             end
