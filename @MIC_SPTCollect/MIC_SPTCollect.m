@@ -787,7 +787,7 @@ obj.Lamp850Obj.off();
                     obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
                     
                     %set timer for IRcamera
-                    obj.TimerIRCamera=timer('StartDelay',1);
+                    obj.TimerIRCamera=timer('StartDelay',0.9);
                     obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
                     
                     %set timer for SyringePump
