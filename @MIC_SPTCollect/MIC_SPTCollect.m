@@ -315,7 +315,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             % Align to current reference image
             switch obj.RegType
                 case 'Self'
-                    obj.takeref();
+%                     obj.takeref();
                 case 'Ref'
                     if isempty(obj.R3DObj.Image_Reference)
                         obj.loadref();
@@ -804,7 +804,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                     errordlg('Window was closed before capture complete.  No Data Saved.','Capture Failed');
                     return;
                 end
-                
+                if strcmp(obj.SaveFileType,'h5')
+                    obj.IRCameraObj.Data=Image_BF{nn};
+                end 
                 %Save
                 switch obj.SaveFileType
                     case 'mat'
@@ -820,7 +822,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                         S=sprintf('Data%04d',nn)
 %                         MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
                         MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition001',S,sequence);
-
+%                         if ~isempty(Image_BF)
+%                         MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition002',S,Image_BF);
+%                         end 
                     otherwise
                         error('StartSequence:: unknown SaveFileType')
                 end
