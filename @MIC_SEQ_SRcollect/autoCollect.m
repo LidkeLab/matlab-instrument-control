@@ -69,8 +69,12 @@ for ii = 1:obj.NAcquisitionCycles
             % previously performed and the class didn't get cleared).
             obj.AlignReg.ErrorSignalHistory = zeros(0, 3);
         else
+            % Ignore the parts of the error signal history for which the
+            % polynomial fitting procedure wasn't succesful.
+            CoverslipOffsetUpdate = sum(obj.AlignReg.ErrorSignalHistory ...
+                .* obj.AlignReg.OffsetFitSuccessHistory) * 1e-3; % mm
             obj.CoverSlipOffset = obj.CoverSlipOffset ...
-                - sum(obj.AlignReg.ErrorSignalHistory) * 1e-3; % um -> mm
+                - CoverslipOffsetUpdate;
         end
     end
 end
