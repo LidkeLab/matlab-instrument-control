@@ -71,8 +71,15 @@ for ii = 1:obj.NAcquisitionCycles
         else
             % Ignore the parts of the error signal history for which the
             % polynomial fitting procedure wasn't succesful.
+            % NOTE: This will only include updates to the CoverslipOffset
+            %       when the fitting was succesful in all three dimensions.
+            %       This should be done because when the fit fails along
+            %       one of the dimensions, the other two dimensions might
+            %       be fitting local maxima and thus providing inaccurate
+            %       offsets. 
+            FitSuccess = all(obj.AlignReg.OffsetFitSuccessHistory, 2);
             CoverslipOffsetUpdate = sum(obj.AlignReg.ErrorSignalHistory ...
-                .* obj.AlignReg.OffsetFitSuccessHistory) * 1e-3; % mm
+                .* FitSuccess) * 1e-3; % mm
             obj.CoverSlipOffset = obj.CoverSlipOffset ...
                 - CoverslipOffsetUpdate;
         end
