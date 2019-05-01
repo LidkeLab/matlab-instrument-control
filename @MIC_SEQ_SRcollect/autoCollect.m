@@ -58,10 +58,7 @@ for ii = 1:obj.NAcquisitionCycles
             end
         end
         
-        % Begin the acquisition for the current cell.
-        obj.startSequence(RefStruct, obj.LabelIdx);
-        
-        % Update the CoverSlipOffset to account for the observed drift on 
+        % Update the CoverSlipOffset to account for the observed drift on
         % the previous cell.
         if nn == StartCell
             % Ensure the error signal in AlignReg is set to its default, 
@@ -83,6 +80,9 @@ for ii = 1:obj.NAcquisitionCycles
             obj.CoverSlipOffset = obj.CoverSlipOffset ...
                 - CoverslipOffsetUpdate;
         end
+        
+        % Begin the acquisition for the current cell.
+        obj.startSequence(RefStruct, obj.LabelIdx);
     end
 end
 
