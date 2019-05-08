@@ -228,7 +228,7 @@ switch Method
         % Compute the 3D FFT's of each stack, padding with zeros before
         % computing. The padding size selected such that the result is 
         % approximately equivalent to the brute forced cross-correlation. 
-        % NOTE: Ideally, we would pad to 2*size(Stack)-1. Using
+        % NOTE: Typically, we would pad to 2*size(Stack)-1, however using
         %       2*size(Stack) will improve the performance of the FFT when
         %       the dimensions of Stack are powers of 2. 
         Stack1PaddedFFT = fftn(Stack1Whitened, 2 * size(Stack1Whitened));
@@ -238,8 +238,8 @@ switch Method
         XCorr3D = ifftn(conj(Stack1PaddedFFT) .* Stack2PaddedFFT);
         
         % Compute the binary cross-correlation for later use in scaling.
-        Stack1Binary = (Stack1Whitened ~= 0);
-        Stack2Binary = (Stack2Whitened ~= 0);
+        Stack1Binary = BinaryMask .* ones(size(Stack1Whitened));
+        Stack2Binary = BinaryMask .* ones(size(Stack2Whitened));
         Stack1BinaryFFT = fftn(Stack1Binary, 2 * size(Stack1Whitened));
         Stack2BinaryFFT = fftn(Stack2Binary, 2 * size(Stack2Whitened));
         XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
