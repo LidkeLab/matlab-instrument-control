@@ -62,6 +62,8 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
         GuiDialog;                  % GUI dialog for the CameraParameters
                                     % consider making GuiDialog abstract??
+        AcquisitionTimeOutOffset
+        NumImage
     end
     
     methods
@@ -95,9 +97,13 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                     out=obj.getlastimage();
                 case 'sequence'
                     obj.setcurrentcamera();
-                    [obj.LastError, out]=GetAcquiredData16(prod(obj.ImageSize)*obj.SequenceLength);
+                    %get data based on the number of taken images instead
+                    %of SequenceLength
+                    [a b NumImages] =GetNumberAvailableImages;
+%                     c=GetImages;
+                    [obj.LastError, out]=GetAcquiredData16(prod(obj.ImageSize)*NumImages);
                     obj.errorcheck('GetAcquiredData16');
-                    out=reshape(out,[obj.ImageSize(1) obj.ImageSize(2) obj.SequenceLength]);  
+                    out=reshape(out,[obj.ImageSize(1) obj.ImageSize(2) NumImages]);  
             end
         end
         
@@ -357,9 +363,9 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         function out=start_sequence(obj)
             obj.AcquisitionType='sequence';
  
-%             if ~obj.CameraSetting.ManualShutter.Bit
+            if ~obj.CameraSetting.ManualShutter.Bit
                 obj.openShutter();    
-%             end
+            end
             
             if obj.ReadyForAcq==0
                 obj.setup_acquisition();
@@ -374,7 +380,6 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             obj.errorcheck('StartAcquisition');
             [obj.LastError, aqstatus]= AndorGetStatus();
             obj.errorcheck('AndorGetStatus');
-            
             while aqstatus==obj.ErrorCode.DRV_ACQUIRING
                 if obj.AbortNow
                     obj.LastError=AbortAcquisition();
@@ -382,17 +387,32 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                     out=[];
                     break
                 end
-                obj.LastError=WaitForAcquisition;
-                obj.errorcheck('WaitForAcquisition');
+                % fprintf('about to  WaitForAcquisition\n')
+                % we replaced WaitForAcquisition with WaitForAcquisitionTimeOut to run
+                % Andor and IR camera at the same time.
+                obj.LastError=WaitForAcquisitionTimeOut(1000*obj.SequenceCycleTime+obj.AcquisitionTimeOutOffset);
+%                 fprintf('finished WaitForAcquisition\n')
+                if obj.LastError==20024
+                    % This conditions isn't usually satisfied in regular
+                    % SRCollect
+                    warning('Andor Camera Timeout Reached');
+                    %abort acquisition in the case of not collecting data
+                    %as NumFrame
+                    obj.LastError=AbortAcquisition();
+                    break % out of acquiring data        
+                end 
+                    
+                obj.errorcheck('WaitForAcquisitionTimeOut');
                 obj.displaylastimage;
-                [obj.LastError, aqstatus]= AndorGetStatus; 
+                [obj.LastError, aqstatus]= AndorGetStatus;  
                 obj.errorcheck('AndorGetStatus');
             end
-            
-%             close shutter
-%             if ~obj.CameraSetting.ManualShutter.Bit
+            [a b obj.NumImage] =GetNumberAvailableImages;
+
+            % close shutter
+            if ~obj.CameraSetting.ManualShutter.Bit
                 obj.closeShutter;  
-%             end
+            end
             
             if obj.AbortNow
                obj.AbortNow=0;
@@ -593,7 +613,6 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
     methods(Access=protected)
         % shutter control, internal control only...
         function openShutter(obj)
-            if isfield(obj.CameraSetting,'ManualShutter')
             extTTL = 1;
             mode = 1;
             closingtime = 50;
@@ -601,10 +620,8 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             
             obj.LastError = SetShutter(extTTL,mode,closingtime,openingtime);
             obj.errorcheck('SetShutter');
-            end
         end
         function closeShutter(obj)
-            if isfield(obj.CameraSetting,'ManualShutter')
             extTTL = 1;
             mode = 2;
             closingtime = 50;
@@ -612,7 +629,6 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             
             obj.LastError = SetShutter(extTTL,mode,closingtime,openingtime);
             obj.errorcheck('SetShutter');
-            end
         end
         function obj=get_capabilities(obj)
            %things with selectable modes
@@ -1000,7 +1016,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 A.setup_acquisition()
                 A.start_focus()
                 
-                A.AcquisitionType='capture'
+                A.AcquisitionType='capture';
                 A.ExpTime_Capture=.1;
                 A.setup_acquisition()
                 A.KeepData=1;
