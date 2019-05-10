@@ -963,6 +963,7 @@ obj.Lamp850Obj.off();
             Attributes.CameraEMGainLow = obj.CameraEMGainLow;
             Attributes.CameraROI = obj.getROI('Andor');
             Attributes.CameraPixelSize=obj.PixelSize;
+            Attributes.CameraActualExp_Time=obj.CameraObj.SequenceCycleTime;
             Attributes.IRExpTime_Focus_Set=obj.IRExpTime_Focus_Set;
             Attributes.IRExpTime_Sequence_Set=obj.IRExpTime_Sequence_Set;
             Attributes.IRCameraROI=obj.getROI('IRThorlabs');
