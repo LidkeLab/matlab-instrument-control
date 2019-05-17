@@ -802,24 +802,27 @@ properties2gui();
         % Ensure the object properties are set based on the GUI.
         gui2properties();
         
-        % Request user confirmation that they want to reconnect the piezos.
-        UserConfirmation = questdlg(...
-            sprintf(['Reconnecting piezos takes ~1min. \n', ...
-            'Would you like to proceed?']), 'Warning', 'Yes', 'No', 'No');
-        if strcmp(UserConfirmation, 'No')
-            return
-        end
+        % Open the piezo reconnection GUI.
+        obj.guiPiezoReconnection();
         
-        % If the piezo objects exist, delete them.
-        if ~isempty(obj.StagePiezo)
-            obj.StagePiezo.delete();
-        end
-        
-        % Attempt to reconnect to the piezos.
-        obj.setupStagePiezo();        
-        
-        % Reset the AlignReg object to contain the new piezo handles.
-        obj.setupAlignReg();
+%         % Request user confirmation that they want to reconnect the piezos.
+%         UserConfirmation = questdlg(...
+%             sprintf(['Reconnecting piezos takes ~1min. \n', ...
+%             'Would you like to proceed?']), 'Warning', 'Yes', 'No', 'No');
+%         if strcmp(UserConfirmation, 'No')
+%             return
+%         end
+%         
+%         % If the piezo objects exist, delete them.
+%         if ~isempty(obj.StagePiezo)
+%             obj.StagePiezo.delete();
+%         end
+%         
+%         % Attempt to reconnect to the piezos.
+%         obj.setupStagePiezo();        
+%         
+%         % Reset the AlignReg object to contain the new piezo handles.
+%         obj.setupAlignReg();
         
         % Ensure the GUI reflects object properties.
         properties2gui();
