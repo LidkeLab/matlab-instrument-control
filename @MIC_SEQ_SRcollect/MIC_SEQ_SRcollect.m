@@ -236,6 +236,9 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Data = [];
         end
         
+        GuiFig = gui(obj);
+        GuiFig = guiPiezoReconnection(obj);
+        
         function updateStatus(obj, ~, ~)
             % Listener callback for a change of the object property
             % StatusString. 
