@@ -196,6 +196,10 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             obj.StagePiezoX.center();
             obj.StagePiezoY.center();
             obj.StagePiezoZ.center();
+            
+            % Update the piezo position property, assuming a successful
+            % centering.
+            obj.Position = [10, 10, 10];
         end
         
         function setPosition(obj, Position)
@@ -205,7 +209,14 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             obj.StagePiezoZ.setPosition(Position(3));
             
             % Update the position property to the appropriate value.
-            obj.Position = Position;
+            if size(Position, 1) < size(Position, 2)
+                % Position is a row vector, no need to modify it.
+                obj.Position = Position;
+            else
+                % Position is a column vector, we should make it a row
+                % vector.
+                obj.Position = Position.';
+            end
         end
 
         function connectTCubePiezo(obj, StagePiezo, ...

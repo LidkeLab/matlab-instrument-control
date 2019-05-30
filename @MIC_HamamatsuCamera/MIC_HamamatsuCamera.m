@@ -195,18 +195,22 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         function out=start_capture(obj)
             %obj.AcquisitionType='capture';
             obj.abort;
-             obj.AcquisitionType='capture';
+            obj.AcquisitionType='capture';
 %             status=obj.HtsuGetStatus;
 %             if strcmp(status,'Ready')||strcmp(status,'Busy')
 %                 obj.abort;
 %             end
-             obj.setup_acquisition;
+
+            % Call the setup_acquisition method, but do so 'quietly' i.e.
+            % prevent the method from displaying anything in the Command
+            % Window.
+            evalc('obj.setup_acquisition()');
            
             obj.AbortNow=1;
             DcamCapture(obj.CameraHandle);
-            out=obj.getdata;
-%             dipshow(out);
-            obj.abort;
+            out=obj.getdata();
+%             obj.displaylastimage();
+            obj.abort();
             obj.AbortNow=0;
             
             if obj.KeepData
