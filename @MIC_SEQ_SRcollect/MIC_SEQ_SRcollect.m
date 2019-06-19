@@ -110,7 +110,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
     
     properties (SetAccess = protected)
         InstrumentName = 'MIC_SEQ_SRcollect';
-        GUIFigureMain; % object for the main GUI figure for the class
     end
         
     properties (Hidden)
@@ -162,9 +161,13 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function delete(obj)
             % Class destructor.
-            delete(obj.CameraIR);
+            delete(obj.GuiFigure);
+            close all force;
             obj.Laser647.off(); % ensure the 647 laser is turned off
             obj.Laser405.off(); % ensure the 405 laser is turned off
+            obj.FlipMount.FilterIn(); % place ND filter in optical path
+            obj.Shutter.close(); % ensure shutter is blocking 647 laser
+            clear();
         end
         
         function [Attributes, Data, Children] = exportState(obj)
@@ -244,7 +247,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % StatusString. 
             
             % Find the status box object within the GUI.
-            StatusObject = findall(obj.GUIFigureMain, 'Tag', 'StatusText');
+            StatusObject = findall(obj.GuiFigure, 'Tag', 'StatusText');
             
             % Modify the text within the status box to show the current
             % status.

@@ -34,7 +34,7 @@ GuiFig.Color = get(0, 'defaultUicontrolBackgroundColor');
 GuiFig.WindowScrollWheelFcn = @zPiezoControl; % mouse wheel for Z piezo
 handles.output = GuiFig;
 guidata(GuiFig, handles);
-obj.GUIFigureMain = GuiFig; % pass the figure handle to the class instance
+obj.GuiFigure = GuiFig; % pass the figure handle to the class instance
 
 % Create a control panel for the ROI selection tool and add the sub-ROI 
 % selection buttons.
