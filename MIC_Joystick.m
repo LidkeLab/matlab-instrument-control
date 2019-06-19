@@ -1,11 +1,11 @@
 classdef MIC_Joystick < handle
     % Matlab instrument class to control the TIRF stage with a joystick
     % 
-    % This class controls the TIRF stage with a joystick, if said joystick
+    % This class controls a microscope stage with a joystick, if said joystick
     % is turned ON through the GUI. You can change the speed/sensitivity in microns/second 
     % on your joystick with the two edit buttons on the GUI. When turning the
     % joystick ON, you pass in the Stage object and it will graph where you
-    % are at on the TIRF. When the Joystick is ON, a timer function is used
+    % are on the stage. When the Joystick is ON, a timer function is used
     % to check whether you are moving/using the joystick and graphs your position 
     % 10 times per second. On the USB N64 controller use the analog joystick to move in x and y
     % and the top and bottom buttons (yellow up and down buttons) are used to 
@@ -39,38 +39,38 @@ classdef MIC_Joystick < handle
             set(F, 'ToolBar', 'none'); %turn off the toolbar
             F.Tag='JSGUI'; 
             obj.FigGUI=F;
-            F.Name=obj.InstrumentName
+            F.Name=obj.InstrumentName;
             OnButton=uicontrol('Style', 'pushbutton','String', 'On',... 
                 'Position', [10 10 100 50], 'Callback', @startjoystick); % on/off button for joystick, when clicked on the timer begins
             xybutton=uicontrol('Style','edit','String',num2str(obj.MoveScale(1,1)*10),...
-                'Position', [250 30 100 35],'Callback',{@changemovescale,1}) %changes how fast you move in y (sensitivity)
+                'Position', [250 30 100 35],'Callback',{@changemovescale,1}); %changes how fast you move in y (sensitivity)
             zbutton=uicontrol('Style','edit', 'String',num2str(obj.MoveScale(1,2)*10),...
-                'Position', [350 30 100 35],'Callback',{@changemovescale,2}) %changes how fast you move in z (sensitivity)
+                'Position', [350 30 100 35],'Callback',{@changemovescale,2}); %changes how fast you move in z (sensitivity)
             xytext=uicontrol('Style','text', 'String', 'xy microns/second',...
-                'Position',[250 5 100 20])  %text box in GUI to explain your changeing sensitivity of x y
+                'Position',[250 5 100 20]);  %text box in GUI to explain your changeing sensitivity of x y
             ztext=uicontrol('Style','text', 'String', 'z microns/second',...
-                'Position',[350 5 100 20])  %text box in GUI to explain your changeing sensitivity of z
+                'Position',[350 5 100 20]);  %text box in GUI to explain your changeing sensitivity of z
             ooaxistext=uicontrol('Style','text', 'String', '0,0',...
-                'Position',[20 70 20 20]) %corner axis labels
+                'Position',[20 70 20 20]); %corner axis labels
             oymaxaxistext=uicontrol('Style','text', 'String', sprintf("%d,%d",0,obj.StageObj.Max_Y),...
-                'Position',[10 260 30 20]) %corner axis labels
+                'Position',[10 260 30 20]); %corner axis labels
             xmaxymaxaxistext=uicontrol('Style','text', 'String', sprintf("%d,%d",obj.StageObj.Max_X,obj.StageObj.Max_Y),...
-                'Position',[260 260 50 20]) %corner axis labels
+                'Position',[260 260 50 20]); %corner axis labels
             xmaxoaxistext=uicontrol('Style','text', 'String', sprintf("%d,%d",obj.StageObj.Max_X,0),...
-                'Position',[260 75 30 20]) %corner axis labels
+                'Position',[260 75 30 20]); %corner axis labels
             ozaxistext=uicontrol('Style','text', 'String', '0',...
-                'Position',[365 80 10 15]) %corner axis labels
+                'Position',[365 80 10 15]); %corner axis labels
             zmaxaxistext=uicontrol('Style','text', 'String', sprintf("%d",obj.StageObj.Max_Z),...
-                'Position',[360 260 30 20]) %corner axis labels
+                'Position',[360 260 30 20]); %corner axis labels
             Ax1=axes();
             Ax1.Position=[.1 .3 .4 .6]; %specify the position of the axis
-            Ax1.XTick=[] %turn off the tick marks on axis
-            Ax1.YTick=[]
+            Ax1.XTick=[]; %turn off the tick marks on axis
+            Ax1.YTick=[];
             Ax2=axes();
             Ax2.Position=[.7 .3 .005 .6];
             Ax2.XTick=[];
             Ax2.YTick=[];
-            obj.JS_activate=0  % JS_activate is used to tell if the Joystick is on, if 1 it's on, if 0 it's off
+            obj.JS_activate=0;  % JS_activate is used to tell if the Joystick is on, if 1 it's on, if 0 it's off
             function changemovescale(source,~,num) %function which changes sensitivity 
                 obj.MoveScale(1,num)=str2double(source.String)/10; %figures out which axis you want to change and converts your input to the property "MoveScale"
             end
@@ -84,8 +84,8 @@ classdef MIC_Joystick < handle
                     case 0
                 set(OnButton,'String', 'Running', 'BackgroundColor','g') % Joystick is on button says running and is green
                 obj.JSObj = HebiJoystick(1); % Brings in the HebiJoystick code which allows you use the joystick in matlab
-                obj.JS_activate=1 % JS_activate set to 1 and Joystick is on
-                obj.TimerObj=timer('ExecutionMode','fixedRate','Period',.1,'TimerFcn',@movestage) %timer obj which calls movestage function every .1 second
+                obj.JS_activate=1; % JS_activate set to 1 and Joystick is on
+                obj.TimerObj=timer('ExecutionMode','fixedRate','Period',.1,'TimerFcn',@movestage); %timer obj which calls movestage function every .1 second
                 start(obj.TimerObj) %start the timer since button is on
                    
                 end
