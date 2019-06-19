@@ -15,11 +15,13 @@ function [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
 %       then PixelOffset = findStackOffset(Stack1, Stack2) == [x; y; z]
 % NOTE: All inputs besides Stack1 and Stack2 are optional and can be
 %       replaced by [] (an empty array).
+% NOTE: Stack1 and Stack2 must be the same size in all 3 dimensions (x, y,
+%       and z)
 %
 % INPUTS:
 %   Stack1: (mxnxo) The stack to which Stack2 is compared to, i.e. 
 %           Stack1 is the reference stack.
-%   Stack2: (pxqxr) The stack for which the offset relative to Stack1 
+%   Stack2: (mxnxo) The stack for which the offset relative to Stack1 
 %           is to be determined.
 %   MaxOffset: (3x1 or 1x3)(default = [2; 2; 2]) Maximum offset between 
 %           Stack1 and Stack2 to be considered in the calculation of
@@ -117,6 +119,13 @@ if ~exist('PlotFlag', 'var') || isempty(PlotFlag)
 end
 if ~exist('BinaryMask', 'var') || isempty(BinaryMask)
     BinaryMask = ones(size(Stack1));
+    if (size(Stack1, 3) == 1) || (size(Stack2, 3) == 1)
+        % One or both of the stacks are just a single image, so we need to
+        % change the size of the BinaryMask to account for that (single
+        % images are converted to a 3D stack later on by copying the image
+        % twice in the z dimension).
+        BinaryMask = repmat(BinaryMask, [1, 1, 2]);
+    end
 end
 if ~exist('UseGPU', 'var') || isempty(UseGPU)
     UseGPU = 1;
