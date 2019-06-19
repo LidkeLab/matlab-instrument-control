@@ -314,8 +314,8 @@ classdef MIC_SPTCollect < MIC_Abstract
         function align(obj)
             % Align to current reference image
             switch obj.RegType
-                case 'Self'
-                    obj.takeref();
+%                 case 'Self'
+% %                     obj.takeref();
                 case 'Ref'
                     if isempty(obj.R3DObj.Image_Reference)
                         obj.loadref();
@@ -337,6 +337,8 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on();
                 pause(obj.LampWait);
+                obj.R3DObj.ZStackMaxDevInitialReg=.5;
+                obj.R3DObj.UseStackCorrelation=1; %for 3D Reg correlation
                 obj.R3DObj.align2imageFit();
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
@@ -352,7 +354,9 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on();
                 pause(obj.LampWait);
-                obj.R3DObj.align2imageFit();
+                obj.R3DObj.ZStackMaxDevInitialReg=.5;
+                obj.R3DObj.UseStackCorrelation=1; %for 3D Reg correlation
+                 obj.R3DObj.align2imageFit();
                 obj.Lamp850Obj.off();
             end
         end
@@ -379,7 +383,15 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on();
                 pause(obj.LampWait);
+                %%update this lines after new version of Reg3DTrans till
+                %%line 390
+                obj.R3DObj.ZStackMaxDevInitialReg=.5;
+                if ~obj.R3DObj.UseStackCorrelation
                 obj.R3DObj.takerefimage();
+                else
+                    obj.R3DObj.takeRefStack();
+                end
+                
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
                 CamSet.EMGain.Value = EMGTemp;
@@ -397,8 +409,16 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.Lamp850Obj.setPower(obj.Lamp850Power);
                 obj.Lamp850Obj.on();
                 pause(obj.LampWait);
+                 %%update this lines after new version of Reg3DTrans till
+                %%line 415
+                                obj.R3DObj.ZStackMaxDevInitialReg=.5;
+
+if ~obj.R3DObj.UseStackCorrelation
                 obj.R3DObj.takerefimage();
-                obj.Lamp850Obj.off();
+                else
+                    obj.R3DObj.takeRefStack();
+end
+obj.Lamp850Obj.off();
             end
             
         end
@@ -692,7 +712,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                 obj.CameraObj.setCamProperties(CamSet);
                 obj.CameraObj.ExpTime_Sequence=obj.ExpTime_Sequence_Set;
                 obj.CameraObj.SequenceLength=obj.NumFrames;
-                %                 obj.CameraObj.AcquisitionTimeOutOffset=10000;
+                                obj.CameraObj.AcquisitionTimeOutOffset=10000;
                 obj.CameraObj.ROI=obj.getROI('Andor');
                 %                 fprintf('EM Gain\n')
                 obj.CameraObj.CameraSetting.EMGain
@@ -767,7 +787,7 @@ classdef MIC_SPTCollect < MIC_Abstract
                     obj.IRCameraObj.KeepData=1; % image is saved in IRCamera.Data
                     
                     %set timer for IRcamera
-                    obj.TimerIRCamera=timer('StartDelay',.5);
+                    obj.TimerIRCamera=timer('StartDelay',0.9);
                     obj.TimerIRCamera.TimerFcn={@IRCamerasequenceTimerFcn,obj.IRCameraObj}
                     
                     %set timer for SyringePump
@@ -943,6 +963,7 @@ classdef MIC_SPTCollect < MIC_Abstract
             Attributes.CameraEMGainLow = obj.CameraEMGainLow;
             Attributes.CameraROI = obj.getROI('Andor');
             Attributes.CameraPixelSize=obj.PixelSize;
+            Attributes.CameraActualExp_Time=obj.CameraObj.SequenceCycleTime;
             Attributes.IRExpTime_Focus_Set=obj.IRExpTime_Focus_Set;
             Attributes.IRExpTime_Sequence_Set=obj.IRExpTime_Sequence_Set;
             Attributes.IRCameraROI=obj.getROI('IRThorlabs');
@@ -974,4 +995,3 @@ classdef MIC_SPTCollect < MIC_Abstract
         
     end
 end
-
