@@ -35,12 +35,12 @@ php = ph*ysz;
 hFilePanel = uipanel('Parent',guiFig,'Title','FILE','Position',[(1-pw)/2 refh-ph-psep pw ph]);
 refh=refh-ph-psep;
 
-FlieDir=uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String', 'Save Directory:','Enable','off','Position', [staticst php-40 100 20]);
-Edit_FileDir= uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String','Set Auto','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-40 250 20]);
+FileDirectory=uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String', 'Save Directory:','Enable','off','Position', [staticst php-40 100 20]);
+Edit_FileDirectory= uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String','Set Auto','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-40 250 20]);
 FileName=uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String', 'Base FileName:','Enable','off','Position', [staticst php-65 100 20]);
 Edit_FileName= uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String','Set Auto','Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-65 250 20]);
 FileType = uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String','File type:','Enable','off','Position', [staticst php-90 100 20]);
-Edit_saveFileType = uicontrol('Parent',hFilePanel, 'Style', 'popupmenu', 'String',{'.mat','.h5'},'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-90 250 20],'CallBack',@saveFile);
+Edit_saveFileType = uicontrol('Parent',hFilePanel, 'Style', 'popupmenu', 'String',{'.mat','.h5'},'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-90 250 20],'CallBack',{@saveFile_Callback});
 
 
 % Camera Panel
@@ -49,8 +49,9 @@ php = ph*ysz;
 hCameraPanel = uipanel('Parent',guiFig,'Title','CAMERA','Position',[(1-pw)/2 refh-ph-psep pw ph]);
 refh=refh-ph-psep;
 
-Y_Range = uicontrol('Parent',hCameraPanel, 'Style', 'text', 'String','Y Range:','Enable','off','Position', [staticst php-60 100 20]);
-Y_Range = uicontrol('Parent',hCameraPanel, 'Style', 'popupmenu', 'String',{'32','64','128','256','405'},'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-60 250 20],'CallBack',@setmap);
+Y_Range = uicontrol('Parent',hCameraPanel, 'Style','text','String','Y Range:','Enable','off','Position', [staticst php-60 100 20]);
+ROIlist = {'460','256','128','64','32'};
+Edit_Y_Range = uicontrol('Parent',hCameraPanel, 'Style','popupmenu','String',ROIlist,'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-60 250 20]);
 
 ExposureTime = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Exp. Time Focus:','Enable','off','Position', [staticst php-100 140 20]);
 Edit_ExposureTime = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','0.01','Enable','on','BackgroundColor',[1 1 1],'Position', [editst+40 php-100 50 20]);
@@ -58,23 +59,23 @@ CameraExpTimeFocusActual = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'St
 Edit_CameraExpTimeFocusActual = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','','Enable','off','Position', [330 php-100 50 20]);
 
 ScansPerSecond = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Scans per second:','Enable','off','Position', [staticst php-130 140 20]);
-Edit_ScansPerSecond = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','0.01','Enable','off','BackgroundColor',[1 1 1],'Position', [editst+40 php-130 50 20]);
+Edit_ScansPerSecond = uicontrol('Parent',hCameraPanel, 'Style', 'edit','Enable','off','BackgroundColor',[1 1 1],'Position', [editst+40 php-130 50 20]);
 
-NSeqBeforeRegistration = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','N_Seq Before Reg','Enable','off','Position', [215 php-130 140 20]);
-Edit_NSeqBeforeRegistration = uicontrol('Parent',hCameraPanel, 'Style', 'edit','Enable','on','Position', [330 php-130 50 20]);
+DataCube = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','No of Data cubes','Enable','off','Position', [215 php-130 140 20]);
+Edit_DataCube = uicontrol('Parent',hCameraPanel, 'Style', 'edit','Enable','on','Position', [330 php-130 50 20]);
 
 NumberofSteps = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Number of Steps per Scan:','Enable','off','Position', [staticst php-160 140 20]);
 Edit_NumberofSteps = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','200','Enable','on','BackgroundColor',[1 1 1],'Position', [editst+40 php-160 50 20]);
 
-NumberofScans = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Number of Scans:','Enable','off','Position', [215 php-160 140 20]);
+NumberofScans = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Number of Sequences:','Enable','off','Position', [215 php-160 140 20]);
 Edit_NumberofScans = uicontrol('Parent',hCameraPanel, 'Style','edit','Enable','on','BackgroundColor',[1 1 1],'Position', [330 php-160 50 20]);
 
 
 
-% Registration Panel
+% Calibration Panel
 ph=0.09;
 php = ph*ysz;
-hRegPanel = uipanel('Parent',guiFig,'Title','REGISTRATION','Position',[(1-pw)/2 refh-ph-psep pw ph]);
+hRegPanel = uipanel('Parent',guiFig,'Title','CALIBRATION','Position',[(1-pw)/2 refh-ph-psep pw ph]);
 refh=refh-ph-psep;
 
 CameraCalibration = uicontrol('Parent',hRegPanel, 'Style', 'toggle', 'String','Calibrate Camera:','Enable','on','Position', [staticst php-40 100 20],'Callback',{@CameraCalibration_Callback});
@@ -87,7 +88,7 @@ WavelengthCalibration =uicontrol('Parent',hRegPanel, 'Style', 'toggle',...
 
 % LIGHTSOURCE Panel
 ph=0.3;
-hLampPanel = uipanel('Parent',guiFig,'Title','LIGHT SOURCE','Position',[(1-pw)/2 refh-ph-psep pw ph]);
+hLampPanel = uipanel('Parent',guiFig,'Title','LASER AND SPECTROMETER','Position',[(1-pw)/2 refh-ph-psep pw ph]);
 refh=refh-ph-psep;
 
 
@@ -133,26 +134,18 @@ guiFig.Visible = 'on';
 properties2gui();
 
 %% Figure Callbacks
-%
-% function y_range_set(~,~)
-% str = obj.String;
-% val = obj.Value;
-% % Set current data to the selected data set.
-% switch str{val};
-%     case '32' % User selects Peaks.
-%         current_data = peaks_data;
-%     case '64' % User selects Membrane.
-%         current_data = membrane_data;
-%     case '128' % User selects Sinc.
-%         current_data = sinc_data;
-%     case '256' % User selects Sinc.
-%         current_data = sinc_data;
-%
-%     case '405' % User selects Sinc.
-%         current_data = sinc_data;
-% end
-% end
-%
+
+
+    function saveFile_Callback(~,~)
+        file_val=get(Edit_saveFileType,'value');
+        switch file_val
+            case 1
+                obj.SaveFileType='mat';
+            case 2
+                obj.SaveFileType='h5';
+        end
+    end
+
     function ToggleLaser_Callback(~,~)
         gui2properties();
         if obj.LaserObj.IsOn == 0
@@ -172,7 +165,7 @@ properties2gui();
             obj.LampObj.on;
         else
             obj.LampObj.off;
-            %            pause(obj.LampWait);
+            %  pause(obj.LampWait);
             properties2gui();
         end
     end
@@ -184,8 +177,8 @@ properties2gui();
             obj.LaserObj.off
             obj.scanFocus();
         else
-        obj.scanFocus();
-        properties2gui();
+            obj.scanFocus();
+            properties2gui();
         end
     end
 
@@ -203,10 +196,9 @@ properties2gui();
         properties2gui();
     end
 
-%      function export_data_Callback(~,~)
-%         gui2properties();
-%         obj.export_data();
-%     end
+
+%
+
 %
 %     function CameraCalibration_Callback(~,~)
 %         gui2properties();
@@ -234,32 +226,29 @@ properties2gui();
 
 %
     function gui2properties()
-        %         %Get GUI values and update to object properties
+        %Get GUI values and update to object properties
         
         obj.NSteps=str2double(get(Edit_NumberofSteps,'string'));
-        obj.NSeqBeforeRegistration=str2double(get(Edit_NSeqBeforeRegistration,'string'));
+        obj.DataCube=str2double(get(Edit_DataCube,'string'));
         obj.Nsequences=str2double(get(Edit_NumberofScans,'string'));
-        %         obj.SaveDir=get(Edit_FileDirectory,'String');
-        
-        
-        
-        %         obj.BaseFileName=get(Edit_FileName,'String');
-        %         obj.ExpTime_Focus_Set=str2double(get(Edit_CameraExpTimeFocusSet,'string'));
+        obj.SaveDir=get(Edit_FileDirectory,'String');
+        obj.BaseFileName=get(Edit_FileName,'String');
+        obj.CameraROI=get(Edit_Y_Range,'value');
+        %         obj.Exp_Scan=str2double(get(Edit_ExposureTime,'string'));
         %         obj.ExpTime_Sequence_Set=str2double(get(Edit_CameraExpTimeSeqSet,'string'));
         %         obj.NumFrames=str2double(get(Edit_CameraNumFrames,'string'));
-        %         obj.NumberofSteps=str2double(get(Edit_ControlNSequence,'string'));
         %         obj.RegType=get(get(ButtonGroup_RegCollectType,'SelectedObject'),'Tag');
         
     end
 
     function properties2gui()
-        %         %Set GUI values from object properties
-        %         set(Edit_FileDirectory,'String',obj.SaveDir);
-        %         set(Edit_FileName,'String',obj.BaseFileName);
-        %
+        %Set GUI values from object properties
+        set(Edit_FileDirectory,'String',obj.SaveDir);
+        set(Edit_FileName,'String',obj.BaseFileName);
+        set(Edit_Y_Range,'value',obj.CameraROI);
         %         set(Edit_CameraExpTimeFocusSet,'string',num2str(obj.ExpTime_Focus_Set));
         %         set(Edit_CameraExpTimeSeqSet,'string',num2str(obj.ExpTime_Sequence_Set));
-        %          set(Edit_LaserPower,'string',num2str(obj.Laserobj.MaxPower));
+        set(Edit_LaserPower,'string',num2str(obj.LaserObj.MaxPower));
         %         set(Edit_CameraNumFrames,'string',num2str(obj.NumFrames));
         %         set(Edit_RegFileName,'string',obj.R3DObj.RefImageFile);
         %

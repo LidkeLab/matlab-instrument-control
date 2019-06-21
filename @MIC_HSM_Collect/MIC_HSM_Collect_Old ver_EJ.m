@@ -17,6 +17,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
     
     
     
+    
     properties
         % objardware objects
         CameraZyla;      % Andor Camera
@@ -33,16 +34,17 @@ classdef MIC_HSM_Collect < MIC_Abstract
         LampAq;         % Flag for using lamp during acquisition
         LampWait=2.5;   % Lamp wait time
         % Other things
-        DataDir='h:\';
+        DataDir='h:\'; 
         SaveDir='h:\';  % Save Directory
         BaseFileName='Cell1';   % Base File Name
         AbortNow=0;     % Flag for aborting acquisition
         RegType='None'; % Registration type, can be 'None', 'Self' or 'Ref'
         SaveFileType='mat'  %Save to *.mat or *.H5.  Options are 'mat' or 'H5'
-        % Zyla ROI
-        
-        CameraROI=1; %Camera ROI (see gui for specifics)
-        
+        %          HSMMaxROI=[852 1335 890 1400];%for Atto 488
+        %         HSMMaxROI=[1000 1300 900 1500];%for Atto 520
+        %         ROI =[1000 1300 900 1500];%for Atto 520
+        HSMMaxROI=[785 1150 930 1400];%for tetraspek beads
+        ROI=[800 1050 900 1500]; % Camera ROI [LeftTop ...]
         % Camera params
         Exp_Focus = 0.1;
         PixelSizeLuca;                   % Pixel size determined from calibration
@@ -54,15 +56,14 @@ classdef MIC_HSM_Collect < MIC_Abstract
         StepAngle = 0.00186; % Step angle in degrees 0.00186
         Exp_Scan = 0.02;
         Nsequences =20;
-        %         NSeqBeforeRegistration = 5;
-        DataCube = 5;% data cubes
+        NSeqBeforeRegistration = 5;
         sequence_1;
         sequence_2;
         sequence_3;
         % Background
         BackgroundScanN = 500;
         Background;
-        clibImage;
+        
     end
     
     properties (SetAccess = protected)
@@ -142,7 +143,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     fprintf('Calibrating camera and stage ...\n')
                     pause(obj.LampWait);
                     %                 obj.R3DObj.align2imageFit();
-                    obj.R3DObj.CameraObj.ROI=[100 900 100 900]; %luca
+                    obj.R3DObj.CameraObj.ROI=[100 900 100 900];
                     obj.R3DObj.calibrate();
                     obj.LampObj.off();
                     %             obj.CameraLuca.ROI=[100 900 100 900];
@@ -161,7 +162,6 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 error('hardware startup error');
                 
             end
-            
             %Set save directory
             user_name = 'Data'; %java.lang.System.getProperty('user.name');
             timenow=clock;
@@ -255,6 +255,8 @@ classdef MIC_HSM_Collect < MIC_Abstract
         function takeref(obj)
             % Captures reference image
             %set the Andor Camera
+            
+            
             CamSet = obj.R3DObj.CameraObj.CameraSetting; %take the saved setting
             %set the mannualShutter be one
             EMGTemp = CamSet.EMGain.Value;
@@ -293,35 +295,24 @@ classdef MIC_HSM_Collect < MIC_Abstract
         end
         
         function focus_raw(obj)
-            obj.CameraZyla.ROI=obj.getROI();
-            
+            obj.CameraZyla.ROI = obj.ROI;
             obj.CameraZyla.ExpTime_Focus= obj.Exp_Focus;
             obj.CameraZyla.start_focus();
         end
         
         function collect_background(obj)
-            
-            obj.CameraZyla.ROI=obj.getROI();
+            obj.CameraZyla.ROI = obj.ROI;
             obj.CameraZyla.ExpTime_Sequence=obj.Exp_Scan;
             obj.CameraZyla.SequenceLength = obj.BackgroundScanN;
             obj.CameraZyla.start_sequence();
             obj.Background = single(mean(obj.CameraZyla.Data,3));
         end
         
-         function collect_clibImage(obj)
-            
-            obj.CameraZyla.ROI=obj.getROI();
-            obj.CameraZyla.ExpTime_Sequence=obj.Exp_Scan;
-            obj.CameraZyla.SequenceLength = 10;
-            obj.CameraZyla.start_sequence();
-            obj.clibImage = single(mean(obj.CameraZyla.Data,3));
-        end
         function Data=single_scan(obj)
             % Setup camera
             obj.CameraZyla.ExpTime_Sequence=obj.Exp_Scan;
             obj.CameraZyla.SequenceLength = obj.NSteps;
-            obj.CameraZyla.ROI=obj.getROI();
-            
+            obj.CameraZyla.ROI = obj.ROI;
             
             % Setup Galvo
             obj.GalvoObj.N_Step =obj.NSteps;
@@ -346,7 +337,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
             
         end
         function scanFocus(obj)
-            obj.CameraZyla.ROI=obj.getROI();
+            
             %Take background scan
             obj.BackgroundScanN=100;
             obj.collect_background();
@@ -371,7 +362,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
         end
         function single_scan_sequence(obj)
             
-            
+           
             obj.FlipMount.FilterOut;
             fprintf('IsOpen == %d\n', obj.FlipMount.IsOpen);
             %create save folder and filenames
@@ -399,79 +390,74 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     MIC_H5.createFile(FileH5);
                     MIC_H5.createGroup(FileH5,'Data');
                     MIC_H5.createGroup(FileH5,'Calibration');
-                otherwise
+                    otherwise
                     error('StartSequence:: unknown file save type')
             end
+            
+            
+            
             
             obj.FlipMount.FilterIn;
             fprintf('IsOpen == %d\n', obj.FlipMount.IsOpen);
             
-            %Take background scan
-            obj.CameraZyla.abort()% Clear buffer
             
+            
+            obj.CameraZyla.abort()
+            %Take background scan
             obj.LaserObj.off()
             obj.BackgroundScanN=100;
             obj.collect_background();
             dipshow(obj.Background)
             
-            ROISZ = obj.CameraZyla.ROI;
-            %loop over sequences
-            for nn=1:obj.DataCube
-                nn
-                Data = ones(ROISZ(2)-ROISZ(1)+1,obj.NSteps,ROISZ(4)-ROISZ(3)+1,obj.Nsequences);
-                for ii = 1:obj.Nsequences
-                    ii
-                    %Turn on Laser for aquisition
-                    obj.LaserObj.on();
-                    %Collect
-                    Data(:,:,:,ii)=obj.single_scan();
-                    %Turn off Laser
-                    obj.LaserObj.off();
-                end
-                Data = uint16(Data);
-                %Save
-                switch obj.SaveFileType
-                    case 'mat'
-                        fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
-                        Params=exportState(obj); %#ok<NASGU>
-                        save(fn,'Data','Params');
-                    case 'h5' %This will become default
-                        S=sprintf('Data_C%04d',nn);
-                        MIC_H5.writeAsync_uint16(FileH5,'Data',S,Data);
-                    otherwise
-                        error('StartSequence:: unknown SaveFileType')
-                end
-                
-                
-                switch obj.SaveFileType
-                    case 'mat'
-                        %Nothing to do
-                    case 'h5' %This will become default
-                        % S='MIC_TIRF_SRcollect'; % -modified SP
-                        S='Data'; % -modified EJ
-                        MIC_H5.createGroup(FileH5,S);
-                        obj.save2hdf5(FileH5,S);  %Working
-                    otherwise
-                        error('StartSequence:: unknown SaveFileType')
-                end
-                
-                % align
-                if nn~=obj.DataCube
+%             obj.sequence_1 = zeros(obj.ROI(2)-obj.ROI(1)+1,obj.NSteps,obj.Nsequences);
+%             obj.sequence_2 = zeros(obj.ROI(2)-obj.ROI(1)+1,obj.NSteps,obj.Nsequences);
+%             obj.sequence_3 = zeros(obj.ROI(2)-obj.ROI(1)+1,obj.NSteps,obj.Nsequences);
+%             F=figure
+%             Y=figure
+%             P=figure
+
+%loop over sequences
+            for ii=1:obj.Nsequences
+                ii
+                if ~mod(ii, obj.NSeqBeforeRegistration)
+                    pause(1)
                     obj.FlipMount.FilterOut;
                     
                     fprintf('Start aliging...\n')
                     obj.align();% Align
                     fprintf('Alignment is done...\n')
-             
+                    
+                    
                     obj.FlipMount.FilterIn;
                     pause(1)
-                else
+                    
                 end
+                obj.LaserObj.on();
+                Data=obj.single_scan();
+                DataXY_1=sum(Data(:,:,330:370),3);% 530nm spectra selection
+                DataXY_2=sum(Data(:,:,370:400),3);% 488nm spectra selection
+%                 DataXY_3=sum(Data(:,:,200:470),3);
+                obj.sequence_1(:,:,ii)=DataXY_1;
+                obj.sequence_2(:,:,ii)=DataXY_2;
+%                 obj.sequence_3(:,:,ii)=DataXY_3;
+%                 dipshow(F,DataXY_1)
+%                 diptruesize(200)
+%                 dipshow(Y,DataXY_2)
+%                 diptruesize(200)
+%                 dipshow(P,DataXY_2)
+%                 diptruesize(200)
+                obj.LaserObj.off();
+                
+                
+                
             end
+            
+            
+         
+            
         end
-        
         function singleScan(obj)
-            obj.CameraZyla.ROI=obj.getROI();
+           
             obj.LaserObj.off()
             obj.BackgroundScanN=100;
             obj.collect_background();
@@ -481,25 +467,151 @@ classdef MIC_HSM_Collect < MIC_Abstract
             dipshow(sum(Data(:,:,:),3))
             diptruesize(100)
         end
-        %Set ROI for zylaCamera
-        function ROI=getROI(obj)
-            %these could be set from camera size;
-            switch obj.CameraROI
-                case 1
-                    ROI=[712 1172 700 1500]; %460pixels
-                case 2
-                    ROI=[814 1070 700 1500];%256pixels
-                case 3
-                    ROI=[878 1006 700 1500];%128pixels
-                case 4
-                    ROI=[910 974 700 1500];%64pixels
-                case 5
-                    ROI=[926 958 700 1500];%32pixels
-                    
-                otherwise
-                    error('HSM_collect: ROI not found')
+        function atLiveMode(obj)
+            % Used for checking pinhole alignment
+            disp('Andor SDK3 Live Mode Example');
+            [rc] = AT_InitialiseLibrary();
+            AT_CheckError(rc);
+            [rc,hndl] = AT_Open(0);
+            AT_CheckError(rc);
+            disp('Camera initialized');
+            [rc] = AT_SetFloat(hndl,'ExposureTime',0.1);
+            AT_CheckWarning(rc);
+            [rc] = AT_SetEnumString(hndl,'CycleMode','Continuous');
+            AT_CheckWarning(rc);
+            [rc] = AT_SetEnumString(hndl,'TriggerMode','Software');
+            AT_CheckWarning(rc);
+            [rc] = AT_SetEnumString(hndl,'SimplePreAmpGainControl','16-bit (low noise & high well capacity)');
+            AT_CheckWarning(rc);
+            [rc] = AT_SetEnumString(hndl,'PixelEncoding','Mono16');
+            AT_CheckWarning(rc);
+            [rc] = AT_SetInt(hndl,'AOIWidth',1400);
+            [rc] = AT_SetInt(hndl,'AOILeft',250);
+            [rc] = AT_SetInt(hndl,'AOIHeight',1400);
+            [rc] = AT_SetInt(hndl,'AOITop',300);
+            [rc,imagesize] = AT_GetInt(hndl,'ImageSizeBytes');
+            % AT_CheckWarning(rc);
+            [rc,height] = AT_GetInt(hndl,'AOIHeight');
+            % AT_CheckWarning(rc);
+            [rc,width] = AT_GetInt(hndl,'AOIWidth');
+            % AT_CheckWarning(rc);
+            [rc,stride] = AT_GetInt(hndl,'AOIStride');
+            % AT_CheckWarning(rc);
+            warndlg('To Abort the acquisition close the image display.','Starting Acquisition')
+            disp('Starting acquisition...');
+            [rc] = AT_Command(hndl,'AcquisitionStart');
+            AT_CheckWarning(rc);
+            buf2 = zeros(width,height);
+            h=imagesc(buf2);
+            while(ishandle(h))
+                [rc] = AT_QueueBuffer(hndl,imagesize);
+                AT_CheckWarning(rc);
+                [rc] = AT_Command(hndl,'SoftwareTrigger');
+                AT_CheckWarning(rc);
+                [rc,buf] = AT_WaitBuffer(hndl,1000);
+                AT_CheckWarning(rc);
+                [rc,buf2] = AT_ConvertMono16ToMatrix(buf,height,width,stride);
+                AT_CheckWarning(rc);
+                set(h,'CData',buf2);
+                drawnow;
+                
             end
+            
+            P=prctile(buf2(buf2>0),99.9);
+            buf2(buf2>P)=P;
+            h=imagesc(buf2);
+            set(h,'CData',buf2);
+            
+            disp('Acquisition complete');
+            [rc] = AT_Command(hndl,'AcquisitionStop');
+            AT_CheckWarning(rc);
+            [rc] = AT_Flush(hndl);
+            AT_CheckWarning(rc);
+            [rc] = AT_Close(hndl);
+            AT_CheckWarning(rc);
+            [rc] = AT_FinaliseLibrary();
+            AT_CheckWarning(rc);
+            disp('Camera shutdown');
+
         end
+        function atKineticSeries(obj)
+            %Used to take images for calibration
+            disp('Andor SDK3 Kinetic Series Example');
+            [rc] = AT_InitialiseLibrary();
+            AT_CheckError(rc);
+            [rc,hndl] = AT_Open(0);
+            AT_CheckError(rc);
+            disp('Camera initialized');
+            [rc] = AT_SetFloat(hndl,'ExposureTime',0.05);
+            AT_CheckWarning(rc);
+            [rc] = AT_SetEnumString(hndl,'CycleMode','Fixed');
+            AT_CheckWarning(rc);
+            [rc] = AT_SetEnumString(hndl,'TriggerMode','Internal');
+            AT_CheckWarning(rc);
+            [rc] = AT_SetEnumString(hndl,'SimplePreAmpGainControl','16-bit (low noise & high well capacity)');
+            AT_CheckWarning(rc);
+            [rc] = AT_SetEnumString(hndl,'PixelEncoding','Mono16');
+            AT_CheckWarning(rc);
+            prompt = {'Enter Acquisition name','Enter number of images'};
+            dlg_title = 'Configure acquisition';
+            num_lines = 1;
+            def = {'acquisition','10'};
+            answer = inputdlg(prompt,dlg_title,num_lines,def);
+            filename = cell2mat(answer(1));
+            frameCount = str2double(cell2mat(answer(2)));
+            [rc] = AT_SetInt(hndl,'FrameCount',frameCount);
+            AT_CheckWarning(rc); 
+            [rc] = AT_SetInt(hndl,'AOIWidth',1400);
+            [rc] = AT_SetInt(hndl,'AOILeft',250);
+            [rc] = AT_SetInt(hndl,'AOIHeight',1400);
+            [rc] = AT_SetInt(hndl,'AOITop',300);
+            [rc,imagesize] = AT_GetInt(hndl,'ImageSizeBytes');
+            AT_CheckWarning(rc);
+            [rc,height] = AT_GetInt(hndl,'AOIHeight');
+            AT_CheckWarning(rc);
+            [rc,width] = AT_GetInt(hndl,'AOIWidth');
+            AT_CheckWarning(rc);
+            [rc,stride] = AT_GetInt(hndl,'AOIStride');
+            AT_CheckWarning(rc);
+            for X = 1:10
+                [rc] = AT_QueueBuffer(hndl,imagesize);
+                AT_CheckWarning(rc);
+            end
+            disp('Starting acquisition...');
+            [rc] = AT_Command(hndl,'AcquisitionStart');
+            AT_CheckWarning(rc);
+            i=0;
+            while(i<frameCount)
+                [rc,buf] = AT_WaitBuffer(hndl,1000);
+                AT_CheckWarning(rc);
+                [rc] = AT_QueueBuffer(hndl,imagesize);
+                AT_CheckWarning(rc);
+                [rc,buf2] = AT_ConvertMono16ToMatrix(buf,height,width,stride);
+                AT_CheckWarning(rc);
+                P=prctile(buf2(buf2>0),99.9);
+                buf2(buf2>P)=P;
+                h=imagesc(buf2);
+                set(h,'CData',buf2);
+                
+                thisFilename = strcat(filename, num2str(i+1), '.tiff');
+                disp(['Writing Image ', num2str(i+1), '/',num2str(frameCount),' to disk']);
+                imwrite(buf2,thisFilename) %saves to current directory
+                
+                i = i+1;
+            end
+            disp('Acquisition complete');
+            [rc] = AT_Command(hndl,'AcquisitionStop');
+            AT_CheckWarning(rc);
+            [rc] = AT_Flush(hndl);
+            AT_CheckWarning(rc);
+            [rc] = AT_Close(hndl);
+            AT_CheckWarning(rc);
+            [rc] = AT_FinaliseLibrary();
+            AT_CheckWarning(rc);
+            disp('Camera shutdown');
+
+        end
+        
         function [Attributes,Data,Children] = exportState(obj)
             % exportState Exports current state of all objardware objects
             % and SRcollect settings
