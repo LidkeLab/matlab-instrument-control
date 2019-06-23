@@ -102,7 +102,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 obj.CameraLuca.setup_acquisition();
                 obj.CameraLuca.ReturnType='matlab';
                 obj.CameraLuca.DisplayZoom=4;
-                obj.CameraLuca.ROI= [300 800 300 800];
+                obj.CameraLuca.ROI= [200 900 200 900];
                 
                 % Stage
                 fprintf('Initializing Stage\n')
@@ -113,7 +113,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 
                 % Lamp
                 obj.LampObj=MIC_IX71Lamp('Dev3','ao0','Port1/Line3');
-                obj.LampPower = 45;
+                obj.LampPower = 30;
                 
                 % Galvo
                 obj.GalvoObj = MIC_GalvoDigital('Dev1','Port0/Line0:31');
@@ -361,7 +361,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 Data=obj.single_scan();
                 dipshow(F,sum(Data(:,:,250:300),3))
                 diptruesize(100)
-                dipshow(P,sum(Data(:,:,330:370),3))
+                dipshow(P,sum(Data(:,:,1:450),3))
                 diptruesize(300)
                 dipshow(Y,sum(Data(:,:,370:400),3))
                 diptruesize(100)

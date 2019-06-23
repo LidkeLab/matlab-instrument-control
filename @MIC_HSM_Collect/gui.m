@@ -175,8 +175,8 @@ properties2gui();
         gui2properties();
         if obj.LaserObj.IsOn ==1
             obj.LaserObj.off
-            obj.scanFocus();
         else
+            properties2gui();
             obj.scanFocus();
             properties2gui();
         end
