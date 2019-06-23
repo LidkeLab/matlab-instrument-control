@@ -82,7 +82,7 @@ CameraCalibration = uicontrol('Parent',hRegPanel, 'Style', 'toggle', 'String','C
 
 WavelengthCalibration =uicontrol('Parent',hRegPanel, 'Style', 'toggle',...
     'String','Calibrate Wavelength','Enable','on',...
-    'Position', [staticst php-70 100 20],'Callback',{@WavelengthCalibration_Callback});
+    'Position', [staticst php-70 100 20],'Callback',{@Calibration_Callback});
 
 
 
@@ -169,8 +169,12 @@ properties2gui();
             properties2gui();
         end
     end
-
-
+    function Calibration_Callback(~,~)
+         gui2properties();
+         obj.Calibration
+         properties2gui();
+         
+    end
     function scanFocus_Callback(~,~)
         gui2properties();
         if obj.LaserObj.IsOn ==1
@@ -178,7 +182,7 @@ properties2gui();
         else
             properties2gui();
             obj.scanFocus();
-            properties2gui();
+          
         end
     end
 
