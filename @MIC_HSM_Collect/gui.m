@@ -176,12 +176,15 @@ properties2gui();
          
     end
     function scanFocus_Callback(~,~)
-        gui2properties();
+        
         if obj.LaserObj.IsOn ==1
             obj.LaserObj.off
         else
-            properties2gui();
-            obj.scanFocus();
+           gui2properties();
+           obj.LaserObj.setPower(obj.LaserObj.MaxPower)
+           obj.scanFocus();
+           properties2gui();
+            
           
         end
     end
