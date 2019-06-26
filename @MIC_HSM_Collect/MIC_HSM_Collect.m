@@ -113,7 +113,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 
                 % Lamp
                 obj.LampObj=MIC_IX71Lamp('Dev3','ao0','Port1/Line3');
-                obj.LampPower = 30;
+                obj.LampPower = 40;
                 
                 % Galvo
                 obj.GalvoObj = MIC_GalvoDigital('Dev1','Port0/Line0:31');
@@ -129,10 +129,12 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 
                 obj.R3DObj=MIC_Reg3DTrans(obj.CameraLuca,obj.StageObj,f);
                 if ~exist(f,'file')
+                    
                     CamSet = obj.R3DObj.CameraObj.CameraSetting;
                     obj.R3DObj.CameraObj.setCamProperties(CamSet); %set the camera properties
                     EMGTemp = CamSet.EMGain.Value;
                     CamSet.EMGain.Value = 2; % from TIRF_SRCollect & SPTCollect class
+                    
                     %set the lamp
                     if isempty(obj.LampPower) || obj.LampPower==0
                         obj.LampPower=obj.LampObj.MaxPower/2;
@@ -140,11 +142,16 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     obj.LampObj.setPower(obj.LampPower);
                     obj.LampObj.on();
                     fprintf('Calibrating camera and stage ...\n')
+                    fprintf('IsOpen == %d\n', obj.FlipMount.IsOpen);
+                    pause(1)
+                    obj.FlipMount.FilterOut;
+                    pause(1)
                     pause(obj.LampWait);
                     %                 obj.R3DObj.align2imageFit();
                     obj.R3DObj.CameraObj.ROI=[100 900 100 900]; %luca
                     obj.R3DObj.calibrate();
                     obj.LampObj.off();
+                    obj.FlipMount.FilterIn;
                     %             obj.CameraLuca.ROI=[100 900 100 900];
                     %             obj.R3DObj.calibrate();
                 end
@@ -327,30 +334,30 @@ classdef MIC_HSM_Collect < MIC_Abstract
             
             obj.collect_clibImage();
             out = obj.clibImage;
-            [~, idx1(1)] = max(out(200,370:445));
+            [~, idx1(1)] = max(obj.clibImage(200,370:445));
             idx1(1)=idx1(1)+370;
-            [~, idx1(2)] = max(out(200,290:346));
+            [~, idx1(2)] = max(obj.clibImage(200,290:346));
             idx1(2)=idx1(2)+290;
-            [~, idx1(3)] = max(out(200,223:285));
+            [~, idx1(3)] = max(obj.clibImage(200,223:285));
             idx1(3)=idx1(3)+223;
-            [~, idx1(4)] = max(out(200,142:154));
+            [~, idx1(4)] = max(obj.clibImage(200,142:154));
             idx1(4)=idx1(4)+142;
-            [~, idx1(5)] = max(out(200,122:140));
+            [~, idx1(5)] = max(obj.clibImage(200,122:140));
             idx1(5)=idx1(5)+122;
-            [~, idx1(6)] = max(out(200,86:97));
+            [~, idx1(6)] = max(obj.clibImage(200,86:97));
             idx1(6)=idx1(6)+86;
-            [~, idx1(7)] = max(out(200,76:84));
+            [~, idx1(7)] = max(obj.clibImage(200,76:84));
             idx1(7)=idx1(7)+76;
             idx1
             
             peakWv = [544 586 611.5 696.5 706.7 763.5 811.5];
-            
+%             peakWv = [544 586 611.5];
             pfit = polyfit(idx1,peakWv,3);
             wv = polyval(pfit,1:length(out));
             figure;plot(idx1,peakWv,'*')
             
             SaveDate=datestr(timenow, 'yyyy-mm-dd-HH-MM-SS');
-            save([H.SaveDir 'Wavelength_Calibration_Data-' SaveDate],'out','time','wv','idx1','peakWv','pfit');
+            save([obj.SaveDir 'Wavelength_Calibration_Data-' SaveDate],'out','timenow','wv','idx1','peakWv','pfit');
         end
         
         
@@ -392,17 +399,17 @@ classdef MIC_HSM_Collect < MIC_Abstract
             
             % H.LaserObj.setPower();
             obj.LaserObj.on();
-            Y=figure
+%             Y=figure
             P=figure
-            F=figure
+%             F=figure
             while 1
                 Data=obj.single_scan();
-                dipshow(F,sum(Data(:,:,250:300),3))
-                diptruesize(100)
-                dipshow(P,sum(Data(:,:,1:450),3))
-                diptruesize(300)
-                dipshow(Y,sum(Data(:,:,370:400),3))
-                diptruesize(100)
+%                 dipshow(F,sum(Data(:,:,250:300),3))
+%                 diptruesize(50)
+                dipshow(P,sum(Data(:,:,300:600),3))
+                diptruesize(200)
+%                 dipshow(Y,sum(Data(:,:,350:380),3))
+%                 diptruesize(100)
             end
             
             obj.LaserObj.off();
@@ -451,7 +458,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
             obj.BackgroundScanN=100;
             obj.collect_background();
             dipshow(obj.Background)
-            
+            P=figure
             ROISZ = obj.CameraZyla.ROI;
             %loop over sequences
             for nn=1:obj.DataCube
@@ -461,8 +468,11 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     ii
                     %Turn on Laser for aquisition
                     obj.LaserObj.on();
-                    %Collect
+                    %Collect Data
                     Data(:,:,:,ii)=obj.single_scan();
+%                   
+                    dipshow(P,sum(Data(:,:,300:600),3))
+                    diptruesize(200)
                     %Turn off Laser
                     obj.LaserObj.off();
                 end
@@ -528,7 +538,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 case 2
                     ROI=[814 1070 700 1500];%256pixels
                 case 3
-                    ROI=[878 1006 700 1500];%128pixels
+                    ROI=[878 1006 700 1500];%128pixels %**changed for memory
                 case 4
                     ROI=[910 974 700 1500];%64pixels
                 case 5
