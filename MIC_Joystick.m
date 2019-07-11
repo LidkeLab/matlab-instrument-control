@@ -7,10 +7,13 @@ classdef MIC_Joystick < handle
     % joystick ON, you pass in the Stage object and it will graph where you
     % are on the stage. When the Joystick is ON, a timer function is used
     % to check whether you are moving/using the joystick and graphs your position 
-    % 10 times per second. On the USB N64 controller use the analog joystick to move in x and y
-    % and the top and bottom buttons (yellow up and down buttons) are used to 
-    % move in zed. Press the blue A button to center the Stage.
-    % Example: Stg = TIRF.StageObj
+    % 10 times per second.   This code uses HebiJoystick to control an HID compliant 
+    % joystick and uses JSaxes (analog joystick) to move in x and y.  The code uses
+    % buttons(1,1) and buttons(1,3) to move in z ,buttons(1,7) is used to center the stage.
+    % For example we used a USB N64 controller, you use the analog
+    % joystick(JSaxes) to move in x and y.
+    % You use the up and down yellow buttons (buttons(1,1) and buttons(1,3)) to 
+    % move in z. Press the blue A button(buttons(1,7)) to center the Stage.
     %                Stg.gui
     %                JS=MIC_Joystick()
     %                JS.StageObj=Stg
@@ -115,4 +118,3 @@ classdef MIC_Joystick < handle
         end
     end
 end
-
