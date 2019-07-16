@@ -44,7 +44,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
         CameraROI=1; %Camera ROI (see gui for specifics)
         
         % Camera params
-        Exp_Focus = 0.1;
+        Exp_Focus = 0.01;
         PixelSizeLuca;                   % Pixel size determined from calibration
         OrientMatrix;                   % unitary matrix to show orientation
         % between Camera and Stage([a b;c d])
@@ -52,7 +52,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
         % Scan params
         NSteps = 200;
         StepAngle = 0.00186; % Step angle in degrees 0.00186
-        Exp_Scan = 0.02;
+        Exp_Scan = 0.01;
         Nsequences =20;
         %         NSeqBeforeRegistration = 5;
         DataCube = 5;% data cubes
@@ -319,7 +319,8 @@ classdef MIC_HSM_Collect < MIC_Abstract
             
             obj.CameraZyla.ROI=obj.getROI();
             obj.CameraZyla.ExpTime_Sequence=obj.Exp_Scan;
-            obj.CameraZyla.SequenceLength = 10;
+            obj.CameraZyla.SequenceLength = 50;
+            obj.CameraZyla.ExpTime_Sequence = 0.5;
             obj.CameraZyla.start_sequence();
             obj.clibImage = single(mean(obj.CameraZyla.Data,3));
         end
@@ -334,27 +335,29 @@ classdef MIC_HSM_Collect < MIC_Abstract
             
             obj.collect_clibImage();
             out = obj.clibImage;
-            [~, idx1(1)] = max(obj.clibImage(200,370:445));
-            idx1(1)=idx1(1)+370;
-            [~, idx1(2)] = max(obj.clibImage(200,290:346));
-            idx1(2)=idx1(2)+290;
-            [~, idx1(3)] = max(obj.clibImage(200,223:285));
-            idx1(3)=idx1(3)+223;
-            [~, idx1(4)] = max(obj.clibImage(200,142:154));
-            idx1(4)=idx1(4)+142;
-            [~, idx1(5)] = max(obj.clibImage(200,122:140));
-            idx1(5)=idx1(5)+122;
-            [~, idx1(6)] = max(obj.clibImage(200,86:97));
-            idx1(6)=idx1(6)+86;
-            [~, idx1(7)] = max(obj.clibImage(200,76:84));
-            idx1(7)=idx1(7)+76;
+            [~, idx1(1)] = max(obj.clibImage(200,405:465));
+            idx1(1)=idx1(1)+405;
+            [~, idx1(2)] = max(obj.clibImage(200,322:400));
+            idx1(2)=idx1(2)+322;
+            [~, idx1(3)] = max(obj.clibImage(200,272:320));
+            idx1(3)=idx1(3)+272;
+            [~, idx1(4)] = max(obj.clibImage(200,156:189));
+            idx1(4)=idx1(4)+156;
+            [~, idx1(5)] = max(obj.clibImage(200,101:121));
+            idx1(5)=idx1(5)+101;
+            [~, idx1(6)] = max(obj.clibImage(200,70:84));
+            idx1(6)=idx1(6)+70;
             idx1
-            
-            peakWv = [544 586 611.5 696.5 706.7 763.5 811.5];
-%             peakWv = [544 586 611.5];
+             
+            peakWv = [544 586 611.5 696.5 763.5 811.5];
+
             pfit = polyfit(idx1,peakWv,3);
             wv = polyval(pfit,1:length(out));
             figure;plot(idx1,peakWv,'*')
+
+            title('Spectral Clibration');
+            xlabel('Lateral shift (pixels)');
+            ylabel('Wavelength (pixels)');
             
             SaveDate=datestr(timenow, 'yyyy-mm-dd-HH-MM-SS');
             save([obj.SaveDir 'Wavelength_Calibration_Data-' SaveDate],'out','timenow','wv','idx1','peakWv','pfit');
@@ -406,7 +409,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 Data=obj.single_scan();
 %                 dipshow(F,sum(Data(:,:,250:300),3))
 %                 diptruesize(50)
-                dipshow(P,sum(Data(:,:,300:600),3))
+                dipshow(P,sum(Data(:,:,100:200),3))
                 diptruesize(200)
 %                 dipshow(Y,sum(Data(:,:,350:380),3))
 %                 diptruesize(100)
@@ -471,7 +474,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     %Collect Data
                     Data(:,:,:,ii)=obj.single_scan();
 %                   
-                    dipshow(P,sum(Data(:,:,300:600),3))
+                    dipshow(P,sum(Data(:,:,1:200),3))
                     diptruesize(200)
                     %Turn off Laser
                     obj.LaserObj.off();
@@ -534,15 +537,15 @@ classdef MIC_HSM_Collect < MIC_Abstract
             %these could be set from camera size;
             switch obj.CameraROI
                 case 1
-                    ROI=[712 1172 700 1500]; %460pixels
+                    ROI=[810 1290 900 1100]; %480pixels 810 1290 750 1300
                 case 2
-                    ROI=[814 1070 700 1500];%256pixels
+                    ROI=[750 1006 850 1300];%256pixels
                 case 3
-                    ROI=[878 1006 700 1500];%128pixels %**changed for memory
+                    ROI=[814 942 850 1300];%128pixels %**changed for memory
                 case 4
-                    ROI=[910 974 700 1500];%64pixels
+                    ROI=[846 910 850 1300];%64pixels
                 case 5
-                    ROI=[926 958 700 1500];%32pixels
+                    ROI=[862 894 850 1300];%32pixels
                     
                 otherwise
                     error('HSM_collect: ROI not found')

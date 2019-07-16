@@ -50,7 +50,7 @@ hCameraPanel = uipanel('Parent',guiFig,'Title','CAMERA','Position',[(1-pw)/2 ref
 refh=refh-ph-psep;
 
 Y_Range = uicontrol('Parent',hCameraPanel, 'Style','text','String','Y Range:','Enable','off','Position', [staticst php-60 100 20]);
-ROIlist = {'460','256','128','64','32'};
+ROIlist = {'404','256','128','64','32'};
 Edit_Y_Range = uicontrol('Parent',hCameraPanel, 'Style','popupmenu','String',ROIlist,'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-60 250 20]);
 
 ExposureTime = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Exp. Time Focus:','Enable','off','Position', [staticst php-100 140 20]);
@@ -191,9 +191,11 @@ properties2gui();
 
     function start_focus_Callback(~,~)
         gui2properties();
+        obj.FlipMount.FilterOut;
         obj.CameraLuca.DisplayZoom = 1;
         obj.CameraLuca.start_focus;
         properties2gui();
+        obj.FlipMount.FilterIn;
     end
 
     function single_scan_sequence_Callback(~,~)
