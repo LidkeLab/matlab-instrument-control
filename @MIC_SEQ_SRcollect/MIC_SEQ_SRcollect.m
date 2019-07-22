@@ -542,7 +542,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 
         function startROILaserFocusHigh(obj)
             % Run SCMOS in focus mode with High Laser Power.
-            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeSequence;
+            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocus;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
