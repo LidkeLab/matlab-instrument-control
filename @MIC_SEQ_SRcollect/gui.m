@@ -839,6 +839,18 @@ properties2gui();
         % Ensure the object properties are set based on the GUI.
         gui2properties();
         
+        % Ensure the user knows that they need to change the directory or
+        % coverslip name before proceeding.
+        ProceedString = questdlg(['Do not proceed unless you have ', ...
+            'changed/plan to change the Save Directory or the ', ...
+            'Coverslip Name'], 'WARNING!', 'Proceed', 'Exit', 'Exit');
+        if strcmpi(ProceedString, 'Exit')
+            % Call properties2gui() just to ensure everything is updated
+            % (we should do this any chance we can get!).
+            properties2gui();
+            return
+        end
+        
         % Get handles for all of the ROI selection buttons.
         ROIButtons = findall(obj.GuiFigure, 'Tag', 'ROIButton');
         
