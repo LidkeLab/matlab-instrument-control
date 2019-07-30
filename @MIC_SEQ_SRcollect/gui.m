@@ -46,6 +46,11 @@ handles.TextNumSelectedCells = uicontrol('Parent', ROISelectionPanel, ...
     'Style', 'Text', 'HorizontalAlignment', 'left', ...
     'String', '0 cell(s) selected from this coverslip', ...
     'Position', [5, BigPanelHeight-50, 275, 20]);
+uicontrol('Parent', ROISelectionPanel, ...
+    'Style', 'Pushbutton', 'String', 'Reset Counters', ...
+    'TooltipString', 'Reset cell index/selected cell counts', ...
+    'Position', [BigPanelWidth-110, BigPanelHeight-40, 100, 25], ...
+    'Callback', @resetCellCounters);
 uicontrol('Parent', ROISelectionPanel, 'Style', 'Text', ...
     'String', ['(hover mouse over a region to view number of cells', ...
     ' selected in that region)'], 'HorizontalAlignment', 'left', ...
@@ -60,7 +65,7 @@ for ii = 1:10
             390 - ROIButtonSize*(ii-1), ROIButtonSize, ROIButtonSize], ...
             'TooltipString', ...
             sprintf('%i cell(s) selected in this subregion', 0), ...
-            'Callback', @exposeGridPoint);
+            'Tag', 'ROIButton', 'Callback', @exposeGridPoint);
     end
 end
 
@@ -822,6 +827,36 @@ properties2gui();
         obj.findCoverslipFocus()
         
         % Ensure the GUI reflects object properties.
+        properties2gui();
+    end
+
+    function resetCellCounters(~, ~)
+        % Callback for the reset cell index/counters button.
+        % This callback will reset all counters/indicators/etc.
+        % indicating the number of cells which have been selected on the
+        % current coverslip.
+        
+        % Ensure the object properties are set based on the GUI.
+        gui2properties();
+        
+        % Get handles for all of the ROI selection buttons.
+        ROIButtons = findall(obj.GuiFigure, 'Tag', 'ROIButton');
+        
+        % Reset the color of all ROI buttons (to indicate no ROI has been
+        % clicked).
+        [ROIButtons.BackgroundColor] = deal([0, 1, 0]);
+        
+        % Reset the TooltipString for all ROI buttons.
+        [ROIButtons.TooltipString] = deal(...
+            sprintf('%i cell(s) selected in this subregion', 0));
+        
+        % Reset the cell index within the sequential class object.
+        obj.CurrentCellIdx = 1;
+        
+        % Ensure the GUI reflects object properties.
+        % NOTE: The string in the ROI selection panel indicating
+        %       how many cells have been selected should be updated by this
+        %       method (based on obj.CurrentCellIdx).
         properties2gui();
     end
 
