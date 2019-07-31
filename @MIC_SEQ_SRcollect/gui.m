@@ -628,6 +628,10 @@ properties2gui();
         handles.Edit405PowerSequence.String = obj.LaserPowerSequence405;
         handles.Edit405PowerFocus.String = obj.LaserPowerFocus405;
         handles.EditLampPower.String = obj.Lamp660Power;
+        handles.Checkbox647LaserFocus.Value = obj.OnDuringFocus647;
+        handles.Checkbox647LaserSequence.Value = obj.OnDuringSequence647;
+        handles.Checkbox405LaserFocus.Value = obj.OnDuringFocus405;
+        handles.Checkbox405LaserSequence.Value = obj.OnDuringSequence405;
         
         % Display for total number of cells selected.
         handles.TextNumSelectedCells.String = sprintf(...
