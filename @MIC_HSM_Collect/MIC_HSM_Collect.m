@@ -314,7 +314,15 @@ classdef MIC_HSM_Collect < MIC_Abstract
             obj.CameraZyla.start_sequence();
             obj.Background = single(mean(obj.CameraZyla.Data,3));
         end
-        
+
+        function collect_backgroundROI(obj)
+            
+%             obj.CameraZyla.ROI=obj.getROI();
+            obj.CameraZyla.ExpTime_Sequence=obj.Exp_Scan;
+            obj.CameraZyla.SequenceLength = obj.BackgroundScanN;
+            obj.CameraZyla.start_sequence();
+            obj.Background = single(mean(obj.CameraZyla.Data,3));
+        end
         function collect_clibImage(obj)
             
             obj.CameraZyla.ROI=obj.getROI();
@@ -363,6 +371,35 @@ classdef MIC_HSM_Collect < MIC_Abstract
             save([obj.SaveDir 'Wavelength_Calibration_Data-' SaveDate],'out','timenow','wv','idx1','peakWv','pfit');
         end
         
+        function Data=single_scanROI(obj)
+            % Setup camera
+            obj.CameraZyla.ExpTime_Sequence=obj.Exp_Scan;
+            obj.CameraZyla.SequenceLength = obj.NSteps;
+%             obj.CameraZyla.ROI=obj.getROI();
+            
+            
+            % Setup Galvo
+            obj.GalvoObj.N_Step =obj.NSteps;
+            obj.GalvoObj.StepSize = obj.StepAngle;
+            obj.GalvoObj.N_Scan=1; % number of scans
+            obj.GalvoObj.Offset = 0;
+            obj.GalvoObj.enable();       %enable first
+            obj.GalvoObj.setSequence();
+            
+            %This is main data collection
+            obj.CameraZyla.start_sequence();
+            %--------------------------
+            
+            %Get data and finish
+            Data=single(obj.CameraZyla.Data)-repmat(obj.Background,[1 1 obj.NSteps]);
+            
+            Data=permute(Data,[1 3 2]); % to check the raw data in (x,y) instead of (x,Lambda)
+            
+            %disable and clear sessions in galvo
+            obj.GalvoObj.disable();
+            obj.GalvoObj.clearSession();
+            
+        end
         
         function Data=single_scan(obj)
             % Setup camera
@@ -409,7 +446,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 Data=obj.single_scan();
 %                 dipshow(F,sum(Data(:,:,250:300),3))
 %                 diptruesize(50)
-                dipshow(P,sum(Data(:,:,100:200),3))
+                dipshow(P,sum(Data(:,:,1:162),3))
                 diptruesize(200)
 %                 dipshow(Y,sum(Data(:,:,350:380),3))
 %                 diptruesize(100)
@@ -474,7 +511,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     %Collect Data
                     Data(:,:,:,ii)=obj.single_scan();
 %                   
-                    dipshow(P,sum(Data(:,:,1:200),3))
+                    dipshow(P,sum(Data(:,:,1:162),3))
                     diptruesize(200)
                     %Turn off Laser
                     obj.LaserObj.off();
@@ -530,22 +567,24 @@ classdef MIC_HSM_Collect < MIC_Abstract
             Data=obj.single_scan();
             obj.LaserObj.off()
             dipshow(sum(Data(:,:,:),3))
-            diptruesize(100)
+            diptruesize(200)
         end
         %Set ROI for zylaCamera
         function ROI=getROI(obj)
             %these could be set from camera size;
             switch obj.CameraROI
                 case 1
-                    ROI=[810 1290 900 1100]; %480pixels 810 1290 750 1300
+                    ROI=[794 1306 974 1137]; %512pixels 810 1290 750 1300
                 case 2
-                    ROI=[750 1006 850 1300];%256pixels
+                    ROI=[922 1178 974 1137];%256pixels
                 case 3
-                    ROI=[814 942 850 1300];%128pixels %**changed for memory
+                    ROI=[986 1114 974 1137];%128pixels 
                 case 4
-                    ROI=[846 910 850 1300];%64pixels
+                    ROI=[1018 1082 974 1137];%64pixels
                 case 5
-                    ROI=[862 894 850 1300];%32pixels
+                    ROI=[1034 1066 974 1137];%32pixels
+                case 6
+                    ROI=[794 1306 750 1300]; % Custom from Sandeep
                     
                 otherwise
                     error('HSM_collect: ROI not found')

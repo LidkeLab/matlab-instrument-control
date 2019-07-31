@@ -50,7 +50,7 @@ hCameraPanel = uipanel('Parent',guiFig,'Title','CAMERA','Position',[(1-pw)/2 ref
 refh=refh-ph-psep;
 
 Y_Range = uicontrol('Parent',hCameraPanel, 'Style','text','String','Y Range:','Enable','off','Position', [staticst php-60 100 20]);
-ROIlist = {'404','256','128','64','32'};
+ROIlist = {'512','256','128','64','32'};
 Edit_Y_Range = uicontrol('Parent',hCameraPanel, 'Style','popupmenu','String',ROIlist,'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-60 250 20]);
 
 ExposureTime = uicontrol('Parent',hCameraPanel, 'Style', 'edit', 'String','Exp. Time Focus:','Enable','off','Position', [staticst php-100 140 20]);

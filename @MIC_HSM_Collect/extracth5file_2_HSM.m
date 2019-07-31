@@ -2,15 +2,15 @@
 
 
 %The directory o the data
-DataDir = 'H:\Data\19-07-14';
+DataDir = 'H:\Data\19-07-30';
 %The directory to save chunks
-SaveDir = 'H:\Data\19-07-14';
+SaveDir = 'H:\Data\19-07-30';
 %The name of the file
-FileName = 'Cell3-2019-7-14-20-26-43';
+FileName = 'Cell1-2019-7-30-16-40-55';
 
 
 %find the name of level
-info=h5info('H:\Data\19-07-14\Cell3-2019-7-14-20-26-43.h5');
+info=h5info('H:\Data\19-07-30\Cell1-2019-7-30-16-40-55.h5');
 
 L=info.Groups(2).Datasets;
 
@@ -22,7 +22,7 @@ nn = size((info.Groups(2).Datasets),1);
 for ii=1:nn
 dataName= L(ii).Name;  
 s=strcat('/Data/',dataName);
-Data=h5read('H:\Data\19-07-14\Cell3-2019-7-14-20-26-43.h5',s);
+Data=h5read('H:\Data\19-07-30\Cell1-2019-7-30-16-40-55.h5',s);
 
 sequence = sum(Data,3);
 sequence = squeeze(sequence);
