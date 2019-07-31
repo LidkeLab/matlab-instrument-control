@@ -44,7 +44,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Operational properties.
         LampWait = 0.1; % Time to wait for full power to lamp (seconds)
         ExposureTimeLampFocus = 0.02;
-        ExposureTimeLaserFocus = 0.2;
+        ExposureTimeLaserFocusLow = 0.2;
+        ExposureTimeLaserFocusHigh = 0.01;
         ExposureTimeSequence = 0.01;
         ExposureTimeCapture = 0.02;
         NumberOfFrames = 6000;
@@ -500,7 +501,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % it will stay on until an acquisition is complete (this is
             % done to avoid the laser power up delay at each cell
             % selection).
-            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocus;
+            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocusLow;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
@@ -545,7 +546,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 
         function startROILaserFocusHigh(obj)
             % Run SCMOS in focus mode with High Laser Power.
-            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocus;
+            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocusHigh;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
