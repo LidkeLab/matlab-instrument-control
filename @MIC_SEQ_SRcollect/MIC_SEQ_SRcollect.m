@@ -220,7 +220,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             
             % Store the desired obj properties to be exported.
             Attributes.ExposureTimeLampFocus = obj.ExposureTimeLampFocus;
-            Attributes.ExposureTimeLaserFocus = obj.ExposureTimeLaserFocus;
+            Attributes.ExposureTimeLaserFocusLow = ...
+                obj.ExposureTimeLaserFocusLow;
+            Attributes.ExposureTimeLaserFocusHigh = ...
+                obj.ExposureTimeLaserFocusHigh;
             Attributes.ExposureTimeSequence = obj.ExposureTimeSequence;
             Attributes.ExposureTimeCapture = obj.ExposureTimeCapture;
             Attributes.NumberOfFrames = obj.NumberOfFrames;
