@@ -581,6 +581,68 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             end
         end
         
+        function collectPSFStack(obj, ExposureTime, MaxOffsetZ, ...
+                StepSize, SaveDir)
+            % This method will collect a z-stack of images centered around
+            % the current piezo position.  The purpose of this method is to
+            % collect a stack of images of a low density bead sample to
+            % observe the PSF.  The input ExposureTime is optional with 
+            % a default value of obj.ExposureTimeLaserFocusLow.
+            % The input MaxOffsetZ is optional with a default value of 2.5
+            % microns.  The input StepSize is optional with a default value
+            % of obj.PiezoStep.  The input SaveDir is optional with a
+            % default value of obj.TopDir.
+            
+            % Set defaults if needed.
+            if ~exist('ExposureTime', 'var') || isempty(ExposureTime)
+                ExposureTime = obj.ExposureTimeLaserFocusLow;
+            end
+            if ~exist('MaxOffsetZ', 'var') || isempty(MaxOffsetZ)
+                MaxOffsetZ = 2.5; % microns
+            end 
+            if ~exist('StepSize', 'var') || isempty(StepSize)
+                StepSize = obj.PiezoStep; % microns
+            end 
+            if ~exist('SaveDir', 'var') || isempty(SaveDir)
+                SaveDir = obj.TopDir;
+            end 
+            
+            % Set instrument properties as needed. 
+            PreviousExposureTime = obj.CameraSCMOS.ExpTime_Capture;
+            obj.CameraSCMOS.ExpTime_Capture = ExposureTime;
+            
+            % Collect the z-stack. 
+            CurrentPosition = obj.StagePiezo.Position;
+            ZPositions = CurrentPosition(3) - MaxOffsetZ...
+                :StepSize...
+                :CurrentPosition(3) + MaxOffsetZ;
+            ImageSize = [obj.SCMOS_ROI_Collect(2) ...
+                - obj.SCMOS_ROI_Collect(1) + 1, ...
+                obj.SCMOS_ROI_Collect(4) ...
+                - obj.SCMOS_ROI_Collect(3) + 1];
+            ZStack = zeros([ImageSize, numel(ZPositions)], 'single');
+            for ii = 1:numel(ZPositions)
+                % Move to the specified position.
+                obj.StagePiezo.setPosition([CurrentPosition(1), ...
+                    CurrentPosition(2), ZPositions(ii)]);
+                
+                % Allow the stage to settle.
+                pause(obj.PiezoSettlingTime);
+                
+                % Capture an image at the current position.
+                ZStack(:, :, ii) = single(obj.CameraSCMOS.start_capture());
+            end
+            
+            % Save the ZStack as a .mat file.
+            save(fullfile(SaveDir, 'PSFStack.mat'), 'ZStack');         
+            
+            % Move the stage back to the original position.
+            obj.StagePiezo.setPosition(CurrentPosition);
+            
+            % Change the camera exposure time back to it's original value.
+            obj.CameraSCMOS.ExpTime_Capture = PreviousExposureTime;
+        end
+        
         function moveStepperUpLarge(obj)
             % Large stage step up in the z dimension with stepper motor.
             PosStepZ = obj.StageStepper.getPosition(3); % get z position
