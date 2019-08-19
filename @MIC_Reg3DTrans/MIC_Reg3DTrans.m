@@ -134,7 +134,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 PlotFlag=0;
             end
             
-            obj.StageObj.center;
+            obj.StageObj.center([1; 1; 0]); % don't center along z
             X=obj.StageObj.Position;
             N=10;
             StepSize=0.1; %micron
