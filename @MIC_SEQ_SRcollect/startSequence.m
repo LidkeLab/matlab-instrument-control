@@ -100,18 +100,6 @@ if obj.UseBrightfieldReg
     obj.Lamp660.setPower(0);
 end
 
-% Setup Active Stabilization (if desired).
-if obj.UseActiveReg
-    obj.ActiveReg = MIC_ActiveReg3D_Seq(...
-        obj.CameraIR,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ);
-    obj.Lamp850.on;
-    obj.Lamp850.setPower(obj.Lamp850Power);
-    obj.IRCamera_ExposureTime = obj.CameraIR.ExpTime_Capture;
-    obj.ActiveReg.takeRefImageStack(); % takes 21 reference images
-    obj.ActiveReg.Period = obj.StabPeriod;
-    obj.ActiveReg.start();
-end
-
 % Setup the main sCMOS to acquire the sequence.
 obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
     'Preparing for acquisition...'], RefStruct.CellIdx);
@@ -261,11 +249,6 @@ obj.Shutter.close(); % close shutter instead of turning off the laser
 obj.FlipMount.FilterIn();
 obj.Laser405.setPower(0);
 obj.Laser405.off();
-
-% If it was used, end the active stabilization process.
-if obj.UseActiveReg
-    obj.ActiveReg.stop();
-end
 
 % Save the acquisition data.
 switch obj.SaveFileType

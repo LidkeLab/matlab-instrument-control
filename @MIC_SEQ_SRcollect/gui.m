@@ -433,29 +433,21 @@ RegistrationControlPanel = uipanel(GuiFig, ...
     + [BigPanelWidth+10, SmallPanelHeight, ...
     MediumPanelWidth, SmallPanelHeight]);
 uicontrol('Parent', RegistrationControlPanel, 'Style', 'text', ...
-    'String', 'Use Active Registration', ...
-    'Position', [25, SmallPanelHeight-40, 125, 15], ...
-    'HorizontalAlignment', 'left');
-handles.CheckboxActiveReg = uicontrol(...
-    'Parent', RegistrationControlPanel, 'Style', 'checkbox', ...
-    'Position', [170, SmallPanelHeight-40, 15, 15], ...
-    'Callback', @useActiveReg);
-uicontrol('Parent', RegistrationControlPanel, 'Style', 'text', ...
     'String', 'Use Brightfield Registration', ...
-    'Position', [25, SmallPanelHeight-60, 150, 15], ...
+    'Position', [25, SmallPanelHeight-35, 150, 15], ...
     'HorizontalAlignment', 'left');
 handles.CheckboxBrightfieldReg = uicontrol(...
     'Parent', RegistrationControlPanel, 'Style', 'checkbox', ...
-    'Position', [170, SmallPanelHeight-60, 15, 15], ...
-    'Callback', @useBrightfieldReg); 
+    'Position', [170, SmallPanelHeight-35, 15, 15], ...
+    'Tag', 'UseBrightfieldReg', 'Callback', @modifyClassProperty); 
 handles.TextBrightfieldReg = uicontrol(...
     'Parent', RegistrationControlPanel, ...
     'Style', 'text', 'String', 'every         sequence(s)', ...
-    'Position', [25, SmallPanelHeight-75, 150, 15]);
+    'Position', [25, SmallPanelHeight-50, 150, 15]);
 handles.EditboxBrightfieldReg = uicontrol(...
     'Parent', RegistrationControlPanel, 'Style', 'edit', ...
     'String', obj.NSeqBeforePeriodicReg, ...
-    'Position', [72, SmallPanelHeight-75, 20, 15], ...
+    'Position', [72, SmallPanelHeight-50 20, 15], ...
     'Tag', 'NSeqBeforePeriodicReg', 'Callback', @modifyClassProperty);
 TopButtonPosition = ...
     [floor(MediumPanelWidth/2 - 125/2), SmallPanelHeight-115, 125, 25];
@@ -602,7 +594,6 @@ properties2gui();
         
         % Registration/alignment properties.
         handles.EditboxBrightfieldReg.String = obj.NSeqBeforePeriodicReg;
-        handles.CheckboxActiveReg.Value = obj.UseActiveReg;
         handles.CheckboxBrightfieldReg.Value = obj.UseBrightfieldReg;
         if handles.CheckboxBrightfieldReg.Value
             % Ensure additional parameter selections are available.
@@ -1109,27 +1100,6 @@ properties2gui();
         properties2gui();
     end
 
-    function useActiveReg(Source, ~)
-        % Callback which sets the UseActiveReg property of
-        % MIC_SEQ_SRcollect to 1 when checked and 0 otherwise.
-        
-        % Ensure the object properties are set based on the GUI.
-        gui2properties();
-        
-        % Set UseActiveReg to the desired value.
-        obj.UseActiveReg = Source.Value;
-        
-        % If using active registration, ensure periodic registration is
-        % turned off.
-        if Source.Value
-            obj.UseBrightfieldReg = 0;
-            handles.CheckboxPeriodicReg.Value = 0;
-        end
-        
-        % Ensure the GUI reflects object properties.
-        properties2gui();
-    end
-
     function useBrightfieldReg(Source, ~)
         % Callback which sets the UseBrightfieldReg property of
         % MIC_SEQ_SRcollect to 1 when checked and 0 otherwise.
@@ -1139,13 +1109,6 @@ properties2gui();
         
         % Set UseBrightfieldReg to the desired value.
         obj.UseBrightfieldReg = Source.Value;
-        
-        % If using periodic registration, ensure active registration is
-        % turned off.
-        if Source.Value
-            obj.UseActiveReg = 0;
-            handles.CheckboxActiveReg.Value = 0;
-        end
         
         % Ensure the GUI reflects object properties.
         properties2gui();

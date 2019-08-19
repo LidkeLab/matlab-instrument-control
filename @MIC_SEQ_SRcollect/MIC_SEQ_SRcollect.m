@@ -19,13 +19,11 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
     properties
         % Hardware objects
         CameraSCMOS; % Main Data Collection Camera
-        CameraIR; % Active Stabilization Camera
         XPiezoSerialNums = {'81850186', '84850145'}; % controller, gauge
         YPiezoSerialNums = {'81850193', '84850146'}; % controller, gauge
         ZPiezoSerialNums = {'81850176', '84850203'}; % controller, gauge
         StagePiezo; % piezo stage
         StageStepper; % Stepper Motor Stage
-        Lamp850; % LED Lamp at 850 nm
         Lamp660; % LED Lamp at 660 nm
         Laser647; % MPB 647 Laser
         Laser405; % ThorLabs 405 Diode Laser
@@ -34,9 +32,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
  
         % Static Instrument Settings
         SCMOS_UseDefectCorrection = 0;
-        IRCamera_ExposureTime;
-        IRCamera_ROI = [513, 768, 385, 640]; % IR Camera ROI Center 256
-        Lamp850Power = 7;
         Lamp660Power = 35;
         SCMOS_PixelSize = .104; % microns
         SCMOSCalFilePath; % needed if using PublishResults flag
@@ -89,9 +84,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         CoverSlipOffset = [0, 0, 0]; % Remounting error (mm)
         
         % Registration classes.
-        ActiveReg; % Active registration with IR Camera
-        AlignReg; % Active alignment object
-        UseActiveReg = 0; % boolean: 1 uses active registration, 0 doesn't
+        AlignReg; % brightfield alignment object
         UseBrightfieldReg = 1; % boolean: 1 uses registration, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
@@ -148,7 +141,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 
             % Setup instruments, ensuring proper order is maintained.
             obj.setupSCMOS();
-            obj.setupIRCamera();
             obj.setupStagePiezo();
             obj.setupLamps();
             obj.setupLasers();
@@ -180,10 +172,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 Children.CameraSCMOS.Data, ...
                 Children.CameraSCMOS.Children] = ...
                     obj.CameraSCMOS.exportState();
-%             [Children.CameraIR.Attributes, ...
-%                 Children.CameraIR.Data, ...
-%                 Children.CameraIR.Children] = ...
-%                     obj.CameraIR.exportState();
             [Children.StageStepper.Attributes, ...
                 Children.StageStepper.Data, ...
                 Children.StageStepper.Children] = ...
@@ -196,10 +184,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 Children.Laser647.Data, ...
                 Children.Laser647.Children] = ...
                     obj.Laser647.exportState();
-%             [Children.Lamp850.Attributes, ...
-%                 Children.Lamp850.Data, ...
-%                 Children.Lamp850.Children] = ...
-%                     obj.Lamp850.exportState();
             [Children.Lamp660.Attributes, ...
                 Children.Lamp660.Data, ...
                 Children.Lamp660.Children] = ...
@@ -209,13 +193,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                     Children.AlignReg.Data, ...
                     Children.AlignReg.Children] = ...
                         obj.AlignReg.exportState();
-            end
-            if obj.UseActiveReg && ~isempty(obj.ActiveReg)
-                % We should only export this object if it was used.
-                [Children.ActiveReg.Attributes, ...
-                    Children.ActiveReg.Data, ...
-                    Children.ActiveReg.Children] = ...
-                        obj.ActiveReg.exportState();
             end
             
             % Store the desired obj properties to be exported.
@@ -230,7 +207,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Attributes.NumberOfSequences = obj.NumberOfSequences;
             Attributes.CameraROI = obj.SCMOS_ROI_Collect;
             Attributes.SCMOS_ROI_Full = obj.SCMOS_ROI_Full;
-%             Attributes.IRCamera_ROI = obj.IRCamera_ROI;
             Attributes.SaveDir = obj.SaveDir;
             Attributes.LaserPowerFocus647 = obj.LaserPowerFocus647;
             Attributes.LaserPowerSequence647 = obj.LaserPowerSequence647;
@@ -316,26 +292,12 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StatusString = '';
         end
         
-        function setupIRCamera(obj)
-            % Update the status indicator for the GUI.
-            obj.StatusString = 'Setting up IR camera...';
-%             
-%             % Setup the IR camera used for active registration.
-%             obj.CameraIR = MIC_ThorlabsIR();
-%             obj.CameraIR.ROI = obj.IRCamera_ROI;
-%             obj.CameraIR.ExpTime_Capture = 0.5;
-            
-            % Update the status indicator for the GUI.
-            obj.StatusString = '';
-        end
-        
         function setupLamps(obj)
             % Update the status indicator for the GUI.
-            obj.StatusString = 'Setting up sample illumination LEDs...';
+            obj.StatusString = 'Setting up sample illumination LED...';
             
-            % Setup the LED lamp objects.
+            % Setup the LED lamp object.
             obj.Lamp660 = MIC_ThorlabsLED('Dev2', 'ao0');
-%             obj.Lamp850 = MIC_ThorlabsLED('Dev2', 'ao1');
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
