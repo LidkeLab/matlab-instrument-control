@@ -52,7 +52,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
         % Scan params
         NSteps = 200;
         StepAngle = 0.00186; % Step angle in degrees 0.00186
-        Exp_Scan = 0.01;
+        Exp_Scan = 0.05;
         Nsequences =20;
         %         NSeqBeforeRegistration = 5;
         DataCube = 5;% data cubes
@@ -63,6 +63,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
         BackgroundScanN = 500;
         Background;
         clibImage;
+ 
     end
     
     properties (SetAccess = protected)
@@ -78,7 +79,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
             % MIC_TIRF_SRcollect constructor
             %   Constructs object and initializes all objardware
             
-            % Enable autonaming feature of MIC_Abstract
+            % Enable autonaming feature of MIC_AbstractC
             obj = obj@MIC_Abstract(~nargout);
             %                  [p,~]=fileparts(which('MIC_HSM_Collect'));
             [p,~]=fileparts(which('MIC_HSM_Collect'));
@@ -102,7 +103,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 obj.CameraLuca.setup_acquisition();
                 obj.CameraLuca.ReturnType='matlab';
                 obj.CameraLuca.DisplayZoom=4;
-                obj.CameraLuca.ROI= [200 900 200 900];
+                obj.CameraLuca.ROI= [350 650 350 650];
                 
                 % Stage
                 fprintf('Initializing Stage\n')
@@ -113,7 +114,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 
                 % Lamp
                 obj.LampObj=MIC_IX71Lamp('Dev3','ao0','Port1/Line3');
-                obj.LampPower = 40;
+                obj.LampPower = 40;%40;
                 
                 % Galvo
                 obj.GalvoObj = MIC_GalvoDigital('Dev1','Port0/Line0:31');
@@ -148,7 +149,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     pause(1)
                     pause(obj.LampWait);
                     %                 obj.R3DObj.align2imageFit();
-                    obj.R3DObj.CameraObj.ROI=[100 900 100 900]; %luca
+                    obj.R3DObj.CameraObj.ROI=[350 650 350 650]; %luca
                     obj.R3DObj.calibrate();
                     obj.LampObj.off();
                     obj.FlipMount.FilterIn;
@@ -343,21 +344,23 @@ classdef MIC_HSM_Collect < MIC_Abstract
             
             obj.collect_clibImage();
             out = obj.clibImage;
-            [~, idx1(1)] = max(obj.clibImage(200,405:465));
-            idx1(1)=idx1(1)+405;
-            [~, idx1(2)] = max(obj.clibImage(200,322:400));
-            idx1(2)=idx1(2)+322;
-            [~, idx1(3)] = max(obj.clibImage(200,272:320));
-            idx1(3)=idx1(3)+272;
-            [~, idx1(4)] = max(obj.clibImage(200,156:189));
-            idx1(4)=idx1(4)+156;
-            [~, idx1(5)] = max(obj.clibImage(200,101:121));
-            idx1(5)=idx1(5)+101;
-            [~, idx1(6)] = max(obj.clibImage(200,70:84));
-            idx1(6)=idx1(6)+70;
+            [~, idx1(1)] = max(obj.clibImage(200,505:544));
+            idx1(1)=idx1(1)+505;
+            [~, idx1(2)] = max(obj.clibImage(200,347:434));
+            idx1(2)=idx1(2)+347;
+            [~, idx1(3)] = max(obj.clibImage(200,282:335));
+            idx1(3)=idx1(3)+282;
+            [~, idx1(4)] = max(obj.clibImage(200,212:270));
+            idx1(4)=idx1(4)+212;
+            [~, idx1(5)] = max(obj.clibImage(200,138:150));
+            idx1(5)=idx1(5)+138;
+            [~, idx1(6)] = max(obj.clibImage(200,120:136));
+            idx1(6)=idx1(6)+120;
+            [~, idx1(7)] = max(obj.clibImage(200,66:84));
+            idx1(7)=idx1(7)+66;
             idx1
              
-            peakWv = [544 586 611.5 696.5 763.5 811.5];
+            peakWv = [485 544 586 611.5 696.5 706.7 763.5];
 
             pfit = polyfit(idx1,peakWv,3);
             wv = polyval(pfit,1:length(out));
@@ -438,6 +441,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
             dipshow(obj.Background)
             
             % H.LaserObj.setPower();
+           
             obj.LaserObj.on();
 %             Y=figure
             P=figure
@@ -446,7 +450,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 Data=obj.single_scan();
 %                 dipshow(F,sum(Data(:,:,250:300),3))
 %                 diptruesize(50)
-                dipshow(P,sum(Data(:,:,1:162),3))
+                dipshow(P,sum(Data(:,:,1:550),3))
                 diptruesize(200)
 %                 dipshow(Y,sum(Data(:,:,350:380),3))
 %                 diptruesize(100)
@@ -457,15 +461,25 @@ classdef MIC_HSM_Collect < MIC_Abstract
         function single_scan_sequence(obj)
             
             
-            obj.FlipMount.FilterOut;
-            fprintf('IsOpen == %d\n', obj.FlipMount.IsOpen);
             %create save folder and filenames
             if ~exist(obj.SaveDir,'dir');mkdir(obj.SaveDir);end
             timenow=clock;
             s=['-' num2str(timenow(1)) '-' num2str(timenow(2))  '-' num2str(timenow(3)) '-' num2str(timenow(4)) '-' num2str(timenow(5)) '-' num2str(round(timenow(6)))];
             obj.DataDir = obj.SaveDir;
+            switch obj.SaveFileType
+                case 'mat'
+                case 'h5'
+                    FileH5=fullfile(obj.SaveDir,[obj.BaseFileName s '.h5']);
+                    MIC_H5.createFile(FileH5);
+                    MIC_H5.createGroup(FileH5,'Data');
+                    MIC_H5.createGroup(FileH5,'Calibration');
+                otherwise
+                    error('StartSequence:: unknown file save type')
+            end
             %first take a reference image or align to image
             
+            obj.FlipMount.FilterOut;
+            fprintf('IsOpen == %d\n', obj.FlipMount.IsOpen);
             obj.LampObj.setPower(obj.LampPower);
             
             obj.RegType='Self';
@@ -477,16 +491,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     save(f,'Image_Reference');
             end
             
-            switch obj.SaveFileType
-                case 'mat'
-                case 'h5'
-                    FileH5=fullfile(obj.SaveDir,[obj.BaseFileName s '.h5']);
-                    MIC_H5.createFile(FileH5);
-                    MIC_H5.createGroup(FileH5,'Data');
-                    MIC_H5.createGroup(FileH5,'Calibration');
-                otherwise
-                    error('StartSequence:: unknown file save type')
-            end
+          
             
             obj.FlipMount.FilterIn;
             fprintf('IsOpen == %d\n', obj.FlipMount.IsOpen);
@@ -511,7 +516,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     %Collect Data
                     Data(:,:,:,ii)=obj.single_scan();
 %                   
-                    dipshow(P,sum(Data(:,:,1:162),3))
+                    dipshow(P,sum(Data(:,:,1:110),3))
                     diptruesize(200)
                     %Turn off Laser
                     obj.LaserObj.off();
@@ -574,15 +579,15 @@ classdef MIC_HSM_Collect < MIC_Abstract
             %these could be set from camera size;
             switch obj.CameraROI
                 case 1
-                    ROI=[794 1306 974 1137]; %512pixels 810 1290 750 1300
+                    ROI=[820  1260 700  1250]; %256pixels 
                 case 2
-                    ROI=[922 1178 974 1137];%256pixels
+                    ROI=[708  964  800  1250];%256pixels
                 case 3
-                    ROI=[986 1114 974 1137];%128pixels 
+                    ROI=[772 900 800  1250];%128pixels 
                 case 4
-                    ROI=[1018 1082 974 1137];%64pixels
+                    ROI=[804 868 800  1250];%64pixels
                 case 5
-                    ROI=[1034 1066 974 1137];%32pixels
+                    ROI=[820 852 800  1250];%32pixels
                 case 6
                     ROI=[794 1306 750 1300]; % Custom from Sandeep
                     
