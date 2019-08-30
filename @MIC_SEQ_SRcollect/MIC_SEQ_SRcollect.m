@@ -637,14 +637,24 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Small stage step up in the z dimension with piezo.
             OldPosPiezo = obj.StagePiezo.Position;
             NewPosPiezo = OldPosPiezo + [0, 0, obj.PiezoStep];
-            obj.StagePiezo.setPosition(NewPosPiezo); 
+            if NewPosPiezo(3) < (10 + obj.StepperSmallStep * 1e3)
+                obj.StagePiezo.setPosition(NewPosPiezo); 
+            else
+                warning(['Recommended Z piezo range exceeded: please ', ...
+                    'use small stepper movements before using piezo.'])
+            end
         end
         
         function movePiezoDownSmall(obj)
             % Small stage step down in the z dimension with piezo.
             OldPosPiezo = obj.StagePiezo.Position;
             NewPosPiezo = OldPosPiezo - [0, 0, obj.PiezoStep];
-            obj.StagePiezo.setPosition(NewPosPiezo); 
+            if NewPosPiezo(3) > (10 - obj.StepperSmallStep * 1e3)
+                obj.StagePiezo.setPosition(NewPosPiezo); 
+            else
+                warning(['Recommended Z piezo range exceeded: please ', ...
+                    'use small stepper movements before using piezo.'])
+            end
         end
     end
     
