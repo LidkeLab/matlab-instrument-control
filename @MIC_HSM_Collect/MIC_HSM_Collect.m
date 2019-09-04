@@ -52,7 +52,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
         % Scan params
         NSteps = 200;
         StepAngle = 0.00186; % Step angle in degrees 0.00186
-        Exp_Scan = 0.05;
+        Exp_Scan = 0.01;
         Nsequences =20;
         %         NSeqBeforeRegistration = 5;
         DataCube = 5;% data cubes
@@ -103,8 +103,8 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 obj.CameraLuca.setup_acquisition();
                 obj.CameraLuca.ReturnType='matlab';
                 obj.CameraLuca.DisplayZoom=4;
-                obj.CameraLuca.ROI= [350 650 350 650];
-                
+                obj.CameraLuca.ROI= [300 700 300 700];
+                obj.CameraLuca.ExpTime_Capture = 0.01;
                 % Stage
                 fprintf('Initializing Stage\n')
                 obj.StageObj=MIC_MCLNanoDrive();
@@ -450,7 +450,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 Data=obj.single_scan();
 %                 dipshow(F,sum(Data(:,:,250:300),3))
 %                 diptruesize(50)
-                dipshow(P,sum(Data(:,:,1:550),3))
+                dipshow(P,sum(Data(:,:,1:100),3))
                 diptruesize(200)
 %                 dipshow(Y,sum(Data(:,:,350:380),3))
 %                 diptruesize(100)
@@ -508,19 +508,19 @@ classdef MIC_HSM_Collect < MIC_Abstract
             %loop over sequences
             for nn=1:obj.DataCube
                 nn
+                %Turn on Laser for aquisition
+                obj.LaserObj.on();
                 Data = ones(ROISZ(2)-ROISZ(1)+1,obj.NSteps,ROISZ(4)-ROISZ(3)+1,obj.Nsequences);
                 for ii = 1:obj.Nsequences
                     ii
-                    %Turn on Laser for aquisition
-                    obj.LaserObj.on();
                     %Collect Data
                     Data(:,:,:,ii)=obj.single_scan();
-%                   
-                    dipshow(P,sum(Data(:,:,1:110),3))
-                    diptruesize(200)
-                    %Turn off Laser
-                    obj.LaserObj.off();
+                    im =sum(Data(:,:,1:100),3);
+                    dipshow(P,im)
+                    diptruesize(200)  
                 end
+                 %Turn off Laser
+                obj.LaserObj.off();
                 Data = uint16(Data);
                 %Save
                 switch obj.SaveFileType
@@ -579,7 +579,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
             %these could be set from camera size;
             switch obj.CameraROI
                 case 1
-                    ROI=[820  1260 700  1250]; %256pixels 
+                    ROI=[580 1030 880  980]; %256pixels 
                 case 2
                     ROI=[708  964  800  1250];%256pixels
                 case 3

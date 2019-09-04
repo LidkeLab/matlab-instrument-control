@@ -43,6 +43,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         CameraFrameIndex    %current frame number in sequence
         XPixels;            %number of pixels in first dimention
         YPixels;            %number of pixels in second dimention
+        Temperature;        %current temp in C
         
         Capabilities;       % Capabilities structure from camera
         
@@ -124,6 +125,13 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             
             % load up camera params and capabilities
             obj.get_capabilities;
+            
+            
+            [obj.LastError] = AT_SetBool(obj.CamHandle,'SensorCooling',1);
+            AT_CheckWarning(obj.LastError);
+            
+            
+            [obj.LastError] = AT_SetEnumIndex(obj.CamHandle,'SimplePreAmpGainControl',1)%12bit low noise
             
         end
         
@@ -337,10 +345,18 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
 %             obj.ImageHandle=imagesc(Out);
 %             set(obj.ImageHandle,'cdata',Out);
 %             %%Hanieh
-            AT_CheckWarning(obj.LastError);
+% %             AT_CheckWarning(obj.LastError);
             
         end
         
+         function [Temp, Status] = call_temperature(obj)
+            [obj.LastError, Temp] = AT_GetFloat(obj.CamHandle,'SensorTemperature');
+            AT_CheckWarning(obj.LastError);
+            
+            [obj.LastError, Status] = AT_GetEnumIndex(obj.CamHandle,'TemperatureStatus');
+            AT_CheckWarning(obj.LastError);
+        end
+  
         function errorcheck(obj)
             
         end
@@ -400,9 +416,19 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             AT_CheckWarning(obj.LastError);
         end
         
-        function obj=gettemperature(obj)
-            % Not sure if Zyla has a sensor cooling
+        function [Temp, Status]=gettemperature(obj)
+            [obj.LastError, Temp] = AT_GetFloat(obj.CamHandle,'SensorTemperature');
+            AT_CheckWarning(obj.LastError);
+            
+            obj.Temperature=Temp;
+            [obj.LastError, Status] = AT_GetEnumIndex(obj.CamHandle,'TemperatureStatus');
+            AT_CheckWarning(obj.LastError);
+                
         end
+        
+       
+        
+        
         
         function obj=get_capabilities(obj)
             % making the CameraSetting

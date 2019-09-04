@@ -42,9 +42,15 @@ Edit_FileName= uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String','Set Aut
 FileType = uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String','File type:','Enable','off','Position', [staticst php-90 100 20]);
 Edit_saveFileType = uicontrol('Parent',hFilePanel, 'Style', 'popupmenu', 'String',{'.mat','.h5'},'Enable','on','BackgroundColor',[1 1 1],'Position', [editst php-90 250 20],'CallBack',{@saveFile_Callback});
 
+% % Other Gui Panel
+% ph=0.2;
+% php = ph*ysz;
+% hOtherguiPanel = uipanel('Parent',guiFig,'Title','Other Guis','Position',[(1-pw)/2 refh-ph-psep pw ph]);
+% refh=refh-ph-psep;
+
 
 % Camera Panel
-ph=0.3;
+ph=0.2;
 php = ph*ysz;
 hCameraPanel = uipanel('Parent',guiFig,'Title','CAMERA','Position',[(1-pw)/2 refh-ph-psep pw ph]);
 refh=refh-ph-psep;
