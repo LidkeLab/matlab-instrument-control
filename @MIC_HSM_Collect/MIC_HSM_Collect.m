@@ -51,7 +51,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
         
         % Scan params
         NSteps = 200;
-        StepAngle = 0.00186; % Step angle in degrees 0.00186
+        StepAngle = 0.0020; % Step angle in degrees 0.00186
         Exp_Scan = 0.01;
         Nsequences =20;
         %         NSeqBeforeRegistration = 5;
@@ -450,7 +450,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 Data=obj.single_scan();
 %                 dipshow(F,sum(Data(:,:,250:300),3))
 %                 diptruesize(50)
-                dipshow(P,sum(Data(:,:,1:100),3))
+                dipshow(P,sum(Data(:,:,1:150),3))
                 diptruesize(200)
 %                 dipshow(Y,sum(Data(:,:,350:380),3))
 %                 diptruesize(100)
@@ -515,7 +515,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     ii
                     %Collect Data
                     Data(:,:,:,ii)=obj.single_scan();
-                    im =sum(Data(:,:,1:100),3);
+                    im =sum(Data(:,:,1:150),3);
                     dipshow(P,im)
                     diptruesize(200)  
                 end
@@ -536,17 +536,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 end
                 
                 
-                switch obj.SaveFileType
-                    case 'mat'
-                        %Nothing to do
-                    case 'h5' %This will become default
-                        % S='MIC_TIRF_SRcollect'; % -modified SP
-                        S='Data'; % -modified EJ
-                        MIC_H5.createGroup(FileH5,S);
-                        obj.save2hdf5(FileH5,S);  %Working
-                    otherwise
-                        error('StartSequence:: unknown SaveFileType')
-                end
+              
                 
                 % align
                 if nn~=obj.DataCube
@@ -561,6 +551,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 else
                 end
             end
+            fprintf('imaging is done!!!\n')
         end
         
         function singleScan(obj)
@@ -579,9 +570,10 @@ classdef MIC_HSM_Collect < MIC_Abstract
             %these could be set from camera size;
             switch obj.CameraROI
                 case 1
-                    ROI=[580 1030 880  980]; %256pixels 
+%                     ROI=[580 1030 710  1060]; %512pixels
+                    ROI=[700 910 900  1050];  
                 case 2
-                    ROI=[708  964  800  1250];%256pixels
+                    ROI=[708  902   810  960];%256pixels
                 case 3
                     ROI=[772 900 800  1250];%128pixels 
                 case 4
