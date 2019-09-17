@@ -2,15 +2,15 @@
 
 
 %The directory o the data
-DataDir = 'H:\Data\19-09-03';
+DataDir = 'H:\Data\19-09-16';
 %The directory to save chunks
-SaveDir = 'H:\Data\19-09-03';
+SaveDir = 'H:\Data\19-09-16';
 %The name of the file
-FileName = 'HeLa_532&488_tubulin_Cell1-2019-9-3-17-25-33';
+FileName = 'tubulin_im520__OSB_Cell1-2019-9-16-20-52-8';
 
 
 %find the name of level
-info=h5info('H:\Data\19-09-03\HeLa_532&488_tubulin_Cell1-2019-9-3-17-25-33.h5');
+info=h5info('H:\Data\19-09-16\tubulin_im520__OSB_Cell1-2019-9-16-20-52-8.h5');
 
 L=info.Groups(2).Datasets;
 
@@ -22,12 +22,13 @@ nn = size((info.Groups(2).Datasets),1);
 for ii=1:nn
 dataName= L(ii).Name;  
 s=strcat('/Data/',dataName);
-Data=h5read('H:\Data\19-09-03\HeLa_532&488_tubulin_Cell1-2019-9-3-17-25-33.h5',s);
+Data=h5read('H:\Data\19-09-16\tubulin_im520__OSB_Cell1-2019-9-16-20-52-8.h5',s);
 
 sequence = sum(Data,3);
-% sequence = sum(Data(:,:,5:100,:),3); %spectral adjustment 
+% sequence = sum(Data(:,:,1:50,:),3); %spectral adjustment 
 sequence = squeeze(sequence);
+% FileName = 'chamber_#1_ Tubulin_EGFR_IM1_520';
 SaveName = cat(2,FileName,sprintf('_#%g',ii));
 save(fullfile(SaveDir,SaveName),'sequence','-v7.3')
 end
-
+fprintf('extract process is done!!!\n')
