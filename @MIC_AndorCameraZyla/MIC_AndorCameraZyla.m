@@ -130,8 +130,9 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             [obj.LastError] = AT_SetBool(obj.CamHandle,'SensorCooling',1);
             AT_CheckWarning(obj.LastError);
             
+%             [obj.LastError] = AT_SetEnumIndex(obj.CamHandle,'FanSpeed',2);
             
-            [obj.LastError] = AT_SetEnumIndex(obj.CamHandle,'SimplePreAmpGainControl',1)%12bit low noise
+            [obj.LastError] = AT_SetEnumIndex(obj.CamHandle,'SimplePreAmpGainControl',1);%12bit low noise
             
         end
         
@@ -339,13 +340,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             AT_CheckWarning(obj.LastError);
             [obj.LastError,Out] = AT_ConvertMono16ToMatrix(buf,obj.Height,obj.Width,obj.Stride);
             
-%             %%Hanieh to remove hot pixel
-%             P=prctile(Out(Out>0),99.9);
-%             Out(Out>P)=P;
-%             obj.ImageHandle=imagesc(Out);
-%             set(obj.ImageHandle,'cdata',Out);
-%             %%Hanieh
-% %             AT_CheckWarning(obj.LastError);
+
             
         end
         
