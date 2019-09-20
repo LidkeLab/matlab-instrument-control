@@ -148,12 +148,14 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     obj.FlipMount.FilterOut;
                     pause(1)
                     pause(obj.LampWait);
-                    %                 obj.R3DObj.align2imageFit();
-                    obj.R3DObj.CameraObj.ROI=[350 650 350 650]; %luca
+                    
+                    obj.R3DObj.CameraObj.ROI=[300 700 300 700]; %luca
                     obj.R3DObj.calibrate();
                     obj.LampObj.off();
+%                     obj.CameraLuca.ROI=[1 256 1 256]; %luca
+%                     obj.R3DObj.calibrate();
                     obj.FlipMount.FilterIn;
-                    %             obj.CameraLuca.ROI=[100 900 100 900];
+                    %             obj.CameraLuca.ROI=[350 650 350 650];
                     %             obj.R3DObj.calibrate();
                 end
                 if exist(f,'file')
@@ -307,13 +309,17 @@ classdef MIC_HSM_Collect < MIC_Abstract
             obj.CameraZyla.start_focus();
         end
         
-        function collect_background(obj)
+        function Data=collect_background(obj)
             
             obj.CameraZyla.ROI=obj.getROI();
             obj.CameraZyla.ExpTime_Sequence=obj.Exp_Scan;
             obj.CameraZyla.SequenceLength = obj.BackgroundScanN;
             obj.CameraZyla.start_sequence();
-            obj.Background = single(mean(obj.CameraZyla.Data,3));
+            %obj.Background = single(mean(obj.CameraZyla.Data,3));
+            Data=single(obj.CameraZyla.Data);
+            Data=permute(Data,[1 3 2]);
+
+            
         end
 
         function collect_backgroundROI(obj)
@@ -394,7 +400,8 @@ classdef MIC_HSM_Collect < MIC_Abstract
             %--------------------------
             
             %Get data and finish
-            Data=single(obj.CameraZyla.Data)-repmat(obj.Background,[1 1 obj.NSteps]);
+%             Data=single(obj.CameraZyla.Data)-repmat(obj.Background,[1 1 obj.NSteps]);
+            Data=single(obj.CameraZyla.Data);
             
             Data=permute(Data,[1 3 2]); % to check the raw data in (x,y) instead of (x,Lambda)
             
@@ -424,8 +431,8 @@ classdef MIC_HSM_Collect < MIC_Abstract
             %--------------------------
             
             %Get data and finish
-            Data=single(obj.CameraZyla.Data)-repmat(obj.Background,[1 1 obj.NSteps]);
-            
+            %Data=single(obj.CameraZyla.Data)-repmat(obj.Background,[1 1 obj.NSteps]);
+            Data=single(obj.CameraZyla.Data);
             Data=permute(Data,[1 3 2]); % to check the raw data in (x,y) instead of (x,Lambda)
             
             %disable and clear sessions in galvo
@@ -435,10 +442,10 @@ classdef MIC_HSM_Collect < MIC_Abstract
         end
         function scanFocus(obj)
             obj.CameraZyla.ROI=obj.getROI();
-            %Take background scan
-            obj.BackgroundScanN=100;
-            obj.collect_background();
-            dipshow(obj.Background)
+%             %Take background scan
+%             obj.BackgroundScanN=100;
+%             obj.collect_background();
+%             dipshow(obj.Background)
             
             % H.LaserObj.setPower();
            
@@ -450,7 +457,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 Data=obj.single_scan();
 %                 dipshow(F,sum(Data(:,:,250:300),3))
 %                 diptruesize(50)
-                dipshow(P,sum(Data(:,:,1:150),3))
+                dipshow(P,sum(Data(:,:,1:100),3))
                 diptruesize(200)
 %                 dipshow(Y,sum(Data(:,:,350:380),3))
 %                 diptruesize(100)
@@ -472,6 +479,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     FileH5=fullfile(obj.SaveDir,[obj.BaseFileName s '.h5']);
                     MIC_H5.createFile(FileH5);
                     MIC_H5.createGroup(FileH5,'Data');
+                    MIC_H5.createGroup(FileH5,'Background');
                     MIC_H5.createGroup(FileH5,'Calibration');
                 otherwise
                     error('StartSequence:: unknown file save type')
@@ -491,7 +499,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
                     save(f,'Image_Reference');
             end
             
-          
+            obj.align();% Align
             
             obj.FlipMount.FilterIn;
             fprintf('IsOpen == %d\n', obj.FlipMount.IsOpen);
@@ -501,8 +509,20 @@ classdef MIC_HSM_Collect < MIC_Abstract
             
             obj.LaserObj.off()
             obj.BackgroundScanN=100;
-            obj.collect_background();
-            dipshow(obj.Background)
+            BackgroundData=uint16(obj.collect_background());
+            
+            switch obj.SaveFileType
+                case 'mat'
+                    fn=fullfile(obj.SaveDir,[obj.BaseFileName '#' num2str(nn,'%04d') s]);
+                    Params=exportState(obj); %#ok<NASGU>
+                    save(fn,'Data','Params');
+                case 'h5' %This will become default
+                    S='Background';
+                    MIC_H5.writeAsync_uint16(FileH5,'Background',S,BackgroundData);
+                otherwise
+                    error('StartSequence:: unknown SaveFileType')
+            end
+%             dipshow(obj.Background)
             P=figure
             ROISZ = obj.CameraZyla.ROI;
             %loop over sequences
@@ -513,10 +533,11 @@ classdef MIC_HSM_Collect < MIC_Abstract
                 Data = ones(ROISZ(2)-ROISZ(1)+1,obj.NSteps,ROISZ(4)-ROISZ(3)+1,obj.Nsequences);
                 for ii = 1:obj.Nsequences
                     ii
+                     
                     %Collect Data
                     Data(:,:,:,ii)=obj.single_scan();
-                    im =sum(Data(:,:,1:150),3);
-                    dipshow(P,im)
+                   dipshow(P,sum(Data(:,:,1:150),3));
+%                     dipshow(P,im)
                     diptruesize(200)  
                 end
                  %Turn off Laser
@@ -557,8 +578,8 @@ classdef MIC_HSM_Collect < MIC_Abstract
         function singleScan(obj)
             obj.CameraZyla.ROI=obj.getROI();
             obj.LaserObj.off()
-            obj.BackgroundScanN=100;
-            obj.collect_background();
+%             obj.BackgroundScanN=100;
+%             obj.collect_background();
             obj.LaserObj.on()
             Data=obj.single_scan();
             obj.LaserObj.off()
@@ -571,7 +592,7 @@ classdef MIC_HSM_Collect < MIC_Abstract
             switch obj.CameraROI
                 case 1
 %                     ROI=[580 1030 710  1060]; %512pixels
-                    ROI=[700 910 900  1050];  
+                    ROI=[650  950 1050  1150];  
                 case 2
                     ROI=[708  902   810  960];%256pixels
                 case 3
