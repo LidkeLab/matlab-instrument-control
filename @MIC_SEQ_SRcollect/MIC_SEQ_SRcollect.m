@@ -32,7 +32,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
  
         % Static Instrument Settings
         SCMOS_UseDefectCorrection = 0;
-        Lamp660Power = 35;
+        Lamp660Power = 15;
         SCMOS_PixelSize = .104; % microns
         SCMOSCalFilePath; % needed if using PublishResults flag
         

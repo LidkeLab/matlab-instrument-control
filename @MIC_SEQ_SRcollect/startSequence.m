@@ -138,11 +138,6 @@ if obj.UsePreActivation
     PreviousState = pause('on'); % saves current state for later
     pause(obj.DurationPreActivation);
     
-    % Turn off the 405nm laser (if used) and close the shutter to
-    % prevent the 647nm laser from reaching the sample.
-    obj.Shutter.close();
-    obj.Laser405.off();
-    
     % Restore the previous pause setting (in case this was important
     % elsewhere/to the user).
     pause(PreviousState);
