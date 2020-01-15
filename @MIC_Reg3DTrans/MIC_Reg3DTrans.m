@@ -1082,11 +1082,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 Data.ErrorSignalHistory = obj.ErrorSignalHistory;
             end
             if ~isempty(obj.OffsetFitSuccess)
-                Data.OffsetFitSuccess = uint8(obj.OffsetFitSuccess);
+                Data.OffsetFitSuccess = obj.OffsetFitSuccess;
             end
             if ~isempty(obj.OffsetFitSuccessHistory)
                 Data.OffsetFitSuccessHistory = ...
-                    uint8(obj.OffsetFitSuccessHistory);
+                    obj.OffsetFitSuccessHistory;
             end
             
             Children=[];
