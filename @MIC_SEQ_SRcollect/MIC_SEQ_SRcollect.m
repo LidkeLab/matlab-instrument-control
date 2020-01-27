@@ -33,7 +33,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         % Static Instrument Settings
         SCMOS_UseDefectCorrection = 0;
         Lamp660Power = 15;
-        SCMOS_PixelSize = .104; % microns
+        SCMOS_PixelSize = .0973; % microns
         SCMOSCalFilePath; % needed if using PublishResults flag
         
         % Operational properties.
@@ -65,7 +65,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         LaserPowerFocus405 = 2;
         LaserPowerSequence405 = 2;
         IsBleach = 0; % boolean: 1 for a photobleach round, 0 otherwise
-        StepperWaitTime = 20; % max time (s) to wait for stepper to move
+        StepperWaitTime = 5; % max time (s) to wait for stepper to move
         MaxPiezoConnectAttempts = 2; % max # of attempts to connect piezo
         PiezoSettlingTime = 0.2; % settling time of piezos (s)
         StepperLargeStep = 0.05; % Large Stepper motor step (mm)
@@ -88,12 +88,12 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseBrightfieldReg = 1; % boolean: 1 uses registration, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
-        Reg3DStepSize = 0.1; % (um) step size along z during cell reg.
-        Reg3DMaxDev = 1; % (um) max deviation along z during cell reg.
+        Reg3DStepSize = 0.1; % (um) step size along z during cell reg. default=0.1
+        Reg3DMaxDev = 1; % (um) max deviation along z during cell reg. default=1
         Reg3DMaxDevInit = 1; % (um) max dev. along z for initial cell reg.
         Reg3DXTol = 0.005; % (um) correction along x to claim convergence
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
-        Reg3DZTol = 0.03; % (um) correction along z to claim convergence
+        Reg3DZTol = 0.05; % (um) correction along z to claim convergence
         
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
@@ -141,12 +141,12 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 
             % Setup instruments, ensuring proper order is maintained.
             obj.setupSCMOS();
-            obj.setupStagePiezo();
             obj.setupLamps();
             obj.setupLasers();
-            obj.setupStageStepper();
             obj.setupFlipMountTTL();
             obj.setupShutterTTL();
+            obj.setupStageStepper();
+            obj.setupStagePiezo();
             obj.setupAlignReg();
             obj.unloadSample(); % move stage up so user can mount sample
             obj.StatusString = '';
@@ -287,6 +287,23 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StageStepper.moveToPosition(3, 4); % z stepper
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
+            
+            % Check to make sure the steppers were setup properly.
+            pause(obj.StepperWaitTime); % let stage settle down first
+            XPosition = obj.StageStepper.getPosition(2);
+            YPosition = obj.StageStepper.getPosition(1);
+            ZPosition = obj.StageStepper.getPosition(3);
+            SmallStepSize = obj.StepperSmallStep;
+            if (abs(XPosition - 2.2780) > SmallStepSize) ...
+                    || (abs(YPosition - 2.0650) > SmallStepSize) ...
+                    || (abs(ZPosition - 4) > SmallStepSize)
+                % If any of these conditions are true, something has
+                % probably gone wrong with the stepper motor...
+                warning(['There is a problem with the stepper motors.', ...
+                    ' Please power cycle the stepper motor ', ...
+                    'controller and run SEQ.setupStageStepper()']);
+                obj.StageStepper.delete(); % delete so it can't be used
+            end
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
