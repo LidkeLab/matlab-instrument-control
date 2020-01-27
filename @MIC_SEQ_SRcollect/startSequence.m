@@ -52,7 +52,7 @@ obj.StageStepper.moveToPosition(2, ...
     RefStruct.StepperPos(1) + obj.CoverSlipOffset(1));
 obj.StageStepper.moveToPosition(3, ...
     RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
-obj.StagePiezo.center(); % center the piezos to ensure full range of motion
+% obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 
 % Attempt to align the cell to the reference image in brightfield (if
 % requested).
