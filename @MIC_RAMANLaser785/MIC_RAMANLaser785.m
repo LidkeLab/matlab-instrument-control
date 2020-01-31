@@ -25,14 +25,13 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
     properties (SetAccess=protected, GetAccess = public)
         Power;              % Currently Set Output Power
         PowerUnit='mW'      % Power Unit
-        MinPower=0.00;         % Minimum Power Setting
+        MinPower=0.00;      % Minimum Power Setting
         MaxPower=70;        % Maximum Power Setting
         IsOn=0;             % On or Off State.  0,1 for off,on
         LaserStatus;        % 1=Normal, 2=TTL modulation, 3=Laser Power Scan
         %   4=Waiting for calibrate laser power, 5=Over laser current
         %   shutdown, 6=TEC over temp shutdown, 7=Waiting temperature
         %   stable, 8=Waiting 30 seconds
-        Busy=0;
         CurrInterpol;       % Interpolated current values from calibration
         PowerInterpol;      % Interpolated power values from calibration
     end
@@ -73,10 +72,25 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
             obj.calibrate();
                                                         
             % put initial value for Power=MinPower
-            obj.getStatus();
-            obj.statusErrorCheck();
-            if obj.LaserStatus==1
-                obj.setPower(obj.MinPower);
+            idx=0; warn7=0; warn8=0;
+            while idx==0
+                obj.getStatus();
+                if obj.LaserStatus==8
+                    idx=0;
+                    if warn8==0
+                        warning('MIC_RAMANLaser785: Waiting 30 seconds ...');
+                        warn8=1;
+                    end
+                elseif obj.LaserStatus==7
+                    idx=0;
+                    if warn7==0
+                        warning('MIC_RAMANLaser785: Waiting for temp to stabilize');
+                        warn7=1;
+                    end
+                elseif obj.LaserStatus==1
+                    obj.setPower(obj.MinPower);
+                    idx=1;
+                end
             end
         end
         
@@ -180,7 +194,6 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
             fprintf(obj.Serial,'rlrs?');
             out=obj.ReadBuffer();
             obj.LaserStatus=str2double(out);
-%             fprintf('Laser Status: %d\n',obj.LaserStatus);
        end
         
         function statusErrorCheck(obj)
@@ -192,9 +205,9 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
                 case 6
                     error('MIC_RAMANLaser785: TEC over temp shutdown')
                 case 7
-                    error('MIC_RAMANLaser785: Waiting for temp to stabilize')
+                    warning('MIC_RAMANLaser785: Waiting for temp to stabilize')
                 case 8
-                    error('MIC_RAMANLaser785: Waiting 30 seconds')
+                    warning('MIC_RAMANLaser785: Waiting 30 seconds ...')
             end
         end
     end
@@ -240,8 +253,9 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
             pause(.5);
             fprintf('Show power on the screen\n')
             L785.getCurrentPower;
-            fprintf('Delete Object\n')
+            fprintf('Testing exportState\n')
             State=L785.exportState()
+            fprintf('Delete Object\n')
             delete(L785);
             clear L785;
             
