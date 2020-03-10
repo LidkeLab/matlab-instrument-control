@@ -148,7 +148,9 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.setupStageStepper();
             obj.setupStagePiezo();
             obj.setupAlignReg();
-            obj.unloadSample(); % move stage up so user can mount sample
+            if obj.StageStepper.isvalid
+                obj.unloadSample(); % move stage up for sample mounting
+            end
             obj.StatusString = '';
         end
         
