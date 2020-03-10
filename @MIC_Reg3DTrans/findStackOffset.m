@@ -15,11 +15,13 @@ function [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
 %       then PixelOffset = findStackOffset(Stack1, Stack2) == [x; y; z]
 % NOTE: All inputs besides Stack1 and Stack2 are optional and can be
 %       replaced by [] (an empty array).
+% NOTE: Stack1 and Stack2 must be the same size in all 3 dimensions (x, y,
+%       and z)
 %
 % INPUTS:
 %   Stack1: (mxnxo) The stack to which Stack2 is compared to, i.e. 
 %           Stack1 is the reference stack.
-%   Stack2: (pxqxr) The stack for which the offset relative to Stack1 
+%   Stack2: (mxnxo) The stack for which the offset relative to Stack1 
 %           is to be determined.
 %   MaxOffset: (3x1 or 1x3)(default = [2; 2; 2]) Maximum offset between 
 %           Stack1 and Stack2 to be considered in the calculation of
@@ -117,6 +119,13 @@ if ~exist('PlotFlag', 'var') || isempty(PlotFlag)
 end
 if ~exist('BinaryMask', 'var') || isempty(BinaryMask)
     BinaryMask = ones(size(Stack1));
+    if (size(Stack1, 3) == 1) || (size(Stack2, 3) == 1)
+        % One or both of the stacks are just a single image, so we need to
+        % change the size of the BinaryMask to account for that (single
+        % images are converted to a 3D stack later on by copying the image
+        % twice in the z dimension).
+        BinaryMask = repmat(BinaryMask, [1, 1, 2]);
+    end
 end
 if ~exist('UseGPU', 'var') || isempty(UseGPU)
     UseGPU = 1;
@@ -228,7 +237,7 @@ switch Method
         % Compute the 3D FFT's of each stack, padding with zeros before
         % computing. The padding size selected such that the result is 
         % approximately equivalent to the brute forced cross-correlation. 
-        % NOTE: Ideally, we would pad to 2*size(Stack)-1. Using
+        % NOTE: Typically, we would pad to 2*size(Stack)-1, however using
         %       2*size(Stack) will improve the performance of the FFT when
         %       the dimensions of Stack are powers of 2. 
         Stack1PaddedFFT = fftn(Stack1Whitened, 2 * size(Stack1Whitened));
@@ -238,8 +247,8 @@ switch Method
         XCorr3D = ifftn(conj(Stack1PaddedFFT) .* Stack2PaddedFFT);
         
         % Compute the binary cross-correlation for later use in scaling.
-        Stack1Binary = (Stack1Whitened ~= 0);
-        Stack2Binary = (Stack2Whitened ~= 0);
+        Stack1Binary = BinaryMask .* ones(size(Stack1Whitened));
+        Stack2Binary = BinaryMask .* ones(size(Stack2Whitened));
         Stack1BinaryFFT = fftn(Stack1Binary, 2 * size(Stack1Whitened));
         Stack2BinaryFFT = fftn(Stack2Binary, 2 * size(Stack2Whitened));
         XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
@@ -249,8 +258,7 @@ switch Method
         % [0, 0, 0] offset introduced by the zero-padded edge effects),
         % scaling by max(XCorr3DBinary(:)) to re-convert to a correlation
         % coefficient.
-        XCorr3D = (XCorr3D ./ XCorr3DBinary) ...
-            * min(sum(Stack1Binary(:)), sum(Stack2Binary(:)));
+        XCorr3D = (XCorr3D ./ XCorr3DBinary) * max(XCorr3DBinary(:));
         
         % Shift the cross-correlation image such that an auto-correlation 
         % image will have it's energy peak at the center of the 3D image.

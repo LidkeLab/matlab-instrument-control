@@ -165,12 +165,29 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
             obj.SensorPosition = pos; % update the position
         end
         
-        function center(obj)
+        function center(obj, AxisBool)
             % Center the stage in it's range of travel rounded to the
             % nearest micron, i.e. range = 101, stage goes to 50,50,50
-            X(1) = floor(obj.Max_X/2);
-            X(2) = floor(obj.Max_Y/2);
-            X(3) = floor(obj.Max_Z/2);
+            % If AxisBool is specified, the stage will only be centered
+            % alnog the dimensions selected.  For example, if 
+            % AxisBool = [1; 0; 1], the stage will be centered along the X 
+            % and Z axes, and the Y axis will remain unchanged. 
+            
+            % Check if the AxisBool was entered, setting a default if not.
+            if ~exist('AxisBool', 'var')
+                AxisBool = [1; 1; 1];
+            end
+            
+            X = obj.Position; % initialize
+            if AxisBool(1)
+                X(1) = floor(obj.Max_X/2);
+            end
+            if AxisBool(2)
+                X(2) = floor(obj.Max_Y/2);
+            end
+            if AxisBool(3)
+                X(3) = floor(obj.Max_Z/2);
+            end
             obj.setPosition(X);
         end
         

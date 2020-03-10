@@ -655,7 +655,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     (abs(XYshift(2))<obj.Tol_Y/obj.PixelSize)&(abs(Zshift)<obj.Tol_Z/obj.PixelSize);
                 
                     % Save the error signal.
-                    obj.ErrorSignal = [StageShiftXY.', Zshift];
+                    obj.ErrorSignal = -[StageShiftXY.', Zshift];
+                    
+                    % Determine where the fit procedure was succesful
+                    obj.OffsetFitSuccess = [1, 1, 1]; % assume success
+                    obj.OffsetFitSuccessHistory = ...
+                        [obj.OffsetFitSuccessHistory; ...
+                        obj.OffsetFitSuccess];
                 end
                 
                 % Append the new ErrorSignal to ErrorSignalHistory.
@@ -663,7 +669,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     obj.ErrorSignal];
                 
                 %show overlay
-                obj.Image_Current=obj.capture;
+                obj.Image_Current = obj.capture_single();
                 im=obj.Image_Reference(...
                     obj.XYBorderPx:end-obj.XYBorderPx, ...
                     obj.XYBorderPx:end-obj.XYBorderPx);
