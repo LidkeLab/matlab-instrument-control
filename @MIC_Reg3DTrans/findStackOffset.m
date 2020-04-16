@@ -1,13 +1,14 @@
 function [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
     findStackOffset(Stack1, Stack2, MaxOffset, FitOffset, ...
     BinaryMask, PlotFlag, UseGPU)
-%findStackOffset estimates a sub-pixel offset between two stacks.
+%findStackOffset estimates a sub-pixel offset between two stacks of images.
 % findStackoffset() will estimate the offset between two 3D stacks of
 % images.  This method computes an integer pixel offset between the two
-% stacks via a cross-correlation (xcorr) or an xcorr like method, and
-% then fits a 2nd order polynomial to the resulting xcorr.  An
-% estimate of a sub-pixel offset is then produced by determining the
-% location of the peak in the 2nd order polynomial fit. 
+% stacks via a cross-correlation and then fits 2nd order polynomials to the 
+% resulting cross-correlation.  An estimate of a sub-pixel offset is then 
+% produced by determining the location of the peaks of the three (x, y, z)
+% 2nd order polynomial fits.
+%
 % NOTE: The convention used here for the offset is based on indices as
 %       follows: If Stack is a 3D stack of images, and
 %       Stack1 = Stack(m:n, m:n, m:n) 
@@ -167,13 +168,9 @@ CorrOffsetIndicesY = max(ceil(SizeOfFullXCorr(2)/2) - MaxOffset(2), 1) ...
 CorrOffsetIndicesZ = max(ceil(SizeOfFullXCorr(3)/2) - MaxOffset(3), 1) ...
     : ceil(SizeOfFullXCorr(3)/2) + MaxOffset(3);
 
-% Compute the standard cross-correlation based on the FFT, but
-% inspect only the central portion corresponding to MaxOffset
-% offsets along each dimension.
-
-% Whiten each image in the stack with respect to the entire stack,
-% ignoring the parts which are covered by the BinaryMask when
-% computing mean, std., etc.
+% Whiten each image in the stack with respect to the entire stack, ignoring
+% the parts which are covered by the BinaryMask when computing mean, std., 
+% etc.
 Stack1Masked = Stack1(logical(BinaryMask));
 Stack2Masked = Stack2(logical(BinaryMask));
 Stack1Whitened = (Stack1 - mean(Stack1Masked)) ...
@@ -181,17 +178,17 @@ Stack1Whitened = (Stack1 - mean(Stack1Masked)) ...
 Stack2Whitened = (Stack2 - mean(Stack2Masked)) ...
     / (std(Stack2Masked) * sqrt(numel(Stack2Masked) - 1));
 
-% Re-apply the binary mask to ensure the masked points cannot
-% contribute to the cross-correlation.
+% Re-apply the binary mask to ensure the masked points cannot contribute to
+% the cross-correlation.
 Stack1Whitened = BinaryMask .* Stack1Whitened;
 Stack2Whitened = BinaryMask .* Stack2Whitened;
 
-% Compute the 3D FFT's of each stack, padding with zeros before
-% computing. The padding size selected such that the result is
-% approximately equivalent to the brute forced cross-correlation.
+% Compute the 3D FFT's of each stack, padding with zeros before computing.
+% The padding size selected such that the result is approximately 
+% equivalent to the brute forced cross-correlation.
 % NOTE: Typically, we would pad to 2*size(Stack)-1, however using
-%       2*size(Stack) will improve the performance of the FFT when
-%       the dimensions of Stack are powers of 2.
+%       2*size(Stack) will improve the performance of the FFT when the 
+%       dimensions of Stack are powers of 2.
 Stack1PaddedFFT = fftn(Stack1Whitened, 2 * size(Stack1Whitened));
 Stack2PaddedFFT = fftn(Stack2Whitened, 2 * size(Stack2Whitened));
 
@@ -206,14 +203,13 @@ Stack2BinaryFFT = fftn(Stack2Binary, 2 * size(Stack2Whitened));
 XCorr3DBinary = ifftn(conj(Stack1BinaryFFT) .* Stack2BinaryFFT);
 
 % Scale the 3D cross-correlation by the cross-correlation of the
-% zero-padded binary images (an attempt to reduce the bias to a
-% [0, 0, 0] offset introduced by the zero-padded edge effects),
-% scaling by max(XCorr3DBinary(:)) to re-convert to a correlation
-% coefficient.
+% zero-padded binary images (an attempt to reduce the bias to a [0, 0, 0]
+% offset introduced by the zero-padded edge effects), scaling by
+% max(XCorr3DBinary(:)) to re-convert to a correlation coefficient.
 XCorr3D = (XCorr3D ./ XCorr3DBinary) * max(XCorr3DBinary(:));
 
-% Shift the cross-correlation image such that an auto-correlation
-% image will have it's energy peak at the center of the 3D image.
+% Shift the cross-correlation image such that an auto-correlation image 
+% will have it's energy peak at the center of the 3D image.
 XCorr3D = circshift(XCorr3D, size(Stack1Whitened) - 1);
 
 % Isolate the central chunk of the cross-correlation.
@@ -279,8 +275,7 @@ Beta = ((X.'*X) \ X.') * ZData; % this is just least-squares fitting
 RawOffsetFitZ = -Beta(2) / (2 * Beta(3)); % z at peak of the 2D polynomial
 PolyFitFunctionZ = @(R) Beta(1) + Beta(2)*R + Beta(3)*R.^2;
 
-% Create arrays of the polynomial fits to use for visualization
-% later on.
+% Create arrays of the polynomial fits to use for visualization later on.
 XArrayDense = linspace(XArray(1), XArray(end), size(Stack1, 1));
 YArrayDense = linspace(YArray(1), YArray(end), size(Stack1, 1));
 ZArrayDense = linspace(ZArray(1), ZArray(end), size(Stack1, 1));
