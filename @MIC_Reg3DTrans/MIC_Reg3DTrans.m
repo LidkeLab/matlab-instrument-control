@@ -546,7 +546,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % between the two stacks.
                     [PixelOffset, SubPixelOffset, ~, MaxOffset] ...
                         = obj.findStackOffset(RefStack, CurrentStack, ...
-                        MaxOffset, 'FFT', '1D', [], [], [], obj.UseGPU);
+                        MaxOffset, [], [], [], obj.UseGPU);
                     
                     % If the sub-pixel prediction exceeds MaxOffset, 
                     % re-try until this is no longer true or when MaxOffset
@@ -577,10 +577,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         
                         % Determine a predicted offset between the two
                         % stacks.
-                        [PixelOffset, SubPixelOffset, ~,MaxOffset] = ...
-                            obj.findStackOffset(...
-                            RefStack, CurrentStack, MaxOffsetInput, ...
-                            'FFT', '1D', [], [], [], obj.UseGPU);
+                        [PixelOffset, SubPixelOffset, ~, MaxOffset] = ...
+                            obj.findStackOffset(RefStack, CurrentStack, ...
+                            MaxOffsetInput, [], [], [], obj.UseGPU);
                         
                         % Re-compute the SelectBit.
                         SelectBit = abs(SubPixelOffset) > MaxOffset;
@@ -1116,8 +1115,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         end
 
         [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
-            findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
-            FitType, FitOffset, BinaryMask, PlotFlag, UseGPU)
+            findStackOffset(Stack1, Stack2, MaxOffset, FitOffset, ...
+            BinaryMask, PlotFlag, UseGPU)
     
         function State = unitTest(camObj,stageObj,lampObj)
             %unitTest Tests all functionality of MIC_Reg3DTrans
