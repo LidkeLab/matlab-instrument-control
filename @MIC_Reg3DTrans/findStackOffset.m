@@ -32,11 +32,11 @@ function [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
 %           to determine SubPixelOffset.
 %   BinaryMask: (mxnxo)(default = ones(m, n, o)) Mask to multiply the
 %           stacks with before computing to cross-correlation.
-%   PlotFlag: (boolean)(default = 1) Specifies whether or not the 1D line
-%           plots through the peak of the xcorr will be shown.  
-%           PlotFlag = 1 will allow the plots to be shown, PlotFlag = 0
-%           will not allow plots to be displayed.
-%   UseGPU: (boolean)(default = 1)
+%   PlotFlag: (boolean)(default = true) Specifies whether or not the 1D 
+%           line plots through the peak of the xcorr will be shown.  
+%           PlotFlag = true will allow the plots to be shown, 
+%           PlotFlag = false will not allow plots to be displayed.
+%   UseGPU: (boolean)(default = logical(gpuDeviceCount()))
 %
 % OUTPUTS:
 %   PixelOffset: (3x1)(integer) The integer pixel offset of Stack2 relative
@@ -71,7 +71,7 @@ if ~exist('FitOffset', 'var') || isempty(FitOffset)
     FitOffset = [2; 2; 2];
 end
 if ~exist('PlotFlag', 'var') || isempty(PlotFlag)
-    PlotFlag = 1;
+    PlotFlag = true;
 end
 if ~exist('BinaryMask', 'var') || isempty(BinaryMask)
     BinaryMask = ones(size(Stack1));
@@ -84,7 +84,7 @@ if ~exist('BinaryMask', 'var') || isempty(BinaryMask)
     end
 end
 if ~exist('UseGPU', 'var') || isempty(UseGPU)
-    UseGPU = 1;
+    UseGPU = logical(gpuDeviceCount());
 end
 
 % Ensure MaxOffset is a column vector for consistency.
@@ -303,29 +303,29 @@ CorrData.ZFitAtPeak = ZFitAtPeak;
 % Display line sections through the integer location of the
 % cross-correlation, overlain on the fit along those lines.
 if PlotFlag
-    FigureWindow = findobj('Tag', 'CorrWindow');
-    if isempty(FigureWindow)
-        FigureWindow = figure('Tag', 'CorrWindow');
+    PlotFigure = findobj('Tag', 'CorrWindow');
+    if isempty(PlotFigure)
+        PlotFigure = figure('Tag', 'CorrWindow');
     end
-    clf(FigureWindow); % clear the figure window
-    figure(FigureWindow); % ensure we plot into the correct figure
+    clf(PlotFigure); % clear the figure window
+    figure(PlotFigure); % ensure we plot into the correct figure
     subplot(3, 1, 1)
     plot(-MaxOffset(1):MaxOffset(1), ...
         XCorr3D(:, RawOffsetIndices(2), RawOffsetIndices(3)), 'x')
-    hold on
+    hold('on')
     plot(XArrayDense-MaxOffset(1)-1, XFitAtPeak)
     title('X Correlation')
     subplot(3, 1, 2)
     plot(-MaxOffset(2):MaxOffset(2), ...
         XCorr3D(RawOffsetIndices(1), :, RawOffsetIndices(3)), 'x')
-    hold on
+    hold('on')
     plot(YArrayDense-MaxOffset(2)-1, YFitAtPeak)
     title('Y Correlation')
     ylabel('Correlation Coefficient')
     subplot(3, 1, 3)
     plot(-MaxOffset(3):MaxOffset(3), ...
         squeeze(XCorr3D(RawOffsetIndices(1), RawOffsetIndices(2), :)), 'x')
-    hold on
+    hold('on')
     plot(ZArrayDense-MaxOffset(3)-1, ZFitAtPeak)
     title('Z Correlation')
     xlabel('Pixel Offset')
