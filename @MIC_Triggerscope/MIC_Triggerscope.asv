@@ -31,6 +31,10 @@ classdef MIC_Triggerscope < MIC_Abstract
         GUIParent; % graphics object parent of the GUI
         InstrumentName = 'Triggerscope'; % name of the instrument
         Triggerscope; % serial object for the connected Triggerscope
+    end
+    
+    properties (Hidden)
+        StartGUI = false; % specifies whether GUI starts on instantiation
         
         % The following should be specified in the Triggerscope
         % documentation. The Terminator was assumed to be 'LF' but that is
@@ -39,18 +43,12 @@ classdef MIC_Triggerscope < MIC_Abstract
         % permanently (i.e., hard coded here).
         BaudRate = 115200; % Baud rate for the Triggerscope
         DataBits = 8; % Number of bits per character
-        Terminator = 'LF'; % Command terminator (or End Of Linede, EOL)
-        
-        % List of commands present in the Triggerscope documentation.
+        Terminator = 'LF'; % Command terminator (or End Of Line, EOL)
         CommandList = {'*', 'DAC', 'FOCUS', 'TTL', 'RANGE', 'CAM', ...
             'STAT?', 'TEST?', 'CLEARTABLE', 'PROG', 'STEP', 'ARM', ...
             'ARRAY', 'CLEARALL', 'RANGE', ...
             'PROG_FOCUS', 'PROG_TTL', 'PROG_DAC', 'PROG_DEL', ...
             'TIMECYCLES', 'TRIGMODE'};
-    end
-    
-    properties (Hidden)
-        StartGUI = false; % specifies whether GUI starts on instantiation
     end
     
     methods

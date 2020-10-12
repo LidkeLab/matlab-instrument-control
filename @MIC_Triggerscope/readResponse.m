@@ -1,7 +1,15 @@
 function [Response] = readResponse(obj)
-%READRESPONSE Summary of this function goes here
-%   Detailed explanation goes here
-outputArg1 = inputArg1;
-outputArg2 = inputArg2;
+%readResponse will attempt to read a response from the Triggerscope.
+% This method will try to read a message from the Triggerscope using the
+% readline() MATLAB method.
+
+% Created by:
+%   David J. Schodt (Lidke Lab, 2020)
+
+
+% Read the response from the Triggerscope.
+[Response] = readline(obj.Triggerscope);
+
+
 end
 
