@@ -8,12 +8,10 @@ function connectTriggerscope(obj)
 
 
 % Connect to the COM port given in obj.SerialPort
-obj.Triggerscope = serialport(obj.SerialPort);
-fopen(obj.SyringePump);
+obj.Triggerscope = serialport(obj.SerialPort, obj.BaudRate);
 
 % Set some serial communication parameters.
 obj.Triggerscope.Timeout = obj.DeviceTimeout;
-obj.Triggerscope.BaudRate = obj.BaudRate;
 obj.Triggerscope.DataBits = obj.DataBits;
 configureTerminator(obj.Triggerscope, obj.Terminator);
 
