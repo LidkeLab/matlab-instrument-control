@@ -23,8 +23,10 @@ configureTerminator(obj.Triggerscope, obj.Terminator);
 % to be a good idea).
 flush(obj.Triggerscope);
 
-% Update obj.ActivityMessage.
+% Update obj.ActivityMessage and obj.IsConnected (we'll assume the
+% connection was successful).
 obj.ActivityMessage = '';
+obj.IsConnected = true;
 
 
 end

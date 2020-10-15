@@ -15,8 +15,9 @@ obj.ActivityMessage = ...
 % Delete obj.Triggerscope.
 delete(obj.Triggerscope)
 
-% Update obj.ActivityMessage.
+% Update obj.ActivityMessage and obj.IsConnected.
 obj.ActivityMessage = '';
+obj.IsConnected = false;
 
 
 end
