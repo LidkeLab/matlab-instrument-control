@@ -19,36 +19,56 @@ classdef MIC_Triggerscope < MIC_Abstract
     
     
     properties
-        DeviceTimeout = 10; % (seconds) Triggerscope response timeout
-        SerialPort = 'COM3'; % COM port of connected Triggerscope
-    end
-    
-    properties (SetObservable)
-        ActivityMessage = ''; % message describing current action
-    end
-    
-    properties (SetAccess = protected)
-        GUIParent; % graphics object parent of the GUI
-        InstrumentName = 'Triggerscope'; % name of the instrument
-        Triggerscope; % serial object for the connected Triggerscope
-    end
-    
-    properties (Hidden)
-        StartGUI = false; % specifies whether GUI starts on instantiation
+        % Triggerscope response timeout. (seconds)(Default = 10)
+        DeviceTimeout = 10;
         
-        % The following should be specified in the Triggerscope
-        % documentation. The Terminator was assumed to be 'LF' but that is
-        % unclear. These properties are not expected to change, and if they
-        % are changed, we will probably want them to be changed 
-        % permanently (i.e., hard coded here).
-        BaudRate = 115200; % Baud rate for the Triggerscope
-        DataBits = 8; % Number of bits per character
-        Terminator = 'LF'; % Command terminator (or End Of Line, EOL)
+        % Serial port Triggerscope is connected to (char)(Default = 'COM3')
+        SerialPort = 'COM3';
+    end
+        
+    properties (SetAccess = protected)
+        % Graphics object parent of the GUI.
+        GUIParent;
+        
+        % Meaningful name of instrument. (char)(Default = 'Triggerscope')
+        InstrumentName = 'Triggerscope';
+        
+        % Indicates the Triggerscope status. (logical)(Default = false)
+        IsConnected = false; 
+        
+        % Serial port device for the Triggerscope.
+        Triggerscope;
+        
+        % Communication rate for Triggerscope. (integer)(Default = 115200)
+        BaudRate = 115200;
+        
+        % Number of bits per serial comm. character. (integer)(Default = 8)
+        DataBits = 8;
+        
+        % Serial communication command terminator. (char)(Default = 'LF')
+        Terminator = 'LF';
+        
+        % List of commands present in the Triggerscope documentation.
         CommandList = {'*', 'DAC', 'FOCUS', 'TTL', 'RANGE', 'CAM', ...
             'STAT?', 'TEST?', 'CLEARTABLE', 'PROG', 'STEP', 'ARM', ...
             'ARRAY', 'CLEARALL', 'RANGE', ...
             'PROG_FOCUS', 'PROG_TTL', 'PROG_DAC', 'PROG_DEL', ...
             'TIMECYCLES', 'TRIGMODE'};
+    end
+    
+    properties (SetObservable)
+        % Message describing current action. (char)(Default = '')
+        ActivityMessage = '';        
+    end
+    
+    properties (Dependent)
+        % Indicates Triggerscope status as a char array. (char)
+        ConnectionStatus;
+    end
+    
+    properties (Hidden)
+        % Determines if GUI starts on instantiation. (Default = false)
+        StartGUI = false;
     end
     
     methods
@@ -69,13 +89,25 @@ classdef MIC_Triggerscope < MIC_Abstract
         
         end
         
+        function [ConnectionStatus] = get.ConnectionStatus(obj)
+            % get method for the 'ConnectionStatus' property.
+            
+            % Convert the logical IsConnected to 'on' or 'off'. This is
+            % done using IsConnected as a "set" bit, but MATLAB's usage of
+            % char makes it so I have to add these extra pieces (e.g.,
+            % erase the ASCII null char(0)).
+            ConnectionStatus = erase([char(obj.IsConnected*'on'), ...
+                char(~obj.IsConnected*'off')], char(0));
+            
+        end
+        
         % Serial communication methods.
         [Response] = executeCommand(obj, Command);
         
         % General instrument methods.
         delete(obj)
         exportState(obj)
-        [GUIParent] = gui(obj, GUIParent);
+        gui(obj, GUIParent);
         unitTest(obj)
         
     end
@@ -92,7 +124,11 @@ classdef MIC_Triggerscope < MIC_Abstract
     end
     
     methods (Static)
-        
+        function [StatusString] = convertLogicalToStatus(Logical)
+            %convertLogicalToStatus converts logical to 'on' or 'off'.
+            % This method is used to convert logical(0) to 'off' and
+            % logical(1) to 'on'.  This is useful in various
+        end
     end
     
     

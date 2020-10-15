@@ -19,27 +19,34 @@ classdef MIC_Triggerscope < MIC_Abstract
     
     
     properties
-        DeviceTimeout = 10; % (seconds) Triggerscope response timeout
-        SerialPort = 'COM3'; % COM port of connected Triggerscope
-    end
-    
-    properties (SetObservable)
-        ActivityMessage = ''; % message describing current action
-    end
-    
-    properties (SetAccess = protected)
-        GUIParent; % graphics object parent of the GUI
-        InstrumentName = 'Triggerscope'; % name of the instrument
-        Triggerscope; % serial object for the connected Triggerscope
+        % Triggerscope response timeout. (seconds)(Default = 10)
+        DeviceTimeout = 10;
         
-        % The following should be specified in the Triggerscope
-        % documentation. The Terminator was assumed to be 'LF' but that is
-        % unclear. These properties are not expected to change, and if they
-        % are changed, we will probably want them to be changed 
-        % permanently (i.e., hard coded here).
-        BaudRate = 115200; % Baud rate for the Triggerscope
-        DataBits = 8; % Number of bits per character
-        Terminator = 'LF'; % Command terminator (or End Of Linede, EOL)
+        % Serial port Triggerscope is connected to (char)(Default = 'COM3')
+        SerialPort = 'COM3';
+    end
+        
+    properties (SetAccess = protected)
+        % Graphics object parent of the GUI.
+        GUIParent;
+        
+        % Meaningful name of instrument. (char)(Default = 'Triggerscope')
+        InstrumentName = 'Triggerscope';
+        
+        % Indicates the Triggerscope status. (logical)(Default = false)
+        IsConnected = false; 
+        
+        % Serial port device for the Triggerscope.
+        Triggerscope;
+        
+        % Communication rate for Triggerscope. (integer)(Default = 115200)
+        BaudRate = 115200;
+        
+        % Number of bits per serial comm. character. (integer)(Default = 8)
+        DataBits = 8;
+        
+        % Serial communication command terminator. (char)(Default = 'LF')
+        Terminator = 'LF';
         
         % List of commands present in the Triggerscope documentation.
         CommandList = {'*', 'DAC', 'FOCUS', 'TTL', 'RANGE', 'CAM', ...
@@ -49,8 +56,14 @@ classdef MIC_Triggerscope < MIC_Abstract
             'TIMECYCLES', 'TRIGMODE'};
     end
     
+    properties (SetObservable)
+        % Message describing current action. (char)(Default = '')
+        ActivityMessage = '';        
+    end
+       
     properties (Hidden)
-        StartGUI = false; % specifies whether GUI starts on instantiation
+        % Determines if GUI starts on instantiation. (Default = false)
+        StartGUI = false;
     end
     
     methods
@@ -61,6 +74,10 @@ classdef MIC_Triggerscope < MIC_Abstract
             % this class (i.e. if user forgets to do this).
             obj = obj@MIC_Abstract(~nargout);
             
+            % Set a property listener for the ActivityMessage property.
+            addlistener(obj, 'ActivityMessage', ...
+                'PostSet', @obj.updateStatus);
+            
             % Set inputs to class properties if needed.
             if (exist('SerialPort', 'var') && ~isempty(SerialPort))
                 obj.SerialPort = SerialPort;
@@ -70,14 +87,18 @@ classdef MIC_Triggerscope < MIC_Abstract
             end
         
         end
-        
-        % Serial communication methods.
+                
+        function updateStatus(obj, ~, ~)
+            % Listener callback for a change of the object property
+            % ActivityMessage.         
+        end
+                
         [Response] = executeCommand(obj, Command);
-        
-        % General instrument methods.
+        connectTriggerscope(obj)
+        disconnectTriggerscope(obj)
         delete(obj)
         exportState(obj)
-        [GUIParent] = gui(obj, GUIParent);
+        gui(obj, GUIParent);
         unitTest(obj)
         
     end
@@ -94,7 +115,7 @@ classdef MIC_Triggerscope < MIC_Abstract
     end
     
     methods (Static)
-        
+
     end
     
     

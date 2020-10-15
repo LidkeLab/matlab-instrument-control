@@ -7,6 +7,10 @@ function connectTriggerscope(obj)
 %   David J. Schodt (Lidke Lab, 2020)
 
 
+% Update obj.ActivityMessage.
+obj.ActivityMessage = sprintf('Connecting to serial port ''%s''...', ...
+    obj.SerialPort);
+
 % Connect to the COM port given in obj.SerialPort
 obj.Triggerscope = serialport(obj.SerialPort, obj.BaudRate);
 
@@ -18,6 +22,9 @@ configureTerminator(obj.Triggerscope, obj.Terminator);
 % Flush the input and output buffers (maybe not necessary but always seems
 % to be a good idea).
 flush(obj.Triggerscope);
+
+% Update obj.ActivityMessage.
+obj.ActivityMessage = '';
 
 
 end

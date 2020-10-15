@@ -25,10 +25,10 @@ assert(any(contains(Command, obj.CommandList)), ...
 
 % Execute the command and check for a response.
 obj.ActivityMessage = sprintf('Writing command ''%s'' ', ...
-    'to Triggerscope on %s', Command, obj.SerialPort);
+    'to Triggerscope on serial port ''%s''', Command, obj.SerialPort);
 obj.writeCommand(Command);
 obj.ActivityMessage = sprintf('Reading response to command ''%s'' ', ...
-    'from Triggerscope on %s', Command, obj.SerialPort);
+    'from Triggerscope on serial port ''%s''', Command, obj.SerialPort);
 [Response] = obj.readResponse();
 obj.ActivityMessage = '';
 
