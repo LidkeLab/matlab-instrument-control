@@ -184,6 +184,8 @@ classdef MIC_Triggerscope < MIC_Abstract
                 char(0));
         end
         
+        [BitLevel] = convertVoltageToBitLevel(Voltage, Range, Resolution)
+        
     end
     
     
