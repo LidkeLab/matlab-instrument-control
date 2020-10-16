@@ -51,9 +51,21 @@ classdef MIC_Triggerscope < MIC_Abstract
             'ARRAY', 'CLEARALL', 'RANGE', ...
             'PROG_FOCUS', 'PROG_TTL', 'PROG_DAC', 'PROG_DEL', ...
             'TIMECYCLES', 'TRIGMODE'};
+        
+        % List of voltage ranges, given as char arrays.
+        % NOTE: These must be kept in the same order specified in the
+        %       Triggerscope documentation so that the command to set these
+        %       works correctly.
+        VoltageRangeOptions = {'0-5V', '0-10V', ...
+            '+/-5V', '+/-10V', '+/-2.5V'};
+        
+        % Current voltage range setting.
+        % NOTE: This is given as a number between 1 and 5, where the range
+        %       is set to VoltageRangeOptions{VoltageRange}.
+        VoltageRange
     end
     
-    properties (SetObservable)%, SetAccess = protected)
+    properties (SetObservable, SetAccess = protected)
         % Message describing current action. (char)(Default = '')
         ActivityMessage = '';
         
@@ -123,15 +135,15 @@ classdef MIC_Triggerscope < MIC_Abstract
                 obj.convertLogicalToStatus(...
                 obj.IsConnected, {'green', 'red'});
             
-            % Update the connection and disconnection pushbuttons.
-            ConnectTSButton = findall(obj.GUIParent, ...
-                'Tag', 'ConnectTSButton');
-            ConnectTSButton.Enable = obj.convertLogicalToStatus(...
-                obj.IsConnected, {'off', 'on'});
-            DisconnectTSButton = findall(obj.GUIParent, ...
-                'Tag', 'DisconnectTSButton');
-            DisconnectTSButton.Enable = obj.convertLogicalToStatus(...
-                obj.IsConnected, {'on', 'off'});
+            % Update the toggle connection pushbutton.
+            ToggleConnectionButton = findall(obj.GUIParent, ...
+                'Tag', 'ToggleConnectionButton');
+            ToggleConnectionButton.String = obj.convertLogicalToStatus(...
+                obj.IsConnected, ...
+                {'Disconnect Triggerscope', 'Connect Triggerscope'});
+            ToggleConnectionButton.BackgroundColor = ...
+                obj.convertLogicalToStatus(...
+                obj.IsConnected, {'green', 'red'});
     
         end
         
