@@ -54,7 +54,8 @@ ControlHandles.SerialPortPopup = uicontrol(ConnectionPanel, ...
     'String', unique([obj.SerialPort, serialportlist()]), ...
     'FontUnits', 'normalized', 'FontSize', 0.4, ...
     'Tooltip', SerialPortMessage, ...
-    'Units', 'normalized', 'Position', PopupPosition);
+    'Units', 'normalized', 'Position', PopupPosition, ...
+    'Callback', @guiToProperties);
 ConnectButtonPos = PopupPosition.*[1, 1, 0, 0] ...
     + [PopupPosition(3), 0, 0, 0] ...
     + ButtonPos;
@@ -156,7 +157,7 @@ for pp = 1:obj.IOChannels
     ControlHandles.DACPopup{pp} = uicontrol(TTLDACPanel, ...
         'Style', 'popupmenu', ...
         'String', obj.VoltageRangeChar, ...
-        'Value', obj.DACStatus(pp).VoltageRange, ...
+        'Value', obj.DACStatus(pp).VoltageRangeIndex, ...
         'FontUnits', 'normalized', 'FontSize', 0.4, ...
         'Tooltip', SerialPortMessage, ...
         'Units', 'normalized', ...
@@ -213,11 +214,34 @@ propertiesToGUI();
             ControlHandles.DACEdit{pp}.String = ...
                 num2str(obj.DACStatus(pp).Value);
             ControlHandles.DACPopup{pp}.Value = ...
-                obj.DACStatus(pp).VoltageRange;
+                obj.DACStatus(pp).VoltageRangeIndex;
         end
     end
 
     function guiToProperties()
+        % This function updates properties in obj based on changes made to
+        % controls in this GUI.
+        
+        % Update the serial port popup menu.
+        obj.SerialPort = ControlHandles.SerialPortPopup.String;
+        
+        % Update the status of the TTL channels.
+        for ii = 1:numel(obj.TTLStatus)
+            obj.TTLStatus(pp).Value = ...
+                strcmp(ControlHandles.TTLPushbutton{pp}.String, 'HIGH');
+        end
+        
+        % Update the status of the DAC channels.
+        for ii = 1:numel(obj.DACStatus)
+            % Update the voltage range.
+            obj.DACStatus(pp).VoltageRangeIndex = ...
+                ControlHandles.DACPopup{pp}.Value;
+            
+            % Update the driving voltage.
+            obj.DACStatus(pp).Value = ...
+                str2double(ControlHandles.DACEdit{pp});
+        end
+        
     end
 
     function toggleConnection(~, ~)
@@ -225,7 +249,7 @@ propertiesToGUI();
         if obj.IsConnected
             obj.disconnectTriggerscope()
         else
-            obj.connectTriggerscope
+            obj.connectTriggerscope()
         end
     end
 
@@ -246,6 +270,10 @@ propertiesToGUI();
             CurrentState, {'LOW', 'HIGH'});
         Source.BackgroundColor = obj.convertLogicalToStatus(...
             CurrentState, {'red', 'green'});
+        
+        % Update the class properties to reflect these changes (slower, but
+        % easier, to just call GUIToProperties() here).
+        guiToProperties();
         
     end
 

@@ -129,10 +129,10 @@ classdef MIC_Triggerscope < MIC_Abstract
                 % is being driven at.
                 obj.DACStatus(ii).Value = 0; 
                 
-                % DACStatus(ii).VoltageRange is the row index of
+                % DACStatus(ii).VoltageRangeIndex is the row index of
                 % obj.VoltageRangeOptions that defines the voltage range
                 % currently set to the ii-th DAC.
-                obj.DACStatus(ii).VoltageRange = 1;
+                obj.DACStatus(ii).VoltageRangeIndex = 1;
             end
             
             % Attempt to connect to the Triggerscope, if requested.
