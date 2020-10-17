@@ -52,17 +52,27 @@ classdef MIC_Triggerscope < MIC_Abstract
             'PROG_FOCUS', 'PROG_TTL', 'PROG_DAC', 'PROG_DEL', ...
             'TIMECYCLES', 'TRIGMODE'};
         
-        % List of voltage ranges, given as char arrays.
+        % Resolution of the DAC channels. (bits)(integer)(Default = 16)
+        DACResolution = 16;
+        
+        % Number of TTL/DAC channels. (integer)(Default = 16)
+        IOChannels = 16;
+                
+        % List of voltage ranges. (Volts)(5x2 numeric array)
         % NOTE: These must be kept in the same order specified in the
         %       Triggerscope documentation so that the command to set these
         %       works correctly.
-        VoltageRangeOptions = {'0-5V', '0-10V', ...
-            '+/-5V', '+/-10V', '+/-2.5V'};
+        VoltageRangeOptions = [0, 5; 0, 10; -5, 5; -10, 10; -2.5, 2.5];
         
-        % Current voltage range setting.
-        % NOTE: This is given as a number between 1 and 5, where the range
-        %       is set to VoltageRangeOptions{VoltageRange}.
-        VoltageRange
+        % Char arrays describing voltage ranges. (cell array of char array)
+        VoltageRangeChar =  {'0-5V'; '0-10V'; ...
+            '+/-5V'; '+/-10V'; '+/-2.5V'};
+        
+        % Status of each TTL channel (struct)
+        TTLStatus struct = struct([]);
+        
+        % Status of each DAC channel (struct)
+        DACStatus struct = struct([]);
     end
     
     properties (SetObservable, SetAccess = protected)
@@ -79,8 +89,12 @@ classdef MIC_Triggerscope < MIC_Abstract
     end
     
     methods
-        function obj = MIC_Triggerscope(SerialPort, DeviceTimeout)
+        function obj = MIC_Triggerscope(SerialPort, DeviceTimeout, ...
+                AutoConnect)
             %MIC_Triggerscope is the class constructor.
+            % Setting the optional input 'AutoConnect' to 1 (or true) will
+            % lead the this constructor attempting to make a connection to
+            % the specified SerialPort.
             
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
@@ -99,7 +113,32 @@ classdef MIC_Triggerscope < MIC_Abstract
             if (exist('DeviceTimeout', 'var') && ~isempty(DeviceTimeout))
                 obj.DeviceTimeout = DeviceTimeout;
             end
+            if (~exist('AutoConnect', 'var') || isempty(AutoConnect))
+                AutoConnect = false;
+            end
             
+            % Populate the TTLStatus and DACStatus structs.
+            % NOTE: TTLStatus(nn)/DACStatus(nn) will provide information
+            %       about the nn-th TTL/DAC channel, respectively.
+            for ii = 1:obj.IOChannels
+                % TTLStatus(ii).Value specifies whether the TTL is driven
+                % HIGH (true) or LOW (false).
+                obj.TTLStatus(ii).Value = false; 
+                
+                % DACStatus(ii).Value gives the current voltage this line
+                % is being driven at.
+                obj.DACStatus(ii).Value = 0; 
+                
+                % DACStatus(ii).VoltageRange is the row index of
+                % obj.VoltageRangeOptions that defines the voltage range
+                % currently set to the ii-th DAC.
+                obj.DACStatus(ii).VoltageRange = 1;
+            end
+            
+            % Attempt to connect to the Triggerscope, if requested.
+            if AutoConnect
+                obj.connectTriggerscope();
+            end
         end
         
         function updateActivityDisplay(obj, ~, ~)
