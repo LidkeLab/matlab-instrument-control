@@ -75,7 +75,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         DACStatus struct = struct([]);
     end
     
-    properties (SetObservable, SetAccess = protected)
+    properties (SetObservable, SetAccess = protected, Hidden)
         % Message describing current action. (char)(Default = '')
         ActivityMessage = '';
         
@@ -190,6 +190,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
         delete(obj)
+        reset(obj)
         exportState(obj)
         gui(obj, GUIParent);
         unitTest(obj)

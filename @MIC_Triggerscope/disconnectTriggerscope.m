@@ -15,6 +15,11 @@ obj.ActivityMessage = ...
 % Delete obj.Triggerscope.
 delete(obj.Triggerscope)
 
+% Reset the class instance obj (even if the user doesn't want this, it's
+% probably best that we do so to avoid misleading information/behavior of
+% the GUI).
+obj.reset()
+
 % Update obj.ActivityMessage and obj.IsConnected.
 obj.ActivityMessage = '';
 obj.IsConnected = false;
