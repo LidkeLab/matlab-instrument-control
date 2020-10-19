@@ -178,7 +178,8 @@ uicontrol(CommandPanel, 'Style', 'text', ...
 ControlHandles.CommandEdit = uicontrol(CommandPanel, 'Style', 'edit', ...
     'FontUnits', 'normalized', 'FontSize', 0.5, ...
     'HorizontalAlignment', 'left', ...
-    'Units', 'normalized', 'Position', EditPos);
+    'Units', 'normalized', 'Position', EditPos, ...
+    'Callback', @executeCommandFromGUI);
 uicontrol(CommandPanel, 'Style', 'pushbutton', ...
     'String', 'Execute command', ...
     'FontUnits', 'normalized', 'FontSize', 0.5, ...
@@ -344,22 +345,24 @@ propertiesToGUI();
     end
 
     function executeCommandFromGUI(Source, ~)
-        % This is a callback for the custom command execution button.
+        % This is a callback for the custom command execution uicontrols.
         % Running this callback will update a few things in the GUI for
         % display purposes and then attempt to execute the command typed in
-        % the edit box associated with the pushbutton.
+        % the custom command editbox.
         
-        % Disable the pushbutton so that it doesn't get double-clicked.
+        % Disable the source uicontrol so that it's not calling this
+        % callback multiple times by mistake.
         Source.Enable = 'off';
         
         % Attempt to execute the command.
         try
-            obj.executeCommand(ControlHandles.CommandEdit.String)
+            obj.executeCommand(ControlHandles.CommandEdit.String);
         catch ME
-            % We should re-enable the button before throwing the error.
+            % We should re-enable the uicontrol before throwing the error.
             Source.Enable = 'on';
             rethrow(ME);
         end
+        Source.Enable = 'on';
         
     end
 
