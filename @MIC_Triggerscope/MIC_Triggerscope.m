@@ -5,6 +5,11 @@ classdef MIC_Triggerscope < MIC_Abstract
     % documentation should be included (see documents in
     % Z:\Manuals\AdvancedResearch).
     %
+    % EXAMPLE USAGE:
+    %   TS = MIC_Triggerscope('COM3', [], true); 
+    %       This will create an instance of the class and automatically
+    %       attempt to connect to serial port COM3.
+    %
     % REQUIRES:
     %   Triggerscope 3B, Triggerscope 4 (https://arc.austinblanco.com/)
     %       connected via an accessible serial port
@@ -26,7 +31,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         SerialPort = 'COM3';
     end
     
-    properties (SetAccess = protected)
+    properties (SetAccess = protected, Hidden)
         % Graphics object parent of the GUI.
         GUIParent
         
