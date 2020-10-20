@@ -191,10 +191,17 @@ classdef MIC_Triggerscope < MIC_Abstract
     
         end
         
+        function delete(obj)
+            % This is the destructor for the MIC_Triggerscope class.
+            
+            % For now, just delete the class instance.
+            delete(obj);
+            
+        end
+        
         [Response] = executeCommand(obj, Command);
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
-        delete(obj)
         reset(obj)
         exportState(obj)
         gui(obj, GUIParent);
