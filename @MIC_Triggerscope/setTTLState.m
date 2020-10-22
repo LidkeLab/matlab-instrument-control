@@ -61,5 +61,9 @@ end
 % Set the specified TTL port to the desired state.
 obj.executeCommand(sprintf('TTL%i,%i', TTLIndex, State));
 
+% Update the TTL status to reflect the state change (assuming the command
+% worked).
+obj.TTLStatus(TTLIndex).Value = State;
+
 
 end

@@ -285,23 +285,23 @@ propertiesToGUI();
         % This function will toggle the state of the TTL port defined by
         % TTLIndex.
         
-        % Determine if the TTL is currently on or off (we'll assume the
-        % current 'String' is correct).
-        CurrentState = strcmpi(Source.String, 'HIGH');
-        
         % Toggle the state of the TTL.
-        obj.executeCommand(sprintf('TTL%i,%i', TTLIndex, ~CurrentState))
+        % NOTE: Omitting the second input to setTTLState() toggles the
+        %       state.
+        obj.setTTLState(TTLIndex)
         
+        % Check the new state of this TTL port.
+        NewState = obj.TTLStatus(TTLIndex).Value;
+                
         % Update the 'String' and the 'BackgroundColor' of the pushbutton.
         Source.String = obj.convertLogicalToStatus(...
-            CurrentState, {'LOW', 'HIGH'});
+            NewState, {'HIGH', 'LOW'});
         Source.BackgroundColor = obj.convertLogicalToStatus(...
-            CurrentState, {'red', 'green'});
+            NewState, {'green', 'red'});
         
         % Update the class properties to reflect these changes (slower, but
         % easier, to just call GUIToProperties() here).
         guiToProperties();
-        
     end
 
     function setDACOutput(Source, ~, DACIndex)
@@ -310,20 +310,12 @@ propertiesToGUI();
         % attempt to set the output voltage of DAC port DACIndex to the
         % value specified.
         
-        % Convert the input (given in volts) to the appropriate bit count
-        % given the range.
-        [BitLevel] = obj.convertVoltageToBitLevel(...
-            str2double(Source.String), obj.VoltageRangeOptions(...
-            ControlHandles.DACPopup{DACIndex}.Value, :), ...
-            obj.DACResolution);
-        
         % Attempt to set the specified DAC output voltage.
-        obj.executeCommand(sprintf('DAC%i,%i', DACIndex, BitLevel));
+        obj.setDACVoltage(DACIndex, str2double(Source.String));
         
         % Update the class properties to reflect these changes (slower, but
         % easier, to just call GUIToProperties() here).
         guiToProperties();
-        
     end
 
     function setVoltageRange(Source, ~, DACIndex)
@@ -347,7 +339,6 @@ propertiesToGUI();
         % Update the class properties to reflect these changes (slower, but
         % easier, to just call GUIToProperties() here).
         guiToProperties();
-        
     end
 
     function executeCommandFromGUI(Source, ~)
@@ -369,7 +360,6 @@ propertiesToGUI();
             rethrow(ME);
         end
         Source.Enable = 'on';
-        
     end
 
 
