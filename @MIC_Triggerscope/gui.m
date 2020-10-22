@@ -280,17 +280,17 @@ propertiesToGUI();
         end
     end
 
-    function toggleTTL(Source, ~, TTLNumber)
+    function toggleTTL(Source, ~, TTLIndex)
         % This is a callback for the TTL on/off buttons.
         % This function will toggle the state of the TTL port defined by
-        % TTLNumber.
+        % TTLIndex.
         
         % Determine if the TTL is currently on or off (we'll assume the
         % current 'String' is correct).
         CurrentState = strcmpi(Source.String, 'HIGH');
         
         % Toggle the state of the TTL.
-        obj.executeCommand(sprintf('TTL%i,%i', TTLNumber, ~CurrentState))
+        obj.executeCommand(sprintf('TTL%i,%i', TTLIndex, ~CurrentState))
         
         % Update the 'String' and the 'BackgroundColor' of the pushbutton.
         Source.String = obj.convertLogicalToStatus(...

@@ -199,12 +199,15 @@ classdef MIC_Triggerscope < MIC_Abstract
             
         end
         
-        [Response] = executeCommand(obj, Command);
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
-        reset(obj)
+        [Response] = executeCommand(obj, Command);
+        setDACRange(obj, DACIndex, Range)
+        setDACVoltage(obj, DACIndex, Voltage)
+        setTTLState(obj, TTLIndex, State)
         exportState(obj)
         gui(obj, GUIParent);
+        reset(obj)
         unitTest(obj)
         
     end
