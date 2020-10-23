@@ -333,7 +333,7 @@ propertiesToGUI();
         % Force reset the DAC output to 0 (it seemed that changing the
         % range might sometimes cause undefined behavior of the output, so
         % doing this seemed to be the safest option).
-        ControlHandles.DACEdit.String = 0;
+        ControlHandles.DACEdit{DACIndex}.String = 0;
         obj.executeCommand(sprintf('DAC%i,%i', DACIndex, 0));
         
         % Update the class properties to reflect these changes (slower, but
