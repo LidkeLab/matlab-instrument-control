@@ -206,7 +206,8 @@ classdef MIC_Triggerscope < MIC_Abstract
         setDACVoltage(obj, DACIndex, Voltage)
         setTTLState(obj, TTLIndex, State)
         exportState(obj)
-        gui(obj, GUIParent);
+        gui(obj, GUIParent)
+        triggerArrayGUI(obj, GUIParent)
         reset(obj)
         unitTest(obj)
         
