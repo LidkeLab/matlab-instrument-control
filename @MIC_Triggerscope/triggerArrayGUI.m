@@ -87,7 +87,8 @@ ControlHandles.TTLPortPopup = uicontrol(TTLPanel, ...
     'String', num2str(transpose(1:obj.IOChannels)), ...
     'FontUnits', 'normalized', 'FontSize', 0.8, ...
     'Units', 'normalized', ...
-    'Position', PopupSize + [TextSize(3), 1-TextSize(4), 0, 0]);
+    'Position', PopupSize + [TextSize(3), 1-TextSize(4), 0, 0], ...
+    'Callback', @ttlPopupCallback);
 TTLAliasTooltip = 'Alias/nickname for your TTL channel, e.g., ''laser''';
 uicontrol(TTLPanel, 'Style', 'text', ...
     'String', 'TTL alias: ', ...
@@ -106,8 +107,8 @@ ControlHandles.TTLAliasEdit = uicontrol(TTLPanel, ...
     'HorizontalAlignment', 'center');
 TTLPeriodTooltip = sprintf(...
     ['Period of this TTL signal with respect to the trigger events.\n', ...
-    'For example, a period of 1 means that the TTL changes state\n', ...
-    'with every trigger event, while a period of 2 means that the TTL\n', ...
+    'For example, a period of 2 means that the TTL changes state\n', ...
+    'with every trigger event, while a period of 4 means that the TTL\n', ...
     'changes state with every other trigger event']);
 uicontrol(TTLPanel, 'Style', 'text', ...
     'String', 'Period: ', ...
@@ -119,7 +120,7 @@ uicontrol(TTLPanel, 'Style', 'text', ...
 ControlHandles.TTLPeriodEdit = uicontrol(TTLPanel, ...
     'Style', 'edit', ...
     'FontUnits', 'normalized', 'FontSize', 0.8, ...
-    'String', '1', 'Tooltip', TTLPeriodTooltip, ...
+    'String', '2', 'Tooltip', TTLPeriodTooltip, ...
     'Units', 'normalized', ...
     'Position', EditSize + [TextSize(3), 1-4*EditSize(4), 0, 0], ...
     'HorizontalAlignment', 'center');
@@ -145,7 +146,7 @@ ControlHandles.AddTTLButton = uicontrol(TTLPanel, ...
     'String', 'Add TTL', ...
     'Tooltip', 'Add a new TTL signal on the specified port', ...
     'Units', 'normalized', 'Position', ButtonSize, ...
-    'Callback', @plotTTLSignal);
+    'Callback', @addTTLCallback);
 
 % Add some controls to the DACPanel.
 TextSize = [0, 0, 0.5, 0.1];
@@ -164,7 +165,8 @@ ControlHandles.DACPortPopup = uicontrol(DACPanel, ...
     'String', num2str(transpose(1:obj.IOChannels)), ...
     'FontUnits', 'normalized', 'FontSize', 0.8, ...
     'Units', 'normalized', ...
-    'Position', PopupSize + [TextSize(3), 1-TextSize(4), 0, 0]);
+    'Position', PopupSize + [TextSize(3), 1-TextSize(4), 0, 0], ...
+    'Callback', @dacPopupCallback);
 DACAliasTooltip = 'Alias/nickname for your DAC channel, e.g., ''laser''';
 uicontrol(DACPanel, 'Style', 'text', ...
     'String', 'DAC alias: ', ...
@@ -183,8 +185,8 @@ ControlHandles.DACAliasEdit = uicontrol(DACPanel, ...
     'HorizontalAlignment', 'center');
 DACPeriodTooltip = sprintf(...
     ['Period of this DAC signal with respect to the trigger events.\n', ...
-    'For example, a period of 1 means that the DAC changes state\n', ...
-    'with every trigger event, while a period of 2 means that the DAC\n', ...
+    'For example, a period of 2 means that the DAC changes state\n', ...
+    'with every trigger event, while a period of 4 means that the DAC\n', ...
     'changes state with every other trigger event']);
 uicontrol(DACPanel, 'Style', 'text', ...
     'String', 'Period: ', ...
@@ -196,7 +198,7 @@ uicontrol(DACPanel, 'Style', 'text', ...
 ControlHandles.DACPeriodEdit = uicontrol(DACPanel, ...
     'Style', 'edit', ...
     'FontUnits', 'normalized', 'FontSize', 0.8, ...
-    'String', '1', 'Tooltip', DACPeriodTooltip, ...
+    'String', '2', 'Tooltip', DACPeriodTooltip, ...
     'Units', 'normalized', ...
     'Position', EditSize + [TextSize(3), 1-4*EditSize(4), 0, 0], ...
     'HorizontalAlignment', 'center');
@@ -259,11 +261,15 @@ ControlHandles.DACHighEdit = uicontrol(DACPanel, ...
 PlotAxes = axes(PlotPanel);
 hold(PlotAxes, 'on');
 
-% Define a few variables that will be shared with sub-functions.
-% NOTE: I'm placing the alias for the trigger here immediately.  The rest
-%       of the aliases will be added each time a new signal is added.
-LineHandles = gobjects(2*obj.IOChannels + 1, 1);
-SignalAliases = {ControlHandles.TriggerAliasEdit.String};
+% Define a structure to contain signal information.
+% NOTE: SignalStruct(1) will always be the trigger signal.  The rest of the
+%       signals are concatenated in the order the user added them.
+SignalStruct.NPoints = [];
+SignalStruct.InPhase = [];
+SignalStruct.Period = [];
+SignalStruct.Handle = [];
+SignalStruct.Alias = [];
+SignalStruct.Signal = [];
 
 % Plot the default trigger signal.
 plotTriggerSignal()
@@ -271,35 +277,61 @@ plotTriggerSignal()
     function plotTriggerSignal(~, ~)
         % This function plots the trigger signal as defined in the trigger
         % signal panel. A handle to this trigger line is always kept in
-        % LineHandles(1).
+        % LineHandles(1). The trigger itself will always be saved in 
         % NOTE: This will plot the trigger as a square with height 1. The
         %       alignment of several plot features will depend on this.
         
-        % Remove any previous trigger.
-        if isvalid(LineHandles(1))
-            delete(LineHandles(1))
-        end
-        
-        % Plot the trigger.
+        % Generate and plot the trigger, noting that the trigger will
+        % always alternate with each time step (e.g., [1, 0, 1, 0, 1, ...])
         NCycles = str2double(ControlHandles.NCyclesEdit.String);
         NPoints = 2*NCycles + 1;
         XArray = transpose(1:NPoints);
         OffBool = ~mod(XArray, 2);
         TriggerArray = ones(NPoints, 1);
         TriggerArray(OffBool) = 0;
-        LineHandles(1) = stairs(PlotAxes, XArray, TriggerArray-1, ...
+        SignalStruct(1).NPoints = NPoints;
+        SignalStruct(1).InPhase = 1;
+        SignalStruct(1).Period = 1;
+        SignalStruct(1).Handle = stairs(PlotAxes, ...
+            XArray, TriggerArray-1, ...
             'Color', [0, 0, 0], 'LineWidth', 2);
+        SignalStruct(1).Alias = ControlHandles.TriggerAliasEdit.String;
+        SignalStruct(1).Signal = TriggerArray;
+        plotSignals()
         
-        % Modify some properties of the axis to improve appearance.
-        NSignalsVisible = sum(cell2mat({LineHandles.isvalid}));
-        PlotAxes.XTick = XArray(~OffBool);
-        PlotAxes.XTickLabels = num2str(transpose(1:numel(PlotAxes.XTick)));
-        PlotAxes.YLim = [-(NSignalsVisible+0.5), 0.5];
-        PlotAxes.YTick = (0:NSignalsVisible-1) - 0.5;
-        PlotAxes.YTickLabels = SignalAliases;
     end
 
-    function plotTTLSignal(~, ~)
+    function regenerateSignals()
+        % This function will re-generate all signals and plot them.
+        % The intention of this method is that the user may wish to change
+        % the number of sequences in the trigger, which will require us to
+        % extend the rest of the signals already defined.
+        
+        % Loop through all of the existing signals and recompute them to
+        % match the size of the triggering signal.
+        
+    end
+
+    function ttlPopupCallback(Source, ~)
+        % This is a callback for the TTL port selection popup menu.
+        
+        % Update the default Alias (the user couldn't have selected this
+        % already here, so no harm in overwriting what's there).
+        PortNumber = Source.Value;
+        ControlHandles.TTLAliasEdit.String = ['TTL ', num2str(PortNumber)];
+    end
+
+    function dacPopupCallback(Source, ~)
+        % This is a callback for the DAC port selection popup menu.
+        
+        % Update the default Alias (the user couldn't have selected this
+        % already here, so no harm in overwriting what's there).
+        PortNumber = Source.Value;
+        ControlHandles.DACAliasEdit.String = ['DAC ', num2str(PortNumber)];
+        
+    end
+
+    function addTTLCallback(~, ~)
         % This function plots a TTL signal defined by the user in the TTL
         % panel. The line handle will be saved in the LineHandles array,
         % with the index being 1 + port number.
@@ -309,35 +341,101 @@ plotTriggerSignal()
         
         % Generate the TTL signal using an toggle latch (this is a nice way
         % to do this since each trigger event can cause a state change,
-        % which is exactly what a toggle latchh does).
-        NCycles = str2double(ControlHandles.NCyclesEdit.String);
+        % which is exactly what a toggle latch does).
         SignalPeriod = str2double(ControlHandles.TTLPeriodEdit.String);
-        NPoints = 2*NCycles + 1;
-        TTLSignal = zeros(NPoints, 1);
-        TTLSignal(1) = ControlHandles.TTLPhaseCheckbox.Value;
-        for ii = 2:NPoints
-            % Toggle the signal when appropriate.
-            EventNumber = floor(ii / 2);
-            IsEvent = mod(ii, 2);
-            ToggleSignal = (IsEvent && ~mod(EventNumber, SignalPeriod));
-            TTLSignal(ii) = ToggleSignal*~TTLSignal(ii-1) ...
-                + ~ToggleSignal*TTLSignal(ii-1);
-        end
+        InPhase = ControlHandles.TTLPhaseCheckbox.Value;
+        CurrentSignal.NPoints = SignalStruct(1).NPoints;
+        CurrentSignal.InPhase = InPhase;
+        CurrentSignal.Period = SignalPeriod;
+        CurrentSignal.Handle = [];
+        CurrentSignal.Alias = ControlHandles.TTLAliasEdit.String;
+        CurrentSignal.Signal = toggleLatch(SignalStruct(1).Signal, ...
+            SignalPeriod, InPhase);
+        SignalStruct = [SignalStruct; CurrentSignal];
         
-        % Plot the TTL signal over the same x range as the trigger.
-        NSignalsVisible = sum(cell2mat({LineHandles.isvalid}));
-        TTLSignal = TTLSignal - NSignalsVisible - 1.5;
-        LineHandles = [LineHandles; ...
-            stairs(PlotAxes, transpose(1:NPoints), TTLSignal, ...
-            'LineWidth', 2)];
-        NSignalsVisible = NSignalsVisible + 1;
-        
-        % Modify some properties of the axis to improve appearance.
-        PlotAxes.YLim = [-(NSignalsVisible+0.5), 0.5];
-        PlotAxes.YTick = (0:NSignalsVisible-1) - 0.5;
-        PlotAxes.YTickLabels = SignalAliases;
+        % Re-plot all of the signals.
+        plotSignals()
+
     end
 
+    function plotSignals()
+        % This function will plot all of the signals in the SignalStruct.
+        
+        % Clear the plot axes to make sure we don't keep anything by
+        % mistake.
+        cla(PlotAxes);
+        
+        % Plot the trigger signal (this is the only signal that will always
+        % be in the same spot with the same color).
+        TriggerX = 1:SignalStruct(1).NPoints;
+        ShiftedSignal = SignalStruct(1).Signal - 1;
+        SignalStruct(1).Handle = stairs(PlotAxes, ...
+            TriggerX, ShiftedSignal, ...
+            'Color', [0, 0, 0], 'LineWidth', 2);
+        
+        % Plot the rest of the signals.
+        NSignals = numel(SignalStruct);
+        for ii = 2:NSignals
+            ShiftedSignal = SignalStruct(ii).Signal - 1.5*ii + 0.5;           
+            SignalStruct(ii).Handle = stairs(PlotAxes, ...
+                1:SignalStruct(ii).NPoints, ShiftedSignal, ...
+                'LineWidth', 2);
+        end
+        
+        % Modify some properties of the axis to improve appearance.
+        axis(PlotAxes, 'tight')
+        PlotAxes.XTick = TriggerX(logical(SignalStruct(1).Signal));
+        PlotAxes.YLim = [-1.5*NSignals, 0.5];
+        PlotAxes.YTick = -(1.5*(NSignals-1):-1.5:0) - 0.5;
+        PlotAxes.YTickLabels = {SignalStruct(NSignals:-1:1).Alias};
+        
+    end
+
+    function [OutputSignal] = toggleLatch(TriggerSignal, ...
+            SignalPeriod, InPhase)
+        % This function simulates a toggle latch, which is used to generate
+        % the basic TTL signals. This means that, with each trigger event
+        % (rising or falling edge, as long as the first element of the
+        % triggering array is counted as an "event", i.e., for rising
+        % edge trigger, the triggering array must start with 1, and for
+        % falling edge it must start with 0).
+        %
+        % INPUTS:
+        %   TriggerSignal: Triggering signal which must be formatted s.t.
+        %                  each element alternates (e.g., [1, 0, 1, 0], or
+        %                  [0, 1, 0, 1, 0, 1, 0]).
+        %   SignalPeriod: "Period" of the output signal with respect to the
+        %                 triggering events. For example, SignalPeriod = 2
+        %                 means that every triggering event toggles
+        %                 OutputSignal, whereas SignalPeriod = 4 means
+        %                 every other triggering event toggles
+        %                 OutputSignal.
+        %   InPhase: Boolean indicating whether or not the output is "in
+        %            phase" (maybe an abuse of terminology here) with the
+        %            input trigger, i.e., OutputSignal(1) = double(InPhase)
+        %
+        % OUTPUTS:
+        %   OutputSignal: Square wave of 0's and 1's with period
+        %                 SignalPeriod and length matching TriggerSignal.
+        
+        % Simulate the toggle latch to produce our output signal.
+        % NOTE: We want the toggle signal to correspond to each triggering
+        %       event, e.g., if SignalPeriod = 4, we want every other 
+        %       trigger event to toggle the output (which is achieved by
+        %       the definition of 'ToggleSignal' below).
+        NPoints = numel(TriggerSignal);
+        OutputSignal = zeros(1, NPoints);
+        OutputSignal(1) = double(InPhase);
+        EventNumber = floor((1:NPoints) / 2);
+        IsEvent = mod(1:NPoints, 2);
+        ToggleSignal = (IsEvent ...
+            & ~mod(EventNumber, round(SignalPeriod/2)));
+        for ii = 2:NPoints
+            OutputSignal(ii) = ToggleSignal(ii)*~OutputSignal(ii-1) ...
+                + ~ToggleSignal(ii)*OutputSignal(ii-1);
+        end
+        
+    end
 
 
 end
