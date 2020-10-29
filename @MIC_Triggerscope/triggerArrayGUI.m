@@ -68,7 +68,7 @@ ControlHandles.NCyclesEdit = uicontrol(TriggerPanel, ...
     'Units', 'normalized', ...
     'Position', EditSize + [TextSize(3), 1-2*TextSize(4), 0, 0], ...
     'HorizontalAlignment', 'center', ...
-    'Callback', @plotTriggerSignal);
+    'Callback', @createTriggerSignal);
 
 % Add some controls to the TTLPanel.
 TextSize = [0, 0, 0.5, 0.1];
@@ -219,11 +219,6 @@ ControlHandles.DACPhaseCheckbox = uicontrol(DACPanel, ...
     'Value', 1, ...
     'Units', 'normalized', ...
     'Position', CheckSize + [TextSize(3), 1-5.1*TextSize(4), 0, 0]);
-ControlHandles.AddDACButton = uicontrol(DACPanel, ...
-    'Style', 'pushbutton', ...
-    'String', 'Add DAC', ...
-    'Tooltip', 'Add a new DAC signal on the specified port', ...
-    'Units', 'normalized', 'Position', ButtonSize);
 VoltageRangeDefault = obj.VoltageRangeOptions(...
     obj.DACStatus(ControlHandles.DACPortPopup.Value).VoltageRangeIndex, :);
 uicontrol(DACPanel, 'Style', 'text', ...
@@ -256,6 +251,12 @@ ControlHandles.DACHighEdit = uicontrol(DACPanel, ...
     'Units', 'normalized', ...
     'Position', EditSize + [TextSize(3), 1-7*EditSize(4), 0, 0], ...
     'HorizontalAlignment', 'center');
+ControlHandles.AddDACButton = uicontrol(DACPanel, ...
+    'Style', 'pushbutton', ...
+    'String', 'Add DAC', ...
+    'Tooltip', 'Add a new DAC signal on the specified port', ...
+    'Units', 'normalized', 'Position', ButtonSize, ...
+    'Callback', @addDACCallback);
 
 % Add axes to the PlotPanel.
 PlotAxes = axes(PlotPanel);
@@ -267,50 +268,14 @@ hold(PlotAxes, 'on');
 SignalStruct.NPoints = [];
 SignalStruct.InPhase = [];
 SignalStruct.Period = [];
+SignalStruct.Range = [];
+SignalStruct.IsLogical = [];
 SignalStruct.Handle = [];
 SignalStruct.Alias = [];
 SignalStruct.Signal = [];
 
 % Plot the default trigger signal.
-plotTriggerSignal()
-
-    function plotTriggerSignal(~, ~)
-        % This function plots the trigger signal as defined in the trigger
-        % signal panel. A handle to this trigger line is always kept in
-        % LineHandles(1). The trigger itself will always be saved in 
-        % NOTE: This will plot the trigger as a square with height 1. The
-        %       alignment of several plot features will depend on this.
-        
-        % Generate and plot the trigger, noting that the trigger will
-        % always alternate with each time step (e.g., [1, 0, 1, 0, 1, ...])
-        NCycles = str2double(ControlHandles.NCyclesEdit.String);
-        NPoints = 2*NCycles + 1;
-        XArray = transpose(1:NPoints);
-        OffBool = ~mod(XArray, 2);
-        TriggerArray = ones(NPoints, 1);
-        TriggerArray(OffBool) = 0;
-        SignalStruct(1).NPoints = NPoints;
-        SignalStruct(1).InPhase = 1;
-        SignalStruct(1).Period = 1;
-        SignalStruct(1).Handle = stairs(PlotAxes, ...
-            XArray, TriggerArray-1, ...
-            'Color', [0, 0, 0], 'LineWidth', 2);
-        SignalStruct(1).Alias = ControlHandles.TriggerAliasEdit.String;
-        SignalStruct(1).Signal = TriggerArray;
-        plotSignals()
-        
-    end
-
-    function regenerateSignals()
-        % This function will re-generate all signals and plot them.
-        % The intention of this method is that the user may wish to change
-        % the number of sequences in the trigger, which will require us to
-        % extend the rest of the signals already defined.
-        
-        % Loop through all of the existing signals and recompute them to
-        % match the size of the triggering signal.
-        
-    end
+createTriggerSignal()
 
     function ttlPopupCallback(Source, ~)
         % This is a callback for the TTL port selection popup menu.
@@ -319,6 +284,7 @@ plotTriggerSignal()
         % already here, so no harm in overwriting what's there).
         PortNumber = Source.Value;
         ControlHandles.TTLAliasEdit.String = ['TTL ', num2str(PortNumber)];
+        
     end
 
     function dacPopupCallback(Source, ~)
@@ -333,11 +299,7 @@ plotTriggerSignal()
 
     function addTTLCallback(~, ~)
         % This function plots a TTL signal defined by the user in the TTL
-        % panel. The line handle will be saved in the LineHandles array,
-        % with the index being 1 + port number.
-        % NOTE: This will plot the signal with the y values normalized to
-        %       [0, 1]. The alignment of several plots will rely on this
-        %       being true.
+        % panel.
         
         % Generate the TTL signal using an toggle latch (this is a nice way
         % to do this since each trigger event can cause a state change,
@@ -347,6 +309,8 @@ plotTriggerSignal()
         CurrentSignal.NPoints = SignalStruct(1).NPoints;
         CurrentSignal.InPhase = InPhase;
         CurrentSignal.Period = SignalPeriod;
+        CurrentSignal.Range = [0; 1];
+        CurrentSignal.IsLogical = 1;
         CurrentSignal.Handle = [];
         CurrentSignal.Alias = ControlHandles.TTLAliasEdit.String;
         CurrentSignal.Signal = toggleLatch(SignalStruct(1).Signal, ...
@@ -358,8 +322,104 @@ plotTriggerSignal()
 
     end
 
+    function addDACCallback(~, ~)
+        % This function plots a DAC signal defined by the user in the DAC
+        % panel.
+        % NOTE: The signal generated here will be rescaled when plotted so
+        %       to improve plot appearance.  The rescaling will not affect
+        %       the output signal.
+        
+        % Generate the DAC signal using an toggle latch (this is a nice way
+        % to do this since each trigger event can cause a state change,
+        % which is exactly what a toggle latch does).
+        SignalPeriod = str2double(ControlHandles.DACPeriodEdit.String);
+        InPhase = ControlHandles.DACPhaseCheckbox.Value;
+        LOWVoltage = str2double(ControlHandles.DACLowEdit.String);
+        HIGHVoltage = str2double(ControlHandles.DACHighEdit.String);
+        CurrentSignal.NPoints = SignalStruct(1).NPoints;
+        CurrentSignal.InPhase = InPhase;
+        CurrentSignal.Period = SignalPeriod;
+        CurrentSignal.Range = [LOWVoltage; HIGHVoltage];
+        CurrentSignal.IsLogical = 0;
+        CurrentSignal.Handle = [];
+        CurrentSignal.Alias = ControlHandles.DACAliasEdit.String;
+        Signal = toggleLatch(SignalStruct(1).Signal, ...
+            SignalPeriod, InPhase);
+        CurrentSignal.Signal = Signal*(HIGHVoltage-LOWVoltage) ...
+            + LOWVoltage;
+        SignalStruct = [SignalStruct; CurrentSignal];
+        
+        % Re-plot all of the signals.
+        plotSignals()
+
+    end
+
+    function createTriggerSignal(~, ~)
+        % This function plots the trigger signal as defined in the trigger
+        % signal panel. A handle to this trigger line is always kept in
+        % LineHandles(1). The trigger itself will always be saved in 
+        % NOTE: This will plot the trigger as a square with height 1. The
+        %       alignment of several plot features will depend on this.
+        
+        % Generate the trigger, noting that the trigger will always
+        % alternate with each time step (e.g., [1, 0, 1, 0, 1, ...]).
+        NCycles = str2double(ControlHandles.NCyclesEdit.String);
+        NPoints = 2*NCycles + 1;
+        XArray = transpose(1:NPoints);
+        OffBool = ~mod(XArray, 2);
+        TriggerArray = ones(1, NPoints);
+        TriggerArray(OffBool) = 0;
+        SignalStruct(1).NPoints = NPoints;
+        SignalStruct(1).InPhase = 1;
+        SignalStruct(1).Period = 1;
+        SignalStruct(1).Range = [0; 1];
+        SignalStruct(1).IsLogical = 1;
+        SignalStruct(1).Handle = stairs(PlotAxes, ...
+            XArray, TriggerArray-1, ...
+            'Color', [0, 0, 0], 'LineWidth', 2);
+        SignalStruct(1).Alias = ControlHandles.TriggerAliasEdit.String;
+        SignalStruct(1).Signal = TriggerArray;
+        
+        % Re-generate the other signals and then plot them.
+        regenerateSignals()
+        plotSignals()
+        
+    end
+
+    function regenerateSignals()
+        % This function will re-generate all of the signals defined so far.
+        % The intention of this method is that the user may wish to change
+        % the number of sequences in the trigger, which will require us to
+        % extend the rest of the signals already defined.
+        
+        % Loop through all of the existing signals and recompute them to
+        % match the size of the triggering signal (SignalStruct(1).Signal).
+        NSignals = numel(SignalStruct);
+        for ii = 2:NSignals
+            % Generate the TTL signal using an toggle latch (this is a nice
+            % way to do this since each trigger event can cause a state 
+            % change, which is exactly what a toggle latch does).
+            SignalPeriod = SignalStruct(ii).Period;
+            InPhase = SignalStruct(ii).InPhase;
+            Range = SignalStruct(ii).Range;
+            SignalStruct(ii).NPoints = SignalStruct(1).NPoints;
+            Signal = toggleLatch(SignalStruct(1).Signal, ...
+                SignalPeriod, InPhase);
+            SignalStruct(ii).Signal = Signal*diff(Range) + Range(1);
+        end
+
+    end
+
     function plotSignals()
         % This function will plot all of the signals in the SignalStruct.
+        % NOTE: The digital signals (trigger and TTL) will always be
+        %       plotted with the same "height".  The DAC signals will be
+        %       rescaled with respect to the DAC signal with the largest
+        %       swing.  For example, if we have two DAC signals, 
+        %       DAC1 = [0, 5, 0, 5, 0] and DAC2 = [0, 2.5, 0, 2.5, 0], DAC1
+        %       would appear the same size as the trigger signal, but DAC2
+        %       would appear to half of the swing as either DAC1 or the
+        %       trigger.
         
         % Clear the plot axes to make sure we don't keep anything by
         % mistake.
@@ -373,21 +433,43 @@ plotTriggerSignal()
             TriggerX, ShiftedSignal, ...
             'Color', [0, 0, 0], 'LineWidth', 2);
         
-        % Plot the rest of the signals.
+        % Define some scaling parameters for rescaling DAC signals (to
+        % improve the appearance of the plots).
+        ConcatenatedSignal = cell2mat({SignalStruct.Signal});
+        ScalingVoltage = max(ConcatenatedSignal) - min(ConcatenatedSignal);
+        
+        % Plot the rest of the signals, rescaling them to improve the plot 
+        % appearance (the rescaled signals won't be saved).
         NSignals = numel(SignalStruct);
         for ii = 2:NSignals
-            ShiftedSignal = SignalStruct(ii).Signal - 1.5*ii + 0.5;           
+            Signal = SignalStruct(ii).Signal;
+            if SignalStruct(ii).IsLogical
+                RescaledSignal = Signal;
+            else
+                RescaledSignal = (Signal-min(Signal)) ...
+                    / (ScalingVoltage-min(Signal));
+            end
+            ShiftedSignal = RescaledSignal - 1.5*ii + 0.5;           
             SignalStruct(ii).Handle = stairs(PlotAxes, ...
                 1:SignalStruct(ii).NPoints, ShiftedSignal, ...
                 'LineWidth', 2);
         end
-        
+                
         % Modify some properties of the axis to improve appearance.
         axis(PlotAxes, 'tight')
-        PlotAxes.XTick = TriggerX(logical(SignalStruct(1).Signal));
+        EventLocationsX = TriggerX(logical(SignalStruct(1).Signal));
+        PlotAxes.XTick = EventLocationsX;
+        PlotAxes.XTickLabels = num2str(transpose(1:numel(PlotAxes.XTick)));
         PlotAxes.YLim = [-1.5*NSignals, 0.5];
         PlotAxes.YTick = -(1.5*(NSignals-1):-1.5:0) - 0.5;
         PlotAxes.YTickLabels = {SignalStruct(NSignals:-1:1).Alias};
+        
+        % Add some vertical lines to indicate each trigger event.
+        for ii = 1:numel(EventLocationsX)
+            line(PlotAxes, ...
+                ones(2, 1)*EventLocationsX(ii), PlotAxes.YLim, ...
+                'Color', [0, 0, 0, 0.5], 'LineStyle', ':')
+        end
         
     end
 
