@@ -436,7 +436,11 @@ createTriggerSignal()
         % Define some scaling parameters for rescaling DAC signals (to
         % improve the appearance of the plots).
         ConcatenatedSignal = cell2mat({SignalStruct.Signal});
-        ScalingVoltage = max(ConcatenatedSignal) - min(ConcatenatedSignal);
+        MinVoltage = min(ConcatenatedSignal);
+        MaxVoltage = max(ConcatenatedSignal);
+        MaxSignalSwing = max(cellfun(@(X) max(X) - min(X), ...
+            {SignalStruct.Signal}));
+        MaxGlobalSwing = MaxVoltage - MinVoltage;
         
         % Plot the rest of the signals, rescaling them to improve the plot 
         % appearance (the rescaled signals won't be saved).
@@ -446,8 +450,10 @@ createTriggerSignal()
             if SignalStruct(ii).IsLogical
                 RescaledSignal = Signal;
             else
-                RescaledSignal = (Signal-min(Signal)) ...
-                    / (ScalingVoltage-min(Signal));
+                SignalCenterScaled = abs(min(Signal)-MinVoltage) ...
+                    / MaxGlobalSwing;
+                RescaledSignal = SignalCenterScaled ...
+                    + ((Signal-min(Signal)) / MaxSignalSwing);
             end
             ShiftedSignal = RescaledSignal - 1.5*ii + 0.5;           
             SignalStruct(ii).Handle = stairs(PlotAxes, ...
@@ -468,7 +474,19 @@ createTriggerSignal()
         for ii = 1:numel(EventLocationsX)
             line(PlotAxes, ...
                 ones(2, 1)*EventLocationsX(ii), PlotAxes.YLim, ...
-                'Color', [0, 0, 0, 0.5], 'LineStyle', ':')
+                'Color', [0, 0, 0, 0.2], ...
+                'LineStyle', ':', 'LineWidth', 2)
+        end
+        
+        % Add some horizontal lines at y=-1, 0, 1 for each signal.
+        for ii = 1:NSignals
+            YZero = PlotAxes.YTick(ii);
+            line(PlotAxes, PlotAxes.XLim, ones(2, 1)*YZero, ...
+                'Color', [0, 0, 0, 0.2], 'LineStyle', '-')
+            line(PlotAxes, PlotAxes.XLim, ones(2, 1)*YZero + 0.5, ...
+                'Color', [0, 0, 0, 0.2], 'LineStyle', ':')
+            line(PlotAxes, PlotAxes.XLim, ones(2, 1)*YZero - 0.5, ...
+                'Color', [0, 0, 0, 0.2], 'LineStyle', ':')
         end
         
     end
