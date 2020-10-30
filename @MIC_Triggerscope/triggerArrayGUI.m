@@ -435,12 +435,7 @@ createTriggerSignal()
         
         % Define some scaling parameters for rescaling DAC signals (to
         % improve the appearance of the plots).
-        ConcatenatedSignal = cell2mat({SignalStruct.Signal});
-        MinVoltage = min(ConcatenatedSignal);
-        MaxVoltage = max(ConcatenatedSignal);
-        MaxSignalSwing = max(cellfun(@(X) max(X) - min(X), ...
-            {SignalStruct.Signal}));
-        MaxGlobalSwing = MaxVoltage - MinVoltage;
+
         
         % Plot the rest of the signals, rescaling them to improve the plot 
         % appearance (the rescaled signals won't be saved).
@@ -450,8 +445,20 @@ createTriggerSignal()
             if SignalStruct(ii).IsLogical
                 RescaledSignal = Signal;
             else
+                % Compute some scaling parameters that we'll need.  These
+                % are defined to ensure that the appearance of all DAC
+                % signals are consistent, e.g., a signal from -5 to 5
+                % should look twice as tall as a signal from 0 to 5.
+                ConcatenatedSignal = cell2mat({SignalStruct.Signal});
+                MinVoltage = min(ConcatenatedSignal);
+                MaxVoltage = max(ConcatenatedSignal);
+                MaxSignalSwing = max(cellfun(@(X) max(X) - min(X), ...
+                    {SignalStruct.Signal}));
+                MaxGlobalSwing = MaxVoltage - MinVoltage;
                 SignalCenterScaled = abs(min(Signal)-MinVoltage) ...
                     / MaxGlobalSwing;
+                
+                % Rescale the signal.
                 RescaledSignal = SignalCenterScaled ...
                     + ((Signal-min(Signal)) / MaxSignalSwing);
             end
