@@ -57,6 +57,12 @@ classdef MIC_Triggerscope < MIC_Abstract
             'PROG_FOCUS', 'PROG_TTL', 'PROG_DAC', 'PROG_DEL', ...
             'TIMECYCLES', 'TRIGMODE'};
         
+        % List of trigger modes from the Triggerscope documentation.
+        % For now, I'm excluding 'Low' and 'High', because I'm not sure
+        % what those mean in this context. Changing the order of this list
+        % will break some functionality throughout the class.
+        TriggerModes = {'Rising', 'Falling', 'Change'};
+        
         % Resolution of the DAC channels. (bits)(integer)(Default = 16)
         DACResolution = 16;
         
