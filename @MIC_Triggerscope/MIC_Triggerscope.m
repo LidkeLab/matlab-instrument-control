@@ -29,6 +29,19 @@ classdef MIC_Triggerscope < MIC_Abstract
         
         % Serial port Triggerscope is connected to (char)(Default = 'COM3')
         SerialPort = 'COM3';
+        
+        % Structure defining signals on each port (struct)
+        % (see MIC_Triggerscope.triggerArrayGUI() for formatting, or to
+        % generate this structure in a GUI)
+        SignalStruct struct
+    end
+    
+    properties (Dependent)
+        % Array of signals be set on ports when triggered (float array)
+        % NOTE: If the user wants to define signals manually, they should
+        %       edit the SignalStruct property (whose entries are converted
+        %       and placed here automatically).
+        SignalArray
     end
     
     properties (SetAccess = protected, Hidden)
@@ -152,6 +165,52 @@ classdef MIC_Triggerscope < MIC_Abstract
             end
         end
         
+        function [SignalArray] = get.SignalArray(obj)
+            % This is a get method for the dependent property SignalArray.
+            % This method will convert the class property SignalStruct into
+            % a simpler SignalArray, which is organized in a specific way
+            % to be "lighter weight" than the SignalStruct.
+            %
+            % OUTPUTS:
+            %   SignalArray: A numeric array containing the signals
+            %                specified in obj.SignalStruct. This array is
+            %                formatted to be 2*obj.IOChannels rows by max.
+            %                signal length columns, with each row
+            %                corresponding to a TTL/DAC port (1-16 are TTL
+            %                ports 1-16, 17-32 are DAC ports 1-16). Ports
+            %                not specified in obj.SignalStruct are set to
+            %                zero arrays. Signals will be padded with zeros
+            %                to match the max. signal length if needed.
+            
+            % Initialize the SignalArray.
+            NPoints = cellfun(@(X) numel(X), {obj.SignalStruct.Signal});
+            SignalArray = zeros(2*obj.IOChannels, max(NPoints));
+            
+            % Populate the SignalArray.
+            for ii = 1:numel(obj.SignalStruct)
+                if contains(obj.SignalStruct(ii).Identifier, 'trigger')
+                    % We don't store the trigger signals in the
+                    % SignalArray, so we can just skip to the next
+                    % iteration.
+                    continue
+                elseif contains(obj.SignalStruct(ii).Identifier, 'TTL')
+                   SignalArray(str2double(...
+                       obj.SignalStruct(ii).Identifier(4:5)), ...
+                        1:NPoints(ii)) = obj.SignalStruct(ii).Signal;
+                elseif contains(obj.SignalStruct(ii).Identifier, 'DAC')
+                    SignalArray(str2double(...
+                       obj.SignalStruct(ii).Identifier(4:5)) + 16, ...
+                        1:NPoints(ii)) = obj.SignalStruct(ii).Signal;
+                else
+                    warning(...
+                        ['Unknown signal identifier found in ', ...
+                        'obj.SignalStruct: ''%s'' not recognized'], ...
+                        obj.SignalStruct(ii).Identifier)
+                end
+            end
+            
+        end
+        
         function updateActivityDisplay(obj, ~, ~)
             % Listener callback for a change of the object property
             % ActivityMessage, which is used to update the GUI activity
@@ -164,6 +223,7 @@ classdef MIC_Triggerscope < MIC_Abstract
             % Modify the text within the status box to show the current
             % activity message
             ActivityDisplay.String = obj.ActivityMessage;
+            
         end
         
         function updateConnectionStatus(obj, ~, ~)
@@ -222,11 +282,13 @@ classdef MIC_Triggerscope < MIC_Abstract
     methods (Access = protected)
         % These methods are protected because it is not anticipated that a
         % user would want to access these. Any methods in this section
-        % should have public calling methods that make them more
-        % user-friendly while providing the same functionality.
+        % should either have public calling methods that make them more
+        % user-friendly while providing the same functionality, or should
+        % not provide user facing functionality.
         
         writeCommand(obj, Command);
         [Response] = readResponse(obj);
+        [SignalArray] = generateSignalArray(obj, SignalStruct);
         
     end
     
@@ -247,7 +309,11 @@ classdef MIC_Triggerscope < MIC_Abstract
         end
         
         [BitLevel] = convertVoltageToBitLevel(Voltage, Range, Resolution)
-        
+
+    end
+    
+    methods (Static)
+        [ArrayProgram] = generateArrayProgram(SignalArray);
     end
     
     
