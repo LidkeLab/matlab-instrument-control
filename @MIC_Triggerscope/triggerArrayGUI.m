@@ -2,7 +2,39 @@ function triggerArrayGUI(obj, GUIParent)
 %createTriggeringArray opens a GUI that can create a triggering array.
 % This method will open a GUI which allows the user to define a
 % 'TriggeringArray', i.e., an array defining a simple DAC/TTL program based
-% on a trigger signal.
+% on a trigger signal. 
+%
+% NOTE: The primary intention of this method is to generate the class 
+%       SignalStruct (which also defines the dependent property 
+%       SignalArray), which is a structure with the following fields (to 
+%       define this manually outside of this GUI, you only need to set
+%       'Identifier' and 'Signal'):
+%       NPoints: Number of points in the signal.
+%       InPhase: 1 if the signal starts HIGH, 0 otherwise.
+%       Period: Period of the signal with respect to the trigger, e.g., a
+%               period of 4 means that the signal toggles every other 
+%               trigger event.
+%       Range: Range of voltages present in the signal [min., max.].
+%       IsLogical: 1 if the signal is logical (e.g., TTL or trigger)
+%                  0 if the signal is analog (e.g., DAC)
+%   	Handle: Line handle for the signal in this GUI.
+%       Identifier: char array defining which signal this is (the trigger
+%                   is 'trigger', TTL's will be 'TTL' suffixed with port 
+%                   number of field width 2, e.g., 'TTL07', DAC's will be 
+%                   'DAC' suffixed with port number of field width 2, e.g., 
+%                   'DAC03').
+%       Alias: Recognizable char array defining what this signal is meant
+%              to control, e.g., 'laser 405', 'attenuator', ...
+%       Signal: Numeric array containing the signal, e.g., a DAC signal
+%               might be something like [0, 5, 0, 2.5, 0, 5]
+%
+% NOTE: All signals will be driven LOW (0 volts) on the last trigger event.
+%       I've decided to do this for safety, e.g., so a laser doesn't stay
+%       on once the trigger signal terminates.  If somebody is setting
+%       something up to be active LOW, this can be risky... but I don't
+%       think anybody should be doing that.  Note that I've done this
+%       manually in several places, so changing this behavior will require
+%       changes throughout this method!
 %
 % INPUTS:
 %   GUIParent: The 'Parent' of this GUI, e.g., a figure handle.
@@ -21,6 +53,7 @@ if ~(exist('GUIParent', 'var') && ~isempty(GUIParent) ...
         'Units', 'pixels', ...
         'Position', DefaultFigurePosition .* [0.5, 1, 1.5, 1]);
 end
+GUIParent.CloseRequestFcn = @figureClosing;
 
 % Generate some panels to help organize the GUI.
 TriggerPanel = uipanel(GUIParent, 'Title', 'Trigger', ...
@@ -30,7 +63,9 @@ TTLPanel = uipanel(GUIParent, 'Title', 'TTL', ...
 DACPanel = uipanel(GUIParent, 'Title', 'DAC', ...
     'Units', 'normalized', 'Position', [0, 0, 0.2, 0.33]);
 PlotPanel = uipanel(GUIParent, ...
-    'Units', 'normalized', 'Position', [0.2, 0, 0.8, 1]);
+    'Units', 'normalized', 'Position', [0.2, 0.1, 0.8, 0.9]);
+SavePanel = uipanel(GUIParent, ...
+    'Units', 'normalized', 'Position', [0.2, 0, 0.8, 0.1]);
 
 % Add some controls to the TriggerPanel.
 TextSize = [0, 0, 0.6, 0.1];
@@ -275,6 +310,16 @@ ControlHandles.AddDACButton = uicontrol(DACPanel, ...
     'Units', 'normalized', 'Position', ButtonSize, ...
     'Callback', @addDACCallback);
 
+% Add some controls to the save panel.
+ButtonSize = [0, 0, 0.2, 1];
+ControlHandles.SaveSignalsButton = uicontrol(SavePanel, ...
+    'Style', 'pushbutton', ...
+    'String', 'Save signals', ...
+    'Tooltip', ...
+    'Save these signals in the class property ''SignalStruct''', ...
+    'Units', 'normalized', 'Position', ButtonSize, ...
+    'Callback', @saveSignalCallback);
+
 % Add axes to the PlotPanel.
 PlotAxes = axes(PlotPanel);
 hold(PlotAxes, 'on');
@@ -288,6 +333,7 @@ SignalStruct.Period = [];
 SignalStruct.Range = [];
 SignalStruct.IsLogical = [];
 SignalStruct.Handle = [];
+SignalStruct.Identifier = [];
 SignalStruct.Alias = [];
 SignalStruct.Signal = [];
 
@@ -305,15 +351,17 @@ createTriggerSignal()
         %       that this initial state of HIGH is caught as a triggering
         %       event when appropriate (i.e., for Rising edge and Change
         %       trigger modes).
+        % NOTE: The trigger will always end LOW.
         
         % Generate the trigger, noting that the trigger will always
         % alternate with each time step (e.g., [1, 0, 1, 0, 1, ...]).
         NCycles = str2double(ControlHandles.NCyclesEdit.String);
         NPoints = 2*NCycles + 1;
         XArray = transpose(1:NPoints);
-        OffBool = ~mod(XArray, 2);
-        TriggerArray = ones(1, NPoints);
-        TriggerArray(OffBool) = 0;
+        OnBool = logical(mod(XArray, 2));
+        TriggerArray = zeros(1, NPoints);
+        TriggerArray(OnBool) = 1;
+        TriggerArray(NPoints) = 0;
         SignalStruct(1).NPoints = NPoints;
         SignalStruct(1).InPhase = 1;
         SignalStruct(1).Period = 1;
@@ -322,6 +370,7 @@ createTriggerSignal()
         SignalStruct(1).Handle = stairs(PlotAxes, ...
             XArray, TriggerArray-1, ...
             'Color', [0, 0, 0], 'LineWidth', 2);
+        SignalStruct(1).Identifier = 'trigger';
         SignalStruct(1).Alias = ControlHandles.TriggerAliasEdit.String;
         SignalStruct(1).Signal = TriggerArray;
         
@@ -368,19 +417,24 @@ createTriggerSignal()
         % Generate the TTL signal using an toggle latch (this is a nice way
         % to do this since each trigger event can cause a state change,
         % which is exactly what a toggle latch does).
+        NPoints = SignalStruct(1).NPoints;
         SignalPeriod = str2double(ControlHandles.TTLPeriodEdit.String);
         InPhase = ControlHandles.TTLPhaseCheckbox.Value;
         TriggerMode = ControlHandles.TriggerModePopup.Value;
-        CurrentSignal.NPoints = SignalStruct(1).NPoints;
+        CurrentSignal.NPoints = NPoints;
         CurrentSignal.InPhase = InPhase;
         CurrentSignal.Period = SignalPeriod;
         CurrentSignal.Range = [0; 1];
         CurrentSignal.IsLogical = 1;
         CurrentSignal.Handle = [];
+        CurrentSignal.Identifier = ...
+            sprintf('TTL%02i', ControlHandles.TTLPortPopup.Value);
         CurrentSignal.Alias = ControlHandles.TTLAliasEdit.String;
         ToggleSignal = generateToggleSignal(...
             SignalStruct(1).Signal, SignalPeriod, TriggerMode);
-        CurrentSignal.Signal = toggleLatch(ToggleSignal, InPhase);
+        Signal = toggleLatch(ToggleSignal, InPhase);
+        Signal(NPoints) = 0;
+        CurrentSignal.Signal = Signal;
         SignalStruct = [SignalStruct; CurrentSignal];
         
         % Re-plot all of the signals.
@@ -394,25 +448,31 @@ createTriggerSignal()
         % NOTE: The signal generated here will be rescaled when plotted so
         %       to improve plot appearance.  The rescaling will not affect
         %       the output signal.
+        % NOTE: The signal is always driven to the LOW voltage at the end
+        %       of the signal.
         
         % Generate the DAC signal using an toggle latch (this is a nice way
         % to do this since each trigger event can cause a state change,
         % which is exactly what a toggle latch does).
+        NPoints = SignalStruct(1).NPoints;
         SignalPeriod = str2double(ControlHandles.DACPeriodEdit.String);
         InPhase = ControlHandles.DACPhaseCheckbox.Value;
         TriggerMode = ControlHandles.TriggerModePopup.Value;
         LOWVoltage = str2double(ControlHandles.DACLowEdit.String);
         HIGHVoltage = str2double(ControlHandles.DACHighEdit.String);
-        CurrentSignal.NPoints = SignalStruct(1).NPoints;
+        CurrentSignal.NPoints = NPoints;
         CurrentSignal.InPhase = InPhase;
         CurrentSignal.Period = SignalPeriod;
         CurrentSignal.Range = [LOWVoltage; HIGHVoltage];
         CurrentSignal.IsLogical = 0;
         CurrentSignal.Handle = [];
+        CurrentSignal.Identifier = ...
+            sprintf('DAC%02i', ControlHandles.DACPortPopup.Value);
         CurrentSignal.Alias = ControlHandles.DACAliasEdit.String;
         [ToggleSignal] = generateToggleSignal(...
             SignalStruct(1).Signal, SignalPeriod, TriggerMode);
         Signal = toggleLatch(ToggleSignal, InPhase);
+        Signal(NPoints) = 0;
         CurrentSignal.Signal = Signal*(HIGHVoltage-LOWVoltage) ...
             + LOWVoltage;
         SignalStruct = [SignalStruct; CurrentSignal];
@@ -420,6 +480,14 @@ createTriggerSignal()
         % Re-plot all of the signals.
         plotSignals()
 
+    end
+
+    function saveSignalCallback(~, ~)
+        % This callback updates the class property 'SignalArray' with the
+        % signals defined in this GUI.
+        
+        obj.SignalStruct = SignalStruct;
+        
     end
 
     function regenerateAllSignals()
@@ -442,14 +510,18 @@ createTriggerSignal()
     function [OutputSignal] = regenerateSignal(SignalIndex)
         % This function regenerates the signal SignalStruct(SignalIndex)
         % such that it's length matches the trigger signal.
+        % NOTE: This function will always drive the signal LOW for the last
+        %       point, i.e., OutputSignal(end) = 0 for all signals.
         
-        SignalPeriod = SignalStruct(SignalIndex).Period;
-        InPhase = SignalStruct(SignalIndex).InPhase;
-        Range = SignalStruct(SignalIndex).Range;
         TriggerMode = ControlHandles.TriggerModePopup.Value;
         ToggleSignal = generateToggleSignal(...
-            SignalStruct(1).Signal, SignalPeriod, TriggerMode);
-        Signal = toggleLatch(ToggleSignal, InPhase);
+            SignalStruct(1).Signal, ...
+            SignalStruct(SignalIndex).Period, ...
+            TriggerMode);
+        Signal = toggleLatch(ToggleSignal, ...
+            SignalStruct(SignalIndex).InPhase);
+        Signal(end) = 0;
+        Range = SignalStruct(SignalIndex).Range;
         OutputSignal = Signal*diff(Range) + Range(1);
         
     end
@@ -509,35 +581,29 @@ createTriggerSignal()
                 1:SignalStruct(ii).NPoints, ShiftedSignal, ...
                 'LineWidth', 2);
         end
-                
-        % Modify some properties of the axis to improve appearance.
-        axis(PlotAxes, 'tight')
+                        
+        % Add some vertical lines to indicate each trigger event.
         EventLocationsX = find(generateToggleSignal(...
             SignalStruct(1).Signal, ...
             1, ControlHandles.TriggerModePopup.Value));
         NEvents = numel(EventLocationsX);
-        PlotAxes.XTick = EventLocationsX;
-        PlotAxes.XTickLabels = num2str(transpose(1:NEvents));
-        PlotAxes.YLim = [-1, 1.5*NSignals - 0.5];
-        PlotAxes.YTick = SignalYZero;
-        PlotAxes.YTickLabels = {SignalStruct.Alias};
-        
-        % Add some vertical lines to indicate each trigger event.
-        for ii = 1:numel(EventLocationsX)
+        YExtent = [-1, 1.5*NSignals - 0.5];
+        for ii = 1:NEvents
             line(PlotAxes, ...
-                ones(2, 1)*EventLocationsX(ii), PlotAxes.YLim, ...
+                ones(2, 1)*EventLocationsX(ii), YExtent, ...
                 'Color', [0, 0, 0, 0.2], ...
                 'LineStyle', ':')
         end
         
         % Add some horizontal lines at y=-1, 0, 1 for each signal.
+        XExtent = [1, NPoints];
         for ii = 1:NSignals
-            YZero = PlotAxes.YTick(ii);
-            line(PlotAxes, PlotAxes.XLim, ones(2, 1)*YZero, ...
+            YZero = SignalYZero(ii);
+            line(PlotAxes, XExtent, ones(2, 1)*YZero, ...
                 'Color', [0, 0, 0, 0.2], 'LineStyle', '-')
-            line(PlotAxes, PlotAxes.XLim, ones(2, 1)*YZero + 0.5, ...
+            line(PlotAxes, XExtent, ones(2, 1)*YZero + 0.5, ...
                 'Color', [0, 0, 0, 0.2], 'LineStyle', ':')
-            line(PlotAxes, PlotAxes.XLim, ones(2, 1)*YZero - 0.5, ...
+            line(PlotAxes, XExtent, ones(2, 1)*YZero - 0.5, ...
                 'Color', [0, 0, 0, 0.2], 'LineStyle', ':')
         end
         
@@ -546,7 +612,7 @@ createTriggerSignal()
         % NOTE: We don't want the trigger to be edited in this way, thus
         %       the index of the second for loop starts at 2.
         NPointsBetweenEvents = EventLocationsX(2) - EventLocationsX(1) - 1;
-        for ii = 1:NEvents-1
+        for ii = 1:NEvents
             for jj = 2:NSignals
                 rectangle(PlotAxes, ...
                     'Position', ...
@@ -559,6 +625,15 @@ createTriggerSignal()
                     EventLocationsX(ii), jj, NPointsBetweenEvents});
             end
         end
+        
+        % Modify some properties of the axis to improve appearance.
+        axis(PlotAxes, 'tight')
+        PlotAxes.XLim = XExtent;
+        PlotAxes.XTick = EventLocationsX;
+        PlotAxes.XTickLabels = num2str(transpose(1:NEvents));
+        PlotAxes.YLim = YExtent;
+        PlotAxes.YTick = SignalYZero;
+        PlotAxes.YTickLabels = {SignalStruct.Alias};
     end
 
     function clickedRectangle(Source, ~, ...
@@ -598,6 +673,7 @@ createTriggerSignal()
         
         % Re-plot the signals to reflect the updates.
         plotSignals()
+        
     end
 
     function [ToggleSignal] = generateToggleSignal(TriggerSignal, ...
@@ -637,12 +713,25 @@ createTriggerSignal()
         XArray = 1:NPoints;
         EventNumber = floor((1:NPoints) / 2);
         if (TriggerMode == 1)
-            IsEvent = TriggerSignal(1)*mod(XArray, 2) ...
-                + ~(TriggerSignal(1)+mod(XArray, 2));
+            % For rising edge triggers, we want to ensure that the trigger
+            % is indeed HIGH, and that it is HIGH in a manner consistent
+            % with the expected trigger (in this case, every other element,
+            % thus the mod(XArray, 2) terms).
+            IsEvent = TriggerSignal ...
+                .* (TriggerSignal(1)*mod(XArray, 2) ...
+                + ~(TriggerSignal(1)+mod(XArray, 2)));
         elseif (TriggerMode == 2)
-            IsEvent = ~TriggerSignal(1)*mod(XArray, 2) ...
-                + TriggerSignal(1)*~mod(XArray, 2);
+            % For falling edge triggers, we want to ensure that the trigger
+            % is indeed LOW, and that it is LOW in a manner consistent
+            % with the expected trigger (in this case, every other element,
+            % thus the mod(XArray, 2) terms).
+            IsEvent = ~TriggerSignal ...
+                .* (~TriggerSignal(1)*mod(XArray, 2) ...
+                + TriggerSignal(1)*~mod(XArray, 2));
         elseif (TriggerMode == 3)
+            % For change type triggers, any change from HIGH->LOW,
+            % LOW->HIGH counts, no matter where it appears in the array,
+            % with the first element always assumed to be a change.
             IsEvent = [1, logical(diff(TriggerSignal))];
         end
         ToggleSignal = (IsEvent ...
@@ -678,6 +767,21 @@ createTriggerSignal()
             OutputSignal(ii) = ToggleSignal(ii)*~OutputSignal(ii-1) ...
                 + ~ToggleSignal(ii)*OutputSignal(ii-1);
         end
+        
+    end
+
+    function figureClosing(~, ~)
+        % This callback is executed with the GUI figure is being closed.
+        
+        % Check if the user would like to save their changes before
+        % closing.
+        [UserResponse] = questdlg(...
+            'Would you like to save these signals in obj.SignalStruct?',...
+            'Close request', 'Yes', 'No', 'Yes');
+        if strcmp(UserResponse, 'Yes')
+            obj.SignalStruct = SignalStruct;
+        end
+        delete(GUIParent)
         
     end
 
