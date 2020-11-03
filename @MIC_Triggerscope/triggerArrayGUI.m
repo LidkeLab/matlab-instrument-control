@@ -28,13 +28,6 @@ function triggerArrayGUI(obj, GUIParent)
 %       Signal: Numeric array containing the signal, e.g., a DAC signal
 %               might be something like [0, 5, 0, 2.5, 0, 5]
 %
-% NOTE: All signals will be driven LOW (0 volts) on the last trigger event.
-%       I've decided to do this for safety, e.g., so a laser doesn't stay
-%       on once the trigger signal terminates.  If somebody is setting
-%       something up to be active LOW, this can be risky... but I don't
-%       think anybody should be doing that.  Note that I've done this
-%       manually in several places, so changing this behavior will require
-%       changes throughout this method!
 %
 % INPUTS:
 %   GUIParent: The 'Parent' of this GUI, e.g., a figure handle.
@@ -114,7 +107,7 @@ uicontrol(TriggerPanel, 'Style', 'text', ...
     'HorizontalAlignment', 'right');
 ControlHandles.TriggerModePopup = uicontrol(TriggerPanel, ...
     'Style', 'popupmenu', ...
-    'String', obj.TriggerModes, ...
+    'String', obj.TriggerModeOptions, ...
     'FontUnits', 'normalized', 'FontSize', 0.8, ...
     'Units', 'normalized', ...
     'Position', PopupSize + [TextSize(3), 1-3*TextSize(4), 0, 0], ...
@@ -356,12 +349,11 @@ createTriggerSignal()
         % Generate the trigger, noting that the trigger will always
         % alternate with each time step (e.g., [1, 0, 1, 0, 1, ...]).
         NCycles = str2double(ControlHandles.NCyclesEdit.String);
-        NPoints = 2*NCycles + 1;
+        NPoints = 2 * NCycles;
         XArray = transpose(1:NPoints);
         OnBool = logical(mod(XArray, 2));
         TriggerArray = zeros(1, NPoints);
         TriggerArray(OnBool) = 1;
-        TriggerArray(NPoints) = 0;
         SignalStruct(1).NPoints = NPoints;
         SignalStruct(1).InPhase = 1;
         SignalStruct(1).Period = 1;
@@ -380,8 +372,11 @@ createTriggerSignal()
         
     end
 
-    function triggerModeCallback(~, ~)
+    function triggerModeCallback(Source, ~)
         % This is a callback for the trigger mode selection popup menu.
+        
+        % Update the class property obj.TriggerMode to store this change.
+        obj.TriggerMode = Source.String{Source.Value};
         
         % Regenerate and plot all of the signals to reflect the changes to
         % the triggering mode.
@@ -433,7 +428,6 @@ createTriggerSignal()
         ToggleSignal = generateToggleSignal(...
             SignalStruct(1).Signal, SignalPeriod, TriggerMode);
         Signal = toggleLatch(ToggleSignal, InPhase);
-        Signal(NPoints) = 0;
         CurrentSignal.Signal = Signal;
         SignalStruct = [SignalStruct; CurrentSignal];
         
@@ -472,7 +466,6 @@ createTriggerSignal()
         [ToggleSignal] = generateToggleSignal(...
             SignalStruct(1).Signal, SignalPeriod, TriggerMode);
         Signal = toggleLatch(ToggleSignal, InPhase);
-        Signal(NPoints) = 0;
         CurrentSignal.Signal = Signal*(HIGHVoltage-LOWVoltage) ...
             + LOWVoltage;
         SignalStruct = [SignalStruct; CurrentSignal];
@@ -520,7 +513,6 @@ createTriggerSignal()
             TriggerMode);
         Signal = toggleLatch(ToggleSignal, ...
             SignalStruct(SignalIndex).InPhase);
-        Signal(end) = 0;
         Range = SignalStruct(SignalIndex).Range;
         OutputSignal = Signal*diff(Range) + Range(1);
         
@@ -542,12 +534,17 @@ createTriggerSignal()
         cla(PlotAxes);
         
         % Plot the trigger signal (this is the only signal that will always
-        % be in the same spot with the same color).
+        % be in the same spot with the same color). 
+        % NOTE: For the plots, I'm padding the end of the signals with
+        %       their last value for the sake of improving the plot 
+        %       appearance.
         NPoints = SignalStruct(1).NPoints;
-        TriggerX = 1:NPoints;
-        ShiftedSignal = SignalStruct(1).Signal - 0.5;
+        XArray = 1:(NPoints+1);
+        PaddedSignal = [SignalStruct(1).Signal, ...
+            SignalStruct(1).Signal(NPoints)];
+        ShiftedSignal = PaddedSignal - 0.5;
         SignalStruct(1).Handle = stairs(PlotAxes, ...
-            TriggerX, ShiftedSignal, ...
+            XArray, ShiftedSignal, ...
             'Color', [0, 0, 0], 'LineWidth', 2);
         
         % Plot the rest of the signals, rescaling them to improve the plot 
@@ -556,8 +553,9 @@ createTriggerSignal()
         SignalYZero = (0:(NSignals-1)) * 1.5;
         for ii = 2:NSignals
             Signal = SignalStruct(ii).Signal;
+            PaddedSignal = [Signal, Signal(NPoints)];
             if SignalStruct(ii).IsLogical
-                RescaledSignal = Signal;
+                RescaledSignal = PaddedSignal;
             else
                 % Compute some scaling parameters that we'll need.  These
                 % are defined to ensure that the appearance of all DAC
@@ -569,16 +567,16 @@ createTriggerSignal()
                 MaxSignalSwing = max(cellfun(@(X) max(X) - min(X), ...
                     {SignalStruct.Signal}));
                 MaxGlobalSwing = MaxVoltage - MinVoltage;
-                SignalCenterScaled = abs(min(Signal)-MinVoltage) ...
+                SignalCenterScaled = abs(min(PaddedSignal)-MinVoltage) ...
                     / MaxGlobalSwing;
                 
                 % Rescale the signal.
                 RescaledSignal = SignalCenterScaled ...
-                    + ((Signal-min(Signal)) / MaxSignalSwing);
+                    + ((PaddedSignal-min(PaddedSignal)) / MaxSignalSwing);
             end
             ShiftedSignal = RescaledSignal + SignalYZero(ii) - 0.5;           
             SignalStruct(ii).Handle = stairs(PlotAxes, ...
-                1:SignalStruct(ii).NPoints, ShiftedSignal, ...
+                XArray, ShiftedSignal, ...
                 'LineWidth', 2);
         end
                         
@@ -596,7 +594,7 @@ createTriggerSignal()
         end
         
         % Add some horizontal lines at y=-1, 0, 1 for each signal.
-        XExtent = [1, NPoints];
+        XExtent = [min(XArray), max(XArray)];
         for ii = 1:NSignals
             YZero = SignalYZero(ii);
             line(PlotAxes, XExtent, ones(2, 1)*YZero, ...
@@ -611,7 +609,12 @@ createTriggerSignal()
         % edit each point of a signal.
         % NOTE: We don't want the trigger to be edited in this way, thus
         %       the index of the second for loop starts at 2.
-        NPointsBetweenEvents = EventLocationsX(2) - EventLocationsX(1) - 1;
+        if (NEvents > 1)
+            NPointsBetweenEvents = ...
+                EventLocationsX(2) - EventLocationsX(1) - 1;
+        else
+            NPointsBetweenEvents = 1;
+        end
         for ii = 1:NEvents
             for jj = 2:NSignals
                 rectangle(PlotAxes, ...

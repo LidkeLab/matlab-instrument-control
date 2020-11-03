@@ -34,6 +34,11 @@ classdef MIC_Triggerscope < MIC_Abstract
         % (see MIC_Triggerscope.triggerArrayGUI() for formatting, or to
         % generate this structure in a GUI)
         SignalStruct struct
+        
+        % Trigger mode of the Triggerscope (char array)(Default = 'Rising')
+        % NOTE: This should be set to one of the (hidden property) options
+        %       obj.TriggerModeOptions.
+        TriggerMode = 'Rising';
     end
     
     properties (Dependent)
@@ -74,7 +79,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         % For now, I'm excluding 'Low' and 'High', because I'm not sure
         % what those mean in this context. Changing the order of this list
         % will break some functionality throughout the class.
-        TriggerModes = {'Rising', 'Falling', 'Change'};
+        TriggerModeOptions = {'Rising', 'Falling', 'Change'};
         
         % Resolution of the DAC channels. (bits)(integer)(Default = 16)
         DACResolution = 16;
@@ -268,6 +273,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
         [Response] = executeCommand(obj, Command);
+        [ArrayProgram] = generateArrayProgram(obj, NLoops);
         setDACRange(obj, DACIndex, Range)
         setDACVoltage(obj, DACIndex, Voltage)
         setTTLState(obj, TTLIndex, State)
@@ -288,7 +294,15 @@ classdef MIC_Triggerscope < MIC_Abstract
         
         writeCommand(obj, Command);
         [Response] = readResponse(obj);
-        [SignalArray] = generateSignalArray(obj, SignalStruct);
+        
+    end
+    
+    methods (Hidden)
+        % These methods are hidden because I don't anticipate users
+        % wanting/needing these methods, but I also don't want to prevent
+        % them from using these if needed.
+        
+        [VoltageRangeIndex] = selectVoltageRange(obj, Signal);
         
     end
     
@@ -309,12 +323,8 @@ classdef MIC_Triggerscope < MIC_Abstract
         end
         
         [BitLevel] = convertVoltageToBitLevel(Voltage, Range, Resolution)
-
+        
     end
-    
-    methods (Static)
-        [ArrayProgram] = generateArrayProgram(SignalArray);
-    end
-    
+        
     
 end
