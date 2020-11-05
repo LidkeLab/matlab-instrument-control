@@ -317,21 +317,36 @@ ControlHandles.SaveSignalsButton = uicontrol(SavePanel, ...
 PlotAxes = axes(PlotPanel);
 hold(PlotAxes, 'on');
 
-% Define a structure to contain signal information.
+% If obj.SignalStruct is already populated, attempt to re-plot those 
+% signals.  Otherwise, create and plot the default trigger signal.
 % NOTE: SignalStruct(1) will always be the trigger signal.  The rest of the
 %       signals are concatenated in the order the user added them.
-SignalStruct.NPoints = [];
-SignalStruct.InPhase = [];
-SignalStruct.Period = [];
-SignalStruct.Range = [];
-SignalStruct.IsLogical = [];
-SignalStruct.Handle = [];
-SignalStruct.Identifier = [];
-SignalStruct.Alias = [];
-SignalStruct.Signal = [];
-
-% Plot the default trigger signal.
-createTriggerSignal()
+% NOTE: I don't want to directly use obj.SignalStruct because the user
+%       might not want to overwrite that structure yet.
+SignalStructTemp.NPoints = [];
+SignalStructTemp.InPhase = [];
+SignalStructTemp.Period = [];
+SignalStructTemp.Range = [];
+SignalStructTemp.IsLogical = [];
+SignalStructTemp.Handle = [];
+SignalStructTemp.Identifier = [];
+SignalStructTemp.Alias = [];
+SignalStructTemp.Signal = [];
+if isempty(obj.SignalStruct)
+    SignalStruct = SignalStructTemp;
+    createTriggerSignal()
+else
+    try
+        SignalStruct = obj.SignalStruct;
+        plotSignals()
+    catch MException
+        warning(['Signals present in obj.SignalStruct were invalid. ', ...
+            'Errors reported: %s, %s'], ...
+            MException.identifier, MException.message)
+        SignalStruct = SignalStructTemp;
+        createTriggerSignal();
+    end        
+end
 
 
     function createTriggerSignal(~, ~)

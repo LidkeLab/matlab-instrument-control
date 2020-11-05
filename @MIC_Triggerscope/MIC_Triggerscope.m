@@ -2,8 +2,7 @@ classdef MIC_Triggerscope < MIC_Abstract
     %MIC_Triggerscope contains methods to control a Triggerscope.
     % This class is designed for the control of a Triggerscope (written for
     % Triggerscope 3B and 4). All functionality present in the Triggerscope
-    % documentation should be included (see documents in
-    % Z:\Manuals\AdvancedResearch).
+    % documentation should be included.
     %
     % EXAMPLE USAGE:
     %   TS = MIC_Triggerscope('COM3', [], true); 
@@ -33,7 +32,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         % Structure defining signals on each port (struct)
         % (see MIC_Triggerscope.triggerArrayGUI() for formatting, or to
         % generate this structure in a GUI)
-        SignalStruct struct
+        SignalStruct struct = struct([]);
         
         % Trigger mode of the Triggerscope (char array)(Default = 'Rising')
         % NOTE: This should be set to one of the (hidden property) options
