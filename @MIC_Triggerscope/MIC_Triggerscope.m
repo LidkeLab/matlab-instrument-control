@@ -186,6 +186,17 @@ classdef MIC_Triggerscope < MIC_Abstract
             %                zero arrays. Signals will be padded with zeros
             %                to match the max. signal length if needed.
             
+            % If the SignalStruct is empty, we can just output an empty
+            % array and stop here.
+            if (isempty(obj.SignalStruct) ...
+                    || numel(fieldnames(obj.SignalStruct)))
+                % I'm making this an empty array with correct number of
+                % rows for the sake of consistency (probably not
+                % necessary).
+                SignalArray = zeros(2*obj.IOChannels, 0);
+                return
+            end
+            
             % Initialize the SignalArray.
             NPoints = cellfun(@(X) numel(X), {obj.SignalStruct.Signal});
             SignalArray = zeros(2*obj.IOChannels, max(NPoints));
