@@ -327,7 +327,7 @@ propertiesToGUI();
         %       documentation!
         
         % Attempt to change the DAC voltage range for this port.
-        obj.setDACRange(obj, DACIndex, Source.Value)
+        obj.setDACRange(DACIndex, Source.Value)
         
         % Force reset the DAC output to 0 (it seemed that changing the
         % range might sometimes cause undefined behavior of the output, so
