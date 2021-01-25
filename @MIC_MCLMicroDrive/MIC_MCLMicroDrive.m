@@ -1,4 +1,4 @@
-classdef MIC_MCLMicroDrive < MIC_3DStage_Abstract
+classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     %MIC_MCLMicroDrive controls a Mad City Labs Micro Stage
     % This class controls a Mad City Labs (MCL) micro-positioner stage.
     % This class uses the built-in MATLAB methods for calling C libraries,
@@ -48,6 +48,22 @@ classdef MIC_MCLMicroDrive < MIC_3DStage_Abstract
         % Directory containing the MicroDrive.dll file to be used.
         DLLPath
         
+        % Current position of the stage (micrometers)
+        CurrentPosition(1, 1) double = NaN;
+        
+        % Minimum position of stage (micrometers)
+        % NOTE: We don't have the position encoder, so for now I'm making
+        %       this NaN (since we can't make use of it).
+        MinPosition(1, 1) double = NaN;
+        
+        % Maximum position of stage (micrometers)
+        % NOTE: We don't have the position encoder, so for now I'm making
+        %       this NaN (since we can't use it).
+        MaxPosition(1, 1) double = NaN;
+        
+        % Axis of the stage (char)('X', 'Y', or 'Z')
+        Axis char = 'Z';
+        
         % Units used for the stage position. (Default = 'micrometers')
         % NOTE: This should not be changed.  It is merely here as an extra
         %       accounting tool for anybody not familiar with the device
@@ -61,9 +77,6 @@ classdef MIC_MCLMicroDrive < MIC_3DStage_Abstract
     properties(Transient, SetAccess = protected)
         % Last error to be returned by the instrument. (struct)
         LastError struct
-        
-        % Current position of the stage (micrometers)
-        Position(3, 1) double = NaN(3, 1);
     end
     
     properties (Hidden)
@@ -83,7 +96,7 @@ classdef MIC_MCLMicroDrive < MIC_3DStage_Abstract
             %MIC_MCLMicroDrive is the class constructor.
             
             % Prepare the class instance.
-            obj = obj@MIC_3DStage_Abstract(~nargout);
+            obj = obj@MIC_LinearStage_Abstract(~nargout);
             
             % Define the error code structure and set obj.LastError to the
             % default choice (i.e., no error).
@@ -163,12 +176,12 @@ classdef MIC_MCLMicroDrive < MIC_3DStage_Abstract
             %       was done in MIC_MCLNanoDrive, we'll set a custom error
             %       in obj.LastError to indicate this failure (if needed).
             fprintf('Starting MCL MicroDrive Controller\n')
-            obj.DeviceHandle = calllib('MCL_InitHandle');
-            obj.LastError = obj.ErrorCodes(-9 * (~obj.DeviceHandle));
+            obj.DeviceHandle = calllib('MicroDrive', 'MCL_InitHandle');
+            obj.LastError = obj.ErrorCodes(10 * (~obj.DeviceHandle));
             
             % Request some device information from the micro-stage.
-            obj.SerialNumber = calllib('MCL_GetSerialNumber', ...
-                obj.DeviceHandle);
+            obj.SerialNumber = calllib('MicroDrive', ...
+                'MCL_GetSerialNumber', obj.DeviceHandle);
             obj.displayLastError()
             [obj.DLLVersion, obj.DLLRevision] = calllib('MicroDrive', ...
                 'MCL_DLLVersion', 0, 0);
@@ -180,7 +193,7 @@ classdef MIC_MCLMicroDrive < MIC_3DStage_Abstract
         
         function delete(obj)
             %delete is the class destructor.
-            calllib('MCL_ReleaseHandle', obj.DeviceHandle);
+            calllib('MicroDrive', 'MCL_ReleaseHandle', obj.DeviceHandle);
             fprintf('Stage released\n');
             obj.DeviceHandle = 0;
         end
@@ -199,157 +212,37 @@ classdef MIC_MCLMicroDrive < MIC_3DStage_Abstract
             save(FilePath, 'DLLPath');
         end
         
-        function setPosition(obj,Position)
-            x=Position(1);
-            y=Position(2);
-            z=Position(3);
-            % X
-            if x < 0 || x > obj.Max_X
-                error('MCLNanoDrive:InvalidX','X position must be between 0 and %fµm.', obj.Max_X);
-            end
-            obj.LastError = obj.callNano('MCL_SingleWriteN',x,1,obj.handle);
-            obj.errorcheck('MCL_SingleWriteN',x,1)
-            % Y
-            if y < 0 || y > obj.Max_Y
-                error('MCLNanoDrive:InvalidY','Y position must be between 0 and %fµm.', obj.Max_Y);
-            end
-            obj.LastError = obj.callNano('MCL_SingleWriteN',y,2,obj.handle);
-            obj.errorcheck('MCL_SingleWriteN',y,2);
-            % Z
-            if z < 0 || z > obj.Max_Z
-                error('MCLNanoDrive:InvalidZ','Z position must be between 0 and %fµm.', obj.Max_Z);
-            end
-            obj.LastError = obj.callNano('MCL_SingleWriteN',z,3,obj.handle);
-            obj.errorcheck('MCL_SingleWriteN',z,3);
-            %This updates the gui if it exists
-            h = findall(0,'tag','MIC_MCLNanoDrive_gui');
-            if ~(isempty(h))
-                handles=guidata(h);
-                X=obj.Position;
-                set(handles.edit_XCurrent,'String',num2str(X(1)));
-                set(handles.edit_YCurrent,'String',num2str(X(2)));
-                set(handles.edit_ZCurrent,'String',num2str(X(3)));
-            end
+        function setPosition(obj, Position)
+            
         end
         
-        function getSensorPosition(obj)
-            % gets the position from the MCL NanoDrive sensor.
-            pos = zeros(3,1);
-            % X
-            obj.LastError = obj.callNano('MCL_SingleReadN',1,obj.handle);
-            obj.errorcheck('MCL_SingleReadN')
-            pos(1) = obj.LastError;
-            % Y
-            obj.LastError = obj.callNano('MCL_SingleReadN',2,obj.handle);
-            obj.errorcheck('MCL_SingleReadN');
-            pos(2) = obj.LastError;
-            % Z
-            obj.LastError = obj.callNano('MCL_SingleReadN',3,obj.handle);
-            obj.errorcheck('MCL_SingleReadN');
-            pos(3)= obj.LastError;
-            obj.SensorPosition = pos; % update the position
+        function getPosition(obj)
+            
         end
         
         function center(obj)
-            % Center the stage in it's range of travel rounded to the
-            % nearest micron, i.e. range = 101, stage goes to 50,50,50
-            X(1) = floor(obj.Max_X/2);
-            X(2) = floor(obj.Max_Y/2);
-            X(3) = floor(obj.Max_Z/2);
-            obj.setPosition(X);
+
         end
-        
-        function varargout = callNano(obj,varargin)
-            % wrapper to make calls the MCL library.  There should not be
-            % any real reason to call this outside of the class.
-            FuncName=varargin{1};
-            lname = 'Madlib';
-            try
-                %make the function call string
-                funcall = '';
-                if nargout > 0
-                    funcall = sprintf('[');
-                    for ii=1:nargout
-                        if ii==nargout
-                            funcall=sprintf([funcall 'varargout{%d}]='],ii);
-                        else
-                            funcall=sprintf([funcall 'varargout{%d},'],ii);
-                        end
-                    end
-                end
-                funcall = sprintf([funcall 'calllib(''%s'',''%s'''],lname,FuncName);
-                for ii=2:nargin-1   % - 1 because obj counts
-                    funcall=sprintf([funcall ', varargin{%d}'],ii);
-                end
-                funcall=sprintf([funcall ');']);
-                %call the function
-                eval(funcall);
-                %process errors
-            catch ME
-                fprintf('MCL Library Call Function Error calling: %s\n',FuncName);
-                rethrow(ME);
-            end
-        end
-        
-        function [Attributes,Data,Children]=exportState(obj)
-            % Need to populate this
-            Attributes.Position=obj.Position;
-            Attributes.Max_X = obj.Max_X;
-            Attributes.Max_Y = obj.Max_Y;
-            Attributes.Max_Z = obj.Max_Z;
-            Attributes.DLLversion = obj.DLLversion;     % Dll major version
-            Attributes.DLLrevision = obj.DLLrevision;
-            Attributes.Serial = obj.Serial;         % stage serial number
-            Attributes.DLLPath = obj.DLLPath;
+                
+        function [Attributes, Data, Children] = exportState(obj)
             
-            Attributes.ADC_resolution = obj.ProductInfo.ADC_resolution;    % stage controller info
-            Attributes.DAC_resolution = obj.ProductInfo.DAC_resolution;    % stage controller info
-            Attributes.Product_id = obj.ProductInfo.Product_id;    % stage controller info
-            Attributes.FirmwareVersion = obj.ProductInfo.FirmwareVersion;    % stage controller info
-            Attributes.FirmwareProfile = obj.ProductInfo.FirmwareProfile;    % stage controller info
-            
-            
-            Data=[];
-            Children=[];
         end
         
     end
     
+    
     methods (Static)
         
-        function Success=unitTest()
-            
-            try
-                fprintf('Creating Object\n')
-                M=MIC_MCLNanoDrive()
-                fprintf('Setting Position to 10,10,10\n')
-                M.setPosition([10,10,10]);
-                pause(.1)
-                M.exportState()
-                M.getSensorPosition()
-                fprintf('Sensor Position:\n')
-                M.SensorPosition
-                fprintf('Centering Stage\n')
-                M.center();
-                pause(.1)
-                M.getSensorPosition()
-                fprintf('Sensor Position:\n')
-                M.SensorPosition
-                M.gui
-                pause(2)
-                delete(M)
-                Success=1;
-            catch
-                Success=0;
-            end
-            
+        function Success = unitTest()
+
         end
         
         function libreset()
-            if  libisloaded('Madlib')
-                unloadlibrary('Madlib')
+            if libisloaded('MicroDrive')
+                unloadlibrary('MicroDrive')
             end
         end
     end
+    
     
 end
