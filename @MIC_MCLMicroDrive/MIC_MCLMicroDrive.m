@@ -15,7 +15,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     % NOTE: I had to manually modify MicroDrive.h to remove the precompiler
     %       directives related to the '_cplusplus' stuff.  I was getting
     %       errors otherwise that I didn't know what to do about! -DS 2021
-    %    
+    %
     % REQUIRES:
     %   MCL MicroDrive files installed on system.
     
@@ -25,16 +25,19 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     
     properties (SetAccess = protected)
         % Generic name of the instrument (char array)
-        InstrumentName char = 'MCLMicroDrive';
+        InstrumentName = 'MCLMicroDrive';
         
         % Structure describing error codes (struct)
         % The index of the struct corresponds to the error returned from
-        % the instrument as follows: 
+        % the instrument as follows:
         %   ErrorCodes(1) <-> Error code 0
         %   ErrorCodes(2) <-> Error code -1
-        %   ErrorCodes(3) <-> Error code -2 
+        %   ErrorCodes(3) <-> Error code -2
         %   ...
         ErrorCodes struct
+        
+        % Last error to be returned by the instrument. (struct)
+        LastError struct
         
         % Version number for the MicroDrive.dll file used.
         DLLVersion
@@ -48,35 +51,36 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
         % Directory containing the MicroDrive.dll file to be used.
         DLLPath
         
-        % Current position of the stage (micrometers)
-        CurrentPosition(1, 1) double = NaN;
+        % Current position of the stage (millimeters)
+        CurrentPosition = NaN;
         
-        % Minimum position of stage (micrometers)
+        % Minimum position of stage (millimeters)
         % NOTE: We don't have the position encoder, so for now I'm making
         %       this NaN (since we can't make use of it).
-        MinPosition(1, 1) double = NaN;
+        MinPosition = NaN;
         
-        % Maximum position of stage (micrometers)
+        % Maximum position of stage (millimeters)
         % NOTE: We don't have the position encoder, so for now I'm making
         %       this NaN (since we can't use it).
-        MaxPosition(1, 1) double = NaN;
+        MaxPosition = NaN;
+        
+        % Size of a single step of the stage. (millimeters)
+        StepSize(1, 1) double = NaN;
+        
+        % Min. and max. velocities of stage (mm/s)(2x1 array, [min.; max.])
+        VelocityBounds(2, 1) double = NaN(2, 1);
         
         % Axis of the stage (char)('X', 'Y', or 'Z')
-        Axis char = 'Z';
+        Axis = 'Z';
         
-        % Units used for the stage position. (Default = 'micrometers')
+        % Units used for the stage position. (Default = 'millimeters')
         % NOTE: This should not be changed.  It is merely here as an extra
         %       accounting tool for anybody not familiar with the device
         %       usage.
-        PositionUnit char = 'micrometers';
+        PositionUnit = 'millimeters';
         
         % Integer specifying device handle (Default = 0).
         DeviceHandle(1, 1) {mustBeInteger(DeviceHandle)} = 0;
-    end
-    
-    properties(Transient, SetAccess = protected)
-        % Last error to be returned by the instrument. (struct)
-        LastError struct
     end
     
     properties (Hidden)
@@ -90,7 +94,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
         %       the stage itself, I just haven't figured that out yet!
         NAxes(1, 1) {mustBeMember(NAxes, [1, 3])} = 1;
     end
-
+    
     methods
         function obj = MIC_MCLMicroDrive()
             %MIC_MCLMicroDrive is the class constructor.
@@ -154,7 +158,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
             % user to specify this path if needed.
             ClassPath = fileparts(which('MIC_MCLMicroDrive'));
             PropertiesFile = fullfile(ClassPath, ...
-                    'MIC_MCLMicroDrive_Properties.mat');
+                'MIC_MCLMicroDrive_Properties.mat');
             if exist(PropertiesFile, 'file')
                 % Load the existing path information on this computer.
                 load(PropertiesFile, 'DLLPath');
@@ -180,15 +184,20 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
             obj.LastError = obj.ErrorCodes(10 * (~obj.DeviceHandle));
             
             % Request some device information from the micro-stage.
-            obj.SerialNumber = calllib('MicroDrive', ...
+            [ErrorCode, obj.SerialNumber] = calllib('MicroDrive', ...
                 'MCL_GetSerialNumber', obj.DeviceHandle);
+            obj.LastError = obj.ErrorCodes(-ErrorCode + 1);
             obj.displayLastError()
-            [obj.DLLVersion, obj.DLLRevision] = calllib('MicroDrive', ...
-                'MCL_DLLVersion', 0, 0);
+            [ErrorCode, obj.DLLVersion, obj.DLLRevision] = ...
+                calllib('MicroDrive', 'MCL_DLLVersion', 0, 0);
+            obj.LastError = obj.ErrorCodes(-ErrorCode + 1);
             obj.displayLastError()
-
-            % Center the stage.
-            obj.center()
+            [ErrorCode, ~, obj.StepSize, ...
+                obj.VelocityBounds(2), obj.VelocityBounds(1)] = ...
+                calllib('MicroDrive', 'MCL_MicroDriveInformation', ...
+                0, 0, 0, 0, obj.DeviceHandle);
+            obj.LastError = obj.ErrorCodes(-ErrorCode + 1);
+            obj.displayLastError()
         end
         
         function delete(obj)
@@ -213,20 +222,24 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
         end
         
         function setPosition(obj, Position)
-            
+            % Currently, the MCL microdrive we have doesn't have the
+            % position encoder, meaning we can't make use of this!
         end
         
         function getPosition(obj)
-            
+            % Currently, the MCL microdrive we have doesn't have the
+            % position encoder, meaning we can't make use of this!
         end
         
         function center(obj)
-
+            % Currently, the MCL microdrive we have doesn't have the
+            % position encoder, meaning we can't make use of this!
         end
-                
-        function [Attributes, Data, Children] = exportState(obj)
-            
-        end
+        
+        moveSingleStep(obj, Direction)
+        moveDistance(obj, Distance, Velocity)
+        gui(obj)
+        [Attributes, Data, Children] = exportState(obj)
         
     end
     
@@ -234,7 +247,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     methods (Static)
         
         function Success = unitTest()
-
+            
         end
         
         function libreset()
