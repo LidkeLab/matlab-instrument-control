@@ -5,6 +5,8 @@ function [] = moveDistance(obj, Distance, Velocity)
 %
 % INPUTS:
 %   Distance: Distance the stage will be moved (millimeters)
+%   Velocity: Velocity of the movement 
+%             (millimeters/second)(Default set bassed on velocity bounds)
 
 % Created by:
 %   David J. Schodt (Lidke lab, 2021)
@@ -12,7 +14,8 @@ function [] = moveDistance(obj, Distance, Velocity)
 
 % Set defaults if needed.
 if (~exist('Velocity', 'var') || isempty(Velocity))
-    Velocity = (obj.VelocityBounds(1)+obj.VelocityBounds(2)) / 2;
+    obj.Velocity = max(obj.VelocityBounds(2)/4, ...
+        obj.VelocityBounds(1));
 end
 
 % Validate the input parameters.
