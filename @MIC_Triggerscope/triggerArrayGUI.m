@@ -506,6 +506,7 @@ end
         % signals defined in this GUI.
         
         obj.SignalStruct = SignalStruct;
+        fprintf('Signals saved in obj.SignalStruct\n')
         
     end
 
