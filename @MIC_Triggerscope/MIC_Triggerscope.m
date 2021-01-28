@@ -189,7 +189,7 @@ classdef MIC_Triggerscope < MIC_Abstract
             % If the SignalStruct is empty, we can just output an empty
             % array and stop here.
             if (isempty(obj.SignalStruct) ...
-                    || numel(fieldnames(obj.SignalStruct)))
+                    || (numel(fieldnames(obj.SignalStruct))==0))
                 % I'm making this an empty array with correct number of
                 % rows for the sake of consistency (probably not
                 % necessary).
