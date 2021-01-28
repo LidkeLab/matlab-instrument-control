@@ -96,8 +96,16 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     end
     
     methods
-        function obj = MIC_MCLMicroDrive()
+        function obj = MIC_MCLMicroDrive(AutoConnect)
             %MIC_MCLMicroDrive is the class constructor.
+            % The optional input AutoConnect is a boolean flag to specify
+            % whether or not to attemp to connect to the stage in this
+            % constructor.
+            
+            % Set the default for AutoConnect if needed.
+            if (~exist('AutoConnect', 'var') || isempty(AutoConnect))
+                AutoConnect = true;
+            end
             
             % Prepare the class instance.
             obj = obj@MIC_LinearStage_Abstract(~nargout);
@@ -179,21 +187,10 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
             % NOTE: A returned handle of 0 means there was an error.  As
             %       was done in MIC_MCLNanoDrive, we'll set a custom error
             %       in obj.LastError to indicate this failure (if needed).
-            fprintf('Starting MCL MicroDrive Controller\n')
-            obj.DeviceHandle = calllib('MicroDrive', 'MCL_InitHandle');
-            obj.LastError = obj.ErrorCodes(9*(~obj.DeviceHandle) + 1);
-            
-            % Request some device information from the micro-stage.
-            obj.SerialNumber = calllib('MicroDrive', ...
-                'MCL_GetSerialNumber', obj.DeviceHandle);
-            [obj.DLLVersion, obj.DLLRevision] = ...
-                calllib('MicroDrive', 'MCL_DLLVersion', 0, 0);
-            [ErrorCode, ~, obj.StepSize, ...
-                obj.VelocityBounds(2), obj.VelocityBounds(1)] = ...
-                calllib('MicroDrive', 'MCL_MicroDriveInformation', ...
-                0, 0, 0, 0, obj.DeviceHandle);
-            obj.LastError = obj.ErrorCodes(-ErrorCode + 1);
-            obj.displayLastError()
+            if AutoConnect
+                fprintf('Connecting to MCL MicroDrive Controller...\n')
+                obj.connectStage()
+            end
         end
         
         function delete(obj)
@@ -232,6 +229,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
             % position encoder, meaning we can't make use of this!
         end
         
+        connectStage(obj)
         moveSingleStep(obj, Direction)
         moveDistance(obj, Distance, Velocity)
         gui(obj)
