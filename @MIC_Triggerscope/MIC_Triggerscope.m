@@ -283,7 +283,8 @@ classdef MIC_Triggerscope < MIC_Abstract
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
         [Response] = executeCommand(obj, Command);
-        [ArrayProgram] = generateArrayProgram(obj, NLoops);
+        [CommandSequence] = generateArrayProgram(obj, NLoops);
+        executeArrayProgram(obj, CommandSequence)
         setDACRange(obj, DACIndex, Range)
         setDACVoltage(obj, DACIndex, Voltage)
         setTTLState(obj, TTLIndex, State)

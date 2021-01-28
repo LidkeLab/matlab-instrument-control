@@ -22,6 +22,7 @@ function [CommandSequence] = generateArrayProgram(obj, NLoops)
 % Created by:
 %   David J. Schodt (Lidke Lab, 2020)
 
+
 % Define default parameters if needed.
 if (~exist('NLoops', 'var') || isempty(NLoops))
     NLoops = 1;
