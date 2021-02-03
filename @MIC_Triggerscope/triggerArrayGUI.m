@@ -50,20 +50,20 @@ GUIParent.CloseRequestFcn = @figureClosing;
 
 % Generate some panels to help organize the GUI.
 TriggerPanel = uipanel(GUIParent, 'Title', 'Trigger', ...
-    'Units', 'normalized', 'Position', [0, 0.67, 0.2, 0.33]);
+    'Units', 'normalized', 'Position', [0, 0.8, 0.2, 0.2]);
 TTLPanel = uipanel(GUIParent, 'Title', 'TTL', ...
-    'Units', 'normalized', 'Position', [0, 0.33, 0.2, 0.33]);
+    'Units', 'normalized', 'Position', [0, 0.4, 0.2, 0.4]);
 DACPanel = uipanel(GUIParent, 'Title', 'DAC', ...
-    'Units', 'normalized', 'Position', [0, 0, 0.2, 0.33]);
+    'Units', 'normalized', 'Position', [0, 0, 0.2, 0.4]);
 PlotPanel = uipanel(GUIParent, ...
     'Units', 'normalized', 'Position', [0.2, 0.1, 0.8, 0.9]);
 ControlPanel = uipanel(GUIParent, ...
     'Units', 'normalized', 'Position', [0.2, 0, 0.8, 0.1]);
 
 % Add some controls to the TriggerPanel.
-TextSize = [0, 0, 0.6, 0.1];
-EditSize = [0, 0, 0.4, 0.1];
-PopupSize = [0, 0, 0.4, 0.1];
+TextSize = [0, 0, 0.6, 0.2];
+EditSize = [0, 0, 0.4, 0.2];
+PopupSize = [0, 0, 0.4, 0.2];
 DefaultTriggerParams.Alias = 'Trigger';
 DefaultTriggerParams.NCycles = 2;
 DefaultTriggerParams.TriggerModeIndex = 1;
@@ -118,11 +118,11 @@ ControlHandles.TriggerModePopup = uicontrol(TriggerPanel, ...
     'Callback', @triggerModeCallback);
 
 % Add some controls to the TTLPanel.
-TextSize = [0, 0, 0.5, 0.1];
-EditSize = [0, 0, 0.5, 0.1];
-PopupSize = [0, 0, 0.5, 0.1];
-ButtonSize = [0, 0, 1, 0.2];
-CheckSize = [0, 0, 0.25, 0.11];
+TextSize = [0, 0, 0.5, 0.09];
+EditSize = [0, 0, 0.5, 0.09];
+PopupSize = [0, 0, 0.5, 0.09];
+ButtonSize = [0, 0, 1, 0.18];
+CheckSize = [0, 0, 0.25, 0.1];
 uicontrol(TTLPanel, 'Style', 'text', ...
     'String', 'TTL port: ', ...
     'FontUnits', 'normalized', 'FontSize', 0.8, ...
@@ -191,17 +191,25 @@ ControlHandles.TTLPhaseCheckbox = uicontrol(TTLPanel, ...
     'Position', CheckSize + [TextSize(3), 1-5.1*TextSize(4), 0, 0]);
 ControlHandles.AddTTLButton = uicontrol(TTLPanel, ...
     'Style', 'pushbutton', ...
-    'String', 'Add TTL', ...
+    'String', 'Add TTL signal', ...
     'Tooltip', 'Add a new TTL signal on the specified port', ...
-    'Units', 'normalized', 'Position', ButtonSize, ...
+    'Units', 'normalized', ...
+    'Position', ButtonSize + [0, ButtonSize(4), 0, 0], ...
     'Callback', @addTTLCallback);
+ControlHandles.DeleteTTLButton = uicontrol(TTLPanel, ...
+    'Style', 'pushbutton', ...
+    'String', 'Delete TTL signal', ...
+    'Tooltip', 'Delete the TTL signal defined for the specified port', ...
+    'Units', 'normalized', ...
+    'Position', ButtonSize, ...
+    'Callback', @deleteTTLCallback);
 
 % Add some controls to the DACPanel.
-TextSize = [0, 0, 0.5, 0.1];
-EditSize = [0, 0, 0.5, 0.1];
-PopupSize = [0, 0, 0.5, 0.1];
-ButtonSize = [0, 0, 1, 0.2];
-CheckSize = [0, 0, 0.2, 0.11];
+TextSize = [0, 0, 0.5, 0.09];
+EditSize = [0, 0, 0.5, 0.09];
+PopupSize = [0, 0, 0.5, 0.09];
+ButtonSize = [0, 0, 1, 0.18];
+CheckSize = [0, 0, 0.25, 0.1];
 uicontrol(DACPanel, 'Style', 'text', ...
     'String', 'DAC port: ', ...
     'FontUnits', 'normalized', 'FontSize', 0.8, ...
@@ -302,10 +310,18 @@ ControlHandles.DACHighEdit = uicontrol(DACPanel, ...
     'HorizontalAlignment', 'center');
 ControlHandles.AddDACButton = uicontrol(DACPanel, ...
     'Style', 'pushbutton', ...
-    'String', 'Add DAC', ...
+    'String', 'Add DAC signal', ...
     'Tooltip', 'Add a new DAC signal on the specified port', ...
-    'Units', 'normalized', 'Position', ButtonSize, ...
+    'Units', 'normalized', ...
+    'Position', ButtonSize + [0, ButtonSize(4), 0, 0], ...
     'Callback', @addDACCallback);
+ControlHandles.DeleteDACButton = uicontrol(DACPanel, ...
+    'Style', 'pushbutton', ...
+    'String', 'Delete DAC signal', ...
+    'Tooltip', 'Delete the DAC signal defined for the specified port', ...
+    'Units', 'normalized', ...
+    'Position', ButtonSize, ...
+    'Callback', @deleteDACCallback);
 
 % Add some controls to the control panel.
 ButtonSize = [0, 0, 0.2, 1];
@@ -432,6 +448,15 @@ end
         % This function plots a TTL signal defined by the user in the TTL
         % panel.
         
+        % Make sure the user isn't overwriting a signal!
+        CurrentIdentifier = sprintf('TTL%02i', ...
+            ControlHandles.TTLPortPopup.Value);
+        if any(strcmp({SignalStruct.Identifier}, CurrentIdentifier))
+            errordlg(sprintf('A signal was already defined for %s.', ...
+                CurrentIdentifier))
+            return
+        end
+        
         % Generate the TTL signal using an toggle latch (this is a nice way
         % to do this since each trigger event can cause a state change,
         % which is exactly what a toggle latch does).
@@ -445,14 +470,31 @@ end
         CurrentSignal.Range = [0; 1];
         CurrentSignal.IsLogical = 1;
         CurrentSignal.Handle = [];
-        CurrentSignal.Identifier = ...
-            sprintf('TTL%02i', ControlHandles.TTLPortPopup.Value);
+        CurrentSignal.Identifier = CurrentIdentifier;
         CurrentSignal.Alias = ControlHandles.TTLAliasEdit.String;
         ToggleSignal = obj.generateToggleSignal(...
             SignalStruct(1).Signal, SignalPeriod, TriggerMode);
         Signal = obj.toggleLatch(ToggleSignal, InPhase);
         CurrentSignal.Signal = Signal;
         SignalStruct = [SignalStruct; CurrentSignal];
+        
+        % Re-plot all of the signals.
+        plotSignals()
+        
+    end
+
+    function deleteTTLCallback(~, ~)
+        % This function deletes a TTL signal specified by the user in the
+        % TTL panel.  The signal is only deleted from 'SignalStruct' within
+        % this .m file.  The signal will not be removed from
+        % obj.SignalStruct until the user saves the signals with the save
+        % signals button.
+        
+        % Look for the specified signal and delete it if it exists.
+        CurrentIdentifier = sprintf('TTL%02i', ...
+            ControlHandles.TTLPortPopup.Value);
+        DeleteBool = strcmp({SignalStruct.Identifier}, CurrentIdentifier);
+        SignalStruct = SignalStruct(~DeleteBool);
         
         % Re-plot all of the signals.
         plotSignals()
@@ -467,6 +509,15 @@ end
         %       the output signal.
         % NOTE: The signal is always driven to the LOW voltage at the end
         %       of the signal.
+        
+        % Make sure the user isn't overwriting a signal!
+        CurrentIdentifier = sprintf('DAC%02i', ...
+            ControlHandles.DACPortPopup.Value);
+        if any(strcmp({SignalStruct.Identifier}, CurrentIdentifier))
+            errordlg(sprintf('A signal was already defined for %s.', ...
+                CurrentIdentifier))
+            return
+        end
         
         % Generate the DAC signal using an toggle latch (this is a nice way
         % to do this since each trigger event can cause a state change,
@@ -483,8 +534,7 @@ end
         CurrentSignal.Range = [LOWVoltage; HIGHVoltage];
         CurrentSignal.IsLogical = 0;
         CurrentSignal.Handle = [];
-        CurrentSignal.Identifier = ...
-            sprintf('DAC%02i', ControlHandles.DACPortPopup.Value);
+        CurrentSignal.Identifier = CurrentIdentifier;
         CurrentSignal.Alias = ControlHandles.DACAliasEdit.String;
         [ToggleSignal] = obj.generateToggleSignal(...
             SignalStruct(1).Signal, SignalPeriod, TriggerMode);
@@ -496,6 +546,24 @@ end
         % Re-plot all of the signals.
         plotSignals()
 
+    end
+
+    function deleteDACCallback(~, ~)
+        % This function deletes a DAC signal specified by the user in the
+        % DAC panel.  The signal is only deleted from 'SignalStruct' within
+        % this .m file.  The signal will not be removed from
+        % obj.SignalStruct until the user saves the signals with the save
+        % signals button.
+        
+        % Look for the specified signal and delete it if it exists.
+        CurrentIdentifier = sprintf('DAC%02i', ...
+            ControlHandles.DACPortPopup.Value);
+        DeleteBool = strcmp({SignalStruct.Identifier}, CurrentIdentifier);
+        SignalStruct = SignalStruct(~DeleteBool);
+        
+        % Re-plot all of the signals.
+        plotSignals()
+        
     end
 
     function saveSignalCallback(~, ~)
