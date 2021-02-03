@@ -36,8 +36,9 @@ if (~exist('Arm', 'var') || isempty(Arm))
 end
 
 % Convert the trigger mode to the appropriate integer needed by the
-% Triggerscope.
-[TriggerModeInt] = obj.convertTriggerStringToInt(obj.TriggerMode);
+% Triggerscope.  The +1 accounts for differences in the way I use the
+% indices vs. how the hardware uses them!
+[TriggerModeInt] = obj.convertTriggerStringToInt(obj.TriggerMode) + 1;
 
 % Determine which signals need to be programmed.
 NonZeroIndices = find(any(obj.SignalArray, 2));
