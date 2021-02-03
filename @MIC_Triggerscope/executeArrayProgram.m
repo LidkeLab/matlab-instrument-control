@@ -16,7 +16,7 @@ function [] = executeArrayProgram(obj, CommandSequence)
 
 % Loop through all commands and execute them.
 for cc = 1:numel(CommandSequence)
-    obj.executeCommand(obj, CommandSequence{cc});
+    obj.executeCommand(CommandSequence{cc});
 end
 
 
