@@ -391,6 +391,7 @@ end
         % Generate the trigger, noting that the trigger will always
         % alternate with each time step (e.g., [1, 0, 1, 0, 1, ...]).
         NCycles = round(str2double(ControlHandles.NCyclesEdit.String));
+        ControlHandles.NCyclesEdit.String = num2str(NCycles);
         NPoints = 2 * NCycles;
         XArray = transpose(1:NPoints);
         OnBool = logical(mod(XArray, 2));
