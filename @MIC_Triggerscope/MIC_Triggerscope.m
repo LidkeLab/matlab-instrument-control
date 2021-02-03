@@ -353,7 +353,8 @@ classdef MIC_Triggerscope < MIC_Abstract
             %convertTriggerStringToInt converts a string id into an int.
             % This method converts the string/char array version of the
             % trigger mode (e.g., the char array 'Rising') into the
-            % corresponding integer setting.
+            % corresponding integer index of the (hidden) property 
+            % obj.TriggerModeOptions.
             TriggerModeInt = 1*strcmpi(TriggerModeString, 'Rising') ...
                 + 2*strcmpi(TriggerModeString, 'Falling') ...
                 + 3*strcmpi(TriggerModeString, 'Change');
