@@ -1,4 +1,4 @@
-function [CommandSequence] = generateArrayProgram(obj, NLoops)
+function [CommandSequence] = generateArrayProgram(obj, NLoops, Arm)
 %generateArrayProgram generates a program based on obj.SignalArray.
 % This method will generate a cell array of char arrays, with each element
 % being one line of an array program to be sent to the Triggerscope.  The
@@ -12,7 +12,11 @@ function [CommandSequence] = generateArrayProgram(obj, NLoops)
 % INPUTS:
 %   NLoops: Number of times to repeat the signals in SignalArray.
 %           (scalar integer)(Default = 1)
-%   
+%   Arm: Boolean to indicate whether or not an ARM command should be
+%        attached to the end of the program.  The ARM command will cause
+%        the program to execute immediately if the trigger signal is
+%        already active. (boolean)(Default = true)
+%
 % OUTPUTS:
 %   CommandSequence: A list of commands to be sent to the Triggerscope to
 %                    produce the behavior defined by the signals in
@@ -27,14 +31,13 @@ function [CommandSequence] = generateArrayProgram(obj, NLoops)
 if (~exist('NLoops', 'var') || isempty(NLoops))
     NLoops = 1;
 end
+if (~exist('Arm', 'var') || isempty(Arm))
+    Arm = true;
+end
 
 % Convert the trigger mode to the appropriate integer needed by the
 % Triggerscope.
-TriggerModeInt = 0*strcmpi(obj.TriggerMode, 'Low') ...
-    + 1*strcmpi(obj.TriggerMode, 'High') ...
-    + 2*strcmpi(obj.TriggerMode, 'Rising') ...
-    + 3*strcmpi(obj.TriggerMode, 'Falling') ...
-    + 4*strcmpi(obj.TriggerMode, 'Change');
+[TriggerModeInt] = obj.convertTriggerStringToInt(obj.TriggerMode);
 
 % Determine which signals need to be programmed.
 NonZeroIndices = find(any(obj.SignalArray, 2));
@@ -42,15 +45,20 @@ DACIndices = NonZeroIndices(NonZeroIndices > obj.IOChannels);
 
 % Generate commands to set the voltage ranges of the appropriate DAC ports
 % (after storing some other initializer commands).
+% NOTE: If all works as intended, CommandSequence{NCommands} will just be
+%       overwritten by other commands if the input boolean 'Arm' is false.
 NProgramLines = size(obj.SignalArray, 2);
 NSignals = numel(NonZeroIndices);
 NDACSignals = numel(DACIndices);
-NInitializerCommands = 2;
+NInitializerCommands = 3;
+NCommands = NInitializerCommands + NDACSignals ...
+    + (NProgramLines*NSignals) + logical(Arm);
+CommandSequence = cell(NCommands, 1);
+CommandSequence{1} = 'CLEAR_ALL';
+CommandSequence{2} = sprintf('TRIGMODE,%i', TriggerModeInt);
+CommandSequence{3} = sprintf('TIMECYCLES,%i', NLoops);
+CommandSequence{NCommands} = 'ARM';
 VoltageRangeIndex = ones(2*obj.IOChannels, 1);
-CommandSequence = cell(...
-    NProgramLines*NSignals + NDACSignals + NInitializerCommands, 1);
-CommandSequence{1} = sprintf('TRIGMODE,%i', TriggerModeInt);
-CommandSequence{2} = sprintf('TIMECYCLES,%i', NLoops);
 for ii = 1:NDACSignals
     % Determine the ideal voltage range setting for this signal (i.e., the
     % range which accomodates the signal, but has the smallest extent).
@@ -67,7 +75,7 @@ end
 % commands.
 for ii = 1:NProgramLines
     for jj = 1:NSignals
-        % TTL port numbers directly match their row index in 
+        % TTL port numbers directly match their row index in
         % obj.SignalArray, but DAC signals are stored in the row given by
         % PortNumber + obj.IOChannels.
         CurrentIndex = NonZeroIndices(jj);

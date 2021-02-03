@@ -40,7 +40,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         TriggerMode = 'Rising';
     end
     
-    properties (Dependent)
+    properties (Dependent, Hidden)
         % Array of signals be set on ports when triggered (float array)
         % NOTE: If the user wants to define signals manually, they should
         %       edit the SignalStruct property (whose entries are converted
@@ -75,9 +75,10 @@ classdef MIC_Triggerscope < MIC_Abstract
             'PROG_WAVE', 'TIMECYCLES', 'TRIGMODE'};
         
         % List of trigger modes from the Triggerscope documentation.
-        % For now, I'm excluding 'Low' and 'High', because I'm not sure
-        % what those mean in this context. Changing the order of this list
-        % will break some functionality throughout the class.
+        % For now, I'm excluding 'Low' and 'High' because those seem to 
+        % no longer be in use for the Triggerscopes that we have. 
+        % Changing the order of this list will break some functionality 
+        % throughout the class!
         TriggerModeOptions = {'Rising', 'Falling', 'Change'};
         
         % Resolution of the DAC channels. (bits)(integer)(Default = 16)
@@ -197,25 +198,39 @@ classdef MIC_Triggerscope < MIC_Abstract
                 return
             end
             
-            % Initialize the SignalArray.
-            NPoints = cellfun(@(X) numel(X), {obj.SignalStruct.Signal});
-            SignalArray = zeros(2*obj.IOChannels, max(NPoints));
+            % Reorganize obj.SignalStruct to ensure the trigger is the
+            % first signal.
+            IsTrigger = strcmpi({obj.SignalStruct.Identifier}, 'trigger');
+            obj.SignalStruct = [obj.SignalStruct(IsTrigger); ...
+                obj.SignalStruct(~IsTrigger)];
+            
+            % Determine how many trigger events there were.
+            TriggerModeInt = ...
+                obj.convertTriggerStringToInt(obj.TriggerMode);
+            TriggerEvents = obj.generateToggleSignal(...
+                obj.SignalStruct(1).Signal, 2, TriggerModeInt);
+            NTriggerEvents = sum(TriggerEvents);
+            
+            % Initialize the SignalArray.           
+            SignalArray = zeros(2*obj.IOChannels, NTriggerEvents);
             
             % Populate the SignalArray.
-            for ii = 1:numel(obj.SignalStruct)
-                if contains(obj.SignalStruct(ii).Identifier, 'trigger')
-                    % We don't store the trigger signals in the
-                    % SignalArray, so we can just skip to the next
-                    % iteration.
-                    continue
-                elseif contains(obj.SignalStruct(ii).Identifier, 'TTL')
+            NPointsTrigger = obj.SignalStruct(1).NPoints;
+            for ii = 2:numel(obj.SignalStruct)
+                % Force the input signal to be the correct size before
+                % proceeding.
+                TruncatedSignal = obj.SignalStruct(ii).Signal(...
+                    1:min(NPointsTrigger, obj.SignalStruct(ii).NPoints));
+                CurrentSignal = [TruncatedSignal, ...
+                    zeros(1, NPointsTrigger-obj.SignalStruct(ii).NPoints)];
+                if contains(obj.SignalStruct(ii).Identifier, 'TTL')
                    SignalArray(str2double(...
                        obj.SignalStruct(ii).Identifier(4:5)), ...
-                        1:NPoints(ii)) = obj.SignalStruct(ii).Signal;
+                        1:NTriggerEvents) = CurrentSignal(TriggerEvents);
                 elseif contains(obj.SignalStruct(ii).Identifier, 'DAC')
                     SignalArray(str2double(...
                        obj.SignalStruct(ii).Identifier(4:5)) + 16, ...
-                        1:NPoints(ii)) = obj.SignalStruct(ii).Signal;
+                        1:NTriggerEvents) = CurrentSignal(TriggerEvents);
                 else
                     warning(...
                         ['Unknown signal identifier found in ', ...
@@ -283,7 +298,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
         [Response] = executeCommand(obj, Command);
-        [CommandSequence] = generateArrayProgram(obj, NLoops);
+        [CommandSequence] = generateArrayProgram(obj, NLoops, Arm);
         executeArrayProgram(obj, CommandSequence)
         setDACRange(obj, DACIndex, Range)
         setDACVoltage(obj, DACIndex, Voltage)
@@ -333,7 +348,21 @@ classdef MIC_Triggerscope < MIC_Abstract
                 char(0));
         end
         
-        [BitLevel] = convertVoltageToBitLevel(Voltage, Range, Resolution)
+        function [TriggerModeInt] = ...
+                convertTriggerStringToInt(TriggerModeString)
+            %convertTriggerStringToInt converts a string id into an int.
+            % This method converts the string/char array version of the
+            % trigger mode (e.g., the char array 'Rising') into the
+            % corresponding integer setting.
+            TriggerModeInt = 1*strcmpi(TriggerModeString, 'Rising') ...
+                + 2*strcmpi(TriggerModeString, 'Falling') ...
+                + 3*strcmpi(TriggerModeString, 'Change');
+        end
+        
+        [ToggleSignal] = generateToggleSignal(TriggerSignal, ...
+            SignalPeriod, TriggerModeInt);
+        [OutputSignal] = toggleLatch(ToggleSignal, InPhase);
+        [BitLevel] = convertVoltageToBitLevel(Voltage, Range, Resolution);
         
     end
         

@@ -371,10 +371,10 @@ end
         %       event when appropriate (i.e., for Rising edge and Change
         %       trigger modes).
         % NOTE: The trigger will always end LOW.
-        
+                
         % Generate the trigger, noting that the trigger will always
         % alternate with each time step (e.g., [1, 0, 1, 0, 1, ...]).
-        NCycles = str2double(ControlHandles.NCyclesEdit.String);
+        NCycles = round(str2double(ControlHandles.NCyclesEdit.String));
         NPoints = 2 * NCycles;
         XArray = transpose(1:NPoints);
         OnBool = logical(mod(XArray, 2));
@@ -398,17 +398,14 @@ end
         
     end
 
-    function triggerModeCallback(Source, ~)
+    function triggerModeCallback(~, ~)
         % This is a callback for the trigger mode selection popup menu.
-        
-        % Update the class property obj.TriggerMode to store this change.
-        obj.TriggerMode = Source.String{Source.Value};
-        
+                
         % Regenerate and plot all of the signals to reflect the changes to
         % the triggering mode.
         regenerateAllSignals()
         plotSignals()
-        
+
     end
 
     function ttlPopupCallback(Source, ~)
@@ -451,15 +448,15 @@ end
         CurrentSignal.Identifier = ...
             sprintf('TTL%02i', ControlHandles.TTLPortPopup.Value);
         CurrentSignal.Alias = ControlHandles.TTLAliasEdit.String;
-        ToggleSignal = generateToggleSignal(...
+        ToggleSignal = obj.generateToggleSignal(...
             SignalStruct(1).Signal, SignalPeriod, TriggerMode);
-        Signal = toggleLatch(ToggleSignal, InPhase);
+        Signal = obj.toggleLatch(ToggleSignal, InPhase);
         CurrentSignal.Signal = Signal;
         SignalStruct = [SignalStruct; CurrentSignal];
         
         % Re-plot all of the signals.
         plotSignals()
-
+        
     end
 
     function addDACCallback(~, ~)
@@ -489,9 +486,9 @@ end
         CurrentSignal.Identifier = ...
             sprintf('DAC%02i', ControlHandles.DACPortPopup.Value);
         CurrentSignal.Alias = ControlHandles.DACAliasEdit.String;
-        [ToggleSignal] = generateToggleSignal(...
+        [ToggleSignal] = obj.generateToggleSignal(...
             SignalStruct(1).Signal, SignalPeriod, TriggerMode);
-        Signal = toggleLatch(ToggleSignal, InPhase);
+        Signal = obj.toggleLatch(ToggleSignal, InPhase);
         CurrentSignal.Signal = Signal*(HIGHVoltage-LOWVoltage) ...
             + LOWVoltage;
         SignalStruct = [SignalStruct; CurrentSignal];
@@ -506,6 +503,8 @@ end
         % signals defined in this GUI.
         
         obj.SignalStruct = SignalStruct;
+        obj.TriggerMode = ControlHandles.TriggerModePopup.String{...
+            ControlHandles.TriggerModePopup.Value};
         fprintf('Signals saved in obj.SignalStruct\n')
         
     end
@@ -564,11 +563,11 @@ end
         %       point, i.e., OutputSignal(end) = 0 for all signals.
         
         TriggerMode = ControlHandles.TriggerModePopup.Value;
-        ToggleSignal = generateToggleSignal(...
+        ToggleSignal = obj.generateToggleSignal(...
             SignalStruct(1).Signal, ...
             SignalStruct(SignalIndex).Period, ...
             TriggerMode);
-        Signal = toggleLatch(ToggleSignal, ...
+        Signal = obj.toggleLatch(ToggleSignal, ...
             SignalStruct(SignalIndex).InPhase);
         Range = SignalStruct(SignalIndex).Range;
         OutputSignal = Signal*diff(Range) + Range(1);
@@ -638,7 +637,7 @@ end
         end
                         
         % Add some vertical lines to indicate each trigger event.
-        EventLocationsX = find(generateToggleSignal(...
+        EventLocationsX = find(obj.generateToggleSignal(...
             SignalStruct(1).Signal, ...
             1, ControlHandles.TriggerModePopup.Value));
         NEvents = numel(EventLocationsX);
@@ -736,100 +735,6 @@ end
         
     end
 
-    function [ToggleSignal] = generateToggleSignal(TriggerSignal, ...
-            SignalPeriod, TriggerMode)
-        % This function generates a toggle signal.
-        % The output ToggleSignal is a signal which alternates between
-        % 0 and 1, with the toggling being determined by whether or not a
-        % trigger event happened at the same time an odd square wave with 
-        % period SignalPeriod would have toggled from 0 to 1.
-        %
-        % INPUTS:
-        %   TriggerSignal: Triggering signal which must be formatted s.t.
-        %                  each element alternates (e.g., [1, 0, 1, 0], or
-        %                  [0, 1, 0, 1, 0, 1, 0]).
-        %   SignalPeriod: "Period" of the output signal with respect to the
-        %                 triggering events. For example, SignalPeriod = 2
-        %                 means that every triggering event toggles
-        %                 OutputSignal, whereas SignalPeriod = 4 means
-        %                 every other triggering event toggles
-        %                 OutputSignal.
-        %   TriggerMode: Integer specifying the triggering mode.
-        %                1: Rising edge
-        %                2: Falling edge
-        %                3: Change
-        %
-        % OUTPUTS:
-        %   ToggleSignal: A binary signal with entries of 1 indicating a
-        %                 trigger event happened at the same time as an odd
-        %                 square wave with period SignalPeriod would have
-        %                 toggled from 0 to 1, and with all other entries
-        %                 set to 0.
-        
-        % Define the toggle signal from the input TriggerSignal. This
-        % will be an array with a 1 at each point the output signal should
-        % be toggled, and a 0 at the rest of the points.
-        NPoints = numel(TriggerSignal);
-        XArray = 1:NPoints;
-        EventNumber = floor((1:NPoints) / 2);
-        if (TriggerMode == 1)
-            % For rising edge triggers, we want to ensure that the trigger
-            % is indeed HIGH, and that it is HIGH in a manner consistent
-            % with the expected trigger (in this case, every other element,
-            % thus the mod(XArray, 2) terms).
-            IsEvent = TriggerSignal ...
-                .* (TriggerSignal(1)*mod(XArray, 2) ...
-                + ~(TriggerSignal(1)+mod(XArray, 2)));
-        elseif (TriggerMode == 2)
-            % For falling edge triggers, we want to ensure that the trigger
-            % is indeed LOW, and that it is LOW in a manner consistent
-            % with the expected trigger (in this case, every other element,
-            % thus the mod(XArray, 2) terms).
-            IsEvent = ~TriggerSignal ...
-                .* (~TriggerSignal(1)*mod(XArray, 2) ...
-                + TriggerSignal(1)*~mod(XArray, 2));
-        elseif (TriggerMode == 3)
-            % For change type triggers, any change from HIGH->LOW,
-            % LOW->HIGH counts, no matter where it appears in the array,
-            % with the first element always assumed to be a change.
-            IsEvent = [1, logical(diff(TriggerSignal))];
-        end
-        ToggleSignal = (IsEvent ...
-            & ~mod(EventNumber, round(SignalPeriod/2)));
-        
-    end
-
-    function [OutputSignal] = toggleLatch(ToggleSignal, InPhase)
-        % This function simulates a toggle latch, which is used to generate
-        % the basic TTL signals. This means that, with each trigger event
-        % (rising edge, falling edge, change), the TTL will be toggled.
-        %
-        % INPUTS:
-        %   ToggleSignal: A signal consisting of 0's and 1's, where the 1's
-        %                 direct a state change in OutputSignal.
-        %   InPhase: Boolean indicating whether or not the output is "in
-        %            phase" (maybe an abuse of terminology here) with the
-        %            input trigger, i.e., OutputSignal(1) = double(InPhase)
-        %
-        % OUTPUTS:
-        %   OutputSignal: Square wave of 0's and 1's with period
-        %                 SignalPeriod and length matching TriggerSignal.
-                
-        % Simulate the toggle latch to produce our output signal.
-        % NOTE: We want the toggle signal to correspond to each triggering
-        %       event, e.g., if SignalPeriod = 4, we want every other 
-        %       trigger event to toggle the output (which is achieved by
-        %       the definition of 'ToggleSignal' below).
-        NPoints = numel(ToggleSignal);
-        OutputSignal = zeros(1, NPoints);
-        OutputSignal(1) = double(InPhase);
-        for ii = 2:NPoints
-            OutputSignal(ii) = ToggleSignal(ii)*~OutputSignal(ii-1) ...
-                + ~ToggleSignal(ii)*OutputSignal(ii-1);
-        end
-        
-    end
-
     function figureClosing(~, ~)
         % This callback is executed with the GUI figure is being closed.
         
@@ -839,7 +744,7 @@ end
             'Would you like to save these signals in obj.SignalStruct?',...
             'Close request', 'Yes', 'No', 'Yes');
         if strcmp(UserResponse, 'Yes')
-            obj.SignalStruct = SignalStruct;
+            saveSignalCallback();
         end
         if ~isempty(UserResponse)
             delete(GUIParent)
