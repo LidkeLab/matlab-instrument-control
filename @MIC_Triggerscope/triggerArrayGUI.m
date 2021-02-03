@@ -841,7 +841,9 @@ end
         if strcmp(UserResponse, 'Yes')
             obj.SignalStruct = SignalStruct;
         end
-        delete(GUIParent)
+        if ~isempty(UserResponse)
+            delete(GUIParent)
+        end
         
     end
 
