@@ -23,6 +23,9 @@ function [Response] = executeCommand(obj, Command)
 assert(any(contains(Command, obj.CommandList)), ...
     sprintf('Command ''%s'' not listed in obj.CommandList. ', Command));
 
+% Flush the input and output buffers.
+flush(obj.Triggerscope);
+
 % Execute the command and check for a response.
 obj.ActivityMessage = sprintf(['Writing command ''%s'' ', ...
     'to Triggerscope on serial port ''%s'''], Command, obj.SerialPort);
