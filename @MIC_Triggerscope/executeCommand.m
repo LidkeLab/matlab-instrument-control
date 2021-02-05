@@ -32,7 +32,7 @@ obj.ActivityMessage = sprintf(['Writing command ''%s'' ', ...
 obj.writeCommand(Command);
 obj.ActivityMessage = sprintf(['Reading response to command ''%s'' ', ...
     'from Triggerscope on serial port ''%s'''], Command, obj.SerialPort);
-pause(0.1)
+pause(obj.ActionPause)
 [Response] = obj.readResponse();
 obj.ActivityMessage = Response;
 

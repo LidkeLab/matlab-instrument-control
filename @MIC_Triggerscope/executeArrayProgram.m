@@ -1,4 +1,4 @@
-function [] = executeArrayProgram(obj, CommandSequence)
+function [Response] = executeArrayProgram(obj, CommandSequence)
 %executeArrayProgram sends a list of commands to the Triggerscope.
 % This method will loop through a set of commands in 'CommandSequence' and
 % attempt to execute them sequentially.  The primary intention is that
@@ -9,14 +9,22 @@ function [] = executeArrayProgram(obj, CommandSequence)
 %   CommandSequence: A list of commands to be sent to the Triggerscope to
 %                    produce the behavior defined by the signals in
 %                    obj.SignalArray. (cell array of char array)
+%
+% OUTPUTS:
+%   Response: A cell array of char arrays, with each element corresponding
+%             to the Triggerscope's response to a command in
+%             CommandSequence (i.e., Response{ii} is the response from
+%             CommandSequence{ii}). (cell array)
 
 % Created by:
 %   David J. Schodt (Lidke Lab, 2021)
 
 
 % Loop through all commands and execute them.
-for cc = 1:numel(CommandSequence)
-    obj.executeCommand(CommandSequence{cc});
+NCommands = numel(CommandSequence);
+Response = cell(NCommands, 1);
+for cc = 1:NCommands
+    Response{cc} = obj.executeCommand(CommandSequence{cc});
 end
 
 

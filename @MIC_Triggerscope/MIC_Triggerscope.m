@@ -5,7 +5,7 @@ classdef MIC_Triggerscope < MIC_Abstract
     % documentation should be included.
     %
     % EXAMPLE USAGE:
-    %   TS = MIC_Triggerscope('COM3', [], true); 
+    %   TS = MIC_Triggerscope('COM3', [], true);
     %       This will create an instance of the class and automatically
     %       attempt to connect to serial port COM3.
     %
@@ -24,7 +24,7 @@ classdef MIC_Triggerscope < MIC_Abstract
     
     properties
         % Triggerscope response timeout. (seconds)(Default = 10)
-        DeviceTimeout = 10;
+        DeviceTimeout = 1;
         
         % Serial port Triggerscope is connected to (char)(Default = 'COM3')
         SerialPort = 'COM3';
@@ -58,6 +58,9 @@ classdef MIC_Triggerscope < MIC_Abstract
         % Serial port device for the Triggerscope.
         Triggerscope
         
+        % Brief pause made after sending a command. (seconds)
+        ActionPause = 0.1;
+        
         % Communication rate for Triggerscope. (integer)(Default = 115200)
         BaudRate = 115200;
         
@@ -75,9 +78,9 @@ classdef MIC_Triggerscope < MIC_Abstract
             'PROG_WAVE', 'TIMECYCLES', 'TRIGMODE'};
         
         % List of trigger modes from the Triggerscope documentation.
-        % For now, I'm excluding 'Low' and 'High' because those seem to 
-        % no longer be in use for the Triggerscopes that we have. 
-        % Changing the order of this list will break some functionality 
+        % For now, I'm excluding 'Low' and 'High' because those seem to
+        % no longer be in use for the Triggerscopes that we have.
+        % Changing the order of this list will break some functionality
         % throughout the class!
         TriggerModeOptions = {'Rising', 'Falling', 'Change'};
         
@@ -86,7 +89,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         
         % Number of TTL/DAC channels. (integer)(Default = 16)
         IOChannels = 16;
-                
+        
         % List of voltage ranges. (Volts)(5x2 numeric array)
         % NOTE: These must be kept in the same order specified in the
         %       Triggerscope documentation so that the command to set these
@@ -152,11 +155,11 @@ classdef MIC_Triggerscope < MIC_Abstract
             for ii = 1:obj.IOChannels
                 % TTLStatus(ii).Value specifies whether the TTL is driven
                 % HIGH (true) or LOW (false).
-                obj.TTLStatus(ii).Value = false; 
+                obj.TTLStatus(ii).Value = false;
                 
                 % DACStatus(ii).Value gives the current voltage this line
                 % is being driven at.
-                obj.DACStatus(ii).Value = 0; 
+                obj.DACStatus(ii).Value = 0;
                 
                 % DACStatus(ii).VoltageRangeIndex is the row index of
                 % obj.VoltageRangeOptions that defines the voltage range
@@ -211,7 +214,7 @@ classdef MIC_Triggerscope < MIC_Abstract
                 obj.SignalStruct(1).Signal, 2, TriggerModeInt);
             NTriggerEvents = sum(TriggerEvents);
             
-            % Initialize the SignalArray.           
+            % Initialize the SignalArray.
             SignalArray = zeros(2*obj.IOChannels, NTriggerEvents);
             
             % Populate the SignalArray.
@@ -224,12 +227,12 @@ classdef MIC_Triggerscope < MIC_Abstract
                 CurrentSignal = [TruncatedSignal, ...
                     zeros(1, NPointsTrigger-obj.SignalStruct(ii).NPoints)];
                 if contains(obj.SignalStruct(ii).Identifier, 'TTL')
-                   SignalArray(str2double(...
-                       obj.SignalStruct(ii).Identifier(4:5)), ...
+                    SignalArray(str2double(...
+                        obj.SignalStruct(ii).Identifier(4:5)), ...
                         1:NTriggerEvents) = CurrentSignal(TriggerEvents);
                 elseif contains(obj.SignalStruct(ii).Identifier, 'DAC')
                     SignalArray(str2double(...
-                       obj.SignalStruct(ii).Identifier(4:5)) + 16, ...
+                        obj.SignalStruct(ii).Identifier(4:5)) + 16, ...
                         1:NTriggerEvents) = CurrentSignal(TriggerEvents);
                 else
                     warning(...
@@ -245,8 +248,8 @@ classdef MIC_Triggerscope < MIC_Abstract
             % Listener callback for a change of the object property
             % ActivityMessage, which is used to update the GUI activity
             % display message.
-                        
-            % Find the ActivityDisplay 
+            
+            % Find the ActivityDisplay
             ActivityDisplay = findall(obj.GUIParent, ...
                 'Tag', 'ActivityDisplay');
             
@@ -284,7 +287,7 @@ classdef MIC_Triggerscope < MIC_Abstract
             ToggleConnectionButton.BackgroundColor = ...
                 obj.convertLogicalToStatus(...
                 obj.IsConnected, {'green', 'red'});
-    
+            
         end
         
         function delete(obj)
@@ -298,8 +301,8 @@ classdef MIC_Triggerscope < MIC_Abstract
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
         [Response] = executeCommand(obj, Command);
+        [Response] = executeArrayProgram(obj, CommandSequence);
         [CommandSequence] = generateArrayProgram(obj, NLoops, Arm);
-        executeArrayProgram(obj, CommandSequence)
         setDACRange(obj, DACIndex, Range)
         setDACVoltage(obj, DACIndex, Voltage)
         setTTLState(obj, TTLIndex, State)
@@ -353,7 +356,7 @@ classdef MIC_Triggerscope < MIC_Abstract
             %convertTriggerStringToInt converts a string id into an int.
             % This method converts the string/char array version of the
             % trigger mode (e.g., the char array 'Rising') into the
-            % corresponding integer index of the (hidden) property 
+            % corresponding integer index of the (hidden) property
             % obj.TriggerModeOptions.
             TriggerModeInt = 1*strcmpi(TriggerModeString, 'Rising') ...
                 + 2*strcmpi(TriggerModeString, 'Falling') ...
@@ -366,6 +369,6 @@ classdef MIC_Triggerscope < MIC_Abstract
         [BitLevel] = convertVoltageToBitLevel(Voltage, Range, Resolution);
         
     end
-        
+    
     
 end
