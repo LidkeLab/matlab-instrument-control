@@ -42,6 +42,7 @@ end
 
 % Set the desired voltage range for the specified DAC port.
 obj.executeCommand(sprintf('RANGE%i,%i', DACIndex, VoltageRangeIndex));
+obj.DACStatus(DACIndex).VoltageRangeIndex = VoltageRangeIndex;
 
 
 end
