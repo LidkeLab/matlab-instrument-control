@@ -14,7 +14,7 @@ function [] = moveDistance(obj, Distance, Velocity)
 
 % Set defaults if needed.
 if (~exist('Velocity', 'var') || isempty(Velocity))
-    obj.Velocity = max(obj.VelocityBounds(2)/4, ...
+    Velocity = max(obj.VelocityBounds(2)/4, ...
         obj.VelocityBounds(1));
 end
 

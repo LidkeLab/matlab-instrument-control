@@ -65,7 +65,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
         MaxPosition = NaN;
         
         % Size of a single step of the stage. (millimeters)
-        StepSize(1, 1) double = NaN;
+        StepSize(1, 1) double
         
         % Min. and max. velocities of stage (mm/s)(2x1 array, [min.; max.])
         VelocityBounds(2, 1) double = NaN(2, 1);
