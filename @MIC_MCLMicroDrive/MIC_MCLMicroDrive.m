@@ -69,7 +69,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
         
         % Min. and max. velocities of stage (mm/s)(2x1 array, [min.; max.])
         VelocityBounds(2, 1) double = NaN(2, 1);
-        
+                
         % Axis of the stage (char)('X', 'Y', or 'Z')
         Axis = 'Z';
         
@@ -88,11 +88,10 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     end
     
     properties
-        % Number of axes on the stage to be used. (integer)(Default = 1)
-        % The number of axes must be either 1 (z only) or 3 (x, y, z).
-        % NOTE: Ideally we should figure this out by requesting info. from
-        %       the stage itself, I just haven't figured that out yet!
-        NAxes(1, 1) {mustBeMember(NAxes, [1, 3])} = 1;
+        % Velocity of stage movements (mm/s)(scalar array)
+        % A default will be set by moveDistance() upon the first call to
+        % that method (as long as VelocityBounds is already set as well).
+        Velocity(1, 1) double = NaN;
     end
     
     methods
@@ -231,7 +230,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
         
         connectStage(obj)
         moveSingleStep(obj, Direction)
-        moveDistance(obj, Distance, Velocity)
+        moveDistance(obj, Distance)
         gui(obj)
         [Attributes, Data, Children] = exportState(obj)
         
