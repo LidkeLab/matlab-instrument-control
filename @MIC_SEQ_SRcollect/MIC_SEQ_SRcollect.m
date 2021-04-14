@@ -19,14 +19,11 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
     properties
         % Hardware objects
         CameraSCMOS; % Main Data Collection Camera
-        CameraIR; % Active Stabilization Camera
-        MaxPiezoConnectAttempts = 2; % max # of attempts to connect piezo
         XPiezoSerialNums = {'81850186', '84850145'}; % controller, gauge
         YPiezoSerialNums = {'81850193', '84850146'}; % controller, gauge
         ZPiezoSerialNums = {'81850176', '84850203'}; % controller, gauge
         StagePiezo; % piezo stage
         StageStepper; % Stepper Motor Stage
-        Lamp850; % LED Lamp at 850 nm
         Lamp660; % LED Lamp at 660 nm
         Laser647; % MPB 647 Laser
         Laser405; % ThorLabs 405 Diode Laser
@@ -35,21 +32,21 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
  
         % Static Instrument Settings
         SCMOS_UseDefectCorrection = 0;
-        IRCamera_ExposureTime;
-        IRCamera_ROI = [513, 768, 385, 640]; % IR Camera ROI Center 256
-        Lamp850Power = 7;
-        Lamp660Power = 35;
-        SCMOS_PixelSize = .104; % microns
+        Lamp660Power = 15;
+        SCMOS_PixelSize = .0973; % microns
         SCMOSCalFilePath; % needed if using PublishResults flag
         
         % Operational properties.
         LampWait = 0.1; % Time to wait for full power to lamp (seconds)
         ExposureTimeLampFocus = 0.02;
-        ExposureTimeLaserFocus = 0.2;
+        ExposureTimeLaserFocusLow = 0.2;
+        ExposureTimeLaserFocusHigh = 0.01;
         ExposureTimeSequence = 0.01;
         ExposureTimeCapture = 0.02;
         NumberOfFrames = 6000;
-        NumberOfSequences = 7;
+        NumberOfSequences = 10;
+        NAcquisitionCycles = 1; % number of acquisition cycles per cell
+        PostSeqPause = 0; % seconds to pause after each sequence
         UsePreActivation = 1; % excite fluors. before acquiring data
         DurationPreActivation = 10; % (seconds) time of pre-activation
         StabPeriod = 5; % Time between stabilization events (seconds)
@@ -58,16 +55,18 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
-        CoverslipZPosition = 1; % relative pos. of coverslip to stage
+        CoverslipZPosition = 1.2; % relative pos. of coverslip to stage
         OnDuringFocus647 = 0; % flag indicates 647nm laser on for focusing
         OnDuringSequence647 = 0; % flag indicates 647nm on for sequence
         OnDuringFocus405 = 0; % flag indicates 405nm laser on for focusing
         OnDuringSequence405 = 0; % flag indicates 405nm on for sequence
         LaserPowerFocus647 = 50;
-        LaserPowerSequence647 = 50;
-        LaserPowerFocus405 = 11.84;
-        LaserPowerSequence405 = 11.84;
+        LaserPowerSequence647 = 150;
+        LaserPowerFocus405 = 2;
+        LaserPowerSequence405 = 2;
         IsBleach = 0; % boolean: 1 for a photobleach round, 0 otherwise
+        StepperWaitTime = 5; % max time (s) to wait for stepper to move
+        MaxPiezoConnectAttempts = 2; % max # of attempts to connect piezo
         PiezoSettlingTime = 0.2; % settling time of piezos (s)
         StepperLargeStep = 0.05; % Large Stepper motor step (mm)
         StepperSmallStep = 0.002; % Small Stepper motor step (mm)
@@ -85,19 +84,16 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         CoverSlipOffset = [0, 0, 0]; % Remounting error (mm)
         
         % Registration classes.
-        ActiveReg; % Active registration with IR Camera
-        AlignReg; % Active alignment object
-        UseActiveReg = 0; % boolean: 1 uses active registration, 0 doesn't
-        UsePeriodicReg = 1; % boolean: 1 periodically re-aligns, 0 doesn't
+        AlignReg; % brightfield alignment object
+        UseBrightfieldReg = 1; % boolean: 1 uses registration, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
-        Reg3DStepSize = 0.1; % (um) step size along z during cell reg.
-        Reg3DMaxDev = 1; % (um) max deviation along z during cell reg.
+        Reg3DStepSize = 0.1; % (um) step size along z during cell reg. default=0.1
+        Reg3DMaxDev = 1; % (um) max deviation along z during cell reg. default=1
         Reg3DMaxDevInit = 1; % (um) max dev. along z for initial cell reg.
         Reg3DXTol = 0.005; % (um) correction along x to claim convergence
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
-        Reg3DZTol = 0.03; % (um) correction along z to claim convergence
-        Reg3DMaxCorrTol = 0.5; % xcorr peak val. to claim reg. convergence
+        Reg3DZTol = 0.05; % (um) correction along z to claim convergence
         
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
@@ -108,7 +104,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
     
     properties (SetAccess = protected)
         InstrumentName = 'MIC_SEQ_SRcollect';
-        GUIFigureMain; % object for the main GUI figure for the class
     end
         
     properties (Hidden)
@@ -146,23 +141,28 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 
             % Setup instruments, ensuring proper order is maintained.
             obj.setupSCMOS();
-            obj.setupIRCamera();
-            obj.setupStagePiezo();
             obj.setupLamps();
             obj.setupLasers();
-            obj.setupStageStepper();
             obj.setupFlipMountTTL();
             obj.setupShutterTTL();
+            obj.setupStageStepper();
+            obj.setupStagePiezo();
             obj.setupAlignReg();
-            obj.unloadSample(); % move stage up so user can mount sample
+            if obj.StageStepper.isvalid
+                obj.unloadSample(); % move stage up for sample mounting
+            end
             obj.StatusString = '';
         end
         
         function delete(obj)
             % Class destructor.
-            delete(obj.CameraIR);
+            delete(obj.GuiFigure);
+            close all force;
             obj.Laser647.off(); % ensure the 647 laser is turned off
             obj.Laser405.off(); % ensure the 405 laser is turned off
+            obj.FlipMount.FilterIn(); % place ND filter in optical path
+            obj.Shutter.close(); % ensure shutter is blocking 647 laser
+            clear();
         end
         
         function [Attributes, Data, Children] = exportState(obj)
@@ -174,10 +174,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 Children.CameraSCMOS.Data, ...
                 Children.CameraSCMOS.Children] = ...
                     obj.CameraSCMOS.exportState();
-%             [Children.CameraIR.Attributes, ...
-%                 Children.CameraIR.Data, ...
-%                 Children.CameraIR.Children] = ...
-%                     obj.CameraIR.exportState();
             [Children.StageStepper.Attributes, ...
                 Children.StageStepper.Data, ...
                 Children.StageStepper.Children] = ...
@@ -190,36 +186,29 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 Children.Laser647.Data, ...
                 Children.Laser647.Children] = ...
                     obj.Laser647.exportState();
-%             [Children.Lamp850.Attributes, ...
-%                 Children.Lamp850.Data, ...
-%                 Children.Lamp850.Children] = ...
-%                     obj.Lamp850.exportState();
             [Children.Lamp660.Attributes, ...
                 Children.Lamp660.Data, ...
                 Children.Lamp660.Children] = ...
                     obj.Lamp660.exportState();
-            [Children.AlignReg.Attributes, ...
-                Children.AlignReg.Data, ...
-                Children.AlignReg.Children] = ...
-                    obj.AlignReg.exportState();
-            if obj.UseActiveReg && ~isempty(obj.ActiveReg)
-                % We should only export this object if it was used.
-                [Children.ActiveReg.Attributes, ...
-                    Children.ActiveReg.Data, ...
-                    Children.ActiveReg.Children] = ...
-                        obj.ActiveReg.exportState();
+            if obj.UseBrightfieldReg
+                [Children.AlignReg.Attributes, ...
+                    Children.AlignReg.Data, ...
+                    Children.AlignReg.Children] = ...
+                        obj.AlignReg.exportState();
             end
             
             % Store the desired obj properties to be exported.
             Attributes.ExposureTimeLampFocus = obj.ExposureTimeLampFocus;
-            Attributes.ExposureTimeLaserFocus = obj.ExposureTimeLaserFocus;
+            Attributes.ExposureTimeLaserFocusLow = ...
+                obj.ExposureTimeLaserFocusLow;
+            Attributes.ExposureTimeLaserFocusHigh = ...
+                obj.ExposureTimeLaserFocusHigh;
             Attributes.ExposureTimeSequence = obj.ExposureTimeSequence;
             Attributes.ExposureTimeCapture = obj.ExposureTimeCapture;
             Attributes.NumberOfFrames = obj.NumberOfFrames;
             Attributes.NumberOfSequences = obj.NumberOfSequences;
             Attributes.CameraROI = obj.SCMOS_ROI_Collect;
             Attributes.SCMOS_ROI_Full = obj.SCMOS_ROI_Full;
-%             Attributes.IRCamera_ROI = obj.IRCamera_ROI;
             Attributes.SaveDir = obj.SaveDir;
             Attributes.LaserPowerFocus647 = obj.LaserPowerFocus647;
             Attributes.LaserPowerSequence647 = obj.LaserPowerSequence647;
@@ -232,12 +221,15 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Data = [];
         end
         
+        GuiFig = gui(obj);
+        GuiFig = guiPiezoReconnection(obj);
+        
         function updateStatus(obj, ~, ~)
             % Listener callback for a change of the object property
             % StatusString. 
             
             % Find the status box object within the GUI.
-            StatusObject = findall(obj.GUIFigureMain, 'Tag', 'StatusText');
+            StatusObject = findall(obj.GuiFigure, 'Tag', 'StatusText');
             
             % Modify the text within the status box to show the current
             % status.
@@ -290,29 +282,30 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Update the status indicator for the GUI.
             obj.StatusString = 'Setting up sample stage stepper motors...';
             
-            % Setup the stepper motors for the NanoMax stage.
-            % The StepperMotor Serial Number is 70850323.
-            % NOTE: The x,y convention used is that y<->left-right,
-            %       x<->up-down.
-            % NOTE: The positions set here are chosen such that the center
-            %       GUI button will ~correspond to the center of the well.
+            % Setup the stepper motors for the NanoMax stage and move the
+            % stage to a safe position so as to avoid hitting the
+            % objective.
             obj.StageStepper = MIC_StepperMotor('70850323');
+            obj.StageStepper.moveToPosition(3, 4); % z stepper
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
-            obj.StageStepper.moveToPosition(3, 2); % z stepper
             
-            % Update the status indicator for the GUI.
-            obj.StatusString = '';
-        end
-        
-        function setupIRCamera(obj)
-            % Update the status indicator for the GUI.
-            obj.StatusString = 'Setting up IR camera...';
-%             
-%             % Setup the IR camera used for active registration.
-%             obj.CameraIR = MIC_ThorlabsIR();
-%             obj.CameraIR.ROI = obj.IRCamera_ROI;
-%             obj.CameraIR.ExpTime_Capture = 0.5;
+            % Check to make sure the steppers were setup properly.
+            pause(obj.StepperWaitTime); % let stage settle down first
+            XPosition = obj.StageStepper.getPosition(2);
+            YPosition = obj.StageStepper.getPosition(1);
+            ZPosition = obj.StageStepper.getPosition(3);
+            SmallStepSize = obj.StepperSmallStep;
+            if (abs(XPosition - 2.2780) > SmallStepSize) ...
+                    || (abs(YPosition - 2.0650) > SmallStepSize) ...
+                    || (abs(ZPosition - 4) > SmallStepSize)
+                % If any of these conditions are true, something has
+                % probably gone wrong with the stepper motor...
+                warning(['There is a problem with the stepper motors.', ...
+                    ' Please power cycle the stepper motor ', ...
+                    'controller and run SEQ.setupStageStepper()']);
+                obj.StageStepper.delete(); % delete so it can't be used
+            end
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
@@ -320,11 +313,10 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function setupLamps(obj)
             % Update the status indicator for the GUI.
-            obj.StatusString = 'Setting up sample illumination LEDs...';
+            obj.StatusString = 'Setting up sample illumination LED...';
             
-            % Setup the LED lamp objects.
+            % Setup the LED lamp object.
             obj.Lamp660 = MIC_ThorlabsLED('Dev2', 'ao0');
-%             obj.Lamp850 = MIC_ThorlabsLED('Dev2', 'ao1');
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
@@ -397,9 +389,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
             obj.AlignReg.CameraTriggerMode = 'software'; 
             obj.AlignReg.Tol_X = obj.Reg3DXTol;
-            obj.AlignReg.Tol_Y = obj.Reg3DZTol;
+            obj.AlignReg.Tol_Y = obj.Reg3DYTol;
             obj.AlignReg.Tol_Z = obj.Reg3DZTol;
-            obj.AlignReg.TolMaxCorr = obj.Reg3DMaxCorrTol;
         end
         
         function unloadSample(obj)
@@ -454,6 +445,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function Data = captureLamp(obj, ROISelect)
             % Capture an image with 660nm lamp.
+            obj.Lamp660.on(); 
             obj.Lamp660.setPower(obj.Lamp660Power);
             pause(obj.LampWait);
             switch ROISelect
@@ -479,8 +471,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.Lamp660.setPower(obj.Lamp660Power);
             obj.FlipMount.FilterIn(); 
             obj.CameraSCMOS.start_focus();
+            obj.Lamp660.off();
             obj.startROILaserFocusLow();
-            obj.Lamp660.setPower(0);
         end
         
         function startROILaserFocusLow(obj)
@@ -493,7 +485,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % it will stay on until an acquisition is complete (this is
             % done to avoid the laser power up delay at each cell
             % selection).
-            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocus;
+            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocusLow;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
@@ -510,7 +502,6 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
                 % flag.
                 obj.Laser405.on();
             end
-            obj.Lamp660.setPower(0);
             obj.CameraSCMOS.start_focus();
             obj.Shutter.close(); % closes shutter to prevent photobleaching
             obj.Laser405.off(); % turn of the 405nm laser
@@ -539,7 +530,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 
         function startROILaserFocusHigh(obj)
             % Run SCMOS in focus mode with High Laser Power.
-            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeSequence;
+            obj.CameraSCMOS.ExpTime_Focus = obj.ExposureTimeLaserFocusHigh;
             obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
             obj.CameraSCMOS.AcquisitionType = 'focus';
             obj.CameraSCMOS.setup_acquisition();
@@ -569,6 +560,68 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             if strcmpi(UseCell, 'Yes')
                 obj.saveReferenceImage();
             end
+        end
+        
+        function collectPSFStack(obj, ExposureTime, MaxOffsetZ, ...
+                StepSize, SaveDir)
+            % This method will collect a z-stack of images centered around
+            % the current piezo position.  The purpose of this method is to
+            % collect a stack of images of a low density bead sample to
+            % observe the PSF.  The input ExposureTime is optional with 
+            % a default value of obj.ExposureTimeLaserFocusLow.
+            % The input MaxOffsetZ is optional with a default value of 2.5
+            % microns.  The input StepSize is optional with a default value
+            % of obj.PiezoStep.  The input SaveDir is optional with a
+            % default value of obj.TopDir.
+            
+            % Set defaults if needed.
+            if ~exist('ExposureTime', 'var') || isempty(ExposureTime)
+                ExposureTime = obj.ExposureTimeLaserFocusLow;
+            end
+            if ~exist('MaxOffsetZ', 'var') || isempty(MaxOffsetZ)
+                MaxOffsetZ = 2.5; % microns
+            end 
+            if ~exist('StepSize', 'var') || isempty(StepSize)
+                StepSize = obj.PiezoStep; % microns
+            end 
+            if ~exist('SaveDir', 'var') || isempty(SaveDir)
+                SaveDir = obj.TopDir;
+            end 
+            
+            % Set instrument properties as needed. 
+            PreviousExposureTime = obj.CameraSCMOS.ExpTime_Capture;
+            obj.CameraSCMOS.ExpTime_Capture = ExposureTime;
+            
+            % Collect the z-stack. 
+            CurrentPosition = obj.StagePiezo.Position;
+            ZPositions = CurrentPosition(3) - MaxOffsetZ...
+                :StepSize...
+                :CurrentPosition(3) + MaxOffsetZ;
+            ImageSize = [obj.SCMOS_ROI_Collect(2) ...
+                - obj.SCMOS_ROI_Collect(1) + 1, ...
+                obj.SCMOS_ROI_Collect(4) ...
+                - obj.SCMOS_ROI_Collect(3) + 1];
+            ZStack = zeros([ImageSize, numel(ZPositions)], 'single');
+            for ii = 1:numel(ZPositions)
+                % Move to the specified position.
+                obj.StagePiezo.setPosition([CurrentPosition(1), ...
+                    CurrentPosition(2), ZPositions(ii)]);
+                
+                % Allow the stage to settle.
+                pause(obj.PiezoSettlingTime);
+                
+                % Capture an image at the current position.
+                ZStack(:, :, ii) = single(obj.CameraSCMOS.start_capture());
+            end
+            
+            % Save the ZStack as a .mat file.
+            save(fullfile(SaveDir, 'PSFStack.mat'), 'ZStack');         
+            
+            % Move the stage back to the original position.
+            obj.StagePiezo.setPosition(CurrentPosition);
+            
+            % Change the camera exposure time back to it's original value.
+            obj.CameraSCMOS.ExpTime_Capture = PreviousExposureTime;
         end
         
         function moveStepperUpLarge(obj)
@@ -601,16 +654,26 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         function movePiezoUpSmall(obj)
             % Small stage step up in the z dimension with piezo.
-            OldPosPiezoZ = obj.StagePiezo.StagePiezoZ.getPosition();
-            NewPosPiezoZ = OldPosPiezoZ + obj.PiezoStep; % proposed z pos.
-            obj.StagePiezo.StagePiezoZ.setPosition(NewPosPiezoZ); 
+            OldPosPiezo = obj.StagePiezo.Position;
+            NewPosPiezo = OldPosPiezo + [0, 0, obj.PiezoStep];
+            if NewPosPiezo(3) < (10 + obj.StepperSmallStep * 1e3)
+                obj.StagePiezo.setPosition(NewPosPiezo); 
+            else
+                warning(['Recommended Z piezo range exceeded: please ', ...
+                    'use small stepper movements before using piezo.'])
+            end
         end
         
         function movePiezoDownSmall(obj)
             % Small stage step down in the z dimension with piezo.
-            OldPosPiezoZ = obj.StagePiezo.StagePiezoZ.getPosition();
-            NewPosPiezoZ = OldPosPiezoZ - obj.PiezoStep; % proposed z pos.
-            obj.StagePiezo.StagePiezoZ.setPosition(NewPosPiezoZ); 
+            OldPosPiezo = obj.StagePiezo.Position;
+            NewPosPiezo = OldPosPiezo - [0, 0, obj.PiezoStep];
+            if NewPosPiezo(3) > (10 - obj.StepperSmallStep * 1e3)
+                obj.StagePiezo.setPosition(NewPosPiezo); 
+            else
+                warning(['Recommended Z piezo range exceeded: please ', ...
+                    'use small stepper movements before using piezo.'])
+            end
         end
     end
     

@@ -22,10 +22,10 @@ DateString = [num2str(CurrentTime(1)), '-', ...
     num2str(round(CurrentTime(6)))];
 if obj.IsBleach
     % Indicate that this is a photobleaching sequence if necessary.
-    FileName = sprintf('Data_%s_bleaching_%s.h5', ...
+    FileName = sprintf('Data_%s_bleaching%s.h5', ...
         DateString, obj.FilenameTag);
 else
-    FileName = sprintf('Data_%s_%s.h5', DateString, obj.FilenameTag);
+    FileName = sprintf('Data_%s%s.h5', DateString, obj.FilenameTag);
 end
 FileName = fullfile(DirectoryName, FileName);
 
@@ -52,61 +52,52 @@ obj.StageStepper.moveToPosition(2, ...
     RefStruct.StepperPos(1) + obj.CoverSlipOffset(1));
 obj.StageStepper.moveToPosition(3, ...
     RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
-obj.StagePiezo.center(); % center the piezos to ensure full range of motion
+% obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 
-% Attempt to align the cell to the reference image in brightfield.
-obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
-    'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
-obj.Lamp660.setPower(obj.Lamp660Power);
-pause(obj.LampWait);
-obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
-obj.CameraSCMOS.AcquisitionType = 'capture';
-obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
-obj.CameraSCMOS.setup_acquisition();
-obj.AlignReg.Image_Reference = double(RefStruct.Image);
-obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
-obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
-obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
-obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
-obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
-try
-    obj.AlignReg.align2imageFit();
-catch
-    % We don't want to throw an error since there are still other cells
-    % to be measured from here on: warn the user, attempt to export
-    % data that might be useful, and return control to the calling
-    % method.
-    warning('Problem with AlignReg.align2imageFit()')
-    obj.StatusString = ...
-        'Exporting object Data and Children with exportState()...';
-    fprintf(...
-        'Saving exportables from exportState()....................\n')
-    switch obj.SaveFileType
-        case {'h5', 'h5DataGroups'}
-            % For either .h5 file save type, we'll still use the same
-            % supergroup of Channel01/Zposition001.
-            SequenceName = 'Channel01/Zposition001';
-            MIC_H5.createGroup(FileH5, SequenceName);
-            obj.save2hdf5(FileH5, SequenceName);
-        otherwise
-            error('StartSequence:: unknown SaveFileType')
+% Attempt to align the cell to the reference image in brightfield (if
+% requested).
+if obj.UseBrightfieldReg
+    obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+        'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
+    obj.Lamp660.setPower(RefStruct.LampPower);
+    pause(obj.LampWait);
+    obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
+    obj.CameraSCMOS.AcquisitionType = 'capture';
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
+    obj.CameraSCMOS.setup_acquisition();
+    obj.AlignReg.Image_Reference = double(RefStruct.Image);
+    obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
+    obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
+    obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
+    obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
+    obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
+    try
+        obj.AlignReg.align2imageFit();
+    catch
+        % We don't want to throw an error since there are still other cells
+        % to be measured from here on: warn the user, attempt to export
+        % data that might be useful, and return control to the calling
+        % method.
+        warning('Problem with AlignReg.align2imageFit()')
+        obj.StatusString = ...
+            'Exporting object Data and Children with exportState()...';
+        fprintf(...
+            'Saving exportables from exportState()....................\n')
+        switch obj.SaveFileType
+            case {'h5', 'h5DataGroups'}
+                % For either .h5 file save type, we'll still use the same
+                % supergroup of Channel01/Zposition001.
+                SequenceName = 'Channel01/Zposition001';
+                MIC_H5.createGroup(FileH5, SequenceName);
+                obj.save2hdf5(FileH5, SequenceName);
+            otherwise
+                error('StartSequence:: unknown SaveFileType')
+        end
+        obj.StatusString = '';
+        fprintf('Saving exportables from exportState() complete \n')
+        return
     end
-    obj.StatusString = '';
-    fprintf('Saving exportables from exportState() complete \n')
-    return
-end
-obj.Lamp660.setPower(0);
-
-% Setup Active Stabilization (if desired).
-if obj.UseActiveReg
-    obj.ActiveReg = MIC_ActiveReg3D_Seq(...
-        obj.CameraIR,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ);
-    obj.Lamp850.on;
-    obj.Lamp850.setPower(obj.Lamp850Power);
-    obj.IRCamera_ExposureTime = obj.CameraIR.ExpTime_Capture;
-    obj.ActiveReg.takeRefImageStack(); % takes 21 reference images
-    obj.ActiveReg.Period = obj.StabPeriod;
-    obj.ActiveReg.start();
+    obj.Lamp660.setPower(0);
 end
 
 % Setup the main sCMOS to acquire the sequence.
@@ -147,11 +138,6 @@ if obj.UsePreActivation
     PreviousState = pause('on'); % saves current state for later
     pause(obj.DurationPreActivation);
     
-    % Turn off the 405nm laser (if used) and close the shutter to
-    % prevent the 647nm laser from reaching the sample.
-    obj.Shutter.close();
-    obj.Laser405.off();
-    
     % Restore the previous pause setting (in case this was important
     % elsewhere/to the user).
     pause(PreviousState);
@@ -169,12 +155,12 @@ for ii = 1:obj.NumberOfSequences
     
     % Use periodic registration after NSeqBeforePeriodicReg
     % sequences have been collected.
-    if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
+    if obj.UseBrightfieldReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
             && ~(ii == 1)
         obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
             'Attempting periodic registration...'], ...
             RefStruct.CellIdx, ii);
-        obj.Lamp660.setPower(obj.Lamp660Power);
+        obj.Lamp660.setPower(RefStruct.LampPower);
         pause(obj.LampWait);
         obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
         obj.CameraSCMOS.AcquisitionType = 'capture';
@@ -232,7 +218,6 @@ for ii = 1:obj.NumberOfSequences
             obj.save2hdf5(FileH5, SequenceName);
             fprintf('Exportables from exportState() have been saved\n')
             obj.StatusString = '';
-            fprintf('Saving exportables from exportState() complete\n')
             
             % Begin writing the data.
             MIC_H5.writeAsync_uint16(...
@@ -242,6 +227,13 @@ for ii = 1:obj.NumberOfSequences
     end
     obj.Shutter.close(); % block 647nm from reaching sample
     obj.Laser405.off(); % ensure the 405nm is turned off
+    
+    % If needed, pause before proceeding to the next sequence (this is
+    % useful for test conditions, probably not for a normal acquisition).
+    if ii ~= obj.NumberOfSequences
+        % No need to pause on the last sequence of the cell.
+        pause(obj.PostSeqPause);
+    end
 end
 obj.StatusString = '';
 fprintf('Data collection complete\n')
@@ -251,11 +243,6 @@ obj.Shutter.close(); % close shutter instead of turning off the laser
 obj.FlipMount.FilterIn();
 obj.Laser405.setPower(0);
 obj.Laser405.off();
-
-% If it was used, end the active stabilization process.
-if obj.UseActiveReg
-    obj.ActiveReg.stop();
-end
 
 % Save the acquisition data.
 switch obj.SaveFileType

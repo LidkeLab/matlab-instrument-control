@@ -36,39 +36,53 @@ NumCells = numel(FileList);
 obj.Shutter.close(); % close shutter before the laser turns on
 obj.Laser647.setPower(obj.LaserPowerSequence647);
 obj.Laser647.on();
-for nn = StartCell:NumCells
-    % If AbortNow flag was set, do not continue.
-    if obj.AbortNow
-        return
-    end
-    
-    % Load data from the cell reference .mat file.
-    FileName = fullfile(RefDir, FileList(nn).name);
-    MatFileObj = matfile(FileName);
-    RefStruct = MatFileObj.RefStruct; % extract RefStruct from the mat file
-    if obj.UseManualFindCell && (nn==StartCell)
-        % Allow the user to manually identify the cell (if requested).
-        Success = obj.findCoverSlipOffset_Manual(RefStruct);
-        if ~Success
-            % The coverslip offset find procedure was not succesful, do not
-            % proceed.
+for ii = 1:obj.NAcquisitionCycles
+    % Repeat the acquisition NAcquisitionCycles times for each cell.
+    for nn = StartCell:NumCells
+        % If AbortNow flag was set, do not continue.
+        if obj.AbortNow
             return
         end
-    end
-    
-    % Begin the acquisition for the current cell.
-    obj.startSequence(RefStruct, obj.LabelIdx);
-    
-    % Update the CoverSlipOffset to account for the observed drift on the
-    % previous cell.
-    if nn == StartCell
-        % Ensure the error signal in AlignReg is set to its default, just
-        % in case it was changed (e.g. if an acquisition was previously 
-        % performed and the class didn't get cleared).
-        obj.AlignReg.ErrorSignalHistory = zeros(0, 3); 
-    else
-        obj.CoverSlipOffset = obj.CoverSlipOffset ...
-            - sum(obj.AlignReg.ErrorSignalHistory) * 1e-3; % convert to mm
+        
+        % Load data from the cell reference .mat file.
+        FileName = fullfile(RefDir, FileList(nn).name);
+        MatFileObj = matfile(FileName);
+        RefStruct = MatFileObj.RefStruct; % extract RefStruct from file
+        if obj.UseManualFindCell && (nn==StartCell)
+            % Allow the user to manually identify the cell (if requested).
+            Success = obj.findCoverSlipOffset_Manual(RefStruct);
+            if ~Success
+                % The coverslip offset find procedure was not succesful, do 
+                % not proceed.
+                return
+            end
+        end
+        
+        % Update the CoverSlipOffset to account for the observed drift on
+        % the previous cell.
+        if nn == StartCell
+            % Ensure the error signal in AlignReg is set to its default, 
+            % just in case it was changed (e.g. if an acquisition was 
+            % previously performed and the class didn't get cleared).
+            obj.AlignReg.ErrorSignalHistory = zeros(0, 3);
+        else
+            % Ignore the parts of the error signal history for which the
+            % polynomial fitting procedure wasn't succesful.
+            % NOTE: This will only include updates to the CoverslipOffset
+            %       when the fitting was succesful in all three dimensions.
+            %       This should be done because when the fit fails along
+            %       one of the dimensions, the other two dimensions might
+            %       be fitting local maxima and thus providing inaccurate
+            %       offsets. 
+            FitSuccess = all(obj.AlignReg.OffsetFitSuccessHistory, 2);
+            CoverslipOffsetUpdate = sum(obj.AlignReg.ErrorSignalHistory ...
+                .* FitSuccess) * 1e-3; % mm
+            obj.CoverSlipOffset = obj.CoverSlipOffset ...
+                - CoverslipOffsetUpdate;
+        end
+        
+        % Begin the acquisition for the current cell.
+        obj.startSequence(RefStruct, obj.LabelIdx);
     end
 end
 
