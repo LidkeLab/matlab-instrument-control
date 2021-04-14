@@ -218,7 +218,6 @@ for ii = 1:obj.NumberOfSequences
             obj.save2hdf5(FileH5, SequenceName);
             fprintf('Exportables from exportState() have been saved\n')
             obj.StatusString = '';
-            fprintf('Saving exportables from exportState() complete\n')
             
             % Begin writing the data.
             MIC_H5.writeAsync_uint16(...

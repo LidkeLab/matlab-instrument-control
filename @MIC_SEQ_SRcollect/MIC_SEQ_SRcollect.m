@@ -55,7 +55,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
-        CoverslipZPosition = 1; % relative pos. of coverslip to stage
+        CoverslipZPosition = 1.2; % relative pos. of coverslip to stage
         OnDuringFocus647 = 0; % flag indicates 647nm laser on for focusing
         OnDuringSequence647 = 0; % flag indicates 647nm on for sequence
         OnDuringFocus405 = 0; % flag indicates 405nm laser on for focusing
@@ -389,7 +389,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.UseStackCorrelation = obj.UseStackCorrelation;
             obj.AlignReg.CameraTriggerMode = 'software'; 
             obj.AlignReg.Tol_X = obj.Reg3DXTol;
-            obj.AlignReg.Tol_Y = obj.Reg3DZTol;
+            obj.AlignReg.Tol_Y = obj.Reg3DYTol;
             obj.AlignReg.Tol_Z = obj.Reg3DZTol;
         end
         
