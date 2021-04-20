@@ -54,10 +54,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         Image_Reference     % reference image
         Image_Current       % current image
         ReferenceStack;     % reference stack to compare to in stack corr.
+        ReferenceStackFull  % ref. stack before averaging over NMean images
         ZStack              % acquired zstack
+        ZStackFull          % acquired zstack before averaging over NMean images
         ZStack_MaxDev=0.5;  % distance from current zposition where to start and end zstack (um)
         ZStack_Step=0.05;   % z step size for zstack acquisition (um)
         ZStack_Pos;         % z positions where a frame should be acquired in zstack (um)
+        NMean=1;              % # of images taken (then averaged) at each z position 
         ZStackMaxDevInitialReg = 1; % max. dev. in z for initial reg.
         XYBorderPx = 10; % # of px. to remove from x and y borders.
         StageSettlingTime = 0; % time for stage to settle after moving (s)
@@ -357,7 +360,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
             
-            % Collect the full size z-stack (which can be used for intiial
+            % Collect the full size z-stack (which can be used for initial
             % registration) and store it in obj.ReferenceStack.
             obj.collect_zstack(obj.ZStackMaxDevInitialReg);
             obj.ReferenceStack = obj.ZStack;
@@ -703,7 +706,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
         end
         
-        function collect_zstack(obj, ZStackMaxDev, ZStackStep)
+        function collect_zstack(obj, ZStackMaxDev, ZStackStep, NMean)
             % collect_zstack Collects Zstack 
             
             % Set defaults if not passed as inputs to this method.
@@ -712,6 +715,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
             if ~exist('ZStackStep', 'var')
                 ZStackStep = obj.ZStack_Step; % microns
+            end
+            if ~exist('NMean', 'var')
+                NMean = obj.NMean; % # of images per z position
             end
             
             % get current position of stage
@@ -764,7 +770,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 % Change the sequence length property of the camera, saving
                 % the old value so that we can undo this change later on.
                 PreviousSequenceLength = obj.CameraObj.SequenceLength; 
-                obj.CameraObj.SequenceLength = N; % change back later on
+                obj.CameraObj.SequenceLength = N * NMean; % change back later on
                 
                 % Setup the acquisition to prepare for the triggered
                 % captures. 
@@ -801,11 +807,17 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % When TriggerMode is 'software', we're doing a
                     % triggered capture sequence and must fire the trigger
                     % and collect the stack at the end.
-                    obj.CameraObj.fireTrigger(); 
+                    for ii = 1:NMean
+                        obj.CameraObj.fireTrigger();
+                    end
                 else
-                    % Capture the image as usual. 
-                    obj.ZStack(:, :, nn) = single(...
-                        obj.CameraObj.start_capture);
+                    % Capture the image as usual.
+                    CurrentStack = zeros(size(obj.ZStack), [1, 2, NMean]);
+                    for ii = 1:NMean
+                        CurrentStack(:, :, ii) = obj.CameraObj.start_capture();
+                    end
+                    obj.ZStackFull(:, :, nn, :) = single(CurrentStack);
+                    obj.ZStack(:, :, nn) = single(mean(CurrentStack, 4));
                 end
                 
                 % Remove the characters identifying stack index and stack
@@ -824,8 +836,15 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % triggers were fired.  Also, we need to 'clean up' our changes
             % made to camera parameters (e.g. the length of a sequence). 
             if strcmpi(obj.CameraTriggerMode, 'software')
-                obj.ZStack = single(...
-                    obj.CameraObj.FinishTriggeredCapture(N));
+                CurrentStack = single(...
+                    obj.CameraObj.FinishTriggeredCapture(N * NMean));
+                obj.ZStackFull = [];
+                for ii = 1:N
+                    ZIndicesToAverage = (1:NMean) + (ii-1)*NMean;
+                    obj.ZStackFull(:, :, ii, :) = ...
+                        CurrentStack(:, :, ZIndicesToAverage);
+                end
+                obj.ZStack = mean(obj.ZStackFull, 4);
                 obj.CameraObj.SequenceLength = PreviousSequenceLength;
             end
             
@@ -1074,9 +1093,15 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             if ~isempty(obj.ZStack)
                 Data.ZStack = obj.ZStack;
             end
+            if ~isempty(obj.ZStackFull)
+                Data.ZStackFull = obj.ZStackFull;
+            end
             if ~isempty(obj.ReferenceStack)
                 Data.ReferenceStack = obj.ReferenceStack;
-            end  
+            end
+            if ~isempty(obj.ReferenceStackFull)
+                Data.ReferenceStackFull = obj.ReferenceStackFull;
+            end
             if ~isempty(obj.ZStack)
                 Data.CurrentStack = obj.ZStack; 
             end

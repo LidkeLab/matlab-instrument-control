@@ -88,6 +88,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseBrightfieldReg = 1; % boolean: 1 uses registration, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
+        NMean = 10; % # of images averaged at each z position
         Reg3DStepSize = 0.1; % (um) step size along z during cell reg. default=0.1
         Reg3DMaxDev = 1; % (um) max deviation along z during cell reg. default=1
         Reg3DMaxDevInit = 1; % (um) max dev. along z for initial cell reg.
@@ -382,6 +383,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Modify properties of the registration object as needed.
             obj.AlignReg.ChangeExpTime = 1;
             obj.AlignReg.ExposureTime = obj.ExposureTimeCapture;
+            obj.AlignReg.NMean = obj.NMean;
             obj.AlignReg.ZStackMaxDevInitialReg = obj.Reg3DMaxDevInit;
             obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
             obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
