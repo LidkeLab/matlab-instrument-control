@@ -403,6 +403,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
             obj.StageStepper.moveToPosition(3, 4); % z stepper
+            obj.StagePiezo.center();
             
             % Clear the coverslip offset (this will no longer be a valid
             % offset, but might cause other problems if not reset).
@@ -417,6 +418,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StatusString = 'Loading the sample...';
             
             % Lower the sample stage towards the objective
+            obj.StagePiezo.center();
             obj.StageStepper.moveToPosition(1, 2.0650); % y stepper
             obj.StageStepper.moveToPosition(2, 2.2780); % x stepper
             obj.StageStepper.moveToPosition(3, obj.CoverslipZPosition); % z stepper
