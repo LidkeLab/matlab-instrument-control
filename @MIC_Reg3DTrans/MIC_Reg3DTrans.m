@@ -823,7 +823,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         CurrentStack(:, :, ii) = obj.CameraObj.start_capture();
                     end
                     obj.ZStackFull(:, :, nn, :) = single(CurrentStack);
-                    obj.ZStack(:, :, nn) = single(mean(CurrentStack, 4));
+                    obj.ZStack(:, :, nn) = single(median(CurrentStack, 4));
                 end
                 
                 % Remove the characters identifying stack index and stack
@@ -850,7 +850,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     obj.ZStackFull(:, :, ii, :) = ...
                         CurrentStack(:, :, ZIndicesToAverage);
                 end
-                obj.ZStack = mean(obj.ZStackFull, 4);
+                obj.ZStack = median(obj.ZStackFull, 4);
                 obj.CameraObj.SequenceLength = PreviousSequenceLength;
             end
             
