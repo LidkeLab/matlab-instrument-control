@@ -72,7 +72,7 @@ if obj.UseBrightfieldReg
     obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
     obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
     obj.AlignReg.NMean = obj.NMeanInitial;
-    obj.AlignReg.MaxIterInitial = obj.MaxIterInitial;
+    obj.AlignReg.MaxIter = obj.MaxIterInitial;
     obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
     obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
     try
