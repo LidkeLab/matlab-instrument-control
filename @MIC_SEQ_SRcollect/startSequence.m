@@ -46,13 +46,15 @@ end
 % Attempt to move to the cell of interest.
 % NOTE: The stepper channels are in the order [y, x, z], but
 %       RefStruct.StepperPos is in the order [x, y, z].
+obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 obj.StageStepper.moveToPosition(1, ...
     RefStruct.StepperPos(2) + obj.CoverSlipOffset(2));
 obj.StageStepper.moveToPosition(2, ...
     RefStruct.StepperPos(1) + obj.CoverSlipOffset(1));
 obj.StageStepper.moveToPosition(3, ...
     RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
-obj.StagePiezo.center(); % center the piezos to ensure full range of motion
+obj.CoverslipOffsetHistory = [obj.CoverslipOffsetHistory; ...
+    obj.CoverSlipOffset];
 
 % Attempt to align the cell to the reference image in brightfield (if
 % requested).
@@ -69,6 +71,7 @@ if obj.UseBrightfieldReg
     obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
     obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
     obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
+    obj.AlignReg.NMean = obj.NMeanInitial;
     obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
     obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
     try
@@ -167,6 +170,7 @@ for ii = 1:obj.NumberOfSequences
         obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
         obj.CameraSCMOS.setup_acquisition();
         obj.AlignReg.IsInitialRegistration = 0; % indicate periodic reg.
+        obj.AlignReg.NMean = obj.NMean;
         try
             obj.AlignReg.align2imageFit();
         catch

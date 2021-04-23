@@ -12,6 +12,7 @@ function saveReferenceImage(obj)
         pause(obj.LampWait);
         obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
         obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
+        obj.AlignReg.NMean = obj.NMeanInitial;
         obj.AlignReg.takeRefStack();
         RefStruct.ReferenceStack = obj.AlignReg.ReferenceStack;
         

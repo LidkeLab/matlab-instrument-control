@@ -30,7 +30,6 @@ end
 FileList = dir(fullfile(RefDir, 'Reference_Cell*'));
 NumCells = numel(FileList);
 
-
 % Proceed with the data acquisition, looping through each of the cells
 % specified in the FileList.
 obj.Shutter.close(); % close shutter before the laser turns on

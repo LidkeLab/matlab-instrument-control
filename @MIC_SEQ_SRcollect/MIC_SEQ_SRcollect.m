@@ -13,6 +13,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 % First version: Sheng Liu 
 % Second version: Farzin Farzam  
 % MIC compatible version: Farzin Farzam
+% Misc. revisions and additions + new GUI: David J. Schodt
 % Lidke Lab 2017
 % old version of this code is named SeqAutoCollect.m and can be found at
 % documents>MATLAB>Instrumentation>development>SeqAutoCollect
@@ -82,19 +83,22 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         CurrentCellIdx = 1;
         CurrentGridIdx = [1, 1];
         CoverSlipOffset = [0, 0, 0]; % Remounting error (mm)
+        CoverslipOffsetHistory = [0, 0, 0]; % offset used for each cell
         
         % Registration classes.
         AlignReg; % brightfield alignment object
         UseBrightfieldReg = 1; % boolean: 1 uses registration, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
-        NMean = 10; % # of images averaged at each z position
+        NMeanInitial = 10; % # of images averaged at each z pos. for ref.
+        NMean = 1; % # of images averaged at each z after first sequence
         Reg3DStepSize = 0.1; % (um) step size along z during cell reg. default=0.1
         Reg3DMaxDev = 1; % (um) max deviation along z during cell reg. default=1
         Reg3DMaxDevInit = 1; % (um) max dev. along z for initial cell reg.
         Reg3DXTol = 0.005; % (um) correction along x to claim convergence
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
         Reg3DZTol = 0.05; % (um) correction along z to claim convergence
+        MinPeakCorr = 0.5; % min. value of corr. to deem success
         
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
@@ -217,6 +221,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             Attributes.LaserPowerSequence405 = obj.LaserPowerSequence405;
             Attributes.UsePreActivation = obj.UsePreActivation;
             Attributes.DurationPreActivation = obj.DurationPreActivation;
+            Attributes.CoverslipOffsetHistory = obj.CoverslipOffsetHistory;
             
             % Store the Data to be exported.
             Data = [];
@@ -383,7 +388,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             % Modify properties of the registration object as needed.
             obj.AlignReg.ChangeExpTime = 1;
             obj.AlignReg.ExposureTime = obj.ExposureTimeCapture;
-            obj.AlignReg.NMean = obj.NMean;
+            obj.AlignReg.NMean = obj.NMeanInitial; % might change in startSequence
             obj.AlignReg.ZStackMaxDevInitialReg = obj.Reg3DMaxDevInit;
             obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
             obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
@@ -393,6 +398,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.Tol_X = obj.Reg3DXTol;
             obj.AlignReg.Tol_Y = obj.Reg3DYTol;
             obj.AlignReg.Tol_Z = obj.Reg3DZTol;
+            obj.AlignReg.MinPeakCorr = obj.MinPeakCorr;
         end
         
         function unloadSample(obj)
