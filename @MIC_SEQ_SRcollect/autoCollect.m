@@ -64,6 +64,7 @@ for ii = 1:obj.NAcquisitionCycles
             % just in case it was changed (e.g. if an acquisition was 
             % previously performed and the class didn't get cleared).
             obj.AlignReg.ErrorSignalHistory = zeros(0, 3);
+            obj.CoverslipOffsetHistory = obj.CoverSlipOffset;
         else
             % Ignore the parts of the error signal history for which the
             % polynomial fitting procedure wasn't succesful.
@@ -78,6 +79,8 @@ for ii = 1:obj.NAcquisitionCycles
                 .* FitSuccess) * 1e-3; % mm
             obj.CoverSlipOffset = obj.CoverSlipOffset ...
                 - CoverslipOffsetUpdate;
+            obj.CoverslipOffsetHistory = [obj.CoverslipOffsetHistory; ...
+                obj.CoverSlipOffset];
         end
         
         % Begin the acquisition for the current cell.
