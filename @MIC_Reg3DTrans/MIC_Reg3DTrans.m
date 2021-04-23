@@ -75,6 +75,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZFitModel;          % fitted line though auto correlations
         ZMaxAC;             % autocorrelations of zstack
         maxACmodel;
+        MinPeakCorr=0.7; % min. corr. allowed to be considered successful
         UseStackCorrelation = 0; % use 3D stack correlation reg. method
         UseGPU = 1; % if UseStackCorrelation, use GPU for findStackOffset
         MaxOffsetScaleIter = 2; % max # of scaling iter. for MaxOffset
@@ -547,7 +548,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
-                    [PixelOffset, SubPixelOffset, ~, MaxOffset] ...
+                    [PixelOffset, SubPixelOffset, CorrData, MaxOffset] ...
                         = obj.findStackOffset(RefStack, CurrentStack, ...
                         MaxOffset, [], [], [], obj.UseGPU);
                     
@@ -580,7 +581,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         
                         % Determine a predicted offset between the two
                         % stacks.
-                        [PixelOffset, SubPixelOffset, ~, MaxOffset] = ...
+                        [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
                             obj.findStackOffset(RefStack, CurrentStack, ...
                             MaxOffsetInput, [], [], [], obj.UseGPU);
                         
@@ -598,6 +599,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         .* (abs(PixelOffset-SubPixelOffset) > 0.5);
                     obj.OffsetFitSuccess = ...
                         (abs(PixelOffset-SubPixelOffset) <= 0.5).';
+                    
+                    % Flag low correlation values to indicate a potential
+                    % failure.
+                    obj.OffsetFitSuccess = obj.OffsetFitSuccess ...
+                        * (max(CorrData(:))>=obj.MinPeakCorr);
                     obj.OffsetFitSuccessHistory = ...
                         [obj.OffsetFitSuccessHistory; ...
                         obj.OffsetFitSuccess];
@@ -1077,6 +1083,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             Attribute.MaxZShift = obj.MaxZShift;
             Attribute.IsInitialRegistration = obj.IsInitialRegistration;
             Attribute.UseStackCorrelation = obj.UseStackCorrelation;
+            Attribute.MinPeakCorr = obj.MinPeakCorr;
             
             Data.Image_Reference = obj.Image_Reference;
             Data.Image_Current = obj.Image_Current;
