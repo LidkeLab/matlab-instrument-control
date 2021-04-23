@@ -99,6 +99,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
         Reg3DZTol = 0.05; % (um) correction along z to claim convergence
         MinPeakCorr = 0.5; % min. value of corr. to deem success
+        MaxIterInitial = 10; % max. alignment iteration attempts for cell finding
+        MaxIter = 5; % max. alignment iteration attempts for later sequences
         
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory
@@ -389,6 +391,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.ChangeExpTime = 1;
             obj.AlignReg.ExposureTime = obj.ExposureTimeCapture;
             obj.AlignReg.NMean = obj.NMeanInitial; % might change in startSequence
+            obj.AlignReg.MaxIter = obj.MaxIterInitial; % might change in startSequence
             obj.AlignReg.ZStackMaxDevInitialReg = obj.Reg3DMaxDevInit;
             obj.AlignReg.ZStack_MaxDev = obj.Reg3DMaxDev;
             obj.AlignReg.ZStack_Step = obj.Reg3DStepSize;
