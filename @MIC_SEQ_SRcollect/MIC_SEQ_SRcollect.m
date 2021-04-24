@@ -98,7 +98,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         Reg3DXTol = 0.005; % (um) correction along x to claim convergence
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
         Reg3DZTol = 0.05; % (um) correction along z to claim convergence
-        MinPeakCorr = 0.5; % min. value of corr. to deem success
+        MinPeakCorr = 0.7; % min. value of corr. to deem success
         MaxIterInitial = 10; % max. alignment iteration attempts for cell finding
         MaxIter = 10; % max. alignment iteration attempts for later sequences
         
