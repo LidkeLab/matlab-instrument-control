@@ -51,8 +51,12 @@ obj.StageStepper.moveToPosition(1, ...
     RefStruct.StepperPos(2) + obj.CoverSlipOffset(2));
 obj.StageStepper.moveToPosition(2, ...
     RefStruct.StepperPos(1) + obj.CoverSlipOffset(1));
-obj.StageStepper.moveToPosition(3, ...
-    RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
+if ((RefStruct.StepperPos(3)+obj.CoverSlipOffset(3)) > obj.MinAllowableZ)
+    obj.StageStepper.moveToPosition(3, ...
+        RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
+else
+    obj.StageStepper.moveToPosition(3, obj.MinAllowableZ);
+end
 
 % Attempt to align the cell to the reference image in brightfield (if
 % requested).
@@ -159,6 +163,27 @@ for ii = 1:obj.NumberOfSequences
     % sequences have been collected.
     if obj.UseBrightfieldReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
             && ~(ii == 1)
+        % Update the position using the stepper motors.
+        if all(any(obj.AlignReg.OffsetFitSuccessHistory, 1))
+            % We only want to risk using the stepper updates if the
+            % previous fits were successful.
+            % NOTE: obj.CoverSlipOffset only gets updated when
+            %       OffsetFitSuccessHistory is true.
+            obj.StagePiezo.center();
+            obj.StageStepper.moveToPosition(1, ...
+                RefStruct.StepperPos(2) + obj.CoverSlipOffset(2));
+            obj.StageStepper.moveToPosition(2, ...
+                RefStruct.StepperPos(1) + obj.CoverSlipOffset(1));
+            if ((RefStruct.StepperPos(3)+obj.CoverSlipOffset(3)) ...
+                    > obj.MinAllowableZ)
+                obj.StageStepper.moveToPosition(3, ...
+                    RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
+            else
+                obj.StageStepper.moveToPosition(3, obj.MinAllowableZ);
+            end
+        end
+        
+        % Perform the brightfield registration (this only uses the piezos).
         obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
             'Attempting periodic registration...'], ...
             RefStruct.CellIdx, ii);

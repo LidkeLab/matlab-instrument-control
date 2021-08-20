@@ -90,7 +90,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         UseBrightfieldReg = 1; % boolean: 1 uses registration, 0 doesn't
         UseStackCorrelation = 1; % boolean: 1 uses full stack registration
         NSeqBeforePeriodicReg = 1; % seq. collected before periodic reg.
-        NMeanInitial = 5; % # of images averaged at each z pos. for ref.
+        NMeanInitial = 3; % # of images averaged at each z pos. for ref.
         NMean = 1; % # of images averaged at each z after first sequence
         Reg3DStepSize = 0.1; % (um) step size along z during cell reg. default=0.1
         Reg3DMaxDev = 1; % (um) max deviation along z during cell reg. default=1
@@ -99,6 +99,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
         Reg3DZTol = 0.05; % (um) correction along z to claim convergence
         MinPeakCorr = 0.7; % min. value of corr. to deem success
+        MinAllowableZ = 0.9; % min. allowed z value as seen by stepper motor
         MaxIterInitial = 10; % max. alignment iteration attempts for cell finding
         MaxIter = 10; % max. alignment iteration attempts for later sequences
         
