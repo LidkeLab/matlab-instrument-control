@@ -164,7 +164,7 @@ for ii = 1:obj.NumberOfSequences
     if obj.UseBrightfieldReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
             && ~(ii == 1)
         % Update the position using the stepper motors.
-        if all(any(obj.AlignReg.OffsetFitSuccessHistory, 1))
+        if all(obj.AlignReg.OffsetFitSuccess)
             % We only want to risk using the stepper updates if the
             % previous fits were successful.
             % NOTE: obj.CoverSlipOffset only gets updated when

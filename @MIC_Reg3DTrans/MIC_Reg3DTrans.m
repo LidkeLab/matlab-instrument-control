@@ -465,49 +465,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 end
                 
                 if obj.UseStackCorrelation                    
-                    % Attempt to select an appropriate value of the
-                    % MaxOffset parameter.
-                    if iter == 0
-                        % Always use a large offset for the first
-                        % iteration (especially needed along z).
-                        if obj.IsInitialRegistration
-                            % If this is the initial brightfield
-                            % registration (e.g. if we are finding the cell
-                            % for first time since the reference was taken
-                            % and the shift might be large) we should use
-                            % a very large offset.
-                            MaxOffset = [30; 30; 30];
-                        else
-                            % We should still use a large offset, but we
-                            % don't expect the offset to be as great as it
-                            % would be for the initial registration.
-                            MaxOffset = [10; 10; 10];
-                        end
-                    elseif any(abs(SubPixelOffset) > MaxOffset)
-                        % If the offset predicted by the polynomial fit was
-                        % greater than the inspected offset, we should
-                        % increase the offset to attempt to capture the
-                        % true peak.
-                        % NOTE: If the peak occured outside the selected
-                        %       MaxOffset, we set the new MaxOffset (in 
-                        %       that dimension) to the SubPixelOffset
-                        %       with the goal being to capture the peak on
-                        %       the next iteration (we don't want to make
-                        %       the offset too great though or we'll start
-                        %       to see edge effects of the xcorr).
-                        SelectBit = abs(SubPixelOffset) > MaxOffset;
-                        MaxOffset = ...
-                            SelectBit .* ceil((abs(SubPixelOffset))) ...
-                            + ~SelectBit .* MaxOffset;
-                    else
-                        % In this case, we seem to be close to the peak and
-                        % can reduce the MaxOffset to speed things up.
-                        MaxOffset = [5; 5; 5];
-                    end
-                    
                     % Collect a z-stack whose size depends on whether we
                     % are performing an initial registration step or a
                     % periodic re-registration step.
+                    MaxOffset = [100; 100; 20];
                     if obj.IsInitialRegistration
                         % Acquire a large z-stack for the current stage
                         % location.
