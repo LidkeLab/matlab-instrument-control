@@ -168,7 +168,7 @@ for ii = 1:obj.NumberOfSequences
             % We only want to risk using the stepper updates if the
             % previous fits were successful.
             % NOTE: obj.CoverSlipOffset only gets updated when
-            %       OffsetFitSuccessHistory is true.
+            %       OffsetFitSuccess is true.
             obj.StagePiezo.center();
             obj.StageStepper.moveToPosition(1, ...
                 RefStruct.StepperPos(2) + obj.CoverSlipOffset(2));
@@ -256,6 +256,18 @@ for ii = 1:obj.NumberOfSequences
     end
     obj.Shutter.close(); % block 647nm from reaching sample
     obj.Laser405.off(); % ensure the 405nm is turned off
+        
+    % Update the coverslip offset.
+    if all(obj.AlignReg.OffsetFitSuccess)
+        CurrentStepperPosition = [obj.StageStepper.getPosition(2), ...
+            obj.StageStepper.getPosition(1), ...
+            obj.StageStepper.getPosition(3)];
+        obj.CoverSlipOffset = ...
+            (CurrentStepperPosition-RefStruct.StepperPos) ...
+            + 1e-3*(obj.StagePiezo.Position-RefStruct.PiezoPos);
+    end
+    obj.CoverslipOffsetHistory = [obj.CoverslipOffsetHistory; ...
+        obj.CoverSlipOffset];
     
     % If needed, pause before proceeding to the next sequence (this is
     % useful for test conditions, probably not for a normal acquisition).

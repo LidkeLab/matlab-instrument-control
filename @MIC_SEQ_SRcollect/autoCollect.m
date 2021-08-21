@@ -65,25 +65,6 @@ for ii = 1:obj.NAcquisitionCycles
             % previously performed and the class didn't get cleared).
             obj.AlignReg.ErrorSignalHistory = zeros(0, 3);
             obj.CoverslipOffsetHistory = obj.CoverSlipOffset;
-        else
-            % Ignore the parts of the error signal history for which the
-            % polynomial fitting procedure wasn't succesful.
-            % NOTE: This will only include updates to the CoverslipOffset
-            %       when the fitting was succesful in all three dimensions.
-            %       This should be done because when the fit fails along
-            %       one of the dimensions, the other two dimensions might
-            %       be fitting local maxima and thus providing inaccurate
-            %       offsets. 
-            if all(obj.AlignReg.OffsetFitSuccess)
-                CurrentStepperPosition = [obj.StageStepper.getPosition(2), ...
-                    obj.StageStepper.getPosition(1), ...
-                    obj.StageStepper.getPosition(3)];
-                obj.CoverSlipOffset = ...
-                    (RefStruct.StepperPos-CurrentStepperPosition) ...
-                    + 1e-3*(RefStruct.PiezoPos-obj.StagePiezo.Position);
-            end
-            obj.CoverslipOffsetHistory = [obj.CoverslipOffsetHistory; ...
-                obj.CoverSlipOffset];
         end
         
         % Begin the acquisition for the current cell.

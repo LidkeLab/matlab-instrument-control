@@ -468,7 +468,6 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % Collect a z-stack whose size depends on whether we
                     % are performing an initial registration step or a
                     % periodic re-registration step.
-                    MaxOffset = [100; 100; 20];
                     if obj.IsInitialRegistration
                         % Acquire a large z-stack for the current stage
                         % location.
@@ -506,6 +505,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     CurrentStack = obj.ZStack(...
                         obj.XYBorderPx:end-obj.XYBorderPx, ...
                         obj.XYBorderPx:end-obj.XYBorderPx, :);
+                    MaxOffset = [50, 50, 20];
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
