@@ -582,7 +582,7 @@ gui2properties();
         Zrange = [str2double(ZrangeStr(1:idx(1)-1)),...
             str2double(ZrangeStr(idx(1)+1:idx(2)-1)),...
             str2double(ZrangeStr(idx(2)+1:end))];
-        z0=obj.Piezo.CurrentPosition;
+        z0=obj.StageObj.StagePiezoZ.CurrentPosition;
         z = Zrange(1):Zrange(2):Zrange(3);
         dataset=[];
         %Setup Camera
@@ -593,14 +593,14 @@ gui2properties();
         laserOnPSF();
         pause(.25);
         for ii=1:length(z)
-            obj.Piezo.setPosition(z0+z(ii))
+            obj.StageObj.StagePiezoZ.setPosition(z0+z(ii))
             pause(.1);
             sequence=obj.Camera.start_sequence();
             dataset=cat(4,dataset,sequence);
         end
         %Turn off Laser and reset Piezo
         laserOffPSF();
-        obj.Piezo.setPosition(z0);
+        obj.StageObj.StagePiezoZ.setPosition(z0);
         % show data
         dipshow(permute(squeeze(mean(dataset,3)),[2,1,3]));
         % save data
@@ -615,7 +615,7 @@ gui2properties();
 
     function Attributes = getAttributes()
         Attributes.Camera = obj.Camera.exportState();
-        Attributes.Piezo = obj.Piezo.exportState();
+        Attributes.Piezo = obj.StageObj.StagePiezoZ.exportState();
         Attributes.Laser405 = obj.Laser405.exportState();
         Attributes.Laser488 = obj.Laser488.exportState();
         Attributes.Laser561 = obj.Laser561.exportState();
