@@ -18,10 +18,10 @@ classdef MIC_Joystick < handle
     %                JS=MIC_Joystick()
     %                JS.StageObj=Stg
     %                JS.gui
-
     % REQUIRES:
     % MIC_MCLNanoDrive
     % HebiJoystick: https://www.mathworks.com/matlabcentral/fileexchange/61306-hebirobotics-matlabinput
+    
     properties
         JS_activate=0  %used to control when Joystick is on
         FigGUI         %Figure for your GUI
