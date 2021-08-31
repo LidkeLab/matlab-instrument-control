@@ -119,15 +119,4 @@ void dcam_test_dcamwait( HDCAM hdcam, int nTimes )
 
 		putchar( c );
 	}
-
-	mexPrintf( "\n" );
-	mexPrintf( "FRAMESTART:"	"\t%d\n", nFRAMESTART	);
-	mexPrintf( "FRAMEEND:"		"\t%d\n", nFRAMEEND		);
-	mexPrintf( "CYCLEEND:"		"\t%d\n", nCYCLEEND		);
-	mexPrintf( "VVALIDBEGIN:"	"\t%d\n", nVVALIDBEGIN	);
-	if( nUNKNOWNEVENT != 0 )
-	mexPrintf( "UNKNOWNEVENT:"	"\t%d\n", nUNKNOWNEVENT	);
-	mexPrintf( "TIMEOUT:"		"\t%d\n", nTIMEOUT		);
-	if( nERROR != 0 )
-	mexPrintf( "ERROR:"		"\t%d\n", nERROR		);
 }

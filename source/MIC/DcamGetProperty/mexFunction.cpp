@@ -15,12 +15,12 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	bool	test = false;
 	
 	// grab the inputs from MATLAB and check their types before proceeding.
-	Handle = (long)mxGetScalar(prhs[0]);
 	if (!mxIsInt32(prhs[0]))
 		mexErrMsgTxt("camera handle must be type INT 32.");
-	PropertyID = (int32)mxGetScalar(prhs[1]);
 	if (!mxIsInt32(prhs[1]))
 		mexErrMsgTxt("property ID must be type INT 32.");
+	Handle = (long)mxGetScalar(prhs[0]);
+	PropertyID = (int32)mxGetScalar(prhs[1]);
 
 	// prepare the outputs.
 	plhs[0] = mxCreateDoubleScalar(123);

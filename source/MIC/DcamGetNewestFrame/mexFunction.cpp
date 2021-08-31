@@ -31,13 +31,10 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
     // output image
 
 
-	mexPrintf("Getting Data Size\n");
 
 	if (dcam_getdatasize(hDCAM,&ImageSize)==FALSE)
 		mexPrintf("Error = 0x%08lX\nCould not get the data size of the camera.\n",(_DWORD)dcam_getlasterror(hDCAM,NULL,0));
-	//mexPrintf("\nImage size is %ld by %ld\n",ImageSize.cx,ImageSize.cy);
 
-	mexPrintf("Getting Data Type\n");
 	if (dcam_getdatatype(hDCAM,&DataType))
 	{
 		switch (DataType) {
@@ -71,7 +68,6 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	OutImage=(unsigned short*)mxGetData(plhs[0]);
 	//mexErrMsgTxt("handle must be type INT 32.");
 
-	mexPrintf("Waiting for DCAM_EVENT_CYCLEEND\n");
 	dcam_test_dcamwait(&Signal,hDCAM,4);
 	//mexPrintf("Signal: %d\n",Signal);
 	if(Signal>0)
