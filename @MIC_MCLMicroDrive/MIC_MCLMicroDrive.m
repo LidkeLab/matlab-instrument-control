@@ -206,9 +206,9 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
                 warning('MicroDrive.dll was not selected')
                 return
             end
-            ClassPath = fileparts(which('MIC_MCLNanoDrive'));
+            ClassPath = fileparts(which('MIC_MCLMicroDrive'));
             FilePath = fullfile(ClassPath, ...
-                'MIC_MCLNanoDrive_Properties.mat');
+                'MIC_MCLMicroDrive_Properties.mat');
             DLLPath = obj.DLLPath;
             save(FilePath, 'DLLPath');
         end
