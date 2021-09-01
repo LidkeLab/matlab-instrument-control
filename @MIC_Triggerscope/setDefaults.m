@@ -14,9 +14,10 @@ if ~obj.IsConnected
     return
 end
 
-% Loop through all DAC ports and set the default range.
+% Loop through all DAC ports, set the default range, and force them to 0V.
 for ii = 1:obj.IOChannels
-    setDACRange(obj, ii);
+    obj.setDACRange(ii);
+    obj.setDACVoltage(ii, 0);
 end
 
 % Update obj.ActivityMessage.
