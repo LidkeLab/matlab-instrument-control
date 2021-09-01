@@ -301,7 +301,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
         [Response] = executeCommand(obj, Command);
-        [Response] = executeArrayProgram(obj, CommandSequence);
+        [Response] = executeArrayProgram(obj, CommandSequence, FastMode);
         [CommandSequence] = generateArrayProgram(obj, NLoops, Arm);
         setDefaults(obj)
         setDACRange(obj, DACIndex, Range)
