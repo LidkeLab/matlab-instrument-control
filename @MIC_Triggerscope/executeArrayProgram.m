@@ -1,4 +1,4 @@
-function [Response] = executeArrayProgram(obj, CommandSequence)
+function [Response] = executeArrayProgram(obj, CommandSequence, FastMode)
 %executeArrayProgram sends a list of commands to the Triggerscope.
 % This method will loop through a set of commands in 'CommandSequence' and
 % attempt to execute them sequentially.  The primary intention is that
@@ -9,6 +9,9 @@ function [Response] = executeArrayProgram(obj, CommandSequence)
 %   CommandSequence: A list of commands to be sent to the Triggerscope to
 %                    produce the behavior defined by the signals in
 %                    obj.SignalArray. (cell array of char array)
+%   FastMode: If used, commands are sent as fast as possible to the
+%             Triggerscope, without pausing or waiting for a response.
+%             (Default = false)
 %
 % OUTPUTS:
 %   Response: A cell array of char arrays, with each element corresponding
@@ -20,11 +23,24 @@ function [Response] = executeArrayProgram(obj, CommandSequence)
 %   David J. Schodt (Lidke Lab, 2021)
 
 
+% Set defaults if needed.
+if (~exist('FastMode', 'var') || isempty(FastMode))
+    FastMode = false;
+end
+
 % Loop through all commands and execute them.
 NCommands = numel(CommandSequence);
 Response = cell(NCommands, 1);
-for cc = 1:NCommands
-    Response{cc} = obj.executeCommand(CommandSequence{cc});
+if FastMode
+    % When using FastMode, we don't want the extra "safety features" used
+    % in executeCommand().
+    for cc = 1:NCommands
+        obj.writeCommand(CommandSequence{cc});
+    end
+else
+    for cc = 1:NCommands
+        Response{cc} = obj.executeCommand(CommandSequence{cc});
+    end
 end
 
 
