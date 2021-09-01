@@ -303,6 +303,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         [Response] = executeCommand(obj, Command);
         [Response] = executeArrayProgram(obj, CommandSequence);
         [CommandSequence] = generateArrayProgram(obj, NLoops, Arm);
+        setDefaults(obj)
         setDACRange(obj, DACIndex, Range)
         setDACVoltage(obj, DACIndex, Voltage)
         setTTLState(obj, TTLIndex, State)

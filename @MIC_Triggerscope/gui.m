@@ -283,6 +283,7 @@ propertiesToGUI();
             obj.disconnectTriggerscope()
         else
             obj.connectTriggerscope()
+            obj.setDefaults()
         end
     end
 
