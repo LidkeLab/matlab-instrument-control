@@ -255,8 +255,8 @@ propertiesToGUI();
         % controls in this GUI.
         
         % Update the serial port popup menu.
-        obj.SerialPort = ControlHandles.SerialPortPopup.String(...
-            ControlHandles.SerialPortPopup.Value);
+        obj.SerialPort = ControlHandles.SerialPortPopup.String{...
+            ControlHandles.SerialPortPopup.Value};
         
         % Update the status of the TTL channels.
         for ii = 1:numel(obj.TTLStatus)
