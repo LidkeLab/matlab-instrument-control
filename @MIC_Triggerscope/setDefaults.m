@@ -16,6 +16,9 @@ end
 
 % Loop through all DAC ports, set the default range, and force them to 0V.
 for ii = 1:obj.IOChannels
+    % NOTE: Due to a "bug"(?) on Triggerscope3B, we need to set the DAC
+    %       range twice on the first pass.
+    obj.setDACRange(ii);
     obj.setDACRange(ii);
     obj.setDACVoltage(ii, 0);
 end
