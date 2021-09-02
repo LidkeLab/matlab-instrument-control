@@ -10,13 +10,10 @@ classdef MIC_MCLPiezoObj < MIC_LinearStage_Abstract
     %
     %   REQUIRES:
     %       MATLAB 2019b or higher
-<<<<<<< Updated upstream
     %       MCL Drivers installed on system.  
     
     % Update:Sajjad Khan, Lidke Lab 2021
-=======
     %       MCL Drivers installed on system.
->>>>>>> Stashed changes
     
     properties (SetAccess=protected)
         InstrumentName='MCLPiezoObj';
@@ -40,29 +37,22 @@ classdef MIC_MCLPiezoObj < MIC_LinearStage_Abstract
             obj.handle = obj.callNano('MCL_InitHandle');
             obj.Serial = obj.callNano('MCL_GetSerialNumber',obj.handle);
         end
-<<<<<<< Updated upstream
         
-=======
 
->>>>>>> Stashed changes
         function delete(obj)  % destructor
             obj.callNano('MCL_ReleaseHandle',obj.handle);
             fprintf('Handles Relaeased\n');
             obj.handle = 0;
         end
-<<<<<<< Updated upstream
         
         function getCurrentPosition(obj)            
             obj.PosRead = obj.callNano('MCL_SingleReadN',1,obj.handle);
         end
-        
-=======
 
         function getCurrentPosition(obj)            
             obj.PosRead = obj.callNano('MCL_SingleReadN',1,obj.handle);
         end
 
->>>>>>> Stashed changes
         function varargout = callNano(obj,varargin)
             % wrapper to make calls the MCL library.  There should not be
             % any real reason to call this outside of the class.
@@ -94,17 +84,12 @@ classdef MIC_MCLPiezoObj < MIC_LinearStage_Abstract
                 rethrow(ME);
             end
         end
-<<<<<<< Updated upstream
         
-=======
-
->>>>>>> Stashed changes
         function libreset()
             if  libisloaded('Madlib')
                 unloadlibrary('Madlib')
             end
         end
-<<<<<<< Updated upstream
         
         function [Attributes,Data,Children]=exportState(obj)
             Attributes.Serial = obj.Serial;
@@ -115,17 +100,5 @@ classdef MIC_MCLPiezoObj < MIC_LinearStage_Abstract
         end
         
     end
-      
-=======
 
-        function [Attributes,Data,Children]=exportState(obj)
-            Attributes.Serial = obj.Serial;
-            Attributes.PosRead = obj.PosRead;
-
-            Data=[];
-           Children=[];
-        end
-
-    end
->>>>>>> Stashed changes
 end
