@@ -107,7 +107,7 @@ classdef MIC_DMP40 < MIC_Abstract
             Attributes.IsOpen = obj.IsOpen;
             Attributes.InstrumentName = obj.InstrumentName;
             Data = [];
-            Childern = [];
+            Children = [];
         end
         
         
