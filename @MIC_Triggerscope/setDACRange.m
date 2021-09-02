@@ -16,6 +16,11 @@ function setDACRange(obj, DACIndex, VoltageRange)
 %   David J. Schodt (Lidke Lab, 2020)
 
 
+% Set defaults if needed.
+if (~exist('VoltageRange', 'var') || isempty(VoltageRange))
+    VoltageRange = [0, 5];
+end
+
 % Validate the inputs/convert VoltageRange to the format needed for sending
 % to the Triggerscope.
 assert((DACIndex>=1) && (DACIndex<=obj.IOChannels), ...

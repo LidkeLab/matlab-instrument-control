@@ -139,14 +139,16 @@ classdef MIC_Triggerscope < MIC_Abstract
                 'PostSet', @obj.updateConnectionStatus);
             
             % Set inputs to class properties if needed.
+            ReadyToConnect = false;
             if (exist('SerialPort', 'var') && ~isempty(SerialPort))
                 obj.SerialPort = SerialPort;
+                ReadyToConnect = true;
             end
             if (exist('DeviceTimeout', 'var') && ~isempty(DeviceTimeout))
                 obj.DeviceTimeout = DeviceTimeout;
             end
             if (~exist('AutoConnect', 'var') || isempty(AutoConnect))
-                AutoConnect = false;
+                AutoConnect = true;
             end
             
             % Populate the TTLStatus and DACStatus structs.
@@ -168,8 +170,9 @@ classdef MIC_Triggerscope < MIC_Abstract
             end
             
             % Attempt to connect to the Triggerscope, if requested.
-            if AutoConnect
+            if (AutoConnect && ReadyToConnect)
                 obj.connectTriggerscope();
+                obj.setDefaults();
             end
         end
         
@@ -252,6 +255,9 @@ classdef MIC_Triggerscope < MIC_Abstract
             % Find the ActivityDisplay
             ActivityDisplay = findall(obj.GUIParent, ...
                 'Tag', 'ActivityDisplay');
+            if isempty(ActivityDisplay)
+                return
+            end
             
             % Modify the text within the status box to show the current
             % activity message
@@ -267,6 +273,9 @@ classdef MIC_Triggerscope < MIC_Abstract
             % Find the ConnectionDisplay
             ConnectionDisplay = findall(obj.GUIParent, ...
                 'Tag', 'ConnectionDisplay');
+            if isempty(ConnectionDisplay)
+                return
+            end
             
             % Modify the text within the status box to show the current
             % activity message
@@ -301,8 +310,9 @@ classdef MIC_Triggerscope < MIC_Abstract
         connectTriggerscope(obj)
         disconnectTriggerscope(obj)
         [Response] = executeCommand(obj, Command);
-        [Response] = executeArrayProgram(obj, CommandSequence);
+        [Response] = executeArrayProgram(obj, CommandSequence, FastMode);
         [CommandSequence] = generateArrayProgram(obj, NLoops, Arm);
+        setDefaults(obj)
         setDACRange(obj, DACIndex, Range)
         setDACVoltage(obj, DACIndex, Voltage)
         setTTLState(obj, TTLIndex, State)
