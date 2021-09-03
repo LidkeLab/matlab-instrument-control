@@ -73,11 +73,7 @@ classdef MIC_DMP40 < MIC_Abstract
             
         end
         
-        function setZernikeModes(ZernikeArray)
-            
-            
-        end
-        
+      
         
         %gui
         function gui(obj)
