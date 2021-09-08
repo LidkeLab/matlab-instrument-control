@@ -17,6 +17,8 @@ classdef MIC_Triggerscope < MIC_Abstract
     %   Windows operating system recommended (Unix based systems might
     %       require changes to, e.g., usage/definition of obj.SerialPort,
     %       or perhaps more serious changes)
+    %   TeensyDuino serial communication driver installed 
+    %       http://www.pjrc.com/teensy/serial_install.exe
     
     % Created by:
     %   David J. Schodt (Lidke Lab, 2020)
