@@ -9,11 +9,11 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         ImageHandle;
         ReadyForAcq=0;      %If not, call setup_acquisition
         TextHandle;
-        CameraHandle;
         SDKPath;
     end
     
     properties(SetAccess=protected)
+        CameraHandle;
         CameraIndex;        %index used when more than one camera
         ImageSize;          %size of current ROI
         LastError;          %last errorcode

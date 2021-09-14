@@ -41,7 +41,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         NumFrames                       % Number of frames per sequence
         NumSequences                    % Number of sequences per acquisition
         CameraReadoutMode               % 'Slow' or 'Fast'
-        CameraROI                       % Camera ROI (see gui for specifics)
+        CameraROI                       % Absolute Pixel ROI
+        CameraROISelect                % Camera ROI (see gui for specifics)
         CameraDefectCorrection          % Camera defect correction 'OFF' or 'ON'
         PixelSizeX=[];                  % Pixel size X determined from calibration (um)
         PixelSizeY=[];                  % Pixel size Y determined from calibration (um)
@@ -82,7 +83,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
         % Registration
         RegType='Self';     % Registration type, can be 'None', 'Self'
         ExpTimeReg = 0.1;  % Camera exposure time during registration (s)
- 
+        ZStart;             %zstack absolute start position
         % Piezo
         PiezoStepSize = 0.25; % Piezo step size (um)
         StartZStack;        % Start position of Z-stack
@@ -130,21 +131,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 obj.Camera=MIC_HamamatsuCamera();
                 obj.Camera.ReturnType='matlab';
                 % Stage
-                fprintf('Initializing 3D Piezo Stage\n')
-                
-                ControllerXSerialNum='29501305';
-                ControllerYSerialNum='29501307';
-                ControllerZSerialNum='81843229';
-                StrainGaugeXSerialNum='59000121';
-                StrainGaugeYSerialNum='59000140';
-                StrainGaugeZSerialNum='84842506';
-                MaxPiezoConnectAttempts=1;
-                
-                obj.StageObj = MIC_NanoMaxPiezos(...
-                ControllerXSerialNum, StrainGaugeXSerialNum, ...
-                ControllerYSerialNum, StrainGaugeYSerialNum, ...
-                ControllerZSerialNum, StrainGaugeZSerialNum, ...
-                MaxPiezoConnectAttempts);
+                obj.setupPiezo();
     
                 %Reg3D
                 fprintf('Initializing Registration object\n')
@@ -195,6 +182,24 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             % Start gui (not using StartGUI property because GUI shouldn't
             % be started before hardware initialization)
             obj.gui();
+        end
+        
+        function setupPiezo(obj)
+            fprintf('Initializing 3D Piezo Stage\n')
+            
+            ControllerXSerialNum='29501305';
+            ControllerYSerialNum='29501307';
+            ControllerZSerialNum='81843229';
+            StrainGaugeXSerialNum='59000121';
+            StrainGaugeYSerialNum='59000140';
+            StrainGaugeZSerialNum='84842506';
+            MaxPiezoConnectAttempts=1;
+            
+            obj.StageObj = MIC_NanoMaxPiezos(...
+                ControllerXSerialNum, StrainGaugeXSerialNum, ...
+                ControllerYSerialNum, StrainGaugeYSerialNum, ...
+                ControllerZSerialNum, StrainGaugeZSerialNum, ...
+                MaxPiezoConnectAttempts);
         end
         
         function delete(obj)
@@ -373,6 +378,9 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             
             switch obj.RegType
                 case 'Self' %take and save the reference stack
+                    Pos=obj.StageObj.Position;
+                    z0=Pos(3); %z position
+                    obj.ZStart=z0;
                     obj.R3DObj.takerefimage();
                     f=fullfile(obj.SaveDir,[obj.BaseFileName s '_ReferenceImage']);
                     Image_Reference=obj.R3DObj.Image_Reference; 
@@ -395,12 +403,12 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             Pos=obj.StageObj.Position;
             z0=Pos(3); %z position
             if obj.Zstack
-                ZRange = obj.StartZStack : obj.PiezoStepSize : obj.EndZStack;
+                ZRange = z0-(obj.StartZStack : obj.PiezoStepSize : obj.EndZStack);
             else
-                ZRange = z0;
+                ZRange = 0;
             end
             
-            % calc Grange for Galvo
+            % calc Grange for Galvo- FIX based on relative z0
             g0 = obj.Galvo.Voltage;
             if obj.Zstack
                 switch obj.MirrorPosition
@@ -422,7 +430,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                 if obj.AbortNow; obj.AbortNow=0; break; end
                 
                 % move piezo
-                obj.StageObj.StagePiezoZ.setPosition(ZRange(1));
+                obj.StageObj.StagePiezoZ.setPosition(obj.ZStart);
                 % move galvo
                 obj.Galvo.setVoltage(GRange(1));
                 pause(0.1) % wait for piezo and galvo to finish move
@@ -441,7 +449,10 @@ classdef MIC_RB_SRcollect < MIC_Abstract
                     if obj.AbortNow; break; end
  
                     % move piezo
-                    obj.StageObj.StagePiezoZ.setPosition(ZRange(kk));
+                    Pos=obj.StageObj.Position;
+                    z0=Pos(3); %z position
+                    
+                    obj.StageObj.StagePiezoZ.setPosition(z0+ ZRange(kk));
                     % move galvo
                     obj.Galvo.setVoltage(GRange(kk));
                     pause(0.1) % wait for piezo and galvo to finish move
@@ -540,7 +551,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
             Attributes.NumFrames = obj.NumFrames;
             Attributes.NumSequences = obj.NumSequences;
             Attributes.CameraReadoutMode = obj.CameraReadoutMode;
-            Attributes.CameraROI = obj.CameraROI;
+            Attributes.CameraROISelect = obj.CameraROISelect;
+            Attributes.CameraROI = obj.Camera.ROI;
             Attributes.CameraDefectCorrection = obj.CameraDefectCorrection;
             Attributes.PixelSizeX = obj.PixelSizeX;
             Attributes.PixelSizeY = obj.PixelSizeY;
