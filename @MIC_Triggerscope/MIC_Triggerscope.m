@@ -17,6 +17,8 @@ classdef MIC_Triggerscope < MIC_Abstract
     %   Windows operating system recommended (Unix based systems might
     %       require changes to, e.g., usage/definition of obj.SerialPort,
     %       or perhaps more serious changes)
+    %   TeensyDuino serial communication driver installed 
+    %       http://www.pjrc.com/teensy/serial_install.exe
     
     % Created by:
     %   David J. Schodt (Lidke Lab, 2020)
@@ -73,7 +75,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         % List of commands present in the Triggerscope documentation.
         CommandList = {'*', 'DAC', 'FOCUS', 'TTL', 'RANGE', 'CAM', ...
             'STAT?', 'TEST?', 'CLEARTABLE', 'PROG', 'STEP', 'ARM', ...
-            'ARRAY', 'CLEAR_ALL', 'RANGE', 'RESET', ...
+            'ARRAY', 'CLEAR_ALL', 'RANGE', 'RESET', 'SAVESETTINGS', ...
             'PROG_FOCUS', 'PROG_TTL', 'PROG_DAC', 'PROG_DEL', ...
             'PROG_WAVE', 'TIMECYCLES', 'TRIGMODE'};
         

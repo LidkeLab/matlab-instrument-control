@@ -228,7 +228,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                 case 'matlab'
             end
         end
-        function start_sequence(obj)
+        function SeqOutput=start_sequence(obj)
             % taking image in the case of sequence
             obj.AcquisitionType='sequence';
             obj.setup_acquisition;
