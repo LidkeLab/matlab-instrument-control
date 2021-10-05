@@ -36,6 +36,10 @@ classdef MIC_MCLPiezoObj < MIC_LinearStage_Abstract
         handle;         % handle to control this specific piezo.  Only one .Dll instance can control it at a time.
     end
     
+    properties (Abstract,Hidden)
+        StartGUI;       %Defines GUI start mode.  'true' starts GUI on object creation. 
+    end
+    
     methods
         function obj=MIC_MCLPiezoObj()
             % Constructor takes no arguments and returns the object.
@@ -184,5 +188,8 @@ classdef MIC_MCLPiezoObj < MIC_LinearStage_Abstract
         end
         
     end
-
+    
+    methods (Abstract)
+        unitTest()
+    end
 end
