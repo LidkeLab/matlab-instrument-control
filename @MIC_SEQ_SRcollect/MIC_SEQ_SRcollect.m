@@ -99,7 +99,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         Reg3DYTol = 0.005; % (um) correction along y to claim convergence
         Reg3DZTol = 0.05; % (um) correction along z to claim convergence
         MinPeakCorr = 0.7; % min. value of corr. to deem success
-        MinAllowableZ = 0.9; % min. allowed z value as seen by stepper motor
+        MinAllowableZ = 0.65; % min. allowed z value as seen by stepper motor
         MaxIterInitial = 10; % max. alignment iteration attempts for cell finding
         MaxIter = 10; % max. alignment iteration attempts for later sequences
         
@@ -325,7 +325,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StatusString = 'Setting up sample illumination LED...';
             
             % Setup the LED lamp object.
-            obj.Lamp660 = MIC_ThorlabsLED('Dev2', 'ao0');
+            obj.Lamp660 = MIC_ThorlabsLED('Dev1', 'ao0');
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
