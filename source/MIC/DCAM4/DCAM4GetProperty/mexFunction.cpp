@@ -18,11 +18,11 @@ void mexFunction(int nlhs, mxArray* plhs[],	int	nrhs, const	mxArray* prhs[])
 	// Grab the inputs from MATLAB and check their types before proceeding.
 	if (!mxIsInt32(prhs[0]))
 	{
-		mexErrMsgTxt("camera handle must be type INT 32.");
+		mexErrMsgTxt("Camera handle must be type INT 32.");
 	}
 	if (!mxIsInt32(prhs[1]))
 	{
-		mexErrMsgTxt("property ID must be type INT 32.");
+		mexErrMsgTxt("Property ID must be type INT 32.");
 	}
 	Handle = (long)mxGetScalar(prhs[0]);
 	PropertyID = (int32)mxGetScalar(prhs[1]);
@@ -36,7 +36,7 @@ void mexFunction(int nlhs, mxArray* plhs[],	int	nrhs, const	mxArray* prhs[])
 	error = dcamprop_getvalue(hDCAM, PropertyID, PropertyValue);
 	if (failed(error))
 	{
-		mexPrintf("Error = 0x%08lX\ndcam_getpropertyvalue() failed.\n", error);
+		mexPrintf("Error = 0x%08lX\ndcamprop_getvalue() failed.\n", error);
 	}
 
 	return;

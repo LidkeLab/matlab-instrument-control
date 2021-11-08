@@ -1,0 +1,38 @@
+#include "stdafx.h"
+
+void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
+{
+
+	HDCAM	hdcam = NULL;
+	long	handle;
+	int32	propertyID;
+	double propertyValue;
+	DCAMERR error;
+
+	// Grab the inputs from MATLAB and check their types before proceeding.
+	if (!mxIsInt32(prhs[0]))
+	{
+		mexErrMsgTxt("Camera handle must be type INT 32.");
+	}
+	if (!mxIsInt32(prhs[1]))
+	{
+		mexErrMsgTxt("Property ID must be type INT 32.");
+	}
+	if (!mxIsDouble(prhs[2]))
+	{
+		mexErrMsgTxt("property value must be type DOUBLE.");
+	}
+	handle = (long)mxGetScalar(prhs[0]);
+	propertyID = (int32)mxGetScalar(prhs[1]);
+	propertyValue = (double)mxGetScalar(prhs[2]);
+
+	// Call the dcam function.
+	hdcam = (HDCAM)handle;
+	error = dcamprop_setvalue(hdcam, propertyID, propertyValue);
+	if (failed(error))
+	{
+		mexPrintf("Error = 0x%08lX\ndcamprop_setvalue() failed.\n", error);
+	}
+
+	return;
+}
