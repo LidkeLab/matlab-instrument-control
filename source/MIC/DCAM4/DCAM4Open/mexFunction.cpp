@@ -1,28 +1,31 @@
 #include "stdafx.h"
 
-void mexFunction(int nlhs, mxArray * plhs[], int	nrhs, const	mxArray * prhs[]) {
-	int	CameraIndex;
-	long*   Handle = 0;
-	mwSize  outsize[1];
-	DCAMERR error;
-	DCAMDEV_OPEN	hDCAM;
+void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[]) 
+{
+	int32	     iDevice;
+	int32*       handle = 0;
+	mwSize       outsize[1];
+	DCAMERR      error;
+	DCAMDEV_OPEN devopen;
 
 	// Prepare the MATLAB inputs/outputs.
-	CameraIndex = (int)mxGetScalar(prhs[0]);
+	iDevice = (int32)mxGetScalar(prhs[0]);
 	outsize[0] = 1;
 	plhs[0] = mxCreateNumericArray(1, outsize, mxINT32_CLASS, mxREAL);
-	Handle = (long*)mxGetData(plhs[0]);
+	handle = (int32*)mxGetData(plhs[0]);
 
 	// Connect to the camera.
-	hDCAM.index = CameraIndex;
-	error = dcamdev_open(&hDCAM);
+	memset(&devopen, 0, sizeof(devopen));
+	devopen.size = sizeof(devopen);
+	devopen.index = iDevice;
+	error = dcamdev_open(&devopen);
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcam_devopen() failed.\n", error);
 	}
 
 	// Grab some outputs to return to MATLAB.
-	Handle[0] = (long)hDCAM.hdcam;
+	handle[0] = (int32)devopen.hdcam;
 
 	return;
 }

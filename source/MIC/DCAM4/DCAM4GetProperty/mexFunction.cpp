@@ -6,13 +6,13 @@
 
 
 //*******************************************************************************************
-void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
+void mexFunction(int nlhs, mxArray* plhs[],	int	nrhs, const	mxArray* prhs[]) 
+{
 
 	HDCAM	hDCAM = NULL;
 	long	Handle;
 	int32	PropertyID;
 	double  *PropertyValue;
-	bool	test = false;
 	DCAMERR error;
 	
 	// Grab the inputs from MATLAB and check their types before proceeding.

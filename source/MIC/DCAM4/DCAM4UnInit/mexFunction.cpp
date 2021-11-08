@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
-void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[]) {
+void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[]) 
+{
 	DCAMERR error;
 
 	// Un-initialize all devices.
