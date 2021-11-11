@@ -1,13 +1,14 @@
 #include "stdafx.h"
 
+// nDevices = DCAM4Init()
 void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
-	mwSize  outsize[1];
-	DCAMERR error;
+	mwSize		 outsize[1];
+	DCAMERR		 error;
 	DCAMAPI_INIT apiinit;
-	int* nDevice = 0;
+	int*		 nDevice = 0;
 
 	// Initialize the camera(s).
-	memset(&apiinit, 0, sizeof(apiinit));
+	memset(&apiinit, 0, sizeof(apiinit)); // set all apiinit fields to 0
 	apiinit.size = sizeof(apiinit);
 	error = dcamapi_init(&apiinit);
 	if (failed(error))

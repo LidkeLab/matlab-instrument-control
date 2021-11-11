@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+// [] = DCAM4UnInit()
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[]) 
 {
 	DCAMERR error;

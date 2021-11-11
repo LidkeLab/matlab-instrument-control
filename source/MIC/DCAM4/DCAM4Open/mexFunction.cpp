@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+// [handle] = DCAM4Open(cameraIndex)
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[]) 
 {
 	int32	     iDevice;
