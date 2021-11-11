@@ -9,14 +9,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	DCAMERR error;
 
 	// Grab the inputs from MATLAB and check their types before proceeding.
-	if (!mxIsInt64(prhs[0]))
-	{
-		mexErrMsgTxt("Camera handle must be type INT 64.");
-	}
-	if (!mxIsInt32(prhs[1]))
-	{
-		mexErrMsgTxt("Number of frames must be type INT 32.");
-	}
 	handle = (int32)mxGetScalar(prhs[0]);
 	nFrames = (int32)mxGetScalar(prhs[1]);
 
