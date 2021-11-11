@@ -5,6 +5,12 @@ void mexFunction(int nlhs, mxArray* plhs[],	int	nrhs, const	mxArray* prhs[])
 {
 	int32		 handle;
 	DCAMERR      error;
+	
+	// Validate inputs.
+	if (!mxIsInt32(prhs[0]))
+	{
+		mexErrMsgTxt("Camera handle must be type INT 32.");
+	}
 
 	// Close the camera.
 	handle = (int32)mxGetScalar(prhs[0]);

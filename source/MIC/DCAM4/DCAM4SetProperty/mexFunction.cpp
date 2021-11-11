@@ -3,11 +3,9 @@
 // [] = DCAM4SetProperty(cameraHandle, propertyID, value)
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
-
-	HDCAM	hdcam = NULL;
-	long	handle;
+	int32	handle;
 	int32	propertyID;
-	double propertyValue;
+	double  propertyValue;
 	DCAMERR error;
 
 	// Grab the inputs from MATLAB and check their types before proceeding.
@@ -23,13 +21,12 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	{
 		mexErrMsgTxt("property value must be type DOUBLE.");
 	}
-	handle = (long)mxGetScalar(prhs[0]);
+	handle = (int32)mxGetScalar(prhs[0]);
 	propertyID = (int32)mxGetScalar(prhs[1]);
 	propertyValue = (double)mxGetScalar(prhs[2]);
 
 	// Call the dcam function.
-	hdcam = (HDCAM)handle;
-	error = dcamprop_setvalue(hdcam, propertyID, propertyValue);
+	error = dcamprop_setvalue((HDCAM)handle, propertyID, propertyValue);
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcamprop_setvalue() failed.\n", error);
