@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 // [handle] = DCAM4Open(cameraIndex)
+// Open a handle to the camera defined by index 'cameraIndex'.
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[]) 
 {
 	int32	     iDevice;
@@ -10,10 +11,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	DCAMDEV_OPEN devopen;
 
 	// Prepare the MATLAB inputs/outputs.
+	if (!mxIsInt32(prhs[0]))
+	{
+		mexErrMsgTxt("Device ID must be type INT 32.");
+	}
 	iDevice = (int32)mxGetScalar(prhs[0]);
 	outsize[0] = 1;
 	plhs[0] = mxCreateNumericArray(1, outsize, mxINT32_CLASS, mxREAL);
-	handle = (int32*)mxGetData(plhs[0]);
+	handle = (long*)mxGetData(plhs[0]);
 
 	// Connect to the camera.
 	memset(&devopen, 0, sizeof(devopen));

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 // [] = DCAM4UnInit()
+// Un-initialize the DCAM-API and force close any devices in use.
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[]) 
 {
 	DCAMERR error;

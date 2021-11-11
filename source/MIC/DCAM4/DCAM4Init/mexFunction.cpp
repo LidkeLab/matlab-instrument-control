@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 // nDevices = DCAM4Init()
+// Initialize the DCAM-API and determine how many devices are connected.
 void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	mwSize		 outsize[1];
 	DCAMERR		 error;

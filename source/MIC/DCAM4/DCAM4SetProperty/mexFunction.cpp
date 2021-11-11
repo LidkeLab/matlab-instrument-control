@@ -1,6 +1,9 @@
 #include "stdafx.h"
 
 // [] = DCAM4SetProperty(cameraHandle, propertyID, value)
+// Set the property defined by 'propertyID' to the double given in 'value'. See
+// dcamprop.h for hexadecimal propertyIDs (which must be converted to decimal 
+// before use here).
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
 	int32	handle;

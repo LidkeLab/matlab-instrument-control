@@ -1,15 +1,16 @@
 #include "stdafx.h"
 
 // [] = DCAM4Close(cameraHandle)
+// Release the handle defined by the int32 'cameraHandle'.
 void mexFunction(int nlhs, mxArray* plhs[],	int	nrhs, const	mxArray* prhs[]) 
 {
-	int32		 handle;
-	DCAMERR      error;
+	int32	handle;
+	DCAMERR error;
 	
 	// Validate inputs.
-	if (!mxIsInt32(prhs[0]))
+	if (!mxIsInt64(prhs[0]))
 	{
-		mexErrMsgTxt("Camera handle must be type INT 32.");
+		mexErrMsgTxt("Camera handle must be type INT 64.");
 	}
 
 	// Close the camera.

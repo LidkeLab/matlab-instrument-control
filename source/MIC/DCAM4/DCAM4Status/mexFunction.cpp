@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
 // [pStatus] = DCAM4Status(cameraHandle)
+// Get the current capture status of the camera. See hex. values prefixed by
+// DCAMCAP_STATUS in dcamapi.h.
 void mexFunction(int nlhs, mxArray* plhs[],	int	nrhs, const	mxArray* prhs[]) 
 {
 	int32	handle;
