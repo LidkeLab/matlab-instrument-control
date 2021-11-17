@@ -16,7 +16,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	error = dcambuf_alloc((HDCAM)handle, nFrames);
 	if (failed(error))
 	{
-		mexPrintf("Error = 0x%08lX\dcambuf_alloc() failed.\n", error);
+		mexPrintf("Error = 0x%08lX\ndcambuf_alloc() failed.\n", error);
 	}
 
 	return;
