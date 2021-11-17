@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DCAM4StopCapture", "DCAM4St
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DCAM4CopyFrames", "DCAM4CopyFrames\DCAM4CopyFrames.vcxproj", "{701EE10B-CCD6-40CE-B954-24A32897E282}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DCAM4CopyLastFrame", "DCAM4CopyLastFrame\DCAM4CopyLastFrame.vcxproj", "{63D19E83-C772-43FF-B68B-1BB765E6163C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -121,6 +123,14 @@ Global
 		{701EE10B-CCD6-40CE-B954-24A32897E282}.Release|x64.Build.0 = Release|x64
 		{701EE10B-CCD6-40CE-B954-24A32897E282}.Release|x86.ActiveCfg = Release|Win32
 		{701EE10B-CCD6-40CE-B954-24A32897E282}.Release|x86.Build.0 = Release|Win32
+		{63D19E83-C772-43FF-B68B-1BB765E6163C}.Debug|x64.ActiveCfg = Debug|x64
+		{63D19E83-C772-43FF-B68B-1BB765E6163C}.Debug|x64.Build.0 = Debug|x64
+		{63D19E83-C772-43FF-B68B-1BB765E6163C}.Debug|x86.ActiveCfg = Debug|Win32
+		{63D19E83-C772-43FF-B68B-1BB765E6163C}.Debug|x86.Build.0 = Debug|Win32
+		{63D19E83-C772-43FF-B68B-1BB765E6163C}.Release|x64.ActiveCfg = Release|x64
+		{63D19E83-C772-43FF-B68B-1BB765E6163C}.Release|x64.Build.0 = Release|x64
+		{63D19E83-C772-43FF-B68B-1BB765E6163C}.Release|x86.ActiveCfg = Release|Win32
+		{63D19E83-C772-43FF-B68B-1BB765E6163C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
