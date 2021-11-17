@@ -14,7 +14,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	iDevice = (int32)mxGetScalar(prhs[0]);
 	outsize[0] = 1;
 	plhs[0] = mxCreateNumericArray(1, outsize, mxINT32_CLASS, mxREAL);
-	handle = (long*)mxGetData(plhs[0]);
+	handle = (int32*)mxGetData(plhs[0]);
 
 	// Connect to the camera.
 	memset(&devopen, 0, sizeof(devopen));
