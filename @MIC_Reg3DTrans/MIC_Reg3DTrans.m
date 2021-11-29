@@ -506,12 +506,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         obj.XYBorderPx:end-obj.XYBorderPx, ...
                         obj.XYBorderPx:end-obj.XYBorderPx, :);
                     MaxOffset = [50, 50, 20];
+                    FitOffset = [2, 2, 3];
                     
                     % Determine the pixel and sub-pixel predicted shifts
                     % between the two stacks.
                     [PixelOffset, SubPixelOffset, CorrData, MaxOffset] ...
                         = obj.findStackOffset(RefStack, CurrentStack, ...
-                        MaxOffset, [], [], [], obj.UseGPU);
+                        MaxOffset, FitOffset, [], [], obj.UseGPU);
                     
                     % If the sub-pixel prediction exceeds MaxOffset, 
                     % re-try until this is no longer true or when MaxOffset
@@ -544,7 +545,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                         % stacks.
                         [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
                             obj.findStackOffset(RefStack, CurrentStack, ...
-                            MaxOffsetInput, [], [], [], obj.UseGPU);
+                            MaxOffsetInput, FitOffset, [], [], obj.UseGPU);
                         
                         % Re-compute the SelectBit.
                         SelectBit = abs(SubPixelOffset) > MaxOffset;
@@ -597,8 +598,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % Check if the current iteration succeeded within the
                     % set tolerance.
                     StageOffsetTol = [obj.Tol_X; obj.Tol_Y; obj.Tol_Z];
-                    WithinTol = ...
-                        all(abs(StageOffset) < StageOffsetTol);
+                    WithinTol = all(abs(StageOffset) < StageOffsetTol);
                     
                     % Save the error signal.
                     obj.ErrorSignal = StageOffset.';
@@ -659,6 +659,25 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 obj.MaxIterReached = 1;
                 warning('MIC_Reg3DTrans:MaxIter','Reached max iterations');
             end
+            
+            % Take a final set of images at the resulting focus. 
+            % NOTE: This should all be reorganized, as it would probably be
+            %       better to reuse collect_zstack() (I'm not doing that 
+            %       because it changes too many class properties as it's
+            %       currently written). DJS, 11/28/21
+            if obj.ChangeExpTime
+                ExpTimeTemp = obj.CameraObj.ExpTime_Sequence;
+                obj.CameraObj.ExpTime_Sequence = obj.ExposureTime;
+            end
+            obj.CameraObj.AcquisitionType = 'sequence';
+            obj.CameraObj.TriggerMode = 'internal';
+            PreviousSequenceLength = obj.CameraObj.SequenceLength;
+            obj.CameraObj.SequenceLength = obj.NMean;
+            obj.Image_Current = median(obj.CameraObj.start_sequence(), 3);
+            if obj.ChangeExpTime
+                obj.CameraObj.ExpTime_Sequence = ExpTimeTemp;
+            end
+            obj.CameraObj.SequenceLength = PreviousSequenceLength;
             
             % turn lamp off
 %              obj.LampObj.off;
