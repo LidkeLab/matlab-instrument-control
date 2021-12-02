@@ -47,6 +47,9 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         NumberOfFrames = 6000;
         NumberOfSequences = 10;
         NAcquisitionCycles = 1; % number of acquisition cycles per cell
+        NBrightfieldIms = 10; % # brightfield ims. taken before and after sequence at focus
+        PreSeqImages = []; % NBrightfieldIms taken right before sequence
+        PostSeqImages = []; % NBrightfieldIms taken right after sequence
         PostSeqPause = 0; % seconds to pause after each sequence
         UsePreActivation = 1; % excite fluors. before acquiring data
         DurationPreActivation = 10; % (seconds) time of pre-activation
@@ -101,7 +104,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         MinPeakCorr = 0.7; % min. value of corr. to deem success
         MinAllowableZ = 0.65; % min. allowed z value as seen by stepper motor
         MaxIterInitial = 10; % max. alignment iteration attempts for cell finding
-        MaxIter = 10; % max. alignment iteration attempts for later sequences
+        MaxIter = 5; % max. alignment iteration attempts for later sequences
         
         % Misc. other properties.
         SaveDir = 'Y:\'; % Save Directory

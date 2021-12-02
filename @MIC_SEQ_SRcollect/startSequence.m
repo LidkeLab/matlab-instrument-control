@@ -106,18 +106,10 @@ if obj.UseBrightfieldReg
     obj.Lamp660.setPower(0);
 end
 
-% Setup the main sCMOS to acquire the sequence.
-obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
-    'Preparing for acquisition...'], RefStruct.CellIdx);
-obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
-obj.CameraSCMOS.SequenceLength = obj.NumberOfFrames;
-obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
-obj.CameraSCMOS.TriggerMode = 'internal';
-obj.CameraSCMOS.AcquisitionType = 'sequence';
-obj.CameraSCMOS.setup_acquisition();
-
 % Prepare the lasers for the sequence based on the appropriate object
 % properties.
+obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+    'Preparing for acquisition...'], RefStruct.CellIdx);
 obj.FlipMount.FilterOut(); % removes ND filter from optical path
 obj.Laser647.setPower(obj.LaserPowerSequence647);
 obj.Laser405.setPower(obj.LaserPowerSequence405);
@@ -161,8 +153,8 @@ for ii = 1:obj.NumberOfSequences
     
     % Use periodic registration after NSeqBeforePeriodicReg
     % sequences have been collected.
-    if obj.UseBrightfieldReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
-            && ~(ii == 1)
+    if (obj.UseBrightfieldReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
+            && (ii~=1))
         % Update the position using the stepper motors.
         if all(obj.AlignReg.OffsetFitSuccess)
             % We only want to risk using the stepper updates if the
@@ -191,7 +183,6 @@ for ii = 1:obj.NumberOfSequences
         pause(obj.LampWait);
         obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
         obj.CameraSCMOS.AcquisitionType = 'capture';
-        obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
         obj.CameraSCMOS.setup_acquisition();
         obj.AlignReg.IsInitialRegistration = 0; % indicate periodic reg.
         obj.AlignReg.NMean = obj.NMean;
@@ -206,6 +197,18 @@ for ii = 1:obj.NumberOfSequences
         end
         obj.Lamp660.setPower(0);
     end
+    
+    % Collect a final set of brightfield images before collecting the SR
+    % data.
+    obj.CameraSCMOS.AcquisitionType = 'sequence';
+    obj.CameraSCMOS.TriggerMode = 'internal';
+    obj.CameraSCMOS.SequenceLength = obj.NBrightfieldIms;
+    obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeCapture;
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
+    obj.Lamp660.setPower(RefStruct.LampPower);
+    pause(obj.LampWait);
+    PreSeqImages = obj.CameraSCMOS.start_sequence();
+    obj.Lamp660.setPower(0);
     
     % Allow the lasers to reach the sample as requested by the set flags.
     if obj.OnDuringSequence405
@@ -222,8 +225,24 @@ for ii = 1:obj.NumberOfSequences
             RefStruct.CellIdx, ii);
     obj.CameraSCMOS.AcquisitionType = 'sequence';
     obj.CameraSCMOS.TriggerMode = 'internal';
+    obj.CameraSCMOS.SequenceLength = obj.NumberOfFrames;
     obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
     Sequence = obj.CameraSCMOS.start_sequence();
+    
+    % Collect a final set of brightfield images before proceeding to the
+    % next sequence.
+    obj.CameraSCMOS.AcquisitionType = 'sequence';
+    obj.CameraSCMOS.TriggerMode = 'internal';
+    obj.CameraSCMOS.SequenceLength = obj.NBrightfieldIms;
+    obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeCapture;
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
+    obj.Lamp660.setPower(RefStruct.LampPower);
+    pause(obj.LampWait);
+    PostSeqImages = obj.CameraSCMOS.start_sequence();
+    obj.Lamp660.setPower(0);
+    
+    % Save the data.
     switch obj.SaveFileType
         case 'h5'
             % Place the current dataset in the same group as all other
@@ -235,8 +254,7 @@ for ii = 1:obj.NumberOfSequences
             % Create a new group for the current dataset, so each dataset
             % will have its own group in the .h5 file.
             DataName = sprintf('Data%04d', ii);
-            SequenceName = sprintf('Channel01/Zposition001/%s', ...
-                DataName);
+            SequenceName = sprintf('Channel01/Zposition001/%s', DataName);
             MIC_H5.createGroup(FileH5, SequenceName);
             
             % Save the exportState() exportables.
@@ -247,6 +265,13 @@ for ii = 1:obj.NumberOfSequences
             obj.save2hdf5(FileH5, SequenceName);
             fprintf('Exportables from exportState() have been saved\n')
             obj.StatusString = '';
+            
+            % Place the pre- and post-sequence brightfield images in a new
+            % group.
+            Data.PreSeqImages = PreSeqImages;
+            Data.PostSeqImages = PostSeqImages;
+            FocusImName = sprintf('%s/FocusImages', SequenceName);
+            obj.saveAttAndData(FileH5, FocusImName, struct(), Data, struct())
             
             % Begin writing the data.
             MIC_H5.writeAsync_uint16(...
@@ -271,7 +296,7 @@ for ii = 1:obj.NumberOfSequences
     
     % If needed, pause before proceeding to the next sequence (this is
     % useful for test conditions, probably not for a normal acquisition).
-    if ii ~= obj.NumberOfSequences
+    if (ii ~= obj.NumberOfSequences)
         % No need to pause on the last sequence of the cell.
         pause(obj.PostSeqPause);
     end

@@ -505,50 +505,21 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     CurrentStack = obj.ZStack(...
                         obj.XYBorderPx:end-obj.XYBorderPx, ...
                         obj.XYBorderPx:end-obj.XYBorderPx, :);
-                    MaxOffset = [50, 50, 20];
-                    FitOffset = [2, 2, 3];
+                    MaxOffset = ceil(size(RefStack) / 2).';
+                    FitOffset = [2; 2; 3];
                     
                     % Determine the pixel and sub-pixel predicted shifts
-                    % between the two stacks.
-                    [PixelOffset, SubPixelOffset, CorrData, MaxOffset] ...
-                        = obj.findStackOffset(RefStack, CurrentStack, ...
-                        MaxOffset, FitOffset, [], [], obj.UseGPU);
-                    
-                    % If the sub-pixel prediction exceeds MaxOffset, 
-                    % re-try until this is no longer true or when MaxOffset
-                    % takes on its maximum possible value.
-                    % NOTE: When MaxOffsetInput == MaxOffset, we have
-                    %       selected a valid offset.  If these
-                    %       arrays are not equal, that means we've reached
-                    %       the maximum possible offset along one of the
-                    %       dimensions.
-                    MaxOffsetInput = [0; 0; 0]; % initialize
-                    OffsetScaleIter = 0; % initialize
-                    SelectBit = abs(SubPixelOffset) > MaxOffset;
-                    while any(SelectBit) ...
-                            && ~all(MaxOffsetInput == MaxOffset) ...
-                            && (OffsetScaleIter < obj.MaxOffsetScaleIter)
-                        
-                        % Increment the counter.
-                        OffsetScaleIter = OffsetScaleIter + 1; 
-                        
-                        % The SubPixelOffset predicts a peak in the
-                        % xcorr which is beyond the offset checked by
-                        % findStackOffset(), so we should increase the
-                        % input offset and re-try before proceeding
-                        % with the rest of this registration iteration.
-                        MaxOffsetInput = ...
-                            SelectBit .* ceil((abs(SubPixelOffset))) ...
-                            + ~SelectBit .* MaxOffset;
-                        
-                        % Determine a predicted offset between the two
-                        % stacks.
-                        [PixelOffset, SubPixelOffset, CorrData, MaxOffset] = ...
-                            obj.findStackOffset(RefStack, CurrentStack, ...
-                            MaxOffsetInput, FitOffset, [], [], obj.UseGPU);
-                        
-                        % Re-compute the SelectBit.
-                        SelectBit = abs(SubPixelOffset) > MaxOffset;
+                    % between the two stacks.  After the first iteration,
+                    % we'll attempt the iterative shift finding if it seems
+                    % reasonable to do so.
+                    if ((iter>0) && all(SubPixelOffset<=MaxOffset))
+                        [SubPixelOffset, PixelOffset, CorrData] = ...
+                            obj.findOffsetIter(RefStack, CurrentStack, ...
+                            MaxOffset, FitOffset, 3, [], true, obj.UseGPU);
+                    else
+                        [SubPixelOffset, PixelOffset, CorrData] ...
+                            = obj.findStackOffset(RefStack, CurrentStack, ...
+                            MaxOffset, FitOffset, [], true, obj.UseGPU);
                     end
                     
                     % Decide which shift to proceed with based on
@@ -659,34 +630,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 obj.MaxIterReached = 1;
                 warning('MIC_Reg3DTrans:MaxIter','Reached max iterations');
             end
-            
-            % Take a final set of images at the resulting focus. 
-            % NOTE: This should all be reorganized, as it would probably be
-            %       better to reuse collect_zstack() (I'm not doing that 
-            %       because it changes too many class properties as it's
-            %       currently written). DJS, 11/28/21
-            if obj.ChangeExpTime
-                ExpTimeTemp = obj.CameraObj.ExpTime_Sequence;
-                obj.CameraObj.ExpTime_Sequence = obj.ExposureTime;
-            end
-            obj.CameraObj.AcquisitionType = 'sequence';
-            obj.CameraObj.TriggerMode = 'internal';
-            PreviousSequenceLength = obj.CameraObj.SequenceLength;
-            obj.CameraObj.SequenceLength = obj.NMean;
-            obj.Image_Current = median(obj.CameraObj.start_sequence(), 3);
-            if obj.ChangeExpTime
-                obj.CameraObj.ExpTime_Sequence = ExpTimeTemp;
-            end
-            obj.CameraObj.SequenceLength = PreviousSequenceLength;
-            
-            % turn lamp off
-%              obj.LampObj.off;
-            
-            % change back EMgain and exposure time if needed
-%             if obj.ChangeEMgain
-%                 CamSet.EMGain.Value = EMGTemp; 
-%                 obj.CameraObj.setCamProperties(CamSet);
-%             end
+
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
@@ -1120,9 +1064,14 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             fval=mse(model,CC);
         end
 
-        [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
+        [SubPixelOffset, PixelOffset, CorrAtOffset, MaxOffset] = ...
             findStackOffset(Stack1, Stack2, MaxOffset, FitOffset, ...
             BinaryMask, PlotFlag, UseGPU)
+        [Shift, IntShift, CorrData, MaxOffset] = ...
+            findOffsetIter(RefStack, MovingStack, ...
+            MaxOffset, FitOffset, NIterMax, Tolerance, PlotFlag, UseGPU);
+        [ImageStack] = shiftImage(ImageStack, Shift, UseGPU);
+        
     
         function State = unitTest(camObj,stageObj,lampObj)
             %unitTest Tests all functionality of MIC_Reg3DTrans
