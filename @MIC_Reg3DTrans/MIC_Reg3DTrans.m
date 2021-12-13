@@ -512,14 +512,19 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % between the two stacks.  After the first iteration,
                     % we'll attempt the iterative shift finding if it seems
                     % reasonable to do so.
+                    CorrParams.UseGPU = obj.UseGPU;
+                    CorrParams.PlotFlag = true;
+                    CorrParams.MaxOffset = MaxOffset;
+                    CorrParams.FitOffset = FitOffset;
                     if ((iter>0) && all(SubPixelOffset<=MaxOffset))
+                        NIterMax = 3;
                         [SubPixelOffset, PixelOffset, CorrData] = ...
                             obj.findOffsetIter(RefStack, CurrentStack, ...
-                            MaxOffset, FitOffset, 3, [], true, obj.UseGPU);
+                            NIterMax, [], CorrParams);
                     else
                         [SubPixelOffset, PixelOffset, CorrData] ...
                             = obj.findStackOffset(RefStack, CurrentStack, ...
-                            MaxOffset, FitOffset, [], true, obj.UseGPU);
+                            CorrParams);
                     end
                     
                     % Decide which shift to proceed with based on
@@ -1063,15 +1068,16 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             model=o + a*normpdf(Zpos,u,s);
             fval=mse(model,CC);
         end
-
-        [SubPixelOffset, PixelOffset, CorrAtOffset, MaxOffset] = ...
-            findStackOffset(Stack1, Stack2, MaxOffset, FitOffset, ...
-            BinaryMask, PlotFlag, UseGPU)
-        [Shift, IntShift, CorrData, MaxOffset] = ...
-            findOffsetIter(RefStack, MovingStack, ...
-            MaxOffset, FitOffset, NIterMax, Tolerance, PlotFlag, UseGPU);
-        [ImageStack] = shiftImage(ImageStack, Shift, UseGPU);
         
+        [Shift, IntShift, CorrData, Params] = ...
+            findStackOffset(Stack1, Stack2, Params)
+        [Shift, IntShift, CorrData, CorrParams, ShiftParams] = ...
+            findOffsetIter(RefStack, MovingStack, NIterMax, Tolerance, ...
+            CorrParams, ShiftParams)
+        [ImageStack, Params] = shiftImage(ImageStack, Shift, Params);
+        [FreqMask, FreqSqEllipse, YMesh, XMesh, ZMesh] = ...
+            frequencyMask(ImSize, FreqCutoff)
+        [Struct] = padStruct(Struct, DefaultStruct)
     
         function State = unitTest(camObj,stageObj,lampObj)
             %unitTest Tests all functionality of MIC_Reg3DTrans
