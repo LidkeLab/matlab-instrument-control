@@ -516,6 +516,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     CorrParams.PlotFlag = true;
                     CorrParams.MaxOffset = MaxOffset;
                     CorrParams.FitOffset = FitOffset;
+                    CorrParams.SymmetrizeFit = true;
+                    CorrParams.SuppressWarnings = true;
                     if ((iter>0) && all(SubPixelOffset<=MaxOffset))
                         NIterMax = 3;
                         [SubPixelOffset, PixelOffset, CorrData] = ...
