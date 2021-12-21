@@ -1,18 +1,21 @@
 #include "stdafx.h"
 #include "time.h"
 
-// [Frames] = DCAM4CopyFrames(cameraHandle, nFrames)
-// Copy the 'nFrames' of data collected by 'cameraHandle' during a capture.
+// [Frames] = DCAM4CopyFrames(cameraHandle, nFrames, timeout)
+// Copy the 'nFrames' of data collected by 'cameraHandle' during a capture. 
+// The input 'timeout' is given in milliseconds and is applied in multiple
+// places in this function.
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
 	unsigned long*  mHandle;
 	HDCAM		    handle;
-	long		    nFrames;
-	long			timeout;
+	int32		    nFrames;
+	int32			timeout = 1000;
 	mwSize          outsize[1];
 	DCAMBUF_FRAME   pFrame;
 	unsigned short* imagePointer;
 	DCAMERR         error;
+	char            outError;
 	DCAMWAIT_OPEN	waitopen;
 	DCAMWAIT_START  waitstart;
 	int32			status = 1;
@@ -20,7 +23,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	// Grab the inputs from MATLAB.
 	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
 	handle = (HDCAM)mHandle[0];
-	nFrames = (long)mxGetScalar(prhs[1]);
+	nFrames = (int32)mxGetScalar(prhs[1]);
+	timeout = (int32)mxGetScalar(prhs[2]);
 
 	// Prepare some of the DCAM structures.
 	memset(&waitopen, 0, sizeof(waitopen));
@@ -29,7 +33,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	memset(&waitstart, 0, sizeof(waitstart));
 	waitstart.size = sizeof(waitstart);
 	waitstart.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY;
-	waitstart.timeout = 1000;
+	waitstart.timeout = timeout;
 	memset(&pFrame, 0, sizeof(pFrame));
 	pFrame.size = sizeof(pFrame);
 
@@ -41,24 +45,25 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		return;
 	}
 
-	// Wait for the capture to finish and then force stop it.
-	error = dcamwait_start((HDCAMWAIT)waitopen.hwait, &waitstart);
-	if (failed(error))
-	{
-		mexPrintf("Error = 0x%08lX\ndcamwait_start() failed.\n", error);
-		return;
-	}
-	
 	// Query the camera until it's no longer busy before attempting 
-	// to transfer the data.
+    // to transfer the data.
 	error = dcamcap_status(handle, &status);
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
 		return;
 	}
+	double startTime = clock();
 	while (status != 2) // status 2 is ready
 	{
+		// Check the timeout condition.
+		if ((clock() - startTime) > (timeout * 1e-3 * CLOCKS_PER_SEC))
+		{
+			mexPrintf("DCAM4CopyFrames: timeout of %i ms reached!\n", timeout);
+			return;
+		}
+
+		// Check the status.
 		error = dcamcap_status(handle, &status);
 		if (failed(error))
 		{
@@ -67,8 +72,16 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		}
 	}
 
-	// Prepare the DCAMBUF_FRAME and initialize the output for MATLAB.
+	// Wait for the capture to finish and then force stop it.
+	error = dcamwait_start((HDCAMWAIT)waitopen.hwait, &waitstart);
+	if (failed(error))
+	{
+		mexPrintf("Error = 0x%08lX\ndcamwait_start() failed.\n", error);
+		return;
+	}
 	dcamcap_stop(handle);
+	
+	// Prepare the DCAMBUF_FRAME and initialize the output for MATLAB.
 	error = dcambuf_lockframe(handle, &pFrame);
 	if (failed(error))
 	{
@@ -95,29 +108,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		// Update the pointer for our MATLAB output.
 		imagePointer = (unsigned short*)((char*)imagePointer 
 			+ (long long)pFrame.rowbytes*(long long)pFrame.height);
-		
-		/*
-		// Update the pointer for the current frame.
-		pFrame.iFrame = ff;
-		error = dcambuf_lockframe((HDCAM)handle, &pFrame);
-		if (failed(error))
-		{
-			mexPrintf("Error = 0x%08lX\ndcambuf_lockframe() failed on frame %i.\n", error, ff+1);
-			return;
-		}
-
-		// Copy the image to our output, one row at a time.	
-		for (int ii = 0; ii < pFrame.height; ii++)
-		{
-			// Copy the ii-th row of data.
-			memcpy(imagePointer, pFrame.buf, pFrame.rowbytes);
-
-			// Update our destination pointer for the next row.
-			// NOTE: A char is only 1 byte, so we're converting to char so that
-			//		 our arithmetic is in units of bytes!
-			imagePointer = (unsigned short*)((char*)imagePointer + pFrame.rowbytes);
-		}
-		*/
 	}
 
 	// Release the capturing buffer allocated by DCAM4AllocMemory().
