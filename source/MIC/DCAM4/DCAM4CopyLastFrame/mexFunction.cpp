@@ -4,7 +4,8 @@
 // Copy the most recently transfered frame of data.
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
-	long long	         handle;
+	unsigned long*       mHandle;
+	HDCAM	             handle;
 	mwSize               outsize[1];
 	DCAMBUF_FRAME        pFrame;
 	DCAMERR              error;
@@ -13,14 +14,15 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	DCAMCAP_TRANSFERINFO transferInfo;
 
 	// Grab the inputs from MATLAB.
-	handle = (long long)mxGetScalar(prhs[0]);
+	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
+	handle = (HDCAM)mHandle[0];
 
 	// Prepare some of the DCAM structures.
 	memset(&pFrame, 0, sizeof(pFrame));
 	pFrame.size = sizeof(pFrame);
 	memset(&waitopen, 0, sizeof(waitopen));
 	waitopen.size = sizeof(waitopen);
-	waitopen.hdcam = (HDCAM)handle;
+	waitopen.hdcam = handle;
 	memset(&waitstart, 0, sizeof(waitstart));
 	waitstart.size = sizeof(waitstart);
 	waitstart.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY;
@@ -37,7 +39,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	}
 
 	// Determine the frame index of the most recently transfered image.
-	error = dcamcap_transferinfo((HDCAM)handle, &transferInfo);
+	error = dcamcap_transferinfo(handle, &transferInfo);
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcamcap_transferinfo() failed.\n", error);
@@ -46,7 +48,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 
 	// Prepare the DCAMBUF_FRAME and initialize the output for MATLAB.
 	pFrame.iFrame = transferInfo.nNewestFrameIndex;
-	error = dcambuf_lockframe((HDCAM)handle, &pFrame);
+	error = dcambuf_lockframe(handle, &pFrame);
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcambuf_lockframe() failed.\n", error);
@@ -57,7 +59,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 
 	// Copy the image data to our output array.
 	pFrame.buf = (unsigned short*)mxGetData(plhs[0]);
-	error = dcambuf_copyframe((HDCAM)handle, &pFrame);
+	error = dcambuf_copyframe(handle, &pFrame);
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcambuf_copyframe() failed.\n", error);

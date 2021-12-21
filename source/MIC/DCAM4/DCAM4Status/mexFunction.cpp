@@ -5,10 +5,11 @@
 // DCAMCAP_STATUS in dcamapi.h.
 void mexFunction(int nlhs, mxArray* plhs[],	int	nrhs, const	mxArray* prhs[]) 
 {
-	int32	handle;
-	mwSize  outsize[1];
-	int32*  pStatus;
-	DCAMERR error;
+	unsigned long* mHandle;
+	HDCAM	       handle;
+	mwSize         outsize[1];
+	int32*         pStatus;
+	DCAMERR        error;
 
 	// Prepare the outputs.
 	outsize[0] = 1;
@@ -16,7 +17,8 @@ void mexFunction(int nlhs, mxArray* plhs[],	int	nrhs, const	mxArray* prhs[])
 	pStatus = (int32*)mxGetData(plhs[0]);
 
 	// Call the dcam function.
-	handle = (int32)mxGetScalar(prhs[0]);
+	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
+	handle = (HDCAM)mHandle[0];
 	error = dcamcap_status((HDCAM)handle, pStatus);
 	if (failed(error))
 	{

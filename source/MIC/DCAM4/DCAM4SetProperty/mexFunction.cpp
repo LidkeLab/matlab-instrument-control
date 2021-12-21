@@ -6,18 +6,20 @@
 // before use here).
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
-	int32	handle;
-	int32	propertyID;
-	double  propertyValue;
-	DCAMERR error;
+	unsigned long* mHandle;
+	HDCAM	       handle;
+	int32	       propertyID;
+	double         propertyValue;
+	DCAMERR        error;
 
 	// Grab the inputs from MATLAB and check their types before proceeding.
-	handle = (int32)mxGetScalar(prhs[0]);
+	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
+	handle = (HDCAM)mHandle[0];
 	propertyID = (int32)mxGetScalar(prhs[1]);
 	propertyValue = (double)mxGetScalar(prhs[2]);
 
 	// Call the dcam function.
-	error = dcamprop_setvalue((HDCAM)handle, propertyID, propertyValue);
+	error = dcamprop_setvalue(handle, propertyID, propertyValue);
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcamprop_setvalue() failed.\n", error);
