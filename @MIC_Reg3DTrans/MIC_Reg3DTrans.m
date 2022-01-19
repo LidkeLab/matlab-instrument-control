@@ -516,14 +516,16 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     CorrParams.PlotFlag = true;
                     CorrParams.MaxOffset = MaxOffset;
                     CorrParams.FitOffset = FitOffset;
-                    CorrParams.SymmetrizeFit = true;
                     CorrParams.SuppressWarnings = true;
-                    if ((iter>0) && all(SubPixelOffset<=MaxOffset))
-                        NIterMax = 3;
+                    if ((iter>0) && all(SubPixelOffset<=MaxOffset) ...
+                            && all(SubPixelOffset<=1))
+                        NIterMax = 5;
+                        CorrParams.SymmetrizeFit = true;
                         [SubPixelOffset, PixelOffset, CorrData] = ...
                             obj.findOffsetIter(RefStack, CurrentStack, ...
                             NIterMax, [], CorrParams);
                     else
+                        CorrParams.SymmetrizeFit = false;
                         [SubPixelOffset, PixelOffset, CorrData] ...
                             = obj.findStackOffset(RefStack, CurrentStack, ...
                             CorrParams);
@@ -1080,6 +1082,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         [FreqMask, FreqSqEllipse, YMesh, XMesh, ZMesh] = ...
             frequencyMask(ImSize, FreqCutoff)
         [Struct] = padStruct(Struct, DefaultStruct)
+        [Image] = removeBorder(Image, Border, Direction)
     
         function State = unitTest(camObj,stageObj,lampObj)
             %unitTest Tests all functionality of MIC_Reg3DTrans
