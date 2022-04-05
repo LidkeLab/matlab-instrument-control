@@ -71,7 +71,7 @@ ii = 1;
 while (any(abs(NewShift)>Tolerance) && (ii<NIterMax))
     % Shift the image stack.
     ii = ii + 1;
-    MovingStack =MIC_Reg3DTrans.shiftImage(MovingStack, NewShift, ShiftParams);
+    MovingStack = MIC_Reg3DTrans.shiftImage(MovingStack, NewShift, ShiftParams);
 
     % Remove the border behind the shift direction (this border now
     % contains junk data that we don't want influencing the
