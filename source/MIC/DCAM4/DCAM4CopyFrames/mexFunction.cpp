@@ -45,6 +45,15 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		return;
 	}
 
+	// Wait for the capture to finish and then force stop it.
+	error = dcamwait_start((HDCAMWAIT)waitopen.hwait, &waitstart);
+	if (failed(error))
+	{
+		mexPrintf("Error = 0x%08lX\ndcamwait_start() failed.\n", error);
+		return;
+	}
+	dcamcap_stop(handle);
+
 	// Query the camera until it's no longer busy before attempting 
     // to transfer the data.
 	error = dcamcap_status(handle, &status);
@@ -71,15 +80,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 			return;
 		}
 	}
-
-	// Wait for the capture to finish and then force stop it.
-	error = dcamwait_start((HDCAMWAIT)waitopen.hwait, &waitstart);
-	if (failed(error))
-	{
-		mexPrintf("Error = 0x%08lX\ndcamwait_start() failed.\n", error);
-		return;
-	}
-	dcamcap_stop(handle);
 	
 	// Prepare the DCAMBUF_FRAME and initialize the output for MATLAB.
 	error = dcambuf_lockframe(handle, &pFrame);
@@ -91,13 +91,42 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	outsize[0] = (long long)pFrame.width * (long long)pFrame.height * nFrames;
 	plhs[0] = mxCreateNumericArray(1, outsize, mxUINT16_CLASS, mxREAL);
 	
+	// Update the camera status.
+	error = dcamcap_status(handle, &status);
+	if (failed(error))
+	{
+		mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
+		return;
+	}
+
 	// Copy the image data to our output array.
 	imagePointer = (unsigned short*) mxGetData(plhs[0]);
 	for (int ff = 0; ff < nFrames; ff++)
 	{
+		// Wait for the camera to be ready.
+		double startTime = clock();
+		while (status != 2) // status 2 is ready
+		{
+			// Check the timeout condition.
+			if ((clock() - startTime) > (timeout * 1e-3 * CLOCKS_PER_SEC))
+			{
+				mexPrintf("DCAM4CopyFrames: timeout of %i ms reached!\n", timeout);
+				return;
+			}
+
+			// Check the status.
+			error = dcamcap_status(handle, &status);
+			if (failed(error))
+			{
+				mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
+				return;
+			}
+		}
+
 		// Copy the image to our desired output in MATLAB.
 		pFrame.iFrame = ff;
 		pFrame.buf = imagePointer;
+		mexPrintf("status=%i\n", status);
 		error = dcambuf_copyframe(handle, &pFrame);
 		if (failed(error))
 		{
