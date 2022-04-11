@@ -7,37 +7,32 @@
 // places in this function.
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
-	unsigned long*  mHandle;
-	HDCAM		    handle;
-	int32		    nFrames;
-	int32			timeout = 1000;
-	mwSize          outsize[1];
-	DCAMBUF_FRAME   pFrame;
-	unsigned short* imagePointer;
-	DCAMERR         error;
-	char            outError;
-	DCAMWAIT_OPEN	waitopen;
-	DCAMWAIT_START  waitstart;
-	int32			status = 1;
-
 	// Grab the inputs from MATLAB.
+	unsigned long* mHandle;
+	HDCAM handle;
+	int32 nFrames;
+	int32 timeout = 1000;
 	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
 	handle = (HDCAM)mHandle[0];
 	nFrames = (int32)mxGetScalar(prhs[1]);
 	timeout = (int32)mxGetScalar(prhs[2]);
 
 	// Prepare some of the DCAM structures.
+	DCAMWAIT_OPEN waitopen;
+	DCAMWAIT_START waitstart;
+	DCAMBUF_FRAME pFrame;
 	memset(&waitopen, 0, sizeof(waitopen));
 	waitopen.size = sizeof(waitopen);
 	waitopen.hdcam = handle;
 	memset(&waitstart, 0, sizeof(waitstart));
 	waitstart.size = sizeof(waitstart);
-	waitstart.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY;
+	waitstart.eventmask = DCAMWAIT_CAPEVENT_CYCLEEND;
 	waitstart.timeout = timeout;
 	memset(&pFrame, 0, sizeof(pFrame));
 	pFrame.size = sizeof(pFrame);
 
 	// Create the HDCAMWAIT handle.
+	DCAMERR error;
 	error = dcamwait_open(&waitopen);
 	if (failed(error))
 	{
@@ -54,33 +49,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	}
 	dcamcap_stop(handle);
 
-	// Query the camera until it's no longer busy before attempting 
-    // to transfer the data.
-	error = dcamcap_status(handle, &status);
-	if (failed(error))
-	{
-		mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
-		return;
-	}
-	double startTime = clock();
-	while (status != 2) // status 2 is ready
-	{
-		// Check the timeout condition.
-		if ((clock() - startTime) > (timeout * 1e-3 * CLOCKS_PER_SEC))
-		{
-			mexPrintf("DCAM4CopyFrames: timeout of %i ms reached!\n", timeout);
-			return;
-		}
-
-		// Check the status.
-		error = dcamcap_status(handle, &status);
-		if (failed(error))
-		{
-			mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
-			return;
-		}
-	}
-	
 	// Prepare the DCAMBUF_FRAME and initialize the output for MATLAB.
 	error = dcambuf_lockframe(handle, &pFrame);
 	if (failed(error))
@@ -88,45 +56,18 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		mexPrintf("Error = 0x%08lX\ndcambuf_lockframe() failed.\n", error);
 		return;
 	}
+	mwSize outsize[1];
 	outsize[0] = (long long)pFrame.width * (long long)pFrame.height * nFrames;
 	plhs[0] = mxCreateNumericArray(1, outsize, mxUINT16_CLASS, mxREAL);
-	
-	// Update the camera status.
-	error = dcamcap_status(handle, &status);
-	if (failed(error))
-	{
-		mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
-		return;
-	}
 
 	// Copy the image data to our output array.
+	unsigned short* imagePointer;
 	imagePointer = (unsigned short*) mxGetData(plhs[0]);
 	for (int ff = 0; ff < nFrames; ff++)
 	{
-		// Wait for the camera to be ready.
-		double startTime = clock();
-		while (status != 2) // status 2 is ready
-		{
-			// Check the timeout condition.
-			if ((clock() - startTime) > (timeout * 1e-3 * CLOCKS_PER_SEC))
-			{
-				mexPrintf("DCAM4CopyFrames: timeout of %i ms reached!\n", timeout);
-				return;
-			}
-
-			// Check the status.
-			error = dcamcap_status(handle, &status);
-			if (failed(error))
-			{
-				mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
-				return;
-			}
-		}
-
 		// Copy the image to our desired output in MATLAB.
 		pFrame.iFrame = ff;
 		pFrame.buf = imagePointer;
-		mexPrintf("status=%i\n", status);
 		error = dcambuf_copyframe(handle, &pFrame);
 		if (failed(error))
 		{
@@ -135,6 +76,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		}
 
 		// Update the pointer for our MATLAB output.
+		// NOTE: char is one byte, hence the use of char here (we just need a type
+		//       that's 1 byte long).
 		imagePointer = (unsigned short*)((char*)imagePointer 
 			+ (long long)pFrame.rowbytes*(long long)pFrame.height);
 	}
