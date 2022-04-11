@@ -1,21 +1,29 @@
 #include "stdafx.h"
 #include "time.h"
 
-// [Frames] = DCAM4CopyFrames(cameraHandle, nFrames, timeout)
+// [Frames] = DCAM4CopyFrames(cameraHandle, nFrames, timeout, eventMask)
 // Copy the 'nFrames' of data collected by 'cameraHandle' during a capture. 
 // The input 'timeout' is given in milliseconds and is applied in multiple
-// places in this function.
+// places in this function.  The input 'eventMask' is one of the DCAM
+// event masks used for the wait structures (see DCAMWAIT_EVENT in dcamapi4
+// documentation).  'eventMask' is given as an integer corresponding to the 
+// hexadecimal values defined in dcamapi4.h (e.g., DCAMWAIT_CAPEVENT_CYCLEEND
+// can be selected by inputing eventMask = 4)
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
 	// Grab the inputs from MATLAB.
 	unsigned long* mHandle;
 	HDCAM handle;
 	int32 nFrames;
-	int32 timeout = 1000;
+	int32 timeout;
+	unsigned long mMask;
+	DCAMWAIT_EVENT eventMask;
 	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
 	handle = (HDCAM)mHandle[0];
 	nFrames = (int32)mxGetScalar(prhs[1]);
 	timeout = (int32)mxGetScalar(prhs[2]);
+	mMask = (unsigned long)mxGetScalar(prhs[3]);
+	eventMask = (DCAMWAIT_EVENT)mMask;
 
 	// Prepare some of the DCAM structures.
 	DCAMWAIT_OPEN waitopen;
@@ -26,10 +34,40 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	waitopen.hdcam = handle;
 	memset(&waitstart, 0, sizeof(waitstart));
 	waitstart.size = sizeof(waitstart);
-	waitstart.eventmask = DCAMWAIT_CAPEVENT_CYCLEEND;
+	waitstart.eventmask = eventMask;
 	waitstart.timeout = timeout;
 	memset(&pFrame, 0, sizeof(pFrame));
 	pFrame.size = sizeof(pFrame);
+
+	// Wait to proceed until that camera returns a ready status.
+	/*
+	int32 status = 1;
+	DCAMERR error;
+	error = dcamcap_status(handle, &status);
+	if (failed(error))
+	{
+		mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
+		return;
+	}
+	double startTime = clock();
+	while (status != 2) // status 2 is ready
+	{
+		// Check the timeout condition.
+		if ((clock() - startTime) > (timeout * 1e-3 * CLOCKS_PER_SEC))
+		{
+			mexPrintf("DCAM4CopyFrames: timeout of %i ms reached!\n", timeout);
+			return;
+		}
+
+		// Check the status.
+		error = dcamcap_status(handle, &status);
+		if (failed(error))
+		{
+			mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
+			return;
+		}
+	}
+	*/
 
 	// Create the HDCAMWAIT handle.
 	DCAMERR error;
@@ -62,7 +100,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 
 	// Copy the image data to our output array.
 	unsigned short* imagePointer;
-	imagePointer = (unsigned short*) mxGetData(plhs[0]);
+	imagePointer = (unsigned short*)mxGetData(plhs[0]);
 	for (int ff = 0; ff < nFrames; ff++)
 	{
 		// Copy the image to our desired output in MATLAB.
@@ -87,6 +125,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcambuf_release() failed.\n", error);
+	}
+
+	// Close the wait handles.
+	error = dcamwait_close((HDCAMWAIT)waitopen.hwait);
+	if (failed(error))
+	{
+		mexPrintf("Error = 0x%08lX\ndcamwait_close() failed.\n", error);
 	}
 
 	return;
