@@ -68,7 +68,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         Height;
         Width;
         Stride;
-        
+        TriggerMode='internal';
     end
     
     methods
@@ -356,6 +356,11 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             disp('Zyla shutdown');            
         end
             
+        function fireTrigger(obj)
+            % For now, just throw a warning since we haven't implemented
+            % software triggering for the Andor cameras.
+            warning('Software triggered capturing not yet implemented!')
+        end
     end 
     
     methods(Access=protected)

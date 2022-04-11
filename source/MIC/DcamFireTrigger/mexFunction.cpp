@@ -48,18 +48,4 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 		return;
 	}
 
-
-	// wait frame coming.
-	int32	timeout = 10000;
-	_DWORD	dw = DCAM_EVENT_FRAMEEND;
-	//printf("dcam_wait( FRAMEEND, 10s )\n");
-	if (!dcam_wait(hDCAM, &dw, timeout, NULL))
-	{
-		dcamcon_show_dcamerr(hDCAM, "dcam_wait()");
-		return;
-	}
-
-		
-
-	
 }
