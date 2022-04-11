@@ -4,15 +4,14 @@
 // Stop capturing started by DCAM4StartCapture().
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
-	unsigned long* mHandle;
-	HDCAM	       handle;
-	DCAMERR        error;
-
 	// Grab the inputs from MATLAB.
+	unsigned long* mHandle;
+	HDCAM handle;
 	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
 	handle = (HDCAM)mHandle[0];
 
 	// Call the dcam function.
+	DCAMERR error;
 	error = dcamcap_stop(handle);
 	if (failed(error))
 	{

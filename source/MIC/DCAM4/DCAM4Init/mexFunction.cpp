@@ -2,13 +2,11 @@
 
 // nDevices = DCAM4Init()
 // Initialize the DCAM-API and determine how many devices are connected.
-void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
-	mwSize		 outsize[1];
-	DCAMERR		 error;
-	DCAMAPI_INIT apiinit;
-	int*		 nDevice = 0;
-
+void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) 
+{
 	// Initialize the camera(s).
+	DCAMAPI_INIT apiinit;
+	DCAMERR error;
 	memset(&apiinit, 0, sizeof(apiinit)); // set all apiinit fields to 0
 	apiinit.size = sizeof(apiinit);
 	error = dcamapi_init(&apiinit);
@@ -18,6 +16,8 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	}
 
 	// Grab some outputs to return to MATLAB.
+	mwSize outsize[1];
+	int* nDevice = 0;
 	outsize[0] = 1;
 	plhs[0] = mxCreateNumericArray(1, outsize, mxINT32_CLASS, mxREAL);
 	nDevice = mxGetInt32s(plhs[0]);

@@ -4,9 +4,8 @@
 // Un-initialize the DCAM-API and force close any devices in use.
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[]) 
 {
-	DCAMERR error;
-
 	// Un-initialize all devices.
+	DCAMERR error;
 	error = dcamapi_uninit();
 	if (failed(error))
 	{

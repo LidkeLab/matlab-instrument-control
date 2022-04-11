@@ -1,23 +1,23 @@
 #include "stdafx.h"
 
-// [Frames] = DCAM4CopyLastFrame(cameraHandle)
+// [Frames] = DCAM4CopyLastFrame(cameraHandle, timeout)
 // Copy the most recently transfered frame of data.
 void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 {
-	unsigned long*       mHandle;
-	HDCAM	             handle;
-	mwSize               outsize[1];
-	DCAMBUF_FRAME        pFrame;
-	DCAMERR              error;
-	DCAMWAIT_OPEN	     waitopen;
-	DCAMWAIT_START       waitstart;
-	DCAMCAP_TRANSFERINFO transferInfo;
-
 	// Grab the inputs from MATLAB.
+	unsigned long* mHandle;
+	HDCAM handle;
 	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
 	handle = (HDCAM)mHandle[0];
 
 	// Prepare some of the DCAM structures.
+	mwSize outsize[1];
+	DCAMBUF_FRAME pFrame;
+	DCAMWAIT_OPEN waitopen;
+	DCAMWAIT_START waitstart;
+	int32 timeout;
+	timeout = (int32)mxGetScalar(prhs[1]);
+	DCAMCAP_TRANSFERINFO transferInfo;
 	memset(&pFrame, 0, sizeof(pFrame));
 	pFrame.size = sizeof(pFrame);
 	memset(&waitopen, 0, sizeof(waitopen));
@@ -26,11 +26,12 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	memset(&waitstart, 0, sizeof(waitstart));
 	waitstart.size = sizeof(waitstart);
 	waitstart.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY;
-	waitstart.timeout = 1000;
+	waitstart.timeout = timeout;
 	memset(&transferInfo, 0, sizeof(transferInfo));
 	transferInfo.size = sizeof(transferInfo);
 
 	// Create the HDCAMWAIT handle.
+	DCAMERR error;
 	error = dcamwait_open(&waitopen);
 	if (failed(error))
 	{
