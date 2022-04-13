@@ -39,36 +39,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	memset(&pFrame, 0, sizeof(pFrame));
 	pFrame.size = sizeof(pFrame);
 
-	// Wait to proceed until that camera returns a ready status.
-	/*
-	int32 status = 1;
-	DCAMERR error;
-	error = dcamcap_status(handle, &status);
-	if (failed(error))
-	{
-		mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
-		return;
-	}
-	double startTime = clock();
-	while (status != 2) // status 2 is ready
-	{
-		// Check the timeout condition.
-		if ((clock() - startTime) > (timeout * 1e-3 * CLOCKS_PER_SEC))
-		{
-			mexPrintf("DCAM4CopyFrames: timeout of %i ms reached!\n", timeout);
-			return;
-		}
-
-		// Check the status.
-		error = dcamcap_status(handle, &status);
-		if (failed(error))
-		{
-			mexPrintf("Error = 0x%08lx\ndcamcap_status() failed.\n", error);
-			return;
-		}
-	}
-	*/
-
 	// Create the HDCAMWAIT handle.
 	DCAMERR error;
 	error = dcamwait_open(&waitopen);
