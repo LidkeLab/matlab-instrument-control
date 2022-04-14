@@ -583,11 +583,14 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             % DCAM_IDPROP_SUBARRAYHSIZE <-> 0x00402120 <-> 4202784
             % DCAM_IDPROP_SUBARRAYVPOS <-> 0x00402130 <-> 4202800
             % DCAM_IDPROP_SUBARRAYVSIZE <-> 0x00402140 <-> 4202816
+            % NOTE: Set the width before the offset, otherwise you might
+            %       get an error (i.e., if using full width, setting offset
+            %       to nonzero would suggest imaging past the sensor size!)
             obj.setProperty(obj.CameraHandle, 4202832, 2)
-            obj.setProperty(obj.CameraHandle, 4202768, Hoffset);
             obj.setProperty(obj.CameraHandle, 4202784, HWidth);
-            obj.setProperty(obj.CameraHandle, 4202800, Voffset);
+            obj.setProperty(obj.CameraHandle, 4202768, Hoffset);
             obj.setProperty(obj.CameraHandle, 4202816, VWidth);
+            obj.setProperty(obj.CameraHandle, 4202800, Voffset);
         end
         function set.ExpTime_Focus(obj,in)
             obj.ReadyForAcq=0;
