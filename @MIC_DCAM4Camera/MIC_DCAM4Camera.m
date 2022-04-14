@@ -47,7 +47,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
         DefectCorrection;   %   defect correction  for Hamamatsu sCMOS camera
         GuiDialog;
-        Timeout = 1;        % timeout sent to several DCAM functions (seconds)
+        Timeout = 1000;        % timeout sent to several DCAM functions (milliseconds)
         EventMaskString = 'DCAMWAIT_CAPEVENT_CYCLEEND'; % wait event mask used in DCAM functions (see dcamprop.h DCAMWAIT_EVENT)
         APIPath = 'C:\Program Files\dcamsdk4\inc\dcamapi4.h';
     end
@@ -94,7 +94,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                 case 'sequence'
                     Data = DCAM4CopyFrames(obj.CameraHandle, ...
                         obj.SequenceLength, obj.Timeout, ...
-                        hex2dec(obj.EventMask));
+                        obj.EventMask);
                     Data = reshape(Data, ...
                         obj.ImageSize(1), obj.ImageSize(2), ...
                         obj.SequenceLength);
@@ -193,7 +193,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.setProperty(obj.CameraHandle, 1048848, obj.TriggerMode);
             
             % start capture so triggering can start
-            captureMode=0; %snap
+            captureMode=-1; % sequence
             DCAM4StartCapture(obj.CameraHandle, captureMode);
             pause(1) % pause briefly before proceeding
         end
@@ -343,7 +343,14 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             end
         end
         
-        function out=start_sequence(obj)
+        function out=start_sequence(obj, CaptureMode)
+            if (~exist('CaptureMode', 'var') || isempty(CaptureMode))
+                % Capture mode can be either 0 ("snap", images are taken
+                % until buffer is filled) or -1 ("sequence", images are
+                % taken until capturing is force stopped, e.g., focus mode
+                % or triggered capture).
+                CaptureMode = 0;
+            end
             %obj.AcquisitionType='sequence';
             obj.abort;
             obj.AcquisitionType='sequence';
@@ -354,7 +361,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.setup_acquisition;
             
             obj.AbortNow=0;
-            DCAM4StartCapture(obj.CameraHandle, 0); % what we call sequence needs snap mode
+            DCAM4StartCapture(obj.CameraHandle, CaptureMode); % what we call sequence needs snap mode
             pause(1) % pause briefly before proceeding
             
             Camstatus=obj.HtsuGetStatus;
@@ -389,15 +396,15 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             end
         end
         
-        function TriggeredCapture(obj)
+        function triggeredCapture(obj)
             DCAM4FireTrigger(obj.CameraHandle, obj.Timeout)
             obj.displaylastimage;
         end
         
-        function out=FinishTriggeredCapture(obj,numFrames)
+        function out=finishTriggeredCapture(obj,numFrames)
             %obj.abort;
             imgall = DCAM4CopyFrames(obj.CameraHandle, numFrames, ...
-                obj.Timeout, hex2dec(obj.EventMask));
+                obj.Timeout, obj.EventMask);
             out=reshape(imgall,obj.ImageSize(1),obj.ImageSize(2),numFrames);
             
             % set Trigger mode back to Internal so data can be captured
@@ -622,7 +629,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             % (this can be slow, so it's best to do it as soon as the user
             % sets this property).
             obj.EventMaskString = SetValue;
-            obj.EventMask = obj.propertyToHex(SetValue, obj.APIPath);
+            obj.EventMask = hex2dec(obj.propertyToHex(SetValue, obj.APIPath));
         end
         
     end
