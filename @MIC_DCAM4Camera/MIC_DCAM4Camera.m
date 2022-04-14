@@ -53,7 +53,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
     end
     
     properties (Hidden)
-        EventMask;
+        EventMask = 4;
     end
     
     methods
@@ -113,7 +113,6 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.DefectCorrection=1;% defection correction is off
             obj.XPixels=2048;
             obj.YPixels=2048;
-            obj.ImageSize=[obj.XPixels,obj.YPixels];
             obj.ROI=[1,obj.XPixels,1,obj.YPixels];
             obj.TriggerMode=int32(hex2dec('0001'));
             obj.ExpTime_Focus=single(0.004);
@@ -145,25 +144,19 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                 % Exposure time:
                 %   DCAM_IDPROP_EXPOSURETIME <-> 0x001F0110 <-> 2031888
                 case 'focus'        %Run-Till-Abort
-                    captureMode=1; %sequence
                     TotalFrame=100;
-                    obj.setProperty(obj.CameraHandle, 2031888, obj.ExpTime_Focus)
-                    obj.ExpTime_Focus = ...
-                        obj.getProperty(obj.CameraHandle, 2031888);
-                    DcamCaptureSettings(obj.CameraHandle,captureMode,TotalFrame);
+                    obj.ExpTime_Focus = obj.setGetProperty(...
+                        obj.CameraHandle, 2031888, obj.ExpTime_Focus);
+                    obj.prepareForCapture(obj.CameraHandle,TotalFrame);
                 case 'capture'      %Single Scan
-                    captureMode=0; %snap
                     TotalFrame=1;
-                    obj.setProperty(obj.CameraHandle, 2031888, obj.ExpTime_Capture)
-                    obj.ExpTime_Capture = ...
-                        obj.getProperty(obj.CameraHandle, 2031888);
-                    DcamCaptureSettings(obj.CameraHandle,captureMode,TotalFrame);
+                    obj.ExpTime_Capture = obj.setGetProperty(...
+                        obj.CameraHandle, 2031888, obj.ExpTime_Capture);
+                    obj.prepareForCapture(obj.CameraHandle,TotalFrame);
                 case 'sequence'     %Kinetic Series
-                    captureMode=0; %snap
-                    obj.setProperty(obj.CameraHandle, 2031888, obj.ExpTime_Sequence)
-                    obj.ExpTime_Sequence = ...
-                        obj.getProperty(obj.CameraHandle, 2031888);                    % allocate memory for capturing data
-                    DcamCaptureSettings(obj.CameraHandle,captureMode,obj.SequenceLength);
+                    obj.ExpTime_Sequence = obj.setGetProperty(...
+                        obj.CameraHandle, 2031888, obj.ExpTime_Sequence);
+                    obj.prepareForCapture(obj.CameraHandle,obj.SequenceLength);
             end
             
             status=obj.HtsuGetStatus;
@@ -180,11 +173,9 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             if strcmp(status,'Ready')||strcmp(status,'Busy')
                 obj.abort;
             end
-            captureMode=0; %snap
-            [currentET]=DcamSetExposureTime(obj.CameraHandle,obj.ExpTime_Sequence);
-            % allocate memory for capturing data
-            DcamCaptureSettings(obj.CameraHandle,captureMode,numFrames);
-            obj.ExpTime_Sequence=currentET;
+            obj.ExpTime_Sequence = obj.setGetProperty(...
+                obj.CameraHandle, 2031888, obj.ExpTime_Sequence);
+            obj.prepareForCapture(obj.CameraHandle,numFrames);
             
             status=obj.HtsuGetStatus;
             if strcmp(status,'Ready')
@@ -202,7 +193,9 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.setProperty(obj.CameraHandle, 1048848, obj.TriggerMode);
             
             % start capture so triggering can start
-            DcamCapture(obj.CameraHandle);
+            captureMode=0; %snap
+            DCAM4StartCapture(obj.CameraHandle, captureMode);
+            pause(1) % pause briefly before proceeding
         end
         
         function shutdown(obj)
@@ -224,7 +217,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             evalc('obj.setup_acquisition()');
             
             obj.AbortNow=1;
-            DcamCapture(obj.CameraHandle);
+            DCAM4StartCapture(obj.CameraHandle, 0);
+            pause(1) % pause briefly before proceeding
             out=obj.getdata();
             %             obj.displaylastimage();
             obj.abort();
@@ -256,7 +250,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             end
             
             obj.AbortNow=0;
-            DcamCapture(obj.CameraHandle);
+            DCAM4StartCapture(obj.CameraHandle, -1);
+            pause(1) % pause briefly before proceeding
             
             Camstatus=obj.HtsuGetStatus;
             while strcmp(Camstatus,'Busy')
@@ -308,7 +303,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             end
             
             obj.AbortNow=0;
-            DcamCapture(obj.CameraHandle);
+            DCAM4StartCapture(obj.CameraHandle, -1);
+            pause(1) % pause briefly before proceeding
             
             Camstatus=obj.HtsuGetStatus;
             while strcmp(Camstatus,'Busy')
@@ -358,7 +354,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.setup_acquisition;
             
             obj.AbortNow=0;
-            DcamCapture(obj.CameraHandle);
+            DCAM4StartCapture(obj.CameraHandle, 0); % what we call sequence needs snap mode
+            pause(1) % pause briefly before proceeding
             
             Camstatus=obj.HtsuGetStatus;
             while strcmp(Camstatus,'Busy')
@@ -393,13 +390,14 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         end
         
         function TriggeredCapture(obj)
-            DcamFireTrigger(obj.CameraHandle)
+            DCAM4FireTrigger(obj.CameraHandle, obj.Timeout)
             obj.displaylastimage;
         end
         
         function out=FinishTriggeredCapture(obj,numFrames)
             %obj.abort;
-            [imgall]=DcamGetAllFrames(obj.CameraHandle,numFrames);
+            imgall = DCAM4CopyFrames(obj.CameraHandle, numFrames, ...
+                obj.Timeout, hex2dec(obj.EventMask));
             out=reshape(imgall,obj.ImageSize(1),obj.ImageSize(2),numFrames);
             
             % set Trigger mode back to Internal so data can be captured
@@ -409,7 +407,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.CameraSetting.TriggerMode.Bit = obj.GuiDialog.TriggerMode.Bit(TriggerModeIdx);
             obj.TriggerMode = obj.CameraSetting.TriggerMode.Bit;
             % apply trigger mode
-            DcamSetTriggerMode(obj.CameraHandle,obj.TriggerMode);
+            obj.setProperty(obj.CameraHandle, 1048848, obj.TriggerMode);
         end
         
         function out=take_sequence(obj)
@@ -422,7 +420,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             %             end
             
             obj.AbortNow=0;
-            DcamCapture(obj.CameraHandle)
+            DCAM4StartCapture(obj.CameraHandle, 0); % what we call sequence needs snap mode
+            pause(1) % pause briefly before proceeding
             
             Camstatus=obj.HtsuGetStatus;
             while strcmp(Camstatus,'Busy')
@@ -458,9 +457,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         end
         
         function reset(obj)
-            DcamClose(obj.CameraHandle)
-            DcamGetCameras;
-            obj.CameraHandle=DcamOpen(obj.CameraIndex);
+            DCAM4Close(obj.CameraHandle)
+            obj.CameraHandle=DCAM4Open(obj.CameraIndex);
             obj.setCamProperties(obj.CameraSetting);
         end
         
@@ -579,10 +577,13 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.ImageSize=[HWidth,VWidth];
             
             % Set the appropriate ROI properties:
+            % DCAM_IDPROP_SUBARRAYMODE <-> 0x00402150 <-> 4202832
+            % DCAMPROP_MODE__ON <-> 2
             % DCAM_IDPROP_SUBARRAYHPOS <-> 0x00402110 <-> 4202768
             % DCAM_IDPROP_SUBARRAYHSIZE <-> 0x00402120 <-> 4202784
             % DCAM_IDPROP_SUBARRAYVPOS <-> 0x00402130 <-> 4202800
             % DCAM_IDPROP_SUBARRAYVSIZE <-> 0x00402140 <-> 4202816
+            obj.setProperty(obj.CameraHandle, 4202832, 2)
             obj.setProperty(obj.CameraHandle, 4202768, Hoffset);
             obj.setProperty(obj.CameraHandle, 4202784, HWidth);
             obj.setProperty(obj.CameraHandle, 4202800, Voffset);
@@ -679,6 +680,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         [PropertyString] = hexToProperty(HexString, Prefix, APIFilePath);
         setProperty(CameraHandle, Property, Value, APIFilePath);
         [Value] = getProperty(CameraHandle, Property, APIFilePath);
-        setROI(CameraHandle, ROI);
+        [Value] = setGetProperty(CameraHandle, Property, Value, APIFilePath);
+        prepareForCapture(CameraHandle, CaptureMode, NImages);
     end
 end

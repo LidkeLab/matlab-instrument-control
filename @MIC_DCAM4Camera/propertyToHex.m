@@ -29,6 +29,9 @@ end
 APIText = fileread(APIFilePath);
 HexString = regexp(APIText, ...
     sprintf('(?<=%s\\s*=\\s*)\\w*', PropertyString), 'match');
+if isempty(HexString)
+    return
+end
 HexString = HexString{1};
 
 
