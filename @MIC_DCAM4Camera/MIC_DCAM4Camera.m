@@ -397,12 +397,16 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         end
         
         function triggeredCapture(obj)
+            obj.fireTrigger()
+            obj.displaylastimage();
+        end
+        
+        function fireTrigger(obj)
             DCAM4FireTrigger(obj.CameraHandle, obj.Timeout)
-            obj.displaylastimage;
         end
         
         function out=finishTriggeredCapture(obj,numFrames)
-            %obj.abort;
+%             obj.abort();
             imgall = DCAM4CopyFrames(obj.CameraHandle, numFrames, ...
                 obj.Timeout, obj.EventMask);
             out=reshape(imgall,obj.ImageSize(1),obj.ImageSize(2),numFrames);
