@@ -102,8 +102,6 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         end
         
         function initialize(obj)
-            %basepath=userpath;
-            % addpath([basepath(1:end-1) '\Instrumentation\development\DCAMmex']);
             if isempty(obj.CameraIndex)
                 fprintf('Getting Hamamatsu Camera Info.\n')
                 obj.getcamera()
@@ -408,7 +406,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         function out=finishTriggeredCapture(obj,numFrames)
 %             obj.abort();
             imgall = DCAM4CopyFrames(obj.CameraHandle, numFrames, ...
-                obj.Timeout, obj.EventMask);
+                obj.Timeout*numFrames, obj.EventMask);
             out=reshape(imgall,obj.ImageSize(1),obj.ImageSize(2),numFrames);
             
             % set Trigger mode back to Internal so data can be captured
@@ -594,10 +592,13 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             % DCAM_IDPROP_SUBARRAYHSIZE <-> 0x00402120 <-> 4202784
             % DCAM_IDPROP_SUBARRAYVPOS <-> 0x00402130 <-> 4202800
             % DCAM_IDPROP_SUBARRAYVSIZE <-> 0x00402140 <-> 4202816
-            % NOTE: Set the width before the offset, otherwise you might
-            %       get an error (i.e., if using full width, setting offset
-            %       to nonzero would suggest imaging past the sensor size!)
+            % NOTE: Depending on the values being set, errors can occur due
+            %       to inconsistencies between offset and width, hence I'm
+            %       setting the offset to 0 temporarily before setting the
+            %       desired value.
             obj.setProperty(obj.CameraHandle, 4202832, 2)
+            obj.setProperty(obj.CameraHandle, 4202768, 0);
+            obj.setProperty(obj.CameraHandle, 4202800, 0);
             obj.setProperty(obj.CameraHandle, 4202784, HWidth);
             obj.setProperty(obj.CameraHandle, 4202768, Hoffset);
             obj.setProperty(obj.CameraHandle, 4202816, VWidth);
