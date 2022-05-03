@@ -11,7 +11,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         ImageHandle;
         ReadyForAcq=0;      %If not, call setup_acquisition
         TextHandle;
-        SDKPath;
+        SDKPath = 'C:\Users\lidkelab\Documents\GitHub\matlab-instrument-control\source\MIC\DCAM4\x64\Release';
     end
     
     properties(SetAccess = protected)
@@ -102,6 +102,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         end
         
         function initialize(obj)
+            addpath(obj.SDKPath)
             if isempty(obj.CameraIndex)
                 fprintf('Getting Hamamatsu Camera Info.\n')
                 obj.getcamera()
@@ -137,7 +138,6 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             if strcmp(status,'Ready')||strcmp(status,'Busy')
                 obj.abort();
             end
-            status=obj.HtsuGetStatus();
             switch obj.AcquisitionType
                 % Exposure time:
                 %   DCAM_IDPROP_EXPOSURETIME <-> 0x001F0110 <-> 2031888
@@ -165,15 +165,13 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             end
         end
         
-        function setup_fast_acquisition(obj,numFrames)
+        function setup_fast_acquisition(obj)
             obj.AcquisitionType='sequence';
             status=obj.HtsuGetStatus;
             if strcmp(status,'Ready')||strcmp(status,'Busy')
                 obj.abort;
             end
-            obj.ExpTime_Sequence = obj.setGetProperty(...
-                obj.CameraHandle, 2031888, obj.ExpTime_Sequence);
-            obj.prepareForCapture(obj.CameraHandle,numFrames);
+            obj.setup_acquisition()
             
             status=obj.HtsuGetStatus;
             if strcmp(status,'Ready')
@@ -406,7 +404,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         function out=finishTriggeredCapture(obj,numFrames)
 %             obj.abort();
             imgall = DCAM4CopyFrames(obj.CameraHandle, numFrames, ...
-                obj.Timeout*numFrames, obj.EventMask);
+                obj.ExpTime_Sequence*numFrames, obj.EventMask);
             out=reshape(imgall,obj.ImageSize(1),obj.ImageSize(2),numFrames);
             
             % set Trigger mode back to Internal so data can be captured
