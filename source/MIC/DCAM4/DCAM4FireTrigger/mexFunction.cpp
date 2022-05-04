@@ -22,6 +22,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		mexPrintf("Error = 0x%08lX\ndcamcap_firetrigger failed.\n", error);
 	}
 	
+	/*
 	// Prepare some wait structures.
 	DCAMWAIT_OPEN waitopen;
 	DCAMWAIT_START waitstart;
@@ -53,6 +54,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	{
 		mexPrintf("Error = 0x%08lX\ndcamwait_close() failed.\n", error);
 	}
-	
+	*/
 	return;
 }

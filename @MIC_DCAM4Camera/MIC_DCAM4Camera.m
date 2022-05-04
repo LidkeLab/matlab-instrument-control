@@ -28,6 +28,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         XPixels;            %number of pixels in first dimention
         YPixels;            %number of pixels in second dimention
         InstrumentName='HamamatsuCamera'
+        TriggerPause; % pause (seconds) after trigger firing in fireTrigger()
     end
     
     properties (Hidden)
@@ -157,6 +158,13 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                     obj.prepareForCapture(obj.CameraHandle,obj.SequenceLength);
             end
             
+            % Update the sequence period to reflect duration of exposure +
+            % readout.
+            % DCAM_IDPROP_INTERNALFRAMERATE -> 0x00403810 -> 4208656
+            obj.SequenceCycleTime = 1 ...
+                / MIC_DCAM4Camera.getProperty(obj.CameraHandle, 4208656);
+
+            
             status=obj.HtsuGetStatus;
             if strcmp(status,'Ready')
                 obj.ReadyForAcq=1;
@@ -171,7 +179,6 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             if strcmp(status,'Ready')||strcmp(status,'Busy')
                 obj.abort;
             end
-            obj.setup_acquisition()
             
             status=obj.HtsuGetStatus;
             if strcmp(status,'Ready')
@@ -187,6 +194,11 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             % apply trigger mode
             % DCAM_IDPROP_TRIGGERSOURCE <-> 0x00100110 <-> 1048848
             obj.setProperty(obj.CameraHandle, 1048848, obj.TriggerMode);
+            obj.setup_acquisition()
+                        
+            % Determine the trigger pause time (minimum trigger period).
+            % DCAM_IDPROP_TIMING_MINTRIGGERINTERVAL <-> 0x00403050 <-> 4206672
+            obj.TriggerPause = obj.getProperty(obj.CameraHandle, 4206672);
             
             % start capture so triggering can start
             captureMode=-1; % sequence
@@ -354,7 +366,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             %             if strcmp(status,'Ready')||strcmp(status,'Busy')
             %                 obj.abort;
             %             end
-            obj.setup_acquisition;
+            obj.setup_acquisition();
             
             obj.AbortNow=0;
             DCAM4StartCapture(obj.CameraHandle, CaptureMode); % what we call sequence needs snap mode
@@ -393,8 +405,11 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         end
         
         function triggeredCapture(obj)
-            obj.fireTrigger()
+            obj.fireTrigger();
             obj.displaylastimage();
+            
+            % Pause before returning.
+            pause(obj.TriggerPause)
         end
         
         function fireTrigger(obj)
@@ -404,7 +419,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         function out=finishTriggeredCapture(obj,numFrames)
 %             obj.abort();
             imgall = DCAM4CopyFrames(obj.CameraHandle, numFrames, ...
-                obj.ExpTime_Sequence*numFrames, obj.EventMask);
+                obj.SequenceCycleTime*numFrames, obj.EventMask);
             out=reshape(imgall,obj.ImageSize(1),obj.ImageSize(2),numFrames);
             
             % set Trigger mode back to Internal so data can be captured
