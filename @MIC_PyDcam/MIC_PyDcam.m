@@ -353,7 +353,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
                     end
                     if pinfo.Value ~= value
                         [out,err] = obj.setProperty(idprop,value);
-
+                        
                     end
                 end
             end
@@ -450,12 +450,28 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             Voffset = obj.valuecheck('SUBARRAY_VPOS',ROI(3)-1);
             VWidth = obj.valuecheck('SUBARRAY_VSIZE',ROI(4)-ROI(3)+1);
 
+            curHpos = obj.getProperty(obj.CameraSetting.SUBARRAY_HPOS.idprop);
+            curVpos = obj.getProperty(obj.CameraSetting.SUBARRAY_VPOS.idprop);
+            if Hoffset>curHpos
+                obj.setProperty(obj.CameraSetting.SUBARRAY_HSIZE.idprop,HWidth);
+                obj.setProperty(obj.CameraSetting.SUBARRAY_HPOS.idprop,Hoffset);
+            else
+                obj.setProperty(obj.CameraSetting.SUBARRAY_HPOS.idprop,Hoffset);
+                obj.setProperty(obj.CameraSetting.SUBARRAY_HSIZE.idprop,HWidth);
+            end
+            if Voffset>curVpos
+                obj.setProperty(obj.CameraSetting.SUBARRAY_VSIZE.idprop,VWidth);
+                obj.setProperty(obj.CameraSetting.SUBARRAY_VPOS.idprop,Voffset);
+            else
+                obj.setProperty(obj.CameraSetting.SUBARRAY_VPOS.idprop,Voffset);
+                obj.setProperty(obj.CameraSetting.SUBARRAY_VSIZE.idprop,VWidth);
+            end
 
             obj.CameraSetting.SUBARRAY_HPOS.Value = Hoffset;
             obj.CameraSetting.SUBARRAY_HSIZE.Value = HWidth;
             obj.CameraSetting.SUBARRAY_VPOS.Value = Voffset;
             obj.CameraSetting.SUBARRAY_VSIZE.Value = VWidth;
-            obj.setCamProperties(obj.CameraSetting)
+
             GuiCurSel = MIC_PyDcam.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
             

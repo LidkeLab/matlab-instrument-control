@@ -20,7 +20,7 @@ guidata(camFig,handles)
 % create panels
 panelPosition = [.05 .12 .9 .85];
 handles.camPan = uipanel('Parent',camFig,'Units','normalized','fontweight','bold',...
-    'Position',panelPosition,'Title','Camera Parameters','Visible','on','Scrollable','on');
+    'Position',panelPosition,'Title','Camera Parameters','Visible','on');
 
 % put in a title
 set(camFig,'Name',sprintf('Gui Camera Parameters'))
