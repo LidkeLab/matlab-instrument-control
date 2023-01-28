@@ -1,11 +1,16 @@
-function getcamera(obj, AdaptorName)
+function getcamera(obj,AdaptorName,Format,DevID)
 H=imaqhwinfo;
 
-info=imaqhwinfo(AdaptorName);
 
-DevID=info.DeviceIDs{1};
-Format=info.DeviceInfo(DevID).SupportedFormats{1};
-vid = videoinput(ADname,DevID,Format);
+info=imaqhwinfo(AdaptorName);
+if nargin>3
+    vid = videoinput(AdaptorName,DevID,Format);
+elseif nargin>2
+    DevID=info.DeviceIDs{1};
+    vid = videoinput(AdaptorName,DevID,Format);
+else
+    vid = videoinput(AdaptorName);
+end
 vid_src=getselectedsource(vid);
 obj.CameraIndex=DevID;
 obj.CameraHandle=vid;

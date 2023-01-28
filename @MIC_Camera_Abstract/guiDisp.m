@@ -33,7 +33,7 @@ handles.dispMenu = uicontrol('Parent',handles.dispPan,'Style','popupmenu','Strin
     'Lower Right Quadrant','Center Left','Center Right'},'Units','Normalized','Position',[.77 .87 .2 .075],'BackgroundColor',[1 1 1],'Callback',@ChangeRoi);
 
 handles.ROITex = uicontrol('Parent',handles.dispPan,'Style','text','String','ROI (px) [xstart xend ystart yend]:','fontsize',10,'Units','Normalized','Position',[0.035 .1 .5 .075]);
-handles.ROIBox = uicontrol('Parent',handles.dispPan,'Style','edit','String',['[1 ' num2str(obj.XPixels) ' 1 ' num2str(obj.YPixels) ']'],'Units','Normalized','Position',...
+handles.ROIBox = uicontrol('Parent',handles.dispPan,'Style','edit','String',num2str(obj.ROI),'Units','Normalized','Position',...
     [0.15 .05 .25 .075],'BackgroundColor',[1 1 1],'CallBack',@plotROI);
 
 
