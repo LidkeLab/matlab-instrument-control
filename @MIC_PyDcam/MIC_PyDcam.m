@@ -100,7 +100,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
 
 
         
-        function out=getlastimage(obj) %?
+        function out=getlastimage(obj) 
             frameready = obj.CameraHandle.wait_capevent_frameready(py.int(obj.TimeOut));
             if frameready
                img = obj.CameraHandle.buf_getlastframedata();
@@ -109,6 +109,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             else
                 err = obj.CameraHandle.lasterr();
                 disp(['Dcam.wait_capevent_frameready() fails with error: ',err.char])
+                out = [];
             end
         end
 
@@ -119,8 +120,12 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
                 case 'capture'
                     out=obj.getlastimage;
                 case 'sequence'
-                    out = py.dcam_helper.dcam_get_allframes(obj.CameraHandle,py.int(obj.SequenceLength));
+                    info = obj.CameraHandle.cap_transferinfo();
+                    %info.nFrameCount.int16
+                    %out = py.dcam_helper.dcam_get_allframes(obj.CameraHandle,py.int(obj.SequenceLength));
+                    out = py.dcam_helper.dcam_get_allframes(obj.CameraHandle,info.nFrameCount);
                     out = permute(out.uint16,[3,2,1]);
+                    %out = out.uint16;
             end
         end
 
@@ -147,15 +152,16 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
                     out=[];
                     break;
                 else
-                    out=obj.getdata;
+                    out=obj.getdata();
                 end
-                obj.displaylastimage;
+                obj.displaylastimage();
                 Status = obj.getCapStatus();
             end
             
             if obj.AbortNow
                 obj.abort;
                 obj.AbortNow=0;
+                
                 obj.CameraHandle.buf_release();
                 return;
             end

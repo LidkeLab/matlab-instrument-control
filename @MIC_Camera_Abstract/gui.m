@@ -272,7 +272,7 @@ initialize;
     % Call back to Abort Acquisition
     function abortAcquisition(fileTab,eventdata)
        % function to abort the camera if its doing something (e.g. taking data) 
-        obj.abort;
+        obj.abortnow;
     end
 
     
