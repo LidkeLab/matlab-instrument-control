@@ -37,7 +37,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         Manufacturer;       %camera manufacturer
         Model;              %camera model
         CameraParameters;   %camera specific parameters
-        
+        IsRunning;
         CameraCap;          % capability (all options) of camera parameters created by qw
         CameraSetting;      % current setting of camera parameters created by qw
         CameraFrameIndex    %current frame number in sequence
@@ -92,8 +92,8 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 end
                 clear a;
             else
-                [SDK]=uigetdir(matlabroot,'Select Andor SDK3 Toolbox Directory');
-                obj.SDKPath=SDK;
+                [SDKPath]=uigetdir(matlabroot,'Select Andor SDK3 Toolbox Directory');
+                obj.SDKPath=SDKPath;
                 if exist(obj.SDKPath,'dir')
                     save(fullfile(p,'AndorCameraZyla_Properties.mat'),'SDKPath');
                 else
@@ -148,18 +148,18 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             obj.AbortNow=0;
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStart');
             AT_CheckWarning(obj.LastError);
-            IsRunning=1;
-            while IsRunning
+            obj.IsRunning=1;
+            while obj.IsRunning
                 if obj.AbortNow
                     obj.AbortNow=0;
-                    IsRunning=0;
+                    obj.IsRunning=0;
                     break
                 end
                 
                 Im=obj.displaylastimage(); 
                 obj.CameraFrameIndex=obj.CameraFrameIndex+1;
                 obj.Data(:,:,obj.CameraFrameIndex)=Im;
-                obj.Data(1,1,obj.CameraFrameIndex)
+                %obj.Data(1,1,obj.CameraFrameIndex)
                 
                 if obj.CameraFrameIndex==obj.SequenceLength
                     break
@@ -183,12 +183,12 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             [obj.LastError] = AT_Command(obj.CamHandle, 'AcquisitionStart');
             AT_CheckWarning(obj.LastError);
             [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
-            IsRunning=1;
+            obj.IsRunning=1;
             
-            while IsRunning
+            while obj.IsRunning
                 if obj.AbortNow
                     obj.AbortNow=0;
-                    IsRunning=0;
+                    obj.IsRunning=0;
                     break
                 end
                 [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
@@ -377,6 +377,11 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             [obj.LastError] = AT_FinaliseLibrary();
             AT_CheckWarning(obj.LastError);
             disp('Zyla shutdown');
+        end
+        
+        
+        function [temp, status] = call_temperature(obj)
+            [temp, status]=gettemperature(obj);
         end
         
     end

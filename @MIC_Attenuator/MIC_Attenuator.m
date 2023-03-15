@@ -98,10 +98,10 @@ classdef MIC_Attenuator < MIC_Abstract
         
         function setTransmission(obj,Transmission_in)
             % Sets output attenuation in percentage of maximum
-            if Transmission_in > obj.MaxTransmission
+            if Transmission_in >obj.MaxTransmission+0.001
                error('The input transmission is too large, setting to %d\n',obj.MaxTransmission); 
             end
-            if Transmission_in<obj.MinTransmission
+            if Transmission_in<obj.MinTransmission-0.001
                error('The input transmission is too small, setting to %d\n',obj.MinTransmission); 
             end
             if isempty(obj.Input_Voltage)
@@ -207,7 +207,7 @@ classdef MIC_Attenuator < MIC_Abstract
                 for ii = 1:a
                     outputSingleScan(DAQQ,Voltage(ii));
                     pause(1)
-                    OutTransmission(ii) = Pm.measure();
+                    OutTransmission(ii) = Pm.measure;
                     pause(0.1)
                 end
                 NormTransmission = OutTransmission*100/BeforeAttenuator;
