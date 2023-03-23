@@ -169,7 +169,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
                 TTLWordBinary(ii,:) = flip(dec2bin(TTLWordRounded(ii), 16) - '0');           % Convert each TTLWord integer into a binary array. Each row represents a converted integer. The -'0' takes each character in a string and converts it into a double.
             end
             obj.Offset = Offset;
-            
+            TTLWordBinary(TTLWordRoundedSize,:) = TTLWordBinary(1,:);
             % clear all channels before creating a new sequence of words
             obj.clearSession();
             
@@ -198,7 +198,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
             % send the list of 16bit Words to the backgorund of MATLAB
             startBackground(obj.DAQsessionAngle);
             % update gui from 
-            obj.updateGui();
+            %obj.updateGui();
         end
         
         function Word = angle2word(obj,Angle)

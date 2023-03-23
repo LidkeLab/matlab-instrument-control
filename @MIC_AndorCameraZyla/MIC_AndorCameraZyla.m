@@ -140,7 +140,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             obj.setup_acquisition();
             obj.CameraFrameIndex=0;
             %queue buffers
-            for ii=1:10 
+            for ii=1:1 
                 [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
             end
             obj.Data=zeros(obj.Width,obj.Height,obj.SequenceLength,'uint16');
@@ -348,7 +348,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         function abort(obj)
             
             obj.AbortNow=1;
-            
+            obj.IsRunning = 0;
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
             AT_CheckWarning(obj.LastError);
             [obj.LastError]=AT_Flush(obj.CamHandle);
