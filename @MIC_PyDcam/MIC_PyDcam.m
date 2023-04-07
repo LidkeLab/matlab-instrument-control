@@ -283,6 +283,46 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             end
         end
 
+        function setup_fast_acquisition(obj,numFrames)
+            obj.AcquisitionType='sequence';
+            status=obj.getCapStatus();
+            if strcmp(status,'READY')||strcmp(status,'BUSY')
+                obj.abort;
+            end
+             
+            idprop = obj.CameraSetting.EXPOSURE_TIME.idprop;
+            obj.CameraHandle.buf_alloc(py.int(numFrames));
+            out = obj.setgetProperty(idprop,obj.ExpTime_Sequence);
+            obj.ExpTime_Sequence=out;
+
+            % set Trigger mode to Software so we can use firetrigger
+            idprop = obj.CameraSetting.TRIGGERSOURCE.idprop;
+            obj.setProperty(idprop,3);% Software mode
+
+            status=obj.getCapStatus();
+            if strcmp(status,'READY')
+                obj.ReadyForAcq=1;
+            end
+            
+            % start capture so triggering can start
+            obj.CameraHandle.cap_snapshot();
+        end
+
+        function triggeredCapture(obj)
+            err = obj.CameraHandle.cap_firetrigger();
+            obj.displaylastimage();
+        end
+
+        function out = finishTriggeredCapture(obj)
+            %obj.abort;
+            out = obj.getdata();
+                        
+            % set Trigger mode back to Internal so data can be captured
+            idprop = obj.CameraSetting.TRIGGERSOURCE.idprop;
+            obj.setProperty(idprop,1);% Internal mode
+
+        end
+
         function get_propertiesDcam(obj)
             idprop = obj.CameraHandle.prop_getnextid(py.int(0));
             while idprop ~= 0
