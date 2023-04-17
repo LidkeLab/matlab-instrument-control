@@ -32,7 +32,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         SequenceLength = 10;     %   Kinetic Series length
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
         GuiDialog;
-        TimeOut = 1000;     % ms
+        TimeOut = 10000;     % ms
     end
     properties (Hidden)
         StartGUI=false;     %Defines GUI start mode.  'true' starts GUI on object creation.
@@ -48,8 +48,8 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         
         function abort(obj)
             % Abort function
-            obj.CameraHandle.cap_stop();
-            obj.ReadyForAcq=0;
+            err = obj.CameraHandle.cap_stop();
+            obj.ReadyForAcq=0; 
         end
         
         function shutdown(obj)
@@ -66,7 +66,9 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
 
         function initializeDcam(obj,envpath)
             % Initialization
+            
             pyenv('Version',envpath)
+            
             [filepath,~,~] = fileparts(which('MIC_PyDcam'));
             cd([filepath,'/private'])
             py.importlib.import_module('dcam');
@@ -95,7 +97,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             GuiCurSel = MIC_PyDcam.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
             obj.gui;
-            
+            err = obj.CameraHandle.buf_release();
         end
 
 
@@ -121,7 +123,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
                     out=obj.getlastimage;
                 case 'sequence'
                     info = obj.CameraHandle.cap_transferinfo();
-                    %info.nFrameCount.int16
+                    info.nFrameCount.int16
                     %out = py.dcam_helper.dcam_get_allframes(obj.CameraHandle,py.int(obj.SequenceLength));
                     out = py.dcam_helper.dcam_get_allframes(obj.CameraHandle,info.nFrameCount);
                     out = permute(out.uint16,[3,2,1]);
@@ -130,11 +132,11 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         end
 
         function out=start_focus(obj)
-            obj.abort;
             obj.AcquisitionType='focus';
 
             obj.setup_acquisition;
-                   
+            TotalFrame = 100;
+            err = obj.CameraHandle.buf_alloc(py.int(TotalFrame));       
             Status = obj.getCapStatus();
             switch Status
                 case 'READY'
@@ -143,31 +145,27 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             end               
             
             obj.AbortNow=0;
-            obj.CameraHandle.cap_start();
+            err = obj.CameraHandle.cap_start();
             
             Status = obj.getCapStatus();
             while strcmp(Status,'BUSY')
                 if obj.AbortNow
-                    obj.AbortNow=0;
-                    out=[];
+                    obj.abort;
                     break;
-                else
-                    out=obj.getdata();
                 end
                 obj.displaylastimage();
                 Status = obj.getCapStatus();
             end
             
-            if obj.AbortNow
-                obj.abort;
-                obj.AbortNow=0;
-                
-                obj.CameraHandle.buf_release();
-                return;
-            end
+%             if obj.AbortNow
+%                 obj.abort;
+%                 obj.AbortNow=0;                
+%                 obj.CameraHandle.buf_release();
+%                 return;
+%             end
             
-            out=obj.getdata;
-            obj.CameraHandle.buf_release();
+            out=[]; 
+            err = obj.CameraHandle.buf_release();
             if obj.KeepData
                 obj.Data=out;
             end
@@ -181,15 +179,23 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         end
 
         function out=start_capture(obj)
-            obj.abort;
             obj.AcquisitionType='capture';
             obj.setup_acquisition();
-           
+            
             obj.AbortNow=1;
-            obj.CameraHandle.cap_start();
+            TotalFrame = 1;
+            err = obj.CameraHandle.buf_alloc(py.int(TotalFrame));
+            status=obj.getCapStatus();
+            switch status
+                case 'READY'
+                otherwise
+                    error('Hamamatsu not ready')
+            end               
+
+            err = obj.CameraHandle.cap_snapshot();
             out=obj.getdata();
-            obj.CameraHandle.buf_release();
             obj.abort();
+            err = obj.CameraHandle.buf_release();
             obj.AbortNow=0;
             
             if obj.KeepData
@@ -204,34 +210,42 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         end
 
         function out=start_sequence(obj)
-            obj.abort;
             obj.AcquisitionType='sequence';
             obj.setup_acquisition;
             
             obj.AbortNow=0;
-            obj.CameraHandle.cap_snapshot();
+            err = obj.CameraHandle.buf_alloc(py.int(obj.SequenceLength));
+            status=obj.getCapStatus();
+            switch status
+                case 'READY'
+                otherwise
+                    error('Hamamatsu not ready')
+            end               
+
+            err = obj.CameraHandle.cap_snapshot();
             
             Status = obj.getCapStatus();
             while strcmp(Status,'BUSY')
                 if obj.AbortNow
-                    obj.AbortNow=0;
-                    out=[];
+                    obj.abort;                    
                     break;
                 end
                 obj.displaylastimage;
                 Status = obj.getCapStatus();
             end
             
-            if obj.AbortNow
+%             if obj.AbortNow
+%                 obj.abort;
+%                 obj.AbortNow=0;
+%                 out=[];
+%                 obj.CameraHandle.buf_release();
+%                 return;
+%             end
+            if obj.AbortNow==0
                 obj.abort;
-                obj.AbortNow=0;
-                out=[];
-                obj.CameraHandle.buf_release();
-                return;
             end
-            
             out=obj.getdata;
-            obj.CameraHandle.buf_release();
+            err = obj.CameraHandle.buf_release();
             if obj.KeepData
                 obj.Data=out;
             end
@@ -254,72 +268,98 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             status=obj.getCapStatus();
             if strcmp(status,'READY')||strcmp(status,'BUSY')
                 obj.abort;
+                err = obj.CameraHandle.buf_release();
             end
 
             idprop = obj.CameraSetting.EXPOSURE_TIME.idprop;
 
             switch obj.AcquisitionType
                 case 'focus'        %Run-Till-Abort
-                    TotalFrame=100;
-                    obj.CameraHandle.buf_alloc(py.int(TotalFrame));
+                    %TotalFrame=100;
                     out = obj.setgetProperty(idprop,obj.ExpTime_Focus);
                     obj.ExpTime_Focus=out;
+                    %err = obj.CameraHandle.buf_alloc(py.int(TotalFrame));
+                    
                 case 'capture'      %Single Scan
-                    TotalFrame=1;
-                    obj.CameraHandle.buf_alloc(py.int(TotalFrame));
+                    %TotalFrame=1;
                     out = obj.setgetProperty(idprop,obj.ExpTime_Capture);
                     obj.ExpTime_Capture=out;
+                    %err = obj.CameraHandle.buf_alloc(py.int(TotalFrame));
+                    
                 case 'sequence'     %Kinetic Series
-                    obj.CameraHandle.buf_alloc(py.int(obj.SequenceLength));
                     out = obj.setgetProperty(idprop,obj.ExpTime_Sequence);
                     obj.ExpTime_Sequence=out;
+                    %err = obj.CameraHandle.buf_alloc(py.int(obj.SequenceLength));
+                   
             end
             
-            status=obj.getCapStatus();
-            if strcmp(status,'READY')
-                obj.ReadyForAcq=1;
-            else
-                error('Hamamatsu Camera not ready. Try Reseting')
-            end
+%             status=obj.getCapStatus();
+%             if strcmp(status,'READY')
+%                 obj.ReadyForAcq=1;
+%             else
+%                 error('Hamamatsu Camera not ready. Try Reseting')
+%             end
         end
 
         function setup_fast_acquisition(obj,numFrames)
-            obj.AcquisitionType='sequence';
             status=obj.getCapStatus();
             if strcmp(status,'READY')||strcmp(status,'BUSY')
                 obj.abort;
+                err = obj.CameraHandle.buf_release();
             end
+            obj.AcquisitionType='sequence';
              
+            % set Trigger mode to Software so we can use firetrigger
+            idprop = obj.CameraSetting.TRIGGER_SOURCE.idprop;
+            triggermode=obj.setgetProperty(idprop,3);% Software mode
+
             idprop = obj.CameraSetting.EXPOSURE_TIME.idprop;
-            obj.CameraHandle.buf_alloc(py.int(numFrames));
             out = obj.setgetProperty(idprop,obj.ExpTime_Sequence);
             obj.ExpTime_Sequence=out;
-
-            % set Trigger mode to Software so we can use firetrigger
-            idprop = obj.CameraSetting.TRIGGERSOURCE.idprop;
-            obj.setProperty(idprop,3);% Software mode
+            
+            err = obj.CameraHandle.buf_alloc(py.int(numFrames));
 
             status=obj.getCapStatus();
-            if strcmp(status,'READY')
-                obj.ReadyForAcq=1;
-            end
+            switch status
+                case 'READY'
+                otherwise
+                    error('Hamamatsu not ready')
+            end               
             
             % start capture so triggering can start
-            obj.CameraHandle.cap_snapshot();
+            err = obj.CameraHandle.cap_snapshot();
         end
 
-        function triggeredCapture(obj)
-            err = obj.CameraHandle.cap_firetrigger();
+        function out = triggeredCapture(obj)
+
+            err = obj.CameraHandle.cap_firetrigger();            
+            
+            
+            
+            
+            %frameready = obj.CameraHandle.wait_capevent_frameready(py.int(obj.TimeOut));
+            info = obj.CameraHandle.cap_transferinfo();
+            info.nNewestFrameIndex.int16
+            %out = obj.getlastimage();
             obj.displaylastimage();
+            out = [];
         end
 
         function out = finishTriggeredCapture(obj)
-            %obj.abort;
-            out = obj.getdata();
-                        
+            obj.abort;
+            status=obj.getCapStatus();
+            while ~strcmp(status,'READY')
+                obj.abort;
+            end
+            out = obj.getdata();            
+            
+            %out = [];
+            err = obj.CameraHandle.buf_release();  
+            status=obj.getCapStatus();
+            
             % set Trigger mode back to Internal so data can be captured
-            idprop = obj.CameraSetting.TRIGGERSOURCE.idprop;
-            obj.setProperty(idprop,1);% Internal mode
+            idprop = obj.CameraSetting.TRIGGER_SOURCE.idprop;
+            triggermode = obj.setgetProperty(idprop,1);% Internal mode
 
         end
 
@@ -384,6 +424,12 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         end
 
         function setCamProperties(obj,Infield)
+            status = obj.getCapStatus();
+            if strcmp(status,'READY')||strcmp(status,'BUSY')
+                obj.abort;
+                err = obj.CameraHandle.buf_release();
+            end            
+
             % Set up properties
             fieldp=fields(Infield);
             for ii=1:length(fieldp)
@@ -490,7 +536,8 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             status = obj.getCapStatus();
             if strcmp(status,'READY')||strcmp(status,'BUSY')
                 obj.abort;
-            end
+                err = obj.CameraHandle.buf_release();
+            end            
             Hoffset = obj.valuecheck('SUBARRAY_HPOS',ROI(1)-1);
             HWidth = obj.valuecheck('SUBARRAY_HSIZE',ROI(2)-ROI(1)+1);
             Voffset = obj.valuecheck('SUBARRAY_VPOS',ROI(3)-1);
