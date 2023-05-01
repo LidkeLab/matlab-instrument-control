@@ -289,5 +289,3 @@ __pycache__/
 
 *.asv
 *.filters
-*.vcxproj
-*.def

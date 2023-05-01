@@ -266,7 +266,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
                 im = single(im-mn)/(mx-mn);
                 im=255*im';
             else
-                im = single(in-obj.LUTScale(1))/(obj.LUTScale(2)-obj.LUTScale(1));
+                im = single(im-obj.LUTScale(1))/(obj.LUTScale(2)-obj.LUTScale(1));
                 im=255*im';
             end
             
