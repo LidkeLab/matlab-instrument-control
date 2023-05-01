@@ -1,3 +1,5 @@
+## Software requirement
+- MATLAB 2019b or later, tested on MATLAB 2022b
 ## Installation of PyDcam
 - install miniconda from https://docs.conda.io/en/main/miniconda.html
 - open Anaconda Powershell Prompt and create a conda environment called 'dcam'   
