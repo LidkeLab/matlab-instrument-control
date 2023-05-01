@@ -84,7 +84,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                 end
                 clear a;
             else
-                [dllPath]=uigetdir(matlabroot,'Select IRCamera .dll Directory')
+                [dllPath]=uigetdir(matlabroot,'Select IRCamera .dll Directory');
                 obj.dllPath=dllPath;
                 if exist(obj.dllPath,'dir')
                     save(fullfile(p,'ThorlabsIRCamera_Properties.mat'),'dllPath');
@@ -95,11 +95,11 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
             
             % Connect to the camera via .NET Programming Interface
             NET.addAssembly(fullfile(obj.dllPath,'uc480DotNet.dll'))
-            [a,CamList]=uc480.Info.Camera.GetCameraList
+            [a,CamList]=uc480.Info.Camera.GetCameraList;
             CamList(1)
             CamList(1).Model
             CamList(1).SerialNumber
-            obj.Cam=uc480.Camera()
+            obj.Cam=uc480.Camera();
             obj.Cam.Init();
             obj.Cam.PixelFormat.Set(uc480.Defines.ColorMode.SensorRaw8);
             obj.get_properties;
@@ -172,12 +172,10 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     obj.Cam.Timing.Framerate.Set(1/obj.ExpTime_Focus);
                     obj.Cam.Timing.Exposure.Set(obj.ExpTime_Focus*1000);
                     [Stat, ExpTime]=obj.Cam.Timing.Exposure.Get;
-                    fprintf('Expsoure Time: %g\n',ExpTime)
                 case 'capture'
                     obj.Cam.Timing.Framerate.Set(1/obj.ExpTime_Capture);
                     obj.Cam.Timing.Exposure.Set(obj.ExpTime_Capture*1000);
                     [Stat, ExpTime]=obj.Cam.Timing.Exposure.Get;
-                    fprintf('Expsoure Time: %g\n',ExpTime)
                 case 'sequence'
                     obj.Cam.Timing.Framerate.Set(1/obj.ExpTime_Sequence);
                     obj.Cam.Timing.Exposure.Set(obj.ExpTime_Sequence*1000);
@@ -229,9 +227,8 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                     out=dip_image(out,'uint8');
                 case 'matlab'
             end
-            dipshow(permute(out,[2 1]));
         end
-        function start_sequence(obj)
+        function SeqOutput=start_sequence(obj)
             % taking image in the case of sequence
             obj.AcquisitionType='sequence';
             obj.setup_acquisition;
@@ -245,7 +242,6 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                 s32Wait=uc480.Defines.DeviceParameter.Wait;
                 obj.Cam.Acquisition.Freeze(s32Wait);
                 out=obj.getlastimage;
-                ii
                 
                 if obj.AbortNow
                     obj.AbortNow=0;
@@ -314,13 +310,13 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
                 CamIR.KeepData=1;
                 CamIR.setup_acquisition()
                 CamIR.start_focus()
-                CamIR.AcquisitionType='capture'
+                CamIR.AcquisitionType='capture';
                 CamIR.ExpTime_Capture=.1;
                 CamIR.setup_acquisition()
                 CamIR.KeepData=1;
                 CamIR.start_capture()
                 dipshow(CamIR.Data)
-                CamIR.AcquisitionType='sequence'
+                CamIR.AcquisitionType='sequence';
                 CamIR.ExpTime_Sequence=.01;
                 CamIR.SequenceLength=10;
                 CamIR.setup_acquisition();

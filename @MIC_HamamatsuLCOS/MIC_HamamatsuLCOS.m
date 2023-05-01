@@ -87,29 +87,37 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
             Attributes.Lambda = obj.Lambda;
             Attributes.File_Correction=obj.File_Correction;
             Attributes.ScaleFactor=obj.ScaleFactor;
-            Attributes.Image_Correction=obj.Image_Correction;
-            Attributes.Image_Blaze=obj.Image_Blaze;
-            Attributes.Image_OptimPSF=obj.Image_OptimPSF;
-            Attributes.Image_Pattern=obj.Image_Pattern;
-            Attributes.Image_Display=obj.Image_Display;
             Attributes.ZernikeCoef=obj.ZernikeCoef;
             Attributes.PupilCenter=obj.PupilCenter;
             Attributes.PupilRadius=obj.PupilRadius;
             
-            Data=[];
-            
+            Data.Image_Correction=obj.Image_Correction;
+            Data.Image_Blaze=obj.Image_Blaze;
+            Data.Image_OptimPSF=obj.Image_OptimPSF;
+            Data.Image_Pattern=obj.Image_Pattern;
+            Data.Image_Display=obj.Image_Display;
+  
             Children=[];
         end
         
         function setupImage(obj)
             %Create the figure that will display on the SLM
-            ScrSz=get(0,'screensize');
-            obj.PrimaryDispSize=ScrSz(3:4);
+            ScrSz = get(0,'MonitorPosition');
+            %Assume larger display is primary
+            if ScrSz(1,3)>ScrSz(2,3)
+                PM=1;
+                SLM=2;
+            else
+                PM=2;
+                SLM=1;
+            end
+            
+            obj.PrimaryDispSize=ScrSz(PM,3:4);
             delete(obj.Fig_Pattern);
             obj.Fig_Pattern=figure('Position',...
-                [obj.PrimaryDispSize(1)+1 obj.PrimaryDispSize(2)-obj.VerPixels...
+                [obj.PrimaryDispSize(1)+1 ScrSz(SLM,2) ...
                 obj.HorPixels obj.VerPixels],...
-                'MenuBar','none','ToolBar','none','resize','off');
+                'MenuBar','none','ToolBar','none','resize','off','NumberTitle','off');
             colormap(gray(256));
             %Prevent closing after a 'close' or 'close all'
             axis off

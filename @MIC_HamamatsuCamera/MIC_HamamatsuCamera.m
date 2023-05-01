@@ -9,11 +9,11 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         ImageHandle;
         ReadyForAcq=0;      %If not, call setup_acquisition
         TextHandle;
-        CameraHandle;
         SDKPath;
     end
     
     properties(SetAccess=protected)
+        CameraHandle;
         CameraIndex;        %index used when more than one camera
         ImageSize;          %size of current ROI
         LastError;          %last errorcode
@@ -128,7 +128,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             if strcmp(status,'Ready')||strcmp(status,'Busy')
                 obj.abort;
             end
-            status=obj.HtsuGetStatus
+            status=obj.HtsuGetStatus;
             switch obj.AcquisitionType
                 case 'focus'        %Run-Till-Abort
                     captureMode=1; %sequence
@@ -195,18 +195,22 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         function out=start_capture(obj)
             %obj.AcquisitionType='capture';
             obj.abort;
-             obj.AcquisitionType='capture';
+            obj.AcquisitionType='capture';
 %             status=obj.HtsuGetStatus;
 %             if strcmp(status,'Ready')||strcmp(status,'Busy')
 %                 obj.abort;
 %             end
-             obj.setup_acquisition;
+
+            % Call the setup_acquisition method, but do so 'quietly' i.e.
+            % prevent the method from displaying anything in the Command
+            % Window.
+            evalc('obj.setup_acquisition()');
            
             obj.AbortNow=1;
             DcamCapture(obj.CameraHandle);
-            out=obj.getdata;
-%             dipshow(out);
-            obj.abort;
+            out=obj.getdata();
+%             obj.displaylastimage();
+            obj.abort();
             obj.AbortNow=0;
             
             if obj.KeepData
@@ -593,13 +597,13 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                 A.KeepData=1;
                 A.setup_acquisition()
                 A.start_focus()
-                A.AcquisitionType='capture'
+                A.AcquisitionType='capture';
                 A.ExpTime_Capture=.1;
                 A.setup_acquisition()
                 A.KeepData=1;
                 A.start_capture()
                 dipshow(A.Data)
-                A.AcquisitionType='sequence'
+                A.AcquisitionType='sequence';
                 A.ExpTime_Sequence=.01;
                 A.SequenceLength=100;
                 A.setup_acquisition()

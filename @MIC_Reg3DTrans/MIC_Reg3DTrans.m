@@ -15,7 +15,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     %    to be specified after initialization of the class, before using
     %    any of the functionality. See properties section for explanation
     %    and which ones.
-    %
+    % 
     % REQUIRES
     %    Matlab 2014b or higher
     %    MIC_Abstract
@@ -24,36 +24,43 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     % TIRF: LampPower=?; LampWait=2.5; CamShutter=true; ChangeEMgain=true; 
     %       EMgain=2; ChangeExpTime=true; ExposureTime=0.01;   
     
-    % Marjolein Meddens, Lidke Lab 2017
+    %created by
+    % Marjolein Meddens,  Lidke Lab 2017
+    % Update:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
     
     properties
         % Input
         CameraObj           % Camera Object
         StageObj            % Stage Object
-        LampObj             % Lamp Object
+%         LampObj             % Lamp Object
         CalibrationFile     % File containing previously calibrated pixel size, or path to save calibration file
         
         % These must be set by user for specific system
-        LampPower=30;       % Lamp power setting to use for transmission image acquistion 
-        LampWait=1;         % Time (s) to wait after turning on lamp before starting imaging
-        CamShutter=true;    % Flag for opening and closing camera shutter (Andor Ixon's) before acquiring a stack
-        ChangeEMgain=false; % Flag for changing EM gain before and after acquiring transmission images
-        EMgain;             % EM gain setting to use for transmission image acquisitions
+%         LampPower=30;       % Lamp power setting to use for transmission image acquistion 
+%         LampWait=1;         % Time (s) to wait after turning on lamp before starting imaging
+%         CamShutter=true;    % Flag for opening and closing camera shutter (Andor Ixon's) before acquiring a stack
+%         ChangeEMgain=false; % Flag for changing EM gain before and after acquiring transmission images
+%         EMgain;             % EM gain setting to use for transmission image acquisitions
         ChangeExpTime=true; % Flag for changing exposure time before and after acquiring transmission images
         ExposureTime=0.01;  % Exposure time setting to use for transmission image acquisitions
         
         % Other properties
         PixelSize;          % image pixel size (um)
+        OrientMatrix;       % unitary matrix to show orientation between Camera and Stage([a b;c d])
         AbortNow=0;         % flag for aborting the alignment
         RefImageFile;       % full path to reference image
         Image_Reference     % reference image
         Image_Current       % current image
+        ReferenceStack;     % reference stack to compare to in stack corr.
         ZStack              % acquired zstack
         ZStack_MaxDev=0.5;  % distance from current zposition where to start and end zstack (um)
         ZStack_Step=0.05;   % z step size for zstack acquisition (um)
         ZStack_Pos;         % z positions where a frame should be acquired in zstack (um)
-        Tol_X=.01;         % max X shift to reach convergence(um)
-        Tol_Y=.01;         % max Y shift to reach convergence(um)
+        ZStackMaxDevInitialReg = 1; % max. dev. in z for initial reg.
+        XYBorderPx = 10; % # of px. to remove from x and y borders.
+        TolMaxCorr = 0.8;   % min val. of max xcorr coeff. for convergence
+        Tol_X=.01;          % max X shift to reach convergence(um)
+        Tol_Y=.01;          % max Y shift to reach convergence(um)
         Tol_Z=.05;          % max Z shift to reach convergence(um)
         MaxIter=10;         % max number of iterations for finding back reference position 
         MaxXYShift=5;       % max XY distance (um) stage should move, if found shift is larger it will move this distance
@@ -61,6 +68,15 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         ZFitPos;            % found Z positions
         ZFitModel;          % fitted line though auto correlations
         ZMaxAC;             % autocorrelations of zstack
+        maxACmodel;
+        UseStackCorrelation = 0; % use 3D stack correlation reg. method
+        UseGPU = 1; % if UseStackCorrelation, use GPU for findStackOffset
+        MaxOffsetScaleIter = 2; % max # of scaling iter. for MaxOffset
+        ErrorSignal = zeros(0, 3); % Error Signal [X Y Z] in microns
+        ErrorSignalHistory = zeros(0, 3); % Error signal history in microns
+        IsInitialRegistration = 0; % boolean: initial reg. or periodic reg.
+        OffsetFitSuccess = zeros(0, 3); % bool. array for poly fit success
+        OffsetFitSuccessHistory  = zeros(0, 3); 
     end
     
     properties (SetAccess=protected)
@@ -73,7 +89,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     end
     
     methods
-        function obj=MIC_Reg3DTrans(CameraObj,StageObj,LampObj,CalFileName)
+        function obj=MIC_Reg3DTrans(CameraObj,StageObj,CalFileName)
             % MIC_Reg3DTrans constructor
             % 
             %  INPUT (required)
@@ -82,58 +98,223 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             %    LampObj - lamp object
             %  INPUT (optional)
             %    CalFileName - full path to calibration file (.mat) containing
-            %                  'PixelSize' variable, if file doesn't exist calibration 
-            %                  will be saved here
+            %                  'PixelSize' and 'OrientationMatrix' variable, 
+            %                  if file doesn't exist calibration  will be saved here
             
             % pass in input for autonaming feature MIC_Abstract
             obj = obj@MIC_Abstract(~nargout);
             
             % check input
-            if nargin <3
+            if nargin <2
                 error('MIC_Reg3DTrans:InvInput','You must pass in Camera, Stage and Lamp Objects')
             end
             obj.CameraObj = CameraObj;
             obj.StageObj = StageObj;
-            obj.LampObj = LampObj;
+%             obj.LampObj = LampObj;
             
-            if nargin == 4
+            if nargin == 3
                 obj.CalibrationFile = CalFileName;
                 % get pixelsize
                 if exist(obj.CalibrationFile,'file')
                     a=load(CalFileName);
                     obj.PixelSize=a.PixelSize;
+                    obj.OrientMatrix=a.OrientMatrix;
                     clear a;
                 end
             end
         end
-        
+                
+        function calibrate(obj,PlotFlag)
+            % This function is to obtain elements of rotation matrix between
+            % Camera (x,y) and Stage(X,Y) OrientMatrix=[A B,C D]
+            if ~exist('PlotFlag','var')
+                PlotFlag=0;
+            end
+            
+            obj.StageObj.center;
+            X=obj.StageObj.Position;
+            N=10;
+            StepSize=0.1; %micron
+            deltaX=((0:N-1)*StepSize)';
+            ImSz=obj.CameraObj.ImageSize; %:)
+            ImageStack=zeros(ImSz(1),ImSz(2),N);
+            % remember start position
+            Xstart=X;
+            %change EMgain, shutter and exposure time if needed
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 CamSet = obj.CameraObj.CameraSetting;
+%             end
+%             if obj.ChangeEMgain
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%             end
+%             if obj.CamShutter
+%                 CamSet.ManualShutter.Bit=1;
+%             end
+            if obj.ChangeExpTime
+                ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
+                obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
+            end
+
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
+            % setup camera
+            obj.CameraObj.AcquisitionType='capture';
+            obj.CameraObj.setup_acquisition;
+                        
+%             % turn lamp on
+%             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+%                 obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+%             end 
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on();
+%             % open shutter if needed
+%             if obj.CamShutter
+%                 obj.CameraObj.setShutter(1);
+%             end
+%             
+            % acquire stack for x_direction
+            obj.StageObj.setPosition(Xstart);
+            for ii=1:N
+                X(1)=Xstart(1)+deltaX(ii);
+                obj.StageObj.setPosition(X);
+                pause(.1);
+                ImageStack_X(:,:,ii)=single(obj.CameraObj.start_capture);
+            end
+            
+            % acquire stack for y_direction
+            obj.StageObj.setPosition(Xstart);
+            X=Xstart;
+            deltaY=deltaX;
+            for ii=1:N
+                X(2)=Xstart(2)+deltaY(ii);
+                obj.StageObj.setPosition(X);
+                pause(.1);
+                ImageStack_Y(:,:,ii)=single(obj.CameraObj.start_capture);
+            end
+%             % close shutter if needed
+%             if obj.CamShutter
+%                 obj.CameraObj.setShutter(0);
+%             end
+            % turn lamp off
+%             obj.LampObj.off();
+            
+%             %change back EMgain, shutter and exposure time if needed
+%             if obj.CamShutter
+%                 CamSet.ManualShutter.Bit=0;
+%             end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%             end
+            if obj.ChangeExpTime
+                obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
+            end
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end            
+           % set stage back to initial position
+            obj.StageObj.setPosition(Xstart);
+            dipshow(ImageStack_X(10:end-10,10:end-10,:));
+            % find shifts for Change in X
+            svec_X=zeros(N,2);
+            refim=squeeze(ImageStack_X(10:end-10,10:end-10,1));
+            for ii=1:N
+                alignim_X=squeeze(ImageStack_X(10:end-10,10:end-10,ii));
+                svec_X(ii,:)=findshift(alignim_X,refim,'iter');
+            end
+            
+            % set stage back to initial position
+            obj.StageObj.setPosition(Xstart);
+            dipshow(ImageStack_Y(10:end-10,10:end-10,:));
+            % find shifts for Change in Y
+            svec_Y=zeros(N,2);
+            refim=squeeze(ImageStack_Y(10:end-10,10:end-10,1));
+            for ii=1:N
+                alignim_Y=squeeze(ImageStack_Y(10:end-10,10:end-10,ii));
+                svec_Y(ii,:)=findshift(alignim_Y,refim,'iter');
+            end
+            % Here is the calculation for OrientCoMatrix
+            % There are four coefficient: change Stage in x,y direction and calculate
+            % shift for x,y direction in the image
+
+            % fit shifts delta_X, shift in x in image
+            PxSz=obj.PixelSize;
+            %xy for Image, XY for Stage
+            P_xX=polyfit(deltaX,svec_X(:,1),1);
+            P_xY=polyfit(deltaY,svec_Y(:,1),1);
+            P_yX=polyfit(deltaX,svec_X(:,2),1);
+            P_yY=polyfit(deltaY,svec_Y(:,2),1);
+
+            xXfit=P_xX(1)*deltaX+P_xX(2);
+            xYfit=P_xY(1)*deltaX+P_xY(2);
+            yXfit=P_yX(1)*deltaX+P_yX(2);
+            yYfit=P_yY(1)*deltaX+P_yY(2);
+            
+            a=P_xX(1);
+            b=P_xY(1);
+            c=P_yX(1);
+            d=P_yY(1);
+            %orientation camera vs stage: xy=[a b; c d]XY
+            OrientMatrix=[a b; c d];
+            
+            %calculate scalar pixel size
+            PixelSize=2/(sqrt(a^2+c^2)+sqrt(b^2+d^2));
+            
+            if isempty(obj.CalibrationFile)
+                warning('MIC_Reg3DTrans:CalPxSz:NotSaving','No CalibrationFile specified in obj.CalibrationFile, not saving calibration')
+            elseif exist(obj.CalibrationFile,'file')
+                warning('MIC_Reg3DTrans:CalPxSz:OverwriteFile','Overwriting previous PixelSize and OrientationMatrix calibration file');
+                save(obj.CalibrationFile,'PixelSize','OrientMatrix');
+            else
+                save(obj.CalibrationFile,'PixelSize','OrientMatrix');
+            end
+            obj.OrientMatrix=OrientMatrix;
+            obj.PixelSize=PixelSize; 
+            if PlotFlag
+                if isempty(obj.PlotFigureHandle)||~ishandle(obj.PlotFigureHandle)
+                obj.PlotFigureHandle=figure;
+            else
+                figure(obj.PlotFigureHandle)
+            end
+            hold off
+%             plot(deltaX,svec_X(:,2),'r.','MarkerSize',14);
+            hold on
+%             plot(deltaX,xXfit,'k','LineWidth',2);
+%             legend('Found Displacement','Fit');
+            end
+        end
         function takerefimage(obj)
             %takerefimage Takes new reference image
 
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet = obj.CameraObj.CameraSetting;
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
                         
-            % turn lamp on
-            obj.LampObj.on;
-            
+%             % turn lamp on
+%             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+%                 obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+%             end 
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on;
+%             
             obj.Image_Reference=obj.capture;
             dipshow(obj.Image_Reference);
             % turn lamp off
-            obj.LampObj.off;
+%             obj.LampObj.off;
             
             % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
@@ -150,134 +331,30 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.updateGui();
         end
         
-        function calibratePixelSize(obj)
-            % calibratePixelSize Calibrates pixel size
-            %   Calibrates pixel size by moving the stage over 
-            %     5 microns and fitting line to calculated shifts
-            %   Result is saved in path in obj.CalibrationFile
-            %   If no path is given, result will only be stored in current
-            %     object
-            
-            X=obj.StageObj.Position;
-            N=10;
-            StepSize=0.1; %micron
-            deltaX=((0:N-1)*StepSize)';
-            ImSz=obj.CameraObj.ImageSize;
-            ImageStack=zeros(ImSz(1),ImSz(2),N);
-            % remember start position
-            Xstart=X;
-            %change EMgain, shutter and exposure time if needed
-            if obj.ChangeEMgain || obj.CamShutter
-                CamSet = obj.CameraObj.CameraSetting;
-            end
-            if obj.ChangeEMgain
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-            end
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=1;
-            end
+        function takeRefStack(obj)
+            % Takes a reference stack from -obj.ZStack_MaxDev to
+            % +obj.ZStack_MaxDev in steps of obj.ZStack_Step relative to
+            % the current focal plane.  The resulting z-stack will be
+            % stored as obj.ReferenceStack.
+
+            % If needed, change the exposure time of the camera.
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end
-            % setup camera
-            obj.CameraObj.AcquisitionType='capture';
-            obj.CameraObj.setup_acquisition;
-                        
-            % turn lamp on
-            obj.turnLampOn();
-            % open shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(1);
-            end
             
-            % acquire stack
-            for ii=1:N
-                X(1)=Xstart(1)+deltaX(ii);
-                obj.StageObj.setPosition(X);
-                pause(.1);
-                ImageStack(:,:,ii)=single(obj.CameraObj.start_capture);
-            end
+            % Collect the full size z-stack (which can be used for intiial
+            % registration) and store it in obj.ReferenceStack.
+            obj.collect_zstack(obj.ZStackMaxDevInitialReg);
+            obj.ReferenceStack = obj.ZStack;
             
-            % close shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(0);
-            end
-            % turn lamp off
-            obj.turnLampOff();
-            
-            %change back EMgain, shutter and exposure time if needed
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=0;
-            end
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-            end
+            % Change to exposure time of the camera back to it's original
+            % value.
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end            
-            
-            % set stage back to initial position
-            obj.StageObj.setPosition(Xstart);
-            dipshow(ImageStack(10:end-10,10:end-10,:));
-            % find shifts
-            svec=zeros(N,2);
-            refim=squeeze(ImageStack(10:end-10,10:end-10,1));
-            for ii=1:N
-                alignim=squeeze(ImageStack(10:end-10,10:end-10,ii));
-                svec(ii,:)=findshift(alignim,refim,'iter');
-            end
-            % fit shifts
-            P=polyfit(deltaX,svec(:,2),1);
-            Xfit=P(1)*deltaX+P(2);
-            PixelSize=1/P(1);  %#ok<PROP> 
-            % plot result
-            if isempty(obj.PlotFigureHandle)||~ishandle(obj.PlotFigureHandle)
-                obj.PlotFigureHandle=figure;
-            else
-                figure(obj.PlotFigureHandle)
-            end
-            hold off
-            plot(deltaX,svec(:,2),'r.','MarkerSize',14);
-            hold on
-            plot(deltaX,Xfit,'k','LineWidth',2);
-            legend('Found Displacement','Fit');
-            s=sprintf('Pixel Size= %g',PixelSize); %#ok<PROP>
-            text(0.2,5,s);
-            xlabel('Microns')
-            ylabel('Pixels')
-            % save result
-            if isempty(obj.CalibrationFile)
-                warning('MIC_Reg3DTrans:CalPxSz:NotSaving','No CalibrationFile specified in obj.CalibrationFile, not saving calibration')
-            elseif exist(obj.CalibrationFile,'file')
-                warning('MIC_Reg3DTrans:CalPxSz:OverwriteFile','Overwriting previous pixel size calibration file');
-                save(obj.CalibrationFile,'PixelSize');
-            else
-                save(obj.CalibrationFile,'PixelSize');
-            end
-            obj.PixelSize=PixelSize; %#ok<PROP>
-        end
-        
-        function turnLampOn(obj)
-            %turnLampOn Turns lamp on using current power and wait properties
-            obj.LampObj.setPower(obj.LampObj.Power);
-            obj.LampObj.on;
-            pause(obj.LampWait);
-        end
-        
-        function turnLampOff(obj)
-            %turnLampOn Turns lamp on using current power and wait properties
-            obj.LampObj.off;
-            pause(obj.LampWait);
-        end
-        
+        end        
+       
         function c=showoverlay(obj)
             %showoverlay Shows aligned image on top of reference image
             
@@ -299,31 +376,34 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         function getcurrentimage(obj)
             % getcurrentimage Takes transmission image with current settings
             
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet = obj.CameraObj.CameraSetting;
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
                         
-            % turn lamp on
-            obj.LampObj.setPower(obj.LampObj.Power);
-            obj.LampObj.on;
-            obj.Image_Current=obj.capture;;
+%             % turn lamp on
+%             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+%                 obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+%             end 
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on;
+            obj.Image_Current=obj.capture;
             im=obj.Image_Current;
             dipshow(im);
-            % turn lamp off
-            obj.LampObj.off;
-            
-            % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             % turn lamp off
+%             obj.LampObj.off;
+%             
+%             % change back EMgain and exposure time if needed
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
@@ -333,53 +413,258 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         function align2imageFit(obj)
             % align2imageFit 
 
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet = obj.CameraObj.CameraSetting;
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
                         
-            %turn lamp on
-            obj.LampObj.setPower(obj.LampObj.Power);
-            obj.LampObj.on;
+%             %turn lamp on
+%             if isempty(obj.LampObj.Power) || obj.LampObj.Power==0
+%                 obj.LampObj.setPower(obj.LampObj.MaxPower/2);
+%             end 
+%             obj.LampObj.setPower(obj.LampObj.Power);
+%             obj.LampObj.on;
             
             iter=0;
-            withintol=0;
-            while (withintol==0)&&(iter<obj.MaxIter)
+            WithinTol=0;
+            while (WithinTol==0)&&(iter<obj.MaxIter)
                 if obj.AbortNow
                     obj.AbortNow = 0;
                     break
                 end
-                %find z-position and adjust
-                [Zfit]=obj.findZPos();
-                Pos=obj.StageObj.Position;
-                Zshift=Zfit-Pos(3);
-                Pos(3)=Pos(3) + (sign(real(Zshift))*min(abs(real(Zshift)),obj.MaxZShift));
-                obj.StageObj.setPosition(Pos);
                 
-                %find XY position and adjust
-                [Xshift,Yshift]=findXYShift(obj);
-                Pos(1)=Pos(1)+sign(Xshift)*min(abs(Xshift),obj.MaxXYShift);
-                Pos(2)=Pos(2)+sign(Yshift)*min(abs(Yshift),obj.MaxXYShift);
-                obj.StageObj.setPosition(Pos);
+                if obj.UseStackCorrelation
+                    % Ensure that the reference image is set to the central
+                    % image in the reference stack (this corresponds to the
+                    % focal plane of interest).
+                    FocalInd = 1 + obj.ZStackMaxDevInitialReg ...
+                        / obj.ZStack_Step;
+                    obj.Image_Reference = ...
+                        obj.ReferenceStack(:, :, FocalInd);
+                    
+                    % Attempt to select an appropriate value of the
+                    % MaxOffset parameter.
+                    if iter == 0
+                        % Always use a large offset for the first
+                        % iteration (especially needed along z).
+                        if obj.IsInitialRegistration
+                            % If this is the initial brightfield
+                            % registration (e.g. if we are finding the cell
+                            % for first time since the reference was taken
+                            % and the shift might be large) we should use
+                            % a very large offset.
+                            MaxOffset = [30; 30; 30];
+                        else
+                            % We should still use a large offset, but we
+                            % don't expect the offset to be as great as it
+                            % would be for the initial registration.
+                            MaxOffset = [10; 10; 10];
+                        end
+                    elseif any(abs(SubPixelOffset) > MaxOffset)
+                        % If the offset predicted by the polynomial fit was
+                        % greater than the inspected offset, we should
+                        % increase the offset to attempt to capture the
+                        % true peak.
+                        % NOTE: If the peak occured outside the selected
+                        %       MaxOffset, we set the new MaxOffset (in 
+                        %       that dimension) to the SubPixelOffset
+                        %       with the goal being to capture the peak on
+                        %       the next iteration (we don't want to make
+                        %       the offset too great though or we'll start
+                        %       to see edge effects of the xcorr).
+                        SelectBit = abs(SubPixelOffset) > MaxOffset;
+                        MaxOffset = ...
+                            SelectBit .* ceil((abs(SubPixelOffset))) ...
+                            + ~SelectBit .* MaxOffset;
+                    else
+                        % In this case, we seem to be close to the peak and
+                        % can reduce the MaxOffset to speed things up.
+                        MaxOffset = [5; 5; 5];
+                    end
+                    
+                    % Collect a z-stack whose size depends on whether we
+                    % are performing an initial registration step or a
+                    % periodic re-registration step.
+                    if obj.IsInitialRegistration
+                        % Acquire a large z-stack for the current stage
+                        % location.
+                        % NOTE: This stores the z-stack in the object
+                        %       property obj.ZStack.
+                        obj.collect_zstack(obj.ZStackMaxDevInitialReg);
+                        
+                        % Define the indices of the full size reference
+                        % stack (for better code continuity with the else 
+                        % statement).
+                        ZStackRefInds = 1:size(obj.ZStack, 3);
+                    else
+                        % Acquire a small z-stack for the current stage
+                        % location.
+                        % NOTE: This stores the z-stack in the object
+                        %       property obj.ZStack.
+                        obj.collect_zstack(obj.ZStack_MaxDev);
+                        
+                        % Define the indices of the full size reference
+                        % stack which correspond to this smaller
+                        % sub-stack.
+                        StackSteps = obj.ZStack_MaxDev / obj.ZStack_Step;
+                        ZStackRefInds = FocalInd - StackSteps ...
+                            :FocalInd + StackSteps;
+                    end
+                    
+                    % Isolate the reference stack and the current stack of
+                    % interest, removing the boundaries in x and y to 
+                    % ensure only the images of interest are being 
+                    % compared. 
+                    RefStack = obj.ReferenceStack(...
+                        obj.XYBorderPx:end-obj.XYBorderPx, ...
+                        obj.XYBorderPx:end-obj.XYBorderPx, ZStackRefInds);
+                    CurrentStack = obj.ZStack(...
+                        obj.XYBorderPx:end-obj.XYBorderPx, ...
+                        obj.XYBorderPx:end-obj.XYBorderPx, :);
+                    
+                    % Determine the pixel and sub-pixel predicted shifts
+                    % between the two stacks.
+                    [PixelOffset, SubPixelOffset, MaxCorr, MaxOffset] ...
+                        = obj.findStackOffset(RefStack, CurrentStack, ...
+                        MaxOffset, 'FFT', '1D', [], [], [], obj.UseGPU);
+                    
+                    % If the sub-pixel prediction exceeds MaxOffset, 
+                    % re-try until this is no longer true or when MaxOffset
+                    % takes on its maximum possible value.
+                    % NOTE: When MaxOffsetInput == MaxOffset, we have
+                    %       selected a valid offset.  If these
+                    %       arrays are not equal, that means we've reached
+                    %       the maximum possible offset along one of the
+                    %       dimensions.
+                    MaxOffsetInput = [0; 0; 0]; % initialize
+                    OffsetScaleIter = 0; % initialize
+                    SelectBit = abs(SubPixelOffset) > MaxOffset;
+                    while any(SelectBit) ...
+                            && ~all(MaxOffsetInput == MaxOffset) ...
+                            && (OffsetScaleIter < obj.MaxOffsetScaleIter)
+                        
+                        % Increment the counter.
+                        OffsetScaleIter = OffsetScaleIter + 1; 
+                        
+                        % The SubPixelOffset predicts a peak in the
+                        % xcorr which is beyond the offset checked by
+                        % findStackOffset(), so we should increase the
+                        % input offset and re-try before proceeding
+                        % with the rest of this registration iteration.
+                        MaxOffsetInput = ...
+                            SelectBit .* ceil((abs(SubPixelOffset))) ...
+                            + ~SelectBit .* MaxOffset;
+                        
+                        % Determine a predicted offset between the two
+                        % stacks.
+                        [PixelOffset, SubPixelOffset, MaxCorr, ...
+                            MaxOffset] = obj.findStackOffset(...
+                            RefStack, CurrentStack, MaxOffsetInput, ...
+                            'FFT', '1D', [], [], [], obj.UseGPU);
+                        
+                        % Re-compute the SelectBit.
+                        SelectBit = abs(SubPixelOffset) > MaxOffset;
+                    end
+                    
+                    % Decide which shift to proceed with based on
+                    % PixelOffset and SubPixelOffset (SubPixelOffset can be
+                    % innacurate), setting a flag array to indicate when
+                    % the SubPixelOffset has 'failed'.
+                    CameraOffset = SubPixelOffset ...
+                        .* (abs(PixelOffset-SubPixelOffset) <= 0.5) ...
+                        + PixelOffset ...
+                        .* (abs(PixelOffset-SubPixelOffset) > 0.5);
+                    obj.OffsetFitSuccess = ...
+                        (abs(PixelOffset-SubPixelOffset) <= 0.5).';
+                    obj.OffsetFitSuccessHistory = ...
+                        [obj.OffsetFitSuccessHistory; ...
+                        obj.OffsetFitSuccess];
+                    
+                    % Modify PixelOffset to correspond to physical piezo
+                    % (sample stage) dimensions, taking care of minus sign
+                    % differences as needed.
+                    % NOTE: The additional minus sign accounts for the
+                    %       convention used in findStackOffset() and was
+                    %       kept there (instead of distributing) to
+                    %       emphasize this convention.
+                    % NOTE: The permute in (x,y) is from the traditional
+                    %       image processing convention for (x,y).  In
+                    %       findStackOffset, (x,y) are defined using the
+                    %       convention s.t. the first index (rows)
+                    %       corresponds to x, second index (columns)
+                    %       corresponds to y.
+                    CameraOffset = -[CameraOffset(2); CameraOffset(1); ...
+                        -CameraOffset(3)];
+                    StageOffset = CameraOffset; % initialize
+                    StageOffset(1:2) = ...
+                        obj.OrientMatrix \ CameraOffset(1:2); % px -> um
+                    StageOffset(3) = CameraOffset(3) * obj.ZStack_Step;
+                    
+                    % Move the piezos to adjust for the predicted shift.
+                    CurrentPos = obj.StageObj.Position;
+                    NewPos = CurrentPos - StageOffset.';
+                    obj.StageObj.setPosition(NewPos);
+                    
+                    % Check if the current iteration succeeded within the
+                    % set tolerance.
+                    StageOffsetTol = [obj.Tol_X; obj.Tol_Y; obj.Tol_Z];
+                    WithinTol = ...
+                        all(abs(StageOffset) < StageOffsetTol) ...
+                        && (MaxCorr >= obj.TolMaxCorr);
+                    
+                    % Save the error signal.
+                    obj.ErrorSignal = StageOffset.';
+                else
+                    %find z-position and adjust
+                    [Zfit]=obj.findZPos();
+                    Pos=obj.StageObj.Position;
+                    Zshift=Zfit-Pos(3);
+                    Pos(3)=Pos(3) + (sign(real(Zshift))*min(abs(real(Zshift)),obj.MaxZShift));
+                    obj.StageObj.setPosition(Pos);
+
+                    %find XY position and adjust
+                    [XYshift]=findXYShift(obj);
+
+                    StageShiftXY=inv(obj.OrientMatrix)*XYshift;
+                    Pos(1)=Pos(1)+sign(StageShiftXY(1))*min(abs(StageShiftXY(1)),obj.MaxXYShift);
+                    Pos(2)=Pos(2)+sign(StageShiftXY(2))*min(abs(StageShiftXY(2)),obj.MaxXYShift);
+
+                    obj.StageObj.setPosition(Pos);
+                    
+                    %check convergence
+                    WithinTol=(abs(XYshift(1))<obj.Tol_X/obj.PixelSize)&...
+                    (abs(XYshift(2))<obj.Tol_Y/obj.PixelSize)&(abs(Zshift)<obj.Tol_Z/obj.PixelSize);
+                
+                    % Save the error signal.
+                    obj.ErrorSignal = [StageShiftXY.', Zshift];
+                end
+                
+                % Append the new ErrorSignal to ErrorSignalHistory.
+                obj.ErrorSignalHistory = [obj.ErrorSignalHistory; ...
+                    obj.ErrorSignal];
                 
                 %show overlay
                 obj.Image_Current=obj.capture;
-                im=obj.Image_Reference(10:end-10,10:end-10);
-                zs=obj.Image_Current(10:end-10,10:end-10);
+                im=obj.Image_Reference(...
+                    obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx);
+                zs=obj.Image_Current(...
+                    obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx);
                 o=joinchannels('RGB',stretch(im),stretch(zs));
                 h=dipshow(1234,o);
                 diptruesize(h,'tight');
                 drawnow;
                 
-                %check convergence
-                withintol=(abs(Xshift)<obj.Tol_X)&(abs(Yshift)<obj.Tol_Y)&(abs(Zshift)<obj.Tol_Z);
+                % Increment the iteration counter.
                 iter=iter+1;
+                fprintf('Alignment iteration %i complete \n', iter)
             end
             
             if iter==obj.MaxIter
@@ -387,96 +672,112 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             end
             
             % turn lamp off
-             obj.LampObj.off;
+%              obj.LampObj.off;
             
             % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
         end
         
-        function collect_zstack(obj)
+        function collect_zstack(obj, ZStackMaxDev, ZStackStep)
             % collect_zstack Collects Zstack 
+            
+            % Set defaults if not passed as inputs to this method.
+            if ~exist('ZStackMaxDev', 'var')
+                ZStackMaxDev = obj.ZStack_MaxDev; % microns
+            end
+            if ~exist('ZStackStep', 'var')
+                ZStackStep = obj.ZStack_Step; % microns
+            end
             
             % get current position of stage
             XYZ=obj.StageObj.Position;
             X_Current=XYZ(1);
             Y_Current=XYZ(2);
             Z_Current=XYZ(3);
-                      
-            Zmax=obj.ZStack_MaxDev;     %micron
-            Zstep=obj.ZStack_Step;      %micron
+
         
-            obj.ZStack_Pos=(Z_Current-Zmax:Zstep:Z_Current+Zmax);
+            obj.ZStack_Pos = ...
+                (Z_Current-ZStackMaxDev:ZStackStep:Z_Current+ZStackMaxDev);
             N=length(obj.ZStack_Pos);
             obj.ZStack=[];
             
             %change EMgain, shutter and exposure time if needed
-            if obj.ChangeEMgain || obj.CamShutter
-                CamSet = obj.CameraObj.CameraSetting;
-            end
-            if obj.ChangeEMgain
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-            end
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=1;
-            end
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 CamSet = obj.CameraObj.CameraSetting;
+%             end
+%             if obj.ChangeEMgain
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%             end
+%             if obj.CamShutter
+%                 CamSet.ManualShutter.Bit=1;
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
             end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             % setup camera
             obj.CameraObj.AcquisitionType='capture';
-            obj.CameraObj.setup_acquisition;
+            obj.CameraObj.setup_acquisition();
                         
-            % turn lamp on
-            %obj.turnLampOn();
-            % open shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(1);
-            end
             % acquire zstack
             for nn=1:N
                 if nn==1
                     pause(0.5);
                 end
-                obj.StageObj.setPosition([X_Current,Y_Current,obj.ZStack_Pos(nn)]);
-                obj.ZStack(:,:,nn)=single(obj.CameraObj.start_capture);
+                
+                % Display the current stack position being collected in the
+                % command window.
+                NumChar = fprintf(...
+                    'Acquiring z-stack image index %i out of %i\n', nn, N);
+                
+                obj.StageObj.setPosition(...
+                    [X_Current, Y_Current, obj.ZStack_Pos(nn)]);
+                obj.ZStack(:, :, nn)=single(obj.CameraObj.start_capture);
+                
+                % Remove the characters identifying stack index and stack
+                % number from command line so that they can be updated.  
+                % This is being done to avoid clutter to the command
+                % line.
+                % NOTE: \b deletes previous character displayed in the
+                %       command window.
+                for ii = 1:NumChar
+                    fprintf('\b');
+                end
             end
-            % close shutter if needed
-            if obj.CamShutter
-                obj.CameraObj.setShutter(0);
-            end
-            % turn lamp off
-            %obj.turnLampOff();
-            
+%             % close shutter if needed
+%             if obj.CamShutter
+%                 obj.CameraObj.setShutter(0);
+%             end
+
             %change back EMgain, shutter and exposure time if needed
-            if obj.CamShutter
-                CamSet.ManualShutter.Bit=0;
-            end
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-            end
+%             if obj.CamShutter
+%                 CamSet.ManualShutter.Bit=0;
+%             end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
-            if obj.ChangeEMgain || obj.CamShutter
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain || obj.CamShutter
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             
             % Move stage back to original position
             obj.StageObj.setPosition(XYZ);
         end
         
-        function [Xshift,Yshift]=findXYShift(obj)
+        function [XYshift]=findXYShift(obj)
             % findXYShift Finds XY shift between reference image and newly 
             % acquired current image
             
@@ -484,22 +785,27 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             if isempty(obj.PixelSize)
                 error('MIC_Reg3DTrans:noPixelSize', 'no PixelSize given in obj.PixelSize, please calibrate pixelsize first. Run obj.calibratePixelSize')
             end
-            
+            if isempty(obj.OrientMatrix)
+                error('MIC_Reg3DTrans:noOrientMatrix', 'no OrientMatrix given in obj.OrientMatrix, please calibrate OrientMatrix first. Run obj.calibrateOrientation')
+            end
             %cut edges
-            Ref=dip_image(obj.Image_Reference(10:end-10,10:end-10));
+            Ref=dip_image(obj.Image_Reference(...
+                    obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx));
             Ref=Ref-mean(Ref);
             Ref=Ref/std(Ref(:));
 
             %get image at current z-position
             Current=obj.capture_single;
-            Current=dip_image(Current(10:end-10,10:end-10)); 
+            Current=dip_image(Current(...
+                    obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx));
             Current=Current-mean(Current);
             Current=Current/std(Current(:));
                 
             %find 2D shift         
             svec=findshift(Current,Ref,'iter');
-            Xshift=-svec(2)*obj.PixelSize; %note dipimage permute
-            Yshift=-svec(1)*obj.PixelSize;
+            XYshift=-svec; % In Pixels
         end
         
         
@@ -508,14 +814,22 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             %   reference image
             
             %collect z-data stack
-            obj.collect_zstack();
+            if obj.IsInitialRegistration
+                % Collect a larger z-stack if the IsInitialRegistration
+                % flag is set.
+                obj.collect_zstack(obj.ZStackMaxDevInitialReg);
+            else
+                obj.collect_zstack(obj.ZStack_MaxDev);
+            end          
             
             %whiten data to give zero mean and unit variance
-            Ref=obj.Image_Reference(10:end-10,10:end-10);
+            Ref=obj.Image_Reference(obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx);
             Ref=Ref-mean(Ref(:));
             Ref=Ref/std(Ref(:));
             zs=obj.ZStack;
-            zs=zs(10:end-10,10:end-10,:);
+            zs=zs(obj.XYBorderPx:end-obj.XYBorderPx, ...
+                    obj.XYBorderPx:end-obj.XYBorderPx, :);
             N=size(zs,3);
             n=numel(Ref);
             for ii=1:N
@@ -539,6 +853,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             model = polyval(P,Zpos_fit,S,MU);
             zAtMax=(-sqrt(P(2)^2-3*P(1)*P(3))-P(2))/3/P(1)*MU(2)+MU(1);
             
+            obj.maxACmodel=polyval(P,zAtMax);
             %plot results
             if isempty(obj.PlotFigureHandle)||~ishandle(obj.PlotFigureHandle)
                 obj.PlotFigureHandle=figure;
@@ -574,13 +889,13 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         function out=capture_single(obj)
             % Sets camera and lamp parameters and captures a single image
             
-            % change EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet = obj.CameraObj.CameraSetting;
-                EMGTemp = CamSet.EMGain.Value;
-                CamSet.EMGain.Value = obj.EMgain;
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             % change EMgain and exposure time if needed
+%             if obj.ChangeEMgain
+%                 CamSet = obj.CameraObj.CameraSetting;
+%                 EMGTemp = CamSet.EMGain.Value;
+%                 CamSet.EMGain.Value = obj.EMgain;
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 ExpTimeTemp = obj.CameraObj.ExpTime_Capture; 
                 obj.CameraObj.ExpTime_Capture = obj.ExposureTime;
@@ -594,10 +909,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
  %           obj.turnLampOff();
             
             % change back EMgain and exposure time if needed
-            if obj.ChangeEMgain
-                CamSet.EMGain.Value = EMGTemp; 
-                obj.CameraObj.setCamProperties(CamSet);
-            end
+%             if obj.ChangeEMgain
+%                 CamSet.EMGain.Value = EMGTemp; 
+%                 obj.CameraObj.setCamProperties(CamSet);
+%             end
             if obj.ChangeExpTime
                 obj.CameraObj.ExpTime_Capture = ExpTimeTemp;
             end
@@ -641,39 +956,62 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % structure
             
             Attribute.CalibrationFile = obj.CalibrationFile;
-            Attribute.LampPower = obj.LampObj.Power;
-            Attribute.LampWait = obj.LampWait;
-            Attribute.CamShutter = obj.CamShutter;
-            Attribute.ChangeEMgain = obj.ChangeEMgain;
-            Attribute.EMgain = obj.EMgain;
+%             Attribute.LampPower = obj.LampObj.Power;
+%             Attribute.LampWait = obj.LampWait;
+%             Attribute.CamShutter = obj.CamShutter;
+%             Attribute.ChangeEMgain = obj.ChangeEMgain;
+%             Attribute.EMgain = obj.EMgain;
             Attribute.ChangeExpTime = obj.ChangeExpTime;
             Attribute.ExposureTime = obj.ExposureTime;
             Attribute.PixelSize = obj.PixelSize;
+            Attribute.OrientMatrix = obj.OrientMatrix;
             Attribute.RefImageFile = obj.RefImageFile;
             Attribute.ZStack_MaxDev = obj.ZStack_MaxDev;
             Attribute.ZStack_Step = obj.ZStack_Step;
             Attribute.ZStack_Pos = obj.ZStack_Pos;
+            Attribute.TolMaxCorr = obj.TolMaxCorr;
             Attribute.Tol_X = obj.Tol_X;
             Attribute.Tol_Y = obj.Tol_Y;
             Attribute.Tol_Z = obj.Tol_Z;
             Attribute.MaxIter = obj.MaxIter;
             Attribute.MaxXYShift = obj.MaxXYShift;
             Attribute.MaxZShift = obj.MaxZShift;
+            Attribute.IsInitialRegistration = obj.IsInitialRegistration;
+            Attribute.UseStackCorrelation = obj.UseStackCorrelation;
             
-            %Return 0 as null marker
-            Data.ZFitPos = 0;
-            Data.ZFitModel = 0;
-            Data.ZMaxAC = 0;
-            Data.Image_Reference = 0;
-            Data.Image_Current = 0;
-            Data.ZStack = 0;
-            
-            if ~isempty(obj.ZFitPos);Data.ZFitPos = obj.ZFitPos;end
-            if ~isempty(obj.ZFitModel);Data.ZFitModel = obj.ZFitModel;end
-            if ~isempty(obj.ZMaxAC); Data.ZMaxAC = obj.ZMaxAC;end
-            if ~isempty(obj.Image_Reference);Data.Image_Reference = obj.Image_Reference;end
-            if ~isempty(obj.Image_Current); Data.Image_Current = obj.Image_Current;end
-            if ~isempty(obj.ZStack);Data.ZStack = obj.ZStack;end
+            Data.Image_Reference = obj.Image_Reference;
+            Data.Image_Current = obj.Image_Current;
+            if ~isempty(obj.ZFitPos)
+                Data.ZFitPos = obj.ZFitPos;
+            end
+            if ~isempty(obj.ZFitModel)
+                Data.ZFitModel = obj.ZFitModel;
+            end
+            if ~isempty(obj.ZMaxAC)
+                Data.ZMaxAC = obj.ZMaxAC;
+            end
+            if ~isempty(obj.ZStack)
+                Data.ZStack = obj.ZStack;
+            end
+            if ~isempty(obj.ReferenceStack)
+                Data.ReferenceStack = obj.ReferenceStack;
+            end  
+            if ~isempty(obj.ZStack)
+                Data.CurrentStack = obj.ZStack; 
+            end
+            if ~isempty(obj.ErrorSignal)
+                Data.ErrorSignal = obj.ErrorSignal;
+            end
+            if ~isempty(obj.ErrorSignalHistory)
+                Data.ErrorSignalHistory = obj.ErrorSignalHistory;
+            end
+            if ~isempty(obj.OffsetFitSuccess)
+                Data.OffsetFitSuccess = uint8(obj.OffsetFitSuccess);
+            end
+            if ~isempty(obj.OffsetFitSuccessHistory)
+                Data.OffsetFitSuccessHistory = ...
+                    uint8(obj.OffsetFitSuccessHistory);
+            end
             
             Children=[];
             
@@ -694,7 +1032,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             model=o + a*normpdf(Zpos,u,s);
             fval=mse(model,CC);
         end
-        
+
+        [PixelOffset, SubPixelOffset, CorrAtOffset, MaxOffset] = ...
+            findStackOffset(Stack1, Stack2, MaxOffset, Method, ...
+            FitType, FitOffset, BinaryMask, PlotFlag, UseGPU)
+    
         function State = unitTest(camObj,stageObj,lampObj)
             %unitTest Tests all functionality of MIC_Reg3DTrans
             % 
@@ -709,9 +1051,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 
             fprintf('\nTesting MIC_Reg3DTrans class...\n')
             % constructing and deleting instances of the class
-            RegObj = MIC_Reg3DTrans(camObj,stageObj,lampObj);
+            RegObj = MIC_Reg3DTrans(camObj,stageObj);
             delete(RegObj);
-            RegObj = MIC_Reg3DTrans(camObj,stageObj,lampObj);
+            RegObj = MIC_Reg3DTrans(camObj,stageObj);
             fprintf('* Construction and Destruction of object works\n')
             % loading and closing gui
             RegObj.gui;
@@ -719,8 +1061,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             RegObj.gui;
             fprintf('* Opening and closing of GUI works, please test GUI manually\n');
             % Calibration
-            fprintf('* Testing pixel size calibration\n')
-            RegObj.calibratePixelSize();
+            fprintf('* Testing calibration function\n')
+            RegObj.calibrate();
             % Get current and reference images
             fprintf('* Testing image acquisition\n')
             RegObj.getcurrentimage();
@@ -737,4 +1079,3 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     end
     
 end
-

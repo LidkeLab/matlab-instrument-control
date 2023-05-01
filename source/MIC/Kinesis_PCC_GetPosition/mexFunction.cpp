@@ -9,6 +9,7 @@
 #include <conio.h>
 #include "C:\Program Files\Thorlabs\Kinesis\Thorlabs.MotionControl.Benchtop.StepperMotor.h"
 
+
 #ifndef max
 //! not defined in the C standard used by visual studio
 #define max(a,b) (((a) > (b)) ? (a) : (b))
@@ -43,7 +44,7 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	short Err = SBC_Open(input_buf); //opening the device
 	plhs[0] = mxCreateDoubleScalar(Err); //output.
 	if (!Err){ //If errror opening, send back error code. 
-		SBC_Identify(input_buf);
+		SBC_Identify(input_buf,Channel);
 		SBC_StartPolling(input_buf, Channel, 200);
 	}
 	mxFree(input_buf);

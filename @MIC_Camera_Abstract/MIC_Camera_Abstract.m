@@ -268,9 +268,11 @@ classdef MIC_Camera_Abstract < MIC_Abstract
                 %im=255*im';
                 set(obj.ImageHandle.Parent,'CLim',[mn,mx])
             else
+
                 %im = single(im-obj.LUTScale(1))/(obj.LUTScale(2)-obj.LUTScale(1));
                 %im=255*im';
                 set(obj.ImageHandle.Parent,'CLim',obj.LUTScale)
+
             end
             
             %update data

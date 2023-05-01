@@ -155,6 +155,7 @@ initialize;
         
         obj.AcquisitionType = 'focus';
         obj.setup_acquisition;
+        set(handles.focus_Input,'String',obj.ExpTime_Focus)
         % turn back on
         obj.ReadyForAcq=1;
     end
@@ -175,6 +176,7 @@ initialize;
         
         obj.AcquisitionType = 'capture';
         obj.setup_acquisition;
+        set(handles.capture_Input,'String',obj.ExpTime_Capture)
         % turn back on
         obj.ReadyForAcq=1;
     end
@@ -195,6 +197,7 @@ initialize;
         
         obj.AcquisitionType = 'sequence';
         obj.setup_acquisition;
+        set(handles.sequence_Input,'String',obj.ExpTime_Sequence)
         set(handles.sequence_Period_Butt,'String',num2str(obj.SequenceCycleTime));
         % turn back on
         obj.ReadyForAcq=1;       
@@ -269,7 +272,7 @@ initialize;
     % Call back to Abort Acquisition
     function abortAcquisition(fileTab,eventdata)
        % function to abort the camera if its doing something (e.g. taking data) 
-        obj.abort;
+        obj.abortnow;
     end
 
     

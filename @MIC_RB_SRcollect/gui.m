@@ -25,7 +25,7 @@ guiFig = figure('Units','pixels','Position',[xst yst xsz ysz],...
 obj.GuiFigure = guiFig;
 
 % update gui when window is selected
-guiFig.WindowButtonDownFcn = @properties2gui;
+%guiFig.WindowButtonDownFcn = @properties2gui;
 
 % mouse over TL slider wheel control
 guiFig.WindowScrollWheelFcn = @wheel;
@@ -52,7 +52,7 @@ handles.Edit_FileName = uicontrol('Parent',hFilePanel, 'Style', 'edit',...
 uicontrol('Parent',hFilePanel, 'Style', 'edit', 'String','File type:',...
     'Enable','off','Position', [staticst php-90 100 20]);
 handles.saveFileType = uicontrol('Parent',hFilePanel, 'Style',...
-    'popupmenu', 'String',{'mat','h5'},'Enable','on','BackgroundColor',...
+    'popupmenu', 'String',{'h5','mat'},'Enable','on','BackgroundColor',...
     [1 1 1],'Position', [editst php-90 250 20]);
 
 % Camera Panel
@@ -101,23 +101,39 @@ handles.Edit_CameraDefCor = uicontrol('Parent',hCameraPanel, 'Style', ...
     'Position', [editst+200 php-90 50 20]);
 
 % Registration Panel
-ph=0.08;
+ph=0.12;
 php = ph*ysz;
-hRegPanel = uipanel('Parent',guiFig,'Title','REGISTRATION',...
-    'Position',[(1-pw)/2 refh-ph-psep pw ph]);
+hRegPanel = uipanel('Parent',guiFig,'Title','REGISTRATION','Position',[(1-pw)/2 refh-ph-psep pw ph]);
 refh=refh-ph-psep;
 
-uicontrol('Parent',hRegPanel, 'Style', 'edit', 'String','Exp. Time Reg.:',...
-    'Enable','off','Position', [staticst php-40 100 20]);
+uicontrol('Parent',hRegPanel, 'Style', 'edit', 'String','Exp. Time Reg.:','Enable','off','Position', [staticst php-40 100 20]);
 handles.Edit_RegExpTime = uicontrol('Parent',hRegPanel, 'Style', 'edit', ...
     'String','0.01','Enable','on','BackgroundColor',[1 1 1],...
     'Position', [editst php-40 50 20]);
-handles.BG_RegType = uibuttongroup('Parent',hRegPanel,'Title','Registration type',...
-    'Position',[1/2 1/20 1/2 19/20]);
-uicontrol(handles.BG_RegType,'Style','radiobutton','String','No registration',...
-                  'Tag','None','Position',[5 5 150 20]);
-uicontrol(handles.BG_RegType,'Style','radiobutton','String','Passive registration',...
-                  'Tag','Passive','Position',[5 25 150 20]);
+handles.Button_RegLoadRef=uicontrol('Parent',hRegPanel, 'Style', 'pushbutton',...
+    'String','Load Reference','Enable','on',...
+    'Position', [staticst php-70 100 20],'Callback',@LoadRef);
+handles.Edit_RegFileName = uicontrol('Parent',hRegPanel, 'Style', 'edit', ...
+    'String','File Name','Enable','on','BackgroundColor',[1 1 1],...
+    'Position', [editst php-70 250 20]);
+handles.Button_RegAlign=uicontrol('Parent',hRegPanel, 'Style', 'pushbutton',...
+    'String','Align','Enable','on','Position', ...
+    [staticst php-100 80 20],'Callback',@Align);
+handles.Button_RegShowRef=uicontrol('Parent',hRegPanel, 'Style', 'pushbutton', ...
+    'String','Show Reference','Enable','on','Position', ...
+    [staticst+80 php-100 100 20],'Callback',@ShowRef);
+handles.Button_RegTakeCurrent=uicontrol('Parent',hRegPanel, 'Style', 'pushbutton',...
+    'String','Take Current','Enable','on','Position', ...
+    [staticst+180 php-40 90 20],'Callback',@TakeCurrent);
+handles.Button_RegCenterStage=uicontrol('Parent',hRegPanel, 'Style', 'pushbutton', ...
+    'String','Center Stage','Enable','on','Position', ...
+    [staticst+270 php-40 90 20],'Callback',@CenterStage);
+handles.Button_RegTakeReference=uicontrol('Parent',hRegPanel, 'Style', 'pushbutton',...
+    'String','Take Reference','Enable','on','Position', ...
+    [staticst+180 php-100 90 20],'Callback',@TakeReference);
+handles.Button_RegSaveReference=uicontrol('Parent',hRegPanel, 'Style', 'pushbutton', ...
+    'String','Save Reference','Enable','on','Position', ...
+    [staticst+270 php-100 90 20],'Callback',@SaveReference);
 
 
 % LIGHTSOURCE Panel
@@ -474,6 +490,39 @@ setDefaults();
         handles.Slider_TL.Value = FPnew;
     end
 
+    function LoadRef(~,~)
+        obj.loadref();
+        set(handles.Edit_RegFileName,'String',obj.R3DObj.RefImageFile);
+    end
+
+    function Align(~,~)
+        gui2properties();
+        obj.align();
+    end
+
+    function ShowRef(~,~)
+        obj.showref();
+    end
+
+    function TakeCurrent(~,~)
+        gui2properties();
+        obj.takecurrent();
+    end
+
+    function CenterStage(~,~)
+        obj.StageObj.center();
+    end
+
+    function TakeReference(~,~)
+        gui2properties();
+        obj.takeref();
+    end
+
+    function SaveReference(~,~)
+        obj.saveref();
+        properties2gui();
+    end
+
     function focusLamp(~,~)
         gui2properties();
         obj.focusLamp();
@@ -514,14 +563,19 @@ setDefaults();
         switch handles.Popup_CameraROI.Value
             case 1
                 obj.Camera.ROI=[961 1088 961 1088];% center 128
+                obj.CameraROI=[961 1088 961 1088];% center 128
             case 2
                 obj.Camera.ROI=[897 1152 897 1152];% center 256
+                obj.CameraROI=[897 1152 897 1152];% center 256
             case 3
                 obj.Camera.ROI=[769 1280 769 1280];% center 512
+                obj.CameraROI=[769 1280 769 1280];% center 512
             case 4
                 obj.Camera.ROI=[513 1536 513 1536]; % center 1024
+                obj.CameraROI=[513 1536 513 1536]; % center 1024
             case 5
                 obj.Camera.ROI=[1 2048 1 2048]; % full 2048
+                obj.CameraROI=[1 2048 1 2048]; % full 2048
         end
         % Display zoom
         switch handles.Popup_CameraDispZoom.Value
@@ -563,8 +617,9 @@ setDefaults();
         obj.SaveType = handles.saveFileType.String{handles.saveFileType.Value};
         % CAMERA
         gui2camera()
-        obj.CameraROI = ...
+        obj.CameraROISelect = ...
             handles.Popup_CameraROI.String{handles.Popup_CameraROI.Value};
+        
         obj.ExpTime = str2double(handles.Edit_CameraExpTime.String);
         obj.NumFrames = str2double(handles.Edit_CameraNumFrames.String);
         obj.CameraReadoutMode = ...
@@ -572,8 +627,10 @@ setDefaults();
         obj.CameraDefectCorrection = ...
             handles.Edit_CameraDefCor.String{handles.Edit_CameraDefCor.Value};
         % REGISTRATION
-        obj.ExpTimeReg = str2double(handles.Edit_RegExpTime.String);
-        obj.RegType = handles.BG_RegType.SelectedObject.Tag;
+        obj.R3DObj.ExposureTime=str2double(get(handles.Edit_RegExpTime,'string'));
+        obj.ExpTimeReg=str2double(get(handles.Edit_RegExpTime,'string'));
+        obj.R3DObj.RefImageFile=get(handles.Edit_RegFileName,'string');
+        
         % LIGHT SOURCE
         obj.Laser405Focus = handles.Focus405.Value;
         obj.Laser488Focus = handles.Focus488.Value;
@@ -616,21 +673,21 @@ setDefaults();
             find(strcmp(handles.saveFileType.String,obj.SaveType));
         % CAMERA
         if all(obj.Camera.ROI == [1 2048 1 2048])
-            obj.CameraROI = 'full';
+            obj.CameraROISelect = 'full';
         elseif all(obj.Camera.ROI == [513 1536 513 1536])
-            obj.CameraROI = 'center 1024';
+            obj.CameraROISelect = 'center 1024';
         elseif all(obj.Camera.ROI == [769 1280 769 1280])
-            obj.CameraROI = 'center 512';
+            obj.CameraROISelect = 'center 512';
         elseif all(obj.Camera.ROI == [897 1152 897 1152])
-            obj.CameraROI = 'center 256';
+            obj.CameraROISelect = 'center 256';
         elseif all(obj.Camera.ROI == [961 1088 961 1088])
-            obj.CameraROI = 'center 128';
+            obj.CameraROISelect = 'center 128';
         else
             obj.Camera.ROI = [1 2048 1 2048];
-            obj.CameraROI = 'full';
+            obj.CameraROISelect = 'full';
         end
         handles.Popup_CameraROI.Value = ...
-            find(strcmp(handles.Popup_CameraROI.String,obj.CameraROI));
+            find(strcmp(handles.Popup_CameraROI.String,obj.CameraROISelect));
         obj.ExpTime = obj.Camera.ExpTime_Sequence;
         obj.Camera.ExpTime_Focus = obj.Camera.ExpTime_Sequence;
         handles.Edit_CameraExpTime.String = num2str(obj.ExpTime);
@@ -645,18 +702,8 @@ setDefaults();
         handles.Edit_CameraDefCor.Value = ...
             find(strcmp(handles.Edit_CameraDefCor.String,obj.CameraDefectCorrection));
         % REGISTRATION
-        handles.Edit_RegExpTime.String = num2str(obj.ExpTimeReg);
-        switch obj.RegType
-            case 'None'
-                handles.BG_RegType.SelectedObject = handles.BG_RegType.Children(2);
-            case 'Passive'
-                handles.BG_RegType.SelectedObject = handles.BG_RegType.Children(1);
-            otherwise
-                handles.BG_RegType.SelectedObject = handles.BG_RegType.Children(2);
-        end
-        handles.BG_RegType.SelectedObject = ...
-            handles.BG_RegType.Children(...
-            strcmp({handles.BG_RegType.Children.Tag},obj.RegType));
+        set(handles.Edit_RegExpTime,'string',num2str(obj.R3DObj.ExposureTime));
+        set(handles.Edit_RegFileName,'string',obj.R3DObj.RefImageFile);
         % LIGHT SOURCE
         handles.LP405.String = obj.Laser405Low;
         handles.LP488.String = obj.Laser488Low;
@@ -697,7 +744,7 @@ setDefaults();
         end
         
         % PIEZO
-        handles.Edit_PositionPiezo.String = num2str(obj.Piezo.getPosition);
+        handles.Edit_PositionPiezo.String = num2str(obj.StageObj.StagePiezoZ.getPosition());
         handles.Edit_StepSizePiezo.String = num2str(obj.PiezoStepSize); 
         handles.Edit_Zstart.String = num2str(obj.StartZStack);
         handles.Edit_Zend.String = num2str(obj.EndZStack);
