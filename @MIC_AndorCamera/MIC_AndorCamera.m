@@ -125,7 +125,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 end
                 clear a;
             else
-                [SDKPath]=uigetdir(matlabroot,'Select Andor SDK Toolbox Directory')
+                [SDKPath]=uigetdir(matlabroot,'Select Andor SDK Toolbox Directory. For the Raman Microscope thats C:\Program Files\MATLAB\R2021a\toolbox\AndorSDK3')
                 obj.SDKPath=SDKPath;
                 if exist(obj.SDKPath,'dir')
                     save(fullfile(p,'AndorCamera_Properties.mat'),'SDKPath');
