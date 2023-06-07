@@ -288,4 +288,8 @@ __pycache__/
 *.xsd.cs
 
 *.asv
+
+*.mat
+
 *.filters
+
