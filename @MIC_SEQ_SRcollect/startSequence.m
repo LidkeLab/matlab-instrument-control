@@ -46,80 +46,70 @@ end
 % Attempt to move to the cell of interest.
 % NOTE: The stepper channels are in the order [y, x, z], but
 %       RefStruct.StepperPos is in the order [x, y, z].
+obj.StagePiezo.center(); % center the piezos to ensure full range of motion
 obj.StageStepper.moveToPosition(1, ...
     RefStruct.StepperPos(2) + obj.CoverSlipOffset(2));
 obj.StageStepper.moveToPosition(2, ...
     RefStruct.StepperPos(1) + obj.CoverSlipOffset(1));
-obj.StageStepper.moveToPosition(3, ...
-    RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
-obj.StagePiezo.center(); % center the piezos to ensure full range of motion
+if ((RefStruct.StepperPos(3)+obj.CoverSlipOffset(3)) > obj.MinAllowableZ)
+    obj.StageStepper.moveToPosition(3, ...
+        RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
+else
+    obj.StageStepper.moveToPosition(3, obj.MinAllowableZ);
+end
 
-% Attempt to align the cell to the reference image in brightfield.
-obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
-    'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
-obj.Lamp660.setPower(obj.Lamp660Power);
-pause(obj.LampWait);
-obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
-obj.CameraSCMOS.AcquisitionType = 'capture';
-obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
-obj.CameraSCMOS.setup_acquisition();
-obj.AlignReg.Image_Reference = double(RefStruct.Image);
-obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
-obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
-obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
-obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
-obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
-try
-    obj.AlignReg.align2imageFit();
-catch
-    % We don't want to throw an error since there are still other cells
-    % to be measured from here on: warn the user, attempt to export
-    % data that might be useful, and return control to the calling
-    % method.
-    warning('Problem with AlignReg.align2imageFit()')
-    obj.StatusString = ...
-        'Exporting object Data and Children with exportState()...';
-    fprintf(...
-        'Saving exportables from exportState()....................\n')
-    switch obj.SaveFileType
-        case {'h5', 'h5DataGroups'}
-            % For either .h5 file save type, we'll still use the same
-            % supergroup of Channel01/Zposition001.
-            SequenceName = 'Channel01/Zposition001';
-            MIC_H5.createGroup(FileH5, SequenceName);
-            obj.save2hdf5(FileH5, SequenceName);
-        otherwise
-            error('StartSequence:: unknown SaveFileType')
+% Attempt to align the cell to the reference image in brightfield (if
+% requested).
+if obj.UseBrightfieldReg
+    obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+        'Attempting initial brightfield alignment...'], RefStruct.CellIdx);
+    obj.Lamp660.setPower(RefStruct.LampPower);
+    pause(obj.LampWait);
+    obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
+    obj.CameraSCMOS.AcquisitionType = 'capture';
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
+    obj.CameraSCMOS.setup_acquisition();
+    obj.AlignReg.Image_Reference = double(RefStruct.Image);
+    obj.AlignReg.ReferenceStack = double(RefStruct.ReferenceStack);
+    obj.AlignReg.AbortNow = 0; % reset the AbortNow flag
+    obj.AlignReg.IsInitialRegistration = 1; % indicate first cell find
+    obj.AlignReg.NMean = obj.NMeanInitial;
+    obj.AlignReg.MaxIter = obj.MaxIterInitial;
+    obj.AlignReg.ErrorSignalHistory = zeros(0, 3); % reset history
+    obj.AlignReg.OffsetFitSuccessHistory = zeros(0, 3);
+    try
+        obj.AlignReg.align2imageFit();
+    catch
+        % We don't want to throw an error since there are still other cells
+        % to be measured from here on: warn the user, attempt to export
+        % data that might be useful, and return control to the calling
+        % method.
+        warning('Problem with AlignReg.align2imageFit()')
+        obj.StatusString = ...
+            'Exporting object Data and Children with exportState()...';
+        fprintf(...
+            'Saving exportables from exportState()....................\n')
+        switch obj.SaveFileType
+            case {'h5', 'h5DataGroups'}
+                % For either .h5 file save type, we'll still use the same
+                % supergroup of Channel01/Zposition001.
+                SequenceName = 'Channel01/Zposition001';
+                MIC_H5.createGroup(FileH5, SequenceName);
+                obj.save2hdf5(FileH5, SequenceName);
+            otherwise
+                error('StartSequence:: unknown SaveFileType')
+        end
+        obj.StatusString = '';
+        fprintf('Saving exportables from exportState() complete \n')
+        return
     end
-    obj.StatusString = '';
-    fprintf('Saving exportables from exportState() complete \n')
-    return
+    obj.Lamp660.setPower(0);
 end
-obj.Lamp660.setPower(0);
-
-% Setup Active Stabilization (if desired).
-if obj.UseActiveReg
-    obj.ActiveReg = MIC_ActiveReg3D_Seq(...
-        obj.CameraIR,obj.StagePiezoX,obj.StagePiezoY,obj.StagePiezoZ);
-    obj.Lamp850.on;
-    obj.Lamp850.setPower(obj.Lamp850Power);
-    obj.IRCamera_ExposureTime = obj.CameraIR.ExpTime_Capture;
-    obj.ActiveReg.takeRefImageStack(); % takes 21 reference images
-    obj.ActiveReg.Period = obj.StabPeriod;
-    obj.ActiveReg.start();
-end
-
-% Setup the main sCMOS to acquire the sequence.
-obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
-    'Preparing for acquisition...'], RefStruct.CellIdx);
-obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
-obj.CameraSCMOS.SequenceLength = obj.NumberOfFrames;
-obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
-obj.CameraSCMOS.AcquisitionType = 'sequence';
-obj.CameraSCMOS.setup_acquisition();
 
 % Prepare the lasers for the sequence based on the appropriate object
 % properties.
+obj.StatusString = sprintf(['Cell %g, Sequence 1 - ', ...
+    'Preparing for acquisition...'], RefStruct.CellIdx);
 obj.FlipMount.FilterOut(); % removes ND filter from optical path
 obj.Laser647.setPower(obj.LaserPowerSequence647);
 obj.Laser405.setPower(obj.LaserPowerSequence405);
@@ -146,11 +136,6 @@ if obj.UsePreActivation
     PreviousState = pause('on'); % saves current state for later
     pause(obj.DurationPreActivation);
     
-    % Turn off the 405nm laser (if used) and close the shutter to
-    % prevent the 647nm laser from reaching the sample.
-    obj.Shutter.close();
-    obj.Laser405.off();
-    
     % Restore the previous pause setting (in case this was important
     % elsewhere/to the user).
     pause(PreviousState);
@@ -168,18 +153,40 @@ for ii = 1:obj.NumberOfSequences
     
     % Use periodic registration after NSeqBeforePeriodicReg
     % sequences have been collected.
-    if obj.UsePeriodicReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
-            && ~(ii == 1)
+    if (obj.UseBrightfieldReg && ~mod(ii, obj.NSeqBeforePeriodicReg) ...
+            && (ii~=1))
+        % Update the position using the stepper motors.
+        if all(obj.AlignReg.OffsetFitSuccess)
+            % We only want to risk using the stepper updates if the
+            % previous fits were successful.
+            % NOTE: obj.CoverSlipOffset only gets updated when
+            %       OffsetFitSuccess is true.
+            obj.StagePiezo.center();
+            obj.StageStepper.moveToPosition(1, ...
+                RefStruct.StepperPos(2) + obj.CoverSlipOffset(2));
+            obj.StageStepper.moveToPosition(2, ...
+                RefStruct.StepperPos(1) + obj.CoverSlipOffset(1));
+            if ((RefStruct.StepperPos(3)+obj.CoverSlipOffset(3)) ...
+                    > obj.MinAllowableZ)
+                obj.StageStepper.moveToPosition(3, ...
+                    RefStruct.StepperPos(3) + obj.CoverSlipOffset(3));
+            else
+                obj.StageStepper.moveToPosition(3, obj.MinAllowableZ);
+            end
+        end
+        
+        % Perform the brightfield registration (this only uses the piezos).
         obj.StatusString = sprintf(['Cell %g, Sequence %i - ', ...
             'Attempting periodic registration...'], ...
             RefStruct.CellIdx, ii);
-        obj.Lamp660.setPower(obj.Lamp660Power);
+        obj.Lamp660.setPower(RefStruct.LampPower);
         pause(obj.LampWait);
         obj.CameraSCMOS.ExpTime_Capture = obj.ExposureTimeCapture;
         obj.CameraSCMOS.AcquisitionType = 'capture';
-        obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
         obj.CameraSCMOS.setup_acquisition();
         obj.AlignReg.IsInitialRegistration = 0; % indicate periodic reg.
+        obj.AlignReg.NMean = obj.NMean;
+        obj.AlignReg.MaxIter = obj.MaxIter;
         try
             obj.AlignReg.align2imageFit();
         catch
@@ -190,6 +197,18 @@ for ii = 1:obj.NumberOfSequences
         end
         obj.Lamp660.setPower(0);
     end
+    
+    % Collect a final set of brightfield images before collecting the SR
+    % data.
+    obj.CameraSCMOS.AcquisitionType = 'sequence';
+    obj.CameraSCMOS.TriggerMode = 'internal';
+    obj.CameraSCMOS.SequenceLength = obj.NBrightfieldIms;
+    obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeCapture;
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
+    obj.Lamp660.setPower(RefStruct.LampPower);
+    pause(obj.LampWait);
+    PreSeqImages = obj.CameraSCMOS.start_sequence();
+    obj.Lamp660.setPower(0);
     
     % Allow the lasers to reach the sample as requested by the set flags.
     if obj.OnDuringSequence405
@@ -205,9 +224,25 @@ for ii = 1:obj.NumberOfSequences
             'Acquiring data...'], ...
             RefStruct.CellIdx, ii);
     obj.CameraSCMOS.AcquisitionType = 'sequence';
+    obj.CameraSCMOS.TriggerMode = 'internal';
+    obj.CameraSCMOS.SequenceLength = obj.NumberOfFrames;
     obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeSequence;
-    obj.CameraSCMOS.setup_acquisition();
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
     Sequence = obj.CameraSCMOS.start_sequence();
+    
+    % Collect a final set of brightfield images before proceeding to the
+    % next sequence.
+    obj.CameraSCMOS.AcquisitionType = 'sequence';
+    obj.CameraSCMOS.TriggerMode = 'internal';
+    obj.CameraSCMOS.SequenceLength = obj.NBrightfieldIms;
+    obj.CameraSCMOS.ExpTime_Sequence = obj.ExposureTimeCapture;
+    obj.CameraSCMOS.ROI = obj.SCMOS_ROI_Collect;
+    obj.Lamp660.setPower(RefStruct.LampPower);
+    pause(obj.LampWait);
+    PostSeqImages = obj.CameraSCMOS.start_sequence();
+    obj.Lamp660.setPower(0);
+    
+    % Save the data.
     switch obj.SaveFileType
         case 'h5'
             % Place the current dataset in the same group as all other
@@ -219,8 +254,7 @@ for ii = 1:obj.NumberOfSequences
             % Create a new group for the current dataset, so each dataset
             % will have its own group in the .h5 file.
             DataName = sprintf('Data%04d', ii);
-            SequenceName = sprintf('Channel01/Zposition001/%s', ...
-                DataName);
+            SequenceName = sprintf('Channel01/Zposition001/%s', DataName);
             MIC_H5.createGroup(FileH5, SequenceName);
             
             % Save the exportState() exportables.
@@ -231,7 +265,13 @@ for ii = 1:obj.NumberOfSequences
             obj.save2hdf5(FileH5, SequenceName);
             fprintf('Exportables from exportState() have been saved\n')
             obj.StatusString = '';
-            fprintf('Saving exportables from exportState() complete\n')
+            
+            % Place the pre- and post-sequence brightfield images in a new
+            % group.
+            Data.PreSeqImages = PreSeqImages;
+            Data.PostSeqImages = PostSeqImages;
+            FocusImName = sprintf('%s/FocusImages', SequenceName);
+            obj.saveAttAndData(FileH5, FocusImName, struct(), Data, struct())
             
             % Begin writing the data.
             MIC_H5.writeAsync_uint16(...
@@ -241,6 +281,25 @@ for ii = 1:obj.NumberOfSequences
     end
     obj.Shutter.close(); % block 647nm from reaching sample
     obj.Laser405.off(); % ensure the 405nm is turned off
+        
+    % Update the coverslip offset.
+    if all(obj.AlignReg.OffsetFitSuccess)
+        CurrentStepperPosition = [obj.StageStepper.getPosition(2), ...
+            obj.StageStepper.getPosition(1), ...
+            obj.StageStepper.getPosition(3)];
+        obj.CoverSlipOffset = ...
+            (CurrentStepperPosition-RefStruct.StepperPos) ...
+            + 1e-3*(obj.StagePiezo.Position-RefStruct.PiezoPos);
+    end
+    obj.CoverslipOffsetHistory = [obj.CoverslipOffsetHistory; ...
+        obj.CoverSlipOffset];
+    
+    % If needed, pause before proceeding to the next sequence (this is
+    % useful for test conditions, probably not for a normal acquisition).
+    if (ii ~= obj.NumberOfSequences)
+        % No need to pause on the last sequence of the cell.
+        pause(obj.PostSeqPause);
+    end
 end
 obj.StatusString = '';
 fprintf('Data collection complete\n')
@@ -250,11 +309,6 @@ obj.Shutter.close(); % close shutter instead of turning off the laser
 obj.FlipMount.FilterIn();
 obj.Laser405.setPower(0);
 obj.Laser405.off();
-
-% If it was used, end the active stabilization process.
-if obj.UseActiveReg
-    obj.ActiveReg.stop();
-end
 
 % Save the acquisition data.
 switch obj.SaveFileType
