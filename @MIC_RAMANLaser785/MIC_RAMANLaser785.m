@@ -121,7 +121,7 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
                 obj.CurrInterpol=a.CurrInterpol;
                 obj.PowerInterpol=a.PowerInterpol;
             else
-                error('MIC_RAMANLaser785: No laser calibration file detected')
+                error('MIC_RAMANLaser785: No laser calibration file detected. For the Raman Microscope, go to Y:\Projects\DOE Raman HSM\Equipment\Lasers and Lamps\785 nm Laser and run the LaserPowerCalibration code. This will generate the needed file. ')
             end            
         end
         
