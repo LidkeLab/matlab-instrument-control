@@ -341,8 +341,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StatusString = 'Setting up lasers...';
             
             % Setup the needed laser(s).
-            %obj.Laser647 = MIC_MPBLaser();
-            obj.Laser647 = MIC_TCubeLaserDiode('64849775', 'Power', 80, 182.5, 10);
+            obj.Laser647 = MIC_MPBLaser();
+            %obj.Laser647 = MIC_TCubeLaserDiode('64849775', 'Power', 80, 182.5, 10);
             obj.Laser405 = MIC_TCubeLaserDiode('64841724', ...
                 'Power', 32.25, 20.05, 10);
             % Usage: 
