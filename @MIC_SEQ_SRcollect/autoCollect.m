@@ -32,9 +32,9 @@ NumCells = numel(FileList);
 
 % Proceed with the data acquisition, looping through each of the cells
 % specified in the FileList.
-obj.Shutter.close(); % close shutter before the laser turns on
 obj.Laser647.setPower(obj.LaserPowerSequence647);
-obj.Laser647.on();
+%obj.Laser647.on();
+obj.Shutter.close(); % close shutter before the laser turns on
 for ii = 1:obj.NAcquisitionCycles
     % Repeat the acquisition NAcquisitionCycles times for each cell.
     for nn = StartCell:NumCells

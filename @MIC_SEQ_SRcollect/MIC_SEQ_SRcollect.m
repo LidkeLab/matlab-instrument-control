@@ -55,7 +55,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         DurationPreActivation = 10; % (seconds) time of pre-activation
         StabPeriod = 5; % Time between stabilization events (seconds)
         GridCorner = [1, 1] % 10x10 Full Frame Grid Corner (mm)
-        SCMOS_ROI_Collect = [881, 1136, 937, 1192];%single-mode:[885,1140,961,1216];% multi-mode: [881, 1136, 937, 1192];
+        SCMOS_ROI_Collect = [885,1140,961,1216];%single-mode:[885,1140,961,1216];% multi-mode: [881, 1136, 937, 1192];
         %SCMOS_ROI_Collect = [325, 1348, 513,  1536]; % Center 1024x1024 RoI Delft
         %SCMOS_ROI_Collect = [897, 1152, 897, 1152];
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
@@ -368,7 +368,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             
             % Setup the flip mount object to control the neutral density
             % filter.
-            obj.FlipMount = MIC_FlipMountTTL('Dev1', 'Port0/Line0');
+            %obj.FlipMount = MIC_FlipMountTTL('Dev1', 'Port0/Line0');
+            obj.FlipMount = MIC_FlipMountLaser(obj.Laser647);
             obj.FlipMount.FilterIn(); % place ND filter in 647 laser path
             
             % Update the status indicator for the GUI.
@@ -380,7 +381,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.StatusString = 'Setting up the shutter...';
             
             % Setup the shutter for control of the 647nm laser.
-            obj.Shutter = MIC_ShutterTTL('Dev1', 'Port0/Line1');
+            %obj.Shutter = MIC_ShutterTTL('Dev1', 'Port0/Line1');
+            obj.Shutter = MIC_ShutterLaser(obj.Laser647);
             obj.Shutter.close(); % close the shutter by default
             
             % Update the status indicator for the GUI.
