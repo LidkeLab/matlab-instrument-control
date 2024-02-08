@@ -70,6 +70,8 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
         CycleMode;                  %
         GuiDialog;                  % GUI dialog for the CameraParameters
+        Zscale = [100,120];
+        HsmViewer;
         % consider making GuiDialog abstract??
     end
     
@@ -252,13 +254,14 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             [obj.LastError] = AT_Command(obj.CamHandle, 'TimestampClockReset');
             AT_CheckWarning(obj.LastError);
             obj.AbortNow=0;
-            if isempty(obj.FigHandle)
-                obj.FigHandle=figure('Position',[100,100,700,500]);
-                obj.Axes1 = axes('Position',[0,0,0.5,1],'Parent',obj.FigHandle); 
-                obj.Axes2 = axes('Position',[0.57,0.3,0.4,0.5],'Parent',obj.FigHandle); 
-                colormap(obj.Axes1,'gray')
-                set(obj.FigHandle,'DeleteFcn',@(h,e)obj.figdelete())
-            end
+%             if isempty(obj.FigHandle)
+%                 obj.FigHandle=figure('Position',[100,100,700,500]);
+%                 obj.Axes1 = axes('Position',[0,0,0.5,1],'Parent',obj.FigHandle); 
+%                 obj.Axes2 = axes('Position',[0.57,0.3,0.4,0.5],'Parent',obj.FigHandle); 
+%                 colormap(obj.Axes1,'gray')
+%                 set(obj.FigHandle,'DeleteFcn',@(h,e)obj.figdelete())
+%             end
+            obj.hsmviewer();
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStart');
             AT_CheckWarning(obj.LastError);
 
@@ -289,18 +292,24 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 end
                 if mod(obj.CameraFrameIndex,N*Nstep)==0
                     ims=Imstack(:,:,obj.CameraFrameIndex-Nstep+1:obj.CameraFrameIndex);
-                    ImgXY = squeeze(sum(ims,1));
+                    ImgXY = squeeze(mean(ims,1));
+                    %clim = [quantile(ImgXY(:),0.1),quantile(ImgXY(:),0.995)];
                     Spec = squeeze(mean(mean(ims,2),3));
-                    if ishandle(obj.FigHandle)
-                        imagesc(obj.Axes1,ImgXY)
-                        axis(obj.Axes1,'equal')
-                        obj.Axes1.Visible = 'off';
+                    %if ishandle(obj.FigHandle)
+                        imagesc(obj.HsmViewer.Axis_imag,ImgXY)
+                        colormap(gray)
+                        set(obj.HsmViewer.Axis_imag,'Clim',obj.Zscale)
+                        axis(obj.HsmViewer.Axis_imag,'equal')                        
+                        set(obj.HsmViewer.Axis_imag,'XTick',[])
+                        set(obj.HsmViewer.Axis_imag,'YTick',[])
+                        set(obj.HsmViewer.Axis_imag,'Color',[0,0,0])
+                        %obj.HsmViewer.Axis_imag.Visible = 'off';
                         wv = polyval(pfit,[1:numel(Spec)]+obj.ROI(1)-ROIoffset);
-                        plot(obj.Axes2,wv(2:end-1),Spec(2:end-1))
-                        obj.Axes2.YLabel.String = 'Intensity';
-                        obj.Axes2.XLabel.String = 'wave length (nm)';
+                        plot(obj.HsmViewer.Axis_spec,wv(2:end-1),Spec(2:end-1))
+                        obj.HsmViewer.Axis_spec.YLabel.String = 'Intensity';
+                        obj.HsmViewer.Axis_spec.XLabel.String = 'wave length (nm)';
                         drawnow limitrate
-                    end
+                    %end
                end
             end
             if obj.AbortNow == 0
