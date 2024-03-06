@@ -42,12 +42,24 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_ThorlabsLED(NIDevice,AOChannel)
-            % Example, NIDevice= 'Dev1', AOChannel='ao0'
-            obj=obj@MIC_LightSource_Abstract(~nargout);
-            if nargin<2
-                error('MIC_ThorlabsLED::NIDevice and AOChannel must be defined')
-            end
+%         function obj=MIC_ThorlabsLED(NIDevice,AOChannel) %default
+%         constructor has been changed to add the IsMock to simulate actual
+%         LED 
+%             % Example, NIDevice= 'Dev1', AOChannel='ao0'
+%             obj=obj@MIC_LightSource_Abstract(~nargout);
+%             if nargin<2
+%                 error('MIC_ThorlabsLED::NIDevice and AOChannel must be defined')
+%             end
+         function obj = MIC_ThorlabsLED(NIDevice, AOChannel, isMock)
+            obj = obj@MIC_LightSource_Abstract(~nargout);
+                if nargin < 2
+                    error('MIC_ThorlabsLED::NIDevice and AOChannel must be defined')
+                end
+    
+    % Skip hardware setup if creating a mock object
+                if nargin > 2 && isMock
+                return;
+                end
             %Set up the NI Daq Object
             obj.DAQ = daq.createSession('ni');
             addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage');
@@ -55,7 +67,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
             %Set to minimum power
             obj.setPower(obj.MinPower);
             obj.off();
-        end
+            end
         
         function delete(obj)
             % Destructor
@@ -135,7 +147,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
             fprintf('Turn On\n')
             T_LED.on();pause(1);
             fprintf('Turn Off\n')
-            T_LED.off();;pause(1);
+            T_LED.off();pause(1);
             fprintf('Turn On\n')
             T_LED.on();pause(1);
             fprintf('Setting to 50 Percent Output\n')
@@ -155,7 +167,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
             fprintf('Turn On\n')
             T_LED.on();pause(1);
             fprintf('Turn Off\n')
-            T_LED.off();;pause(.5);
+            T_LED.off();pause(.5);
             fprintf('Turn On\n')
             T_LED.on();pause(.5);
             fprintf('Setting to 50 Percent Output\n')
