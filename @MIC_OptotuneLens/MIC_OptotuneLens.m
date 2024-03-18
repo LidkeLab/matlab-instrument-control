@@ -436,9 +436,32 @@ classdef MIC_OptotuneLens < MIC_Abstract
         end
     end
     
-    methods (Static)
-        function result=unitTest()
+    methods (Static=true)
+    function Success = unitTest(ComPort)
+        % Unit test of object functionality
+        % Example: MIC_OptotuneLens.unitTest('COM3')
+        
+        if nargin < 1
+            error('MIC_OptotuneLens::ComPort must be defined');
         end
         
+        try
+            % Creating an Object and Testing setFocalPower and getTemperature
+            fprintf('Creating Object and testing...\n');
+            ETL = MIC_OptotuneLens(ComPort);
+            ETL.setFocalPower(ETL.MaxFocalPower / 2);
+            pause(1);
+            Temp = ETL.getTemperature();
+            fprintf('Current Temperature: %.2f\n', Temp);
+            delete(ETL);
+            fprintf('Deleting Object.\n');
+            clear ETL;
+            Success = 1;
+        catch
+            warning('MIC_OptotuneLens:: Failed Unit Test');
+            clear ETL;
+            Success = 0;
+        end
     end
+
 end
