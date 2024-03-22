@@ -2,9 +2,9 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
     % MIC_TCubePiezo Matlab Instrument Control Class for ThorLabs TCube Piezo
     %
     %   This class controls a linear piezo stage using the Thorlabs TCube Piezo
-    %   controller TPZ001 and TCube strain gauge controller TSG001. It uses the Thorlabs 
-    %   Kinesis C-API via pre-complied mex files. 
-    %   
+    %   controller TPZ001 and TCube strain gauge controller TSG001. It uses the Thorlabs
+    %   Kinesis C-API via pre-complied mex files.
+    %
     % USAGE:
     %   PX=MIC_TCubePiezo(SerialNoTPZ001,SerialNoTSG001,AxisLabel)
     %   PX.gui()
@@ -17,11 +17,11 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
     %   3-set on "closed loop" (in Control: Feedback Loop Settings>Loop Mode)
     %   4-check box of "Persist Settings to the Device" (in Settings)
     %
-    % REQUIRES: 
+    % REQUIRES:
     %   MIC_Abstract.m
     %   MIC_LinearStage_Abstract.m
     %   Precompiled set of mex files Kinesis_PCC_*.mex64 and Kinesis_SG_*.mex64
-    %   The following dll must be in system path or same directory as mex files: 
+    %   The following dll must be in system path or same directory as mex files:
     %   Thorlabs.MotionControl.TCube.Piezo.dll
     %   Thorlabs.MotionControl.TCube.StrainGauge.dll
     %   Thorlabs.MotionControl.DeviceManager.dll
@@ -31,14 +31,14 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
     properties (SetAccess=protected)
         PositionUnit='um';          % Units of position parameter (eg. um/mm)
         CurrentPosition=0;          % Current position of device
-        MinPosition=0;              % Lower limit position 
+        MinPosition=0;              % Lower limit position
         MaxPosition=20;             % Upper limit position
         Axis;                       % Stage axis (X, Y or Z)
         SerialNoTPZ001;             % Serial Number of TCube Piezo Controller
         SerialNoTSG001;             % Serial Number of TCube Strain Gauge Controller
         Slope;                      % Strain Gauge Calibration Parameter
         Offset;                     % Strain Gauge Calibration Parameter
-        InstrumentName='TCubePiezo' % Instrument name. 
+        InstrumentName='TCubePiezo' % Instrument name.
     end
     
     properties
@@ -55,10 +55,10 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
     
     methods
         function obj = MIC_TCubePiezoM(SerialNoTPZ001, SerialNoTSG001, AxisLabel, isMock)
-            % Creates a MIC_TCubePiezo object and centers the stage.  
+            % Creates a MIC_TCubePiezo object and centers the stage.
             % Example: PX=MIC_TCubePiezo('81843229','84842506','X')
             obj = obj@MIC_LinearStage_Abstract(~nargout);
-           
+            
             if nargin<3
                 error('MIC_TCubePiezoM::SerialNoTPZ001,SerialNoTSG001,AxisLabel must be defined')
             end
@@ -81,7 +81,7 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
             
         end
         function delete(obj)
-            % Destructor.  
+            % Destructor.
             if ~obj.IsMock
                 obj.shutdown();
             end
@@ -90,7 +90,7 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
         function Err=openDevices(obj)
             % Opens communications to PZ and SG with Kinesis C-API via mex
             
-            Kinesis_TLI_BuildDeviceList(); 
+            Kinesis_TLI_BuildDeviceList();
             pause(1);  %Try to prevent crash
             
             ErrSG=Kinesis_SG_Open(obj.SerialNoTSG001);
@@ -98,7 +98,7 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
             % Determine if there were errors opening the strain gauge and
             % output an appropriate warning.
             if ErrSG ~= 0 % ErrSG == 0 suggests a succesful connection
-                ErrorMessage = obj.decodeError(ErrSG); 
+                ErrorMessage = obj.decodeError(ErrSG);
                 warning(['openDevices::Error opening strain gauge ', ...
                     'controller \nError code %i was returned while ', ...
                     'trying to connect to strain gauge %s: \n', ...
@@ -109,7 +109,7 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
             % Determine if there were errors opening the piezo controller
             % and output an appropriate warning.
             if ErrPZ ~= 0 % ErrPZ == 0 suggests a succesful connection
-                ErrorMessage = obj.decodeError(ErrPZ); 
+                ErrorMessage = obj.decodeError(ErrPZ);
                 warning(['openDevices::Error opening piezo ', ...
                     'controller \nError code %i was returned while ', ...
                     'trying to connect to piezo controller %s: \n', ...
@@ -124,19 +124,19 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
         function closeDevices(obj)
             % Closes communications to PZ and SG with Kinesis C-API via mex
             % This must be done before using Kinesis or creating new
-            % objects. 
+            % objects.
             Kinesis_PCC_Close(obj.SerialNoTPZ001)
             Kinesis_SG_Close(obj.SerialNoTSG001)
         end
         
         function resetDevices(obj)
-            % Close and Reopen Devices.  
-           obj.closeDevices();
-           obj.openDevices();
+            % Close and Reopen Devices.
+            obj.closeDevices();
+            obj.openDevices();
         end
         
         function zeroStrainGauge(obj)
-            % Intiates automatic Voltage-Position Calibration of the 
+            % Intiates automatic Voltage-Position Calibration of the
             SN=obj.SerialNoTPZ001;
             SNSG=obj.SerialNoTSG001;
             
@@ -169,16 +169,16 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
             PZ80=Kinesis_SG_GetReading(SNSG)/2^15*20;
             
             obj.Slope=0.6*2^16/(PZ80-PZ20);
-            obj.Offset=0.2*2^16/obj.Slope-PZ20;  
+            obj.Offset=0.2*2^16/obj.Slope-PZ20;
         end
         
         
         function setPosition(obj,Position)
-            % Sets Piezo Stage Position in microns. 
+            % Sets Piezo Stage Position in microns.
             obj.CurrentPosition=max(obj.MinPosition,Position);
             obj.CurrentPosition=min(obj.MaxPosition,obj.CurrentPosition);
             
-            Kinesis_PCC_SetPosition(obj.SerialNoTPZ001,uint32((obj.CurrentPosition+obj.Offset)*obj.Slope)); 
+            Kinesis_PCC_SetPosition(obj.SerialNoTPZ001,uint32((obj.CurrentPosition+obj.Offset)*obj.Slope));
             pause(obj.WaitTime);
             obj.updateGui();
             
@@ -206,177 +206,188 @@ classdef MIC_TCubePiezoM < MIC_LinearStage_Abstract
         end
         
         function shutdown(obj)
-            % Set power to zero and turn off. 
+            % Set power to zero and turn off.
             obj.closeDevices();
         end
         
     end
-        methods (Static=true)
-            function Success=unitTest(SNP, SNSG, AxisLabel, isMock)
-                % Unit test of object functionality with optional isMock argument
-                % Example: MIC_TCubePiezo.unitTest('81843229', '84842506', 'X', true)
-                
-                if nargin<3
-                    error('MIC_TCubePiezo::SerialNoTPZ001,SerialNoTSG001,AxisLabel must be defined')
-                end
-                
-                if nargin < 4
-                isMock = false;  % Default to false if not provided
-                end
-                
-                if isMock
-                    % Test code for mock mode
-                    try
-                        fprintf('Creating Object...\n');
-                        P = MIC_TCubePiezoM(SNP, SNSG, AxisLabel, isMock);
-                        fprintf('Setting the device to the center position...\n');
-                        delete(P);
-                        fprintf('Deleting Object.\n');
-                        Success = 1;
-                    catch ME
-                        warning('MIC_TCubePiezo:: Failed Unit Test');
-                        fprintf('Error Message: %s\n', ME.message);
-                        Success = 0;
-                    end
-                else
-                   % Test code for real mode 
-                    try
-                        %Creating an Object and Testing setPower, on, off
-                        fprintf('Creating Object and testing...\n')
-                        P = MIC_TCubePiezoM(SNP, SNSG, AxisLabel, isMock);
-                        P.gui;
-                        P.setPosition(P.MaxPosition/8);
-                        pause(1);
-                        P.center();
-                        pause(1);
-                        P.setPosition(P.MaxPosition*7/8);
-                        pause(1);
-                        P.exportState()
-                        delete(P);
-                        fprintf('Deleteing Object.\n')
-                        clear RS;
-                        Success=1;
-                    catch ME
-                        warning('MIC_TCubePiezo:: Failed Unit Test');
-                        fprintf('Error Message: %s\n', ME.message);
-                        clear RS;
-                        Success=0;
-                    end
-                end
-                
-            end
-            
-            function [ErrorMessage] = decodeError(Error)
-                % Used to decode an integer error code returned by a TCube
-                % device.
-                % Example: [ErrorMessage] = decodeError(0) returns
-                % ErrorMessage = 'FT_OK - Success' as given in the
-                % Thorlabs.MotionControl.C_API Device and Low Level Error
-                % Codes section.
-                % NOTE: error codes >= 32 might actually be returned as HEX
-                %       values, in which case the code here is not working
-                %       correctly for such errors...
-
-                % Switch through the possible error codes.
-                switch Error
-                    % "FTDI and Communication errors
-                    % The following errors are generated from the FTDI 
-                    % communications module or supporting code."
-                    case 0
-                        ErrorMessage = 'FT_OK - Success';
-                    case 1
-                        ErrorMessage = ['FT_InvalidHandle - The FTDI ', ...
-                            'functions have not been initialized.'];
-                    case 2
-                        ErrorMessage = ['FT_DeviceNotFound - The ', ...
-                            'Device could not be found'];
-                    case 3
-                        ErrorMessage = ['FT_DeviceNotOpened - The ', ...
-                            'Device must be opened before it can be ', ...
-                            'accessed'];
-                    case 4
-                        ErrorMessage = ['FT_IOError - An I/O Error ', ...
-                            'has occured in the FTDI chip.'];
-                    case 5
-                        ErrorMessage = ['FT_InsufficientResources - ', ...
-                            'There are Insufficient resources to run ', ...
-                            'this application.'];
-                    case 6
-                        ErrorMessage = ['FT_InvalidParameter - An ', ...
-                            'invalid parameter has been supplied to ', ...
-                            'the device.'];
-                    case 7
-                        ErrorMessage = ['FT_DeviceNotPresent - The ', ...
-                            'Device is no longer present'];
-                    case 8
-                        ErrorMessage = ['FT_IncorrectDevice - The ', ...
-                            'device detected does not match that ', ...
-                            'expected.'];
-                        
-                    % "General DLL control errors
-                    % The following errors are general errors generated 
-                    % by all DLLs."
-                    case {32, 20} % check for both hex. and dec. errors
-                        ErrorMessage = ['TL_ALREADY_OPEN - Attempt ', ...
-                            'to open a device that was already open.'];
-                    case {33, 21} % check for both hex. and dec. errors
-                        ErrorMessage = ['TL_NO_RESPONSE - The device ', ...
-                            'has stopped responding.'];
-                    case {34, 22} % check for both hex. and dec. errors
-                        ErrorMessage = ['TL_NOT_IMPLEMENTED - This ', ...
-                            'function has not been implemented.'];
-                    case {35, 23} % check for both hex. and dec. errors
-                        ErrorMessage = ['TL_FAULT_REPORTED - The ', ...
-                            'device has reported a fault.'];
-                    case {36, 24} % check for both hex. and dec. errors
-                        ErrorMessage = ['TL_INVALID_OPERATION - The ', ...
-                            'function could not be completed at this ', ...
-                            'time.'];
-                    case {40, 28} % check for both hex. and dec. errors
-                        ErrorMessage = ['TL_DISCONNECTING - The ', ...
-                            'function could not be completed because ', ...
-                            'the device is disconnected.'];
-                    case {41, 29} % check for both hex. and dec. errors 
-                        ErrorMessage = ['TL_FIRMWARE_BUG - The ', ...
-                            'firmware has thrown an error'];
-                    case 42
-                        ErrorMessage = ['TL_INITIALIZATION_FAILURE - ', ...
-                            'The device has failed to initialize'];
-                    case 43
-                        ErrorMessage = ['TL_INVALID_CHANNEL - An ', ...
-                            'Invalid channel address was supplied'];
-                        
-                    % "Motor specific errors
-                    % The following errors are motor specific errors 
-                    % generated by the Motor DLLs."
-                    case {37, 25} % check for both hex. and dec. errors
-                        ErrorMessage = ['TL_UNHOMED - The device ', ...
-                            'cannot perform this function until it ', ...
-                            'has been Homed.'];
-                    case {38, 26} % check for both hex. and dec. errors
-                        ErrorMessage = ['TL_INVALID_POSITION - The ', ...
-                            'function cannot be performed as it ', ...
-                            'would result in an illegal position.'];
-                    case {39, 27} % check for both hex. and dec. errors
-                        ErrorMessage = ...
-                            ['TL_INVALID_VELOCITY_PARAMETER - An ', ...
-                            'invalid velocity parameter was supplied'];
-                    case 44
-                        ErrorMessage = ['TL_CANNOT_HOME_DEVICE - ', ...
-                            'This device does not support Homing'];
-                    case 45
-                        ErrorMessage = ['TL_JOG_CONTINOUS_MODE - An ', ...
-                            'invalid jog mode was supplied for the ', ...
-                            'jog function.'];
-                    otherwise
-                        ErrorMessage = 'Unknown error code';
-                end
-            end
-            
-        end
-        
+    methods (Static=true)
+                function [Success, Failure] = unitTest(SNP, SNSG, AxisLabel, isMock)
+                %function Success=unitTest(SNP, SNSG, AxisLabel, isMock)
+                    % Unit test of object functionality with optional isMock argument
+                    % Example: MIC_TCubePiezo.unitTest('81843229', '84842506', 'X', true)
     
+                    if nargin<3
+                        error('MIC_TCubePiezo::SerialNoTPZ001,SerialNoTSG001,AxisLabel must be defined')
+                    end
+    
+                    if nargin < 4
+                    isMock = false;  % Default to false if not provided
+                    end
+                    
+                    Success = 0;
+                    Failure = 0;
+    
+                    if isMock
+                        % Test code for mock mode
+                        try
+                            fprintf('Creating Object...\n');
+                            P = MIC_TCubePiezoM(SNP, SNSG, AxisLabel, isMock);
+                            fprintf('Setting the device to the center position...\n');
+                            delete(P);
+                            fprintf('Deleting Object.\n');
+                            Success = Success + 1;
+                            %Success = 1;
+                        catch ME
+                            warning('MIC_TCubePiezo:: Failed Unit Test');
+                            fprintf('Error Message: %s\n', ME.message);
+                            Failure = Failure + 1;
+                            %Success = 0;
+                        end
+                       
+                    else
+                       % Test code for real mode
+                        try
+                            %Creating an Object and Testing setPower, on, off
+                            fprintf('Creating Object and testing...\n')
+                            P = MIC_TCubePiezoM(SNP, SNSG, AxisLabel, isMock);
+                            P.gui;
+                            P.setPosition(P.MaxPosition/8);
+                            pause(1);
+                            P.center();
+                            pause(1);
+                            P.setPosition(P.MaxPosition*7/8);
+                            pause(1);
+                            P.exportState()
+                            delete(P);
+                            fprintf('Deleteing Object.\n')
+                            clear RS;
+                            Success = Success + 1;
+                            %Success=1;
+                        catch ME
+                            warning('MIC_TCubePiezo:: Failed Unit Test');
+                            fprintf('Error Message: %s\n', ME.message);
+                            clear RS;
+                            Failure = Failure + 1;
+                            %Success=0;
+                        end
+                        
+                    end
+                    fprintf('Unit Test Results: %d Passed, %d Failed\n', Success, Failure);
+                end
+    
+    
+    function [ErrorMessage] = decodeError(Error)
+    % Used to decode an integer error code returned by a TCube
+    % device.
+    % Example: [ErrorMessage] = decodeError(0) returns
+    % ErrorMessage = 'FT_OK - Success' as given in the
+    % Thorlabs.MotionControl.C_API Device and Low Level Error
+    % Codes section.
+    % NOTE: error codes >= 32 might actually be returned as HEX
+    %       values, in which case the code here is not working
+    %       correctly for such errors...
+    
+    % Switch through the possible error codes.
+    switch Error
+        % "FTDI and Communication errors
+        % The following errors are generated from the FTDI
+        % communications module or supporting code."
+        case 0
+            ErrorMessage = 'FT_OK - Success';
+        case 1
+            ErrorMessage = ['FT_InvalidHandle - The FTDI ', ...
+                'functions have not been initialized.'];
+        case 2
+            ErrorMessage = ['FT_DeviceNotFound - The ', ...
+                'Device could not be found'];
+        case 3
+            ErrorMessage = ['FT_DeviceNotOpened - The ', ...
+                'Device must be opened before it can be ', ...
+                'accessed'];
+        case 4
+            ErrorMessage = ['FT_IOError - An I/O Error ', ...
+                'has occured in the FTDI chip.'];
+        case 5
+            ErrorMessage = ['FT_InsufficientResources - ', ...
+                'There are Insufficient resources to run ', ...
+                'this application.'];
+        case 6
+            ErrorMessage = ['FT_InvalidParameter - An ', ...
+                'invalid parameter has been supplied to ', ...
+                'the device.'];
+        case 7
+            ErrorMessage = ['FT_DeviceNotPresent - The ', ...
+                'Device is no longer present'];
+        case 8
+            ErrorMessage = ['FT_IncorrectDevice - The ', ...
+                'device detected does not match that ', ...
+                'expected.'];
+            
+            % "General DLL control errors
+            % The following errors are general errors generated
+            % by all DLLs."
+        case {32, 20} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_ALREADY_OPEN - Attempt ', ...
+                'to open a device that was already open.'];
+        case {33, 21} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_NO_RESPONSE - The device ', ...
+                'has stopped responding.'];
+        case {34, 22} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_NOT_IMPLEMENTED - This ', ...
+                'function has not been implemented.'];
+        case {35, 23} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_FAULT_REPORTED - The ', ...
+                'device has reported a fault.'];
+        case {36, 24} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_INVALID_OPERATION - The ', ...
+                'function could not be completed at this ', ...
+                'time.'];
+        case {40, 28} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_DISCONNECTING - The ', ...
+                'function could not be completed because ', ...
+                'the device is disconnected.'];
+        case {41, 29} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_FIRMWARE_BUG - The ', ...
+                'firmware has thrown an error'];
+        case 42
+            ErrorMessage = ['TL_INITIALIZATION_FAILURE - ', ...
+                'The device has failed to initialize'];
+        case 43
+            ErrorMessage = ['TL_INVALID_CHANNEL - An ', ...
+                'Invalid channel address was supplied'];
+            
+            % "Motor specific errors
+            % The following errors are motor specific errors
+            % generated by the Motor DLLs."
+        case {37, 25} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_UNHOMED - The device ', ...
+                'cannot perform this function until it ', ...
+                'has been Homed.'];
+        case {38, 26} % check for both hex. and dec. errors
+            ErrorMessage = ['TL_INVALID_POSITION - The ', ...
+                'function cannot be performed as it ', ...
+                'would result in an illegal position.'];
+        case {39, 27} % check for both hex. and dec. errors
+            ErrorMessage = ...
+                ['TL_INVALID_VELOCITY_PARAMETER - An ', ...
+                'invalid velocity parameter was supplied'];
+        case 44
+            ErrorMessage = ['TL_CANNOT_HOME_DEVICE - ', ...
+                'This device does not support Homing'];
+        case 45
+            ErrorMessage = ['TL_JOG_CONTINOUS_MODE - An ', ...
+                'invalid jog mode was supplied for the ', ...
+                'jog function.'];
+        otherwise
+            ErrorMessage = 'Unknown error code';
+    end
+    end
+   
+      
+    end
 end
 
 % To run unit test:
+% [Success, Failure] = MIC_TCubePiezoM.unitTest('81843229', '84842506', 'X', true);
 % MIC_TCubePiezoM.unitTest('81843229', '84842506', 'X', true);
