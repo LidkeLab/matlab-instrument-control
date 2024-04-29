@@ -66,3 +66,7 @@ function extractAndWriteComments(inputFilePath, outputFilePath)
     fprintf(fid, '%s', markdownText);
     fclose(fid);
 end
+
+
+% inputFolderPath = 'C:\Users\sajja\Documents\MATLAB\matlab-instrument-control\'
+% outputFolderPath = 'C:\Users\sajja\Documents\MATLAB\matlab-instrument-control\Documentation\'
