@@ -15,4 +15,5 @@ MIC_Abstract.m
 MATLAB software version R2016b or later
 Data Acquisition Toolbox
 
-CITATION: Marjoleing Meddens, Lidkelab, 2017.
+CITATION: Marjoleing Meddens, Lidkelab, 2017 & Sajjad Khan, Lidkelab,
+2021.

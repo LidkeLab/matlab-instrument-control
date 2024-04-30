@@ -26,5 +26,5 @@ Matlab 2014b or higher
 
 CITATION:
 First version: Sheng Liu
-MIC compatible version Sandeep Pallikuth & Marjolein Meddens
-Lidke Lab 2017
+MIC compatible version Sandeep Pallikuth & Marjolein Meddens, Lidke Lab 2017.
+Sajjad Khan, Lidkelab, 2021.

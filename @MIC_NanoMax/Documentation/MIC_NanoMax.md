@@ -12,4 +12,4 @@ MIC_TCubePiezo.m
 MIC_StepperMotor.m
 MATLAB software version R2016b or later
 
-CITATION: , Lidkelab, 2017.
+CITATION: Sandeep Pallikuth, Lidkelab, 2017 & Sajjad Khan, Lidkelab, 2021.
