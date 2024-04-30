@@ -1,4 +1,11 @@
 classdef ExampleCamera < MIC_Camera_Abstract
+    % This is an example implementation of MIC_Camera_Abstract 
+    % Matlab Instrument Control Camera Class. 
+    
+    % REQUIRES: 
+    % MIC_Abstract.m
+    %
+    % CITATION: Sajjad Khan, Lidkelab, 2024.
     properties(SetAccess=protected)
         InstrumentName = 'ExampleCamera';
         CameraIndex = 1;

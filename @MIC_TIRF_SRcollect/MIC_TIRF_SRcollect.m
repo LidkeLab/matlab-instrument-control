@@ -26,8 +26,9 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
 %
 % CITATION:
 % First version: Sheng Liu 
-% MIC compatible version Sandeep Pallikuth & Marjolein Meddens
-% Lidke Lab 2017
+% MIC compatible version Sandeep Pallikuth & Marjolein Meddens, Lidke Lab 2017.
+% Sajjad Khan, Lidkelab, 2021.
+
 
     properties
         % Hardware objects

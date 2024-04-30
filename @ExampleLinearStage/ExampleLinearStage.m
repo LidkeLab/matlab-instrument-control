@@ -1,6 +1,11 @@
 classdef ExampleLinearStage < MIC_LinearStage_Abstract
-    % ExampleLinearStage: Concrete implementation of MIC_LinearStage_Abstract
+    % This class is an example implementation of MIC_LinearStage_Abstract.
     % This class simulates a linear stage that can move along one axis.
+    
+    % REQUIRES: 
+    % MIC_LinearStage_Abstract.m
+    %
+    % CITATION: Sajjad Khan, Lidkelab, 2024.
 
     properties (SetAccess = protected)
         InstrumentName = 'Simulated Linear Stage'; % Name of the instrument

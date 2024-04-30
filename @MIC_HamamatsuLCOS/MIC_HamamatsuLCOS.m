@@ -15,7 +15,8 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
     %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %
-    % CITATION: Marjoleing Meddens, Lidkelab, 2017.
+    % CITATION: Marjoleing Meddens, Lidkelab, 2017 & Sajjad Khan, Lidkelab,
+    % 2021.
     
     properties
         HorPixels=1272      %SLM Horizontal Pixels
