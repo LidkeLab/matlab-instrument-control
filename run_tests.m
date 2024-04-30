@@ -29,7 +29,7 @@ try
 end
 
 % ExampleCameraModel
-fprintf('ExampleCameraModel.unitTest\n');
+fprintf('ExampleCamera.unitTest\n');
 try
    ExampleCamera.unitTest();
 end
