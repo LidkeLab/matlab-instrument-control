@@ -1,6 +1,6 @@
-classdef ExampleCameraModel < MIC_Camera_Abstract
+classdef ExampleCamera < MIC_Camera_Abstract
     properties(SetAccess=protected)
-        InstrumentName = 'ExampleCameraModel';
+        InstrumentName = 'ExampleCamera';
         CameraIndex = 1;
         ImageSize = [1024, 768];
         LastError = '';
@@ -37,7 +37,7 @@ classdef ExampleCameraModel < MIC_Camera_Abstract
     end
 
     methods
-        function obj = ExampleCameraModel()
+        function obj = ExampleCamera()
             obj = obj@MIC_Camera_Abstract(~nargout);
            
         end
@@ -166,7 +166,7 @@ classdef ExampleCameraModel < MIC_Camera_Abstract
         function onButtonClicked(obj, src)
             % Change the button color to green
             set(src, 'BackgroundColor', [0, 1, 0]);  % Set color to green
-            drawnow;  % Force MATLAB to update the GUI immediately
+            drawnow;  
             
             % Determine the action based on button label
             switch src.String
@@ -253,7 +253,7 @@ classdef ExampleCameraModel < MIC_Camera_Abstract
     methods(Static=true)
         function Success = unitTest()
             disp('Starting unit test...');
-            obj = ExampleCameraModel();
+            obj = ExampleCamera();
             obj.initialize();
             obj.setup_acquisition();
             obj.start_focus();

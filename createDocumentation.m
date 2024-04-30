@@ -1,4 +1,4 @@
-function createDocumentation(inputFolderPath, outputFolderPath)
+function createDocumentation(inputFolderPath)
     % Validate input folder path
     if ~isfolder(inputFolderPath)
         error('Input path is not a valid folder: %s', inputFolderPath);
@@ -14,11 +14,17 @@ function createDocumentation(inputFolderPath, outputFolderPath)
         folderPath = fullfile(inputFolderPath, atFolders(i).name);
         classFiles = dir(fullfile(folderPath, '*.m'));
         
+        % Create documentation directory within the @folder
+        docFolderPath = fullfile(folderPath, 'Documentation');
+        if ~isfolder(docFolderPath)
+            mkdir(docFolderPath);
+        end
+        
         % Process each .m file in the @folder
         for j = 1:length(classFiles)
             classFilePath = fullfile(folderPath, classFiles(j).name);
-            % Generate output file path
-            outputFilePath = fullfile(outputFolderPath, [classFiles(j).name(1:end-2), '.md']);
+            % Generate output file path in the new location
+            outputFilePath = fullfile(docFolderPath, [classFiles(j).name(1:end-2), '.md']);
             
             try
                 % Extract comments and write to Markdown
@@ -67,6 +73,4 @@ function extractAndWriteComments(inputFilePath, outputFilePath)
     fclose(fid);
 end
 
-
 % inputFolderPath = 'C:\Users\sajja\Documents\MATLAB\matlab-instrument-control\'
-% outputFolderPath = 'C:\Users\sajja\Documents\MATLAB\matlab-instrument-control\Documentation\'
