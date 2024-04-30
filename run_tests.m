@@ -31,7 +31,7 @@ end
 % ExampleCameraModel
 fprintf('ExampleCameraModel.unitTest\n');
 try
-   ExampleCameraModel.unitTest();
+   ExampleCamera.unitTest();
 end
 
 
