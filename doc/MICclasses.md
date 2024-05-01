@@ -61,7 +61,7 @@
 &nbsp;&nbsp;&nbsp;[@MIC_SEQ_SRcollect](../@MIC_SEQ_SRcollect/Documentation/MIC_SEQ_SRcollect.md) | data collection for the Sequential microscope
 &nbsp;&nbsp;&nbsp;[@MIC_ShutterELL6](../@MIC_ShutterELL6/Documentation/MIC_ShutterELL6.md) | slider ELL6, which can be used as a shutter (or filter slider)
 &nbsp;&nbsp;&nbsp;[@MIC_ShutterTTL](../@MIC_ShutterTTL/Documentation/MIC_ShutterTTL.md) | control a Thorlabs SH05 shutter via a Thorlabs KSC101 solenoid controller
-&nbsp;&nbsp;&nbsp;[@MIC_SPTCollect](../@MIC_SPTCollect/Documentation/MIC_SPTCollect.md) | Single Particle Tracking/Super uper Resolution data collection software
+&nbsp;&nbsp;&nbsp;[@MIC_SPTCollect](../@MIC_SPTCollect/Documentation/MIC_SPTCollect.md) | Single Particle Tracking/Super Resolution data collection software
 &nbsp;&nbsp;&nbsp;[@MIC_StepperMotor](../@MIC_StepperMotor/Documentation/MIC_StepperMotor.md) | control Benchtop stepper motor
 &nbsp;&nbsp;&nbsp;[@MIC_SyringePump](../@MIC_SyringePump/Documentation/MIC_SyringePump.md) | control Syringe Pump by kdScientific (Model: LEGATO100)
 &nbsp;&nbsp;&nbsp;[@MIC_TIRF_SRcollect](../@MIC_TIRF_SRcollect/Documentation/MIC_TIRF_SRcollect.md) | control TIRF microscope
