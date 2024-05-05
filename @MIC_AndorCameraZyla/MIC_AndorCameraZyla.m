@@ -266,6 +266,8 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             AT_CheckWarning(obj.LastError);
 
             obj.IsRunning=1;
+            
+
             while obj.IsRunning
                 if obj.AbortNow
                     obj.AbortNow=0;
@@ -293,7 +295,12 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 if mod(obj.CameraFrameIndex,N*Nstep)==0
                     ims=Imstack(:,:,obj.CameraFrameIndex-Nstep+1:obj.CameraFrameIndex);
                     ImgXY = squeeze(mean(ims,1));
-                    %clim = [quantile(ImgXY(:),0.1),quantile(ImgXY(:),0.995)];
+                    getclim = get(obj.HsmViewer.Checkbox_autoscale,'Value');
+                    if getclim == 1
+                        clim = [101,quantile(ImgXY(:),0.999)];
+                        obj.Zscale = round(clim);
+                        set(obj.HsmViewer.Edit_zscale,'String',num2str(obj.Zscale));                        
+                    end
                     Spec = squeeze(mean(mean(ims,2),3));
                     %if ishandle(obj.FigHandle)
                         imagesc(obj.HsmViewer.Axis_imag,ImgXY)
@@ -303,6 +310,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                         set(obj.HsmViewer.Axis_imag,'XTick',[])
                         set(obj.HsmViewer.Axis_imag,'YTick',[])
                         set(obj.HsmViewer.Axis_imag,'Color',[0,0,0])
+                        set(obj.HsmViewer.Text_framerate,'String',[num2str(frameRate/Nstep,3),' fps']);
                         %obj.HsmViewer.Axis_imag.Visible = 'off';
                         wv = polyval(pfit,[1:numel(Spec)]+obj.ROI(1)-ROIoffset);
                         plot(obj.HsmViewer.Axis_spec,wv(2:end-1),Spec(2:end-1))
@@ -310,7 +318,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                         obj.HsmViewer.Axis_spec.XLabel.String = 'wave length (nm)';
                         drawnow limitrate
                     %end
-               end
+                end
             end
             if obj.AbortNow == 0
                 [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
