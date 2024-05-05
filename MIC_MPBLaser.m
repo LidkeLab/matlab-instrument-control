@@ -32,7 +32,7 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
         SerialObj; %info of the port associated with this instrument.
         SerialNumber; %serial number of the laser.
         
-        WaveLength = 637; %Wavelength of the laser.
+        WaveLength = 647; %Wavelength of the laser.
         Port; %the name of the port that is used to communicate with the laser.
         StartGUI=false; %true will popup the gui automatically and false value makes the user to open the gui manually.
     end

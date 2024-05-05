@@ -3,6 +3,7 @@ function gui(obj)
 %   Description
 
 %   Marjolein Meddens, Lidke Lab 2017
+%   Hanieh Mazloom-Farsibaf, Lidke Lab 2018
 
 
 %Prevent opening more than one figure for same instrument
@@ -58,7 +59,7 @@ handles.button_showoverlay = uicontrol('Parent',guiFig,'Style', 'pushbutton', 'S
     'Show Overlay', 'Position', [10 ysz-4*(bszy+10) bszx bszy], 'Callback', @gui_showoverlay);
 
 handles.button_calibrate = uicontrol('Parent',guiFig,'Style', 'pushbutton', 'String', ...
-    'Calibrate PxSz', 'Position', [10 ysz-5*(bszy+10) bszx bszy], 'Callback', @gui_calibrate);
+    'Calibrate', 'Position', [10 ysz-5*(bszy+10) bszx bszy], 'Callback', @gui_calibrate);
 
 handles.button_takerefimage = uicontrol('Parent',guiFig,'Style', 'pushbutton', 'String', ...
     'Take Ref. Image', 'Position', [xsz-10-bszx ysz-3*(bszy+10) bszx bszy], 'Callback', @gui_takerefimage);
@@ -87,15 +88,19 @@ handles.button_save = uicontrol('Parent',guiFig,'Style', 'pushbutton', 'String',
     end
 
     function gui_align(~,~)
+        warning('Set the camera and turn on the lamp before aligning two images')
         obj.align2imageFit();
-    end
+        warning('Set back the camera and turn off the lamp after aligning two images')
+ end
 
     function gui_showoverlay(~,~)
         obj.showoverlay();
     end
 
     function gui_getcurrentimage(~,~)
+        warning('Set the camera and turn on the lamp before taking any images')
         obj.getcurrentimage();
+        warning('Set back the camera and turn off the lamp after taking any images')
     end
 
     function gui_abort(~,~)
@@ -103,11 +108,15 @@ handles.button_save = uicontrol('Parent',guiFig,'Style', 'pushbutton', 'String',
     end
 
     function gui_calibrate(~,~)
-        obj.calibratePixelSize();
-    end
+        warning('Set the camera and turn on the lamp before calibration')
+        obj.calibrate();
+        warning('Set back the camera and turn off the lamp after calibration')
+   end
 
     function gui_takerefimage(~,~)
+        warning('Set the camera and turn on the lamp before taking refrence image')
         obj.takerefimage();
+        warning('Set back the camera and turn off the lamp after taking refrence image')
     end
 
     function gui_saverefimage(~,~)
