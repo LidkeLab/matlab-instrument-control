@@ -78,7 +78,7 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
             % Initialize FilterWheel
             % measured the power after the FilterWheel to calibrate
             % transmission Factor. For Laser561 is = [1 0.51 0.20 0.09 0.035 0.0125]
-            obj.FilterWheel=MIC_NDFilterWheel(3,[1 0.51 0.20 0.09 0.035 0.0125],[0 60 120 180 240 300]);
+            obj.FilterWheel=MIC_NDFilterWheel(3,[1 0.51 0.20 0.09 0.035 0.0125],[300 0 60 120 180 240]);
             
             % Initialize Shutter
             obj.Shutter=MIC_ShutterTTL('Dev1','Port1/Line1');

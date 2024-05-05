@@ -42,7 +42,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %         ChangeEMgain=false; % Flag for changing EM gain before and after acquiring transmission images
 %         EMgain;             % EM gain setting to use for transmission image acquisitions
         ChangeExpTime=true; % Flag for changing exposure time before and after acquiring transmission images
-        ExposureTime=0.01;  % Exposure time setting to use for transmission image acquisitions
+        ExposureTime=0.1;  % Exposure time setting to use for transmission image acquisitions
         
         % Other properties
         PixelSize;          % image pixel size (um)
@@ -705,7 +705,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.ZStack_Pos = ...
                 (Z_Current-ZStackMaxDev:ZStackStep:Z_Current+ZStackMaxDev);
             N=length(obj.ZStack_Pos);
-            obj.ZStack=[];
+            ROI = obj.CameraObj.ROI;
+            Zstack=zeros(ROI(4)-ROI(3)+1,ROI(2)-ROI(1)+1,N,'uint16');
             
             %change EMgain, shutter and exposure time if needed
 %             if obj.ChangeEMgain || obj.CamShutter
@@ -728,7 +729,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % setup camera
             obj.CameraObj.AcquisitionType='capture';
             obj.CameraObj.setup_acquisition();
-                        
+            obj.CameraObj.ReturnType = 'matlab';        
             % acquire zstack
             for nn=1:N
                 if nn==1
@@ -742,8 +743,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 
                 obj.StageObj.setPosition(...
                     [X_Current, Y_Current, obj.ZStack_Pos(nn)]);
-                obj.ZStack(:, :, nn)=single(obj.CameraObj.start_capture);
                 
+                
+                Zstack(:, :, nn)=obj.CameraObj.start_capture;
+                pause(0.1)
                 % Remove the characters identifying stack index and stack
                 % number from command line so that they can be updated.  
                 % This is being done to avoid clutter to the command
@@ -754,6 +757,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     fprintf('\b');
                 end
             end
+            obj.ZStack = single(Zstack);
 %             % close shutter if needed
 %             if obj.CamShutter
 %                 obj.CameraObj.setShutter(0);
