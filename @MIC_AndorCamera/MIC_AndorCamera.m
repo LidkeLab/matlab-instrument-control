@@ -125,7 +125,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 end
                 clear a;
             else
-                [SDKPath]=uigetdir(matlabroot,'Select Andor SDK Toolbox Directory')
+                [SDKPath]=uigetdir(matlabroot,'Select Andor SDK Toolbox Directory. For the Raman Microscope thats C:\Program Files\MATLAB\R2021a\toolbox\AndorSDK3')
                 obj.SDKPath=SDKPath;
                 if exist(obj.SDKPath,'dir')
                     save(fullfile(p,'AndorCamera_Properties.mat'),'SDKPath');
@@ -175,6 +175,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             end
             obj.LastError = CoolerON; % turn on the cooler!!!
             obj.errorcheck('CoolerON');
+            obj.AcquisitionTimeOutOffset=0;
             
         end
         
@@ -390,7 +391,8 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 % fprintf('about to  WaitForAcquisition\n')
                 % we replaced WaitForAcquisition with WaitForAcquisitionTimeOut to run
                 % Andor and IR camera at the same time.
-                obj.LastError=WaitForAcquisitionTimeOut(1000*obj.SequenceCycleTime+obj.AcquisitionTimeOutOffset);
+                %obj.LastError=WaitForAcquisitionTimeOut(1000*obj.SequenceCycleTime+obj.AcquisitionTimeOutOffset);
+                obj.LastError=WaitForAcquisition();
 %                 fprintf('finished WaitForAcquisition\n')
                 if obj.LastError==20024
                     % This conditions isn't usually satisfied in regular

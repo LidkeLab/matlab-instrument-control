@@ -1,13 +1,13 @@
 classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
-    %MIC_AndorCamera class for Zyla 
-    %   
+    %MIC_AndorCamera class for Zyla
+    %
     %   Usage:
     %           CAM=AndorCameraZyla
     %           CAM.gui
     %
     %   Requires:
     %       Andor MATLAB SDK3 2.94.30005 or higher
-    %       
+    %
     %
     %   TODO:
     %
@@ -25,6 +25,9 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         SDKPath;
         ImageSizeBytes;
         Buffer;
+        Height;
+        Width;
+        Stride;
     end
     
     properties(SetAccess=protected)
@@ -34,23 +37,26 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         Manufacturer;       %camera manufacturer
         Model;              %camera model
         CameraParameters;   %camera specific parameters
-        
-        CameraCap;      % capability (all options) of camera parameters created by qw
-        CameraSetting;  % current setting of camera parameters created by qw
-        
+        IsRunning;
+        CameraCap;          % capability (all options) of camera parameters created by qw
+        CameraSetting;      % current setting of camera parameters created by qw
+        CameraFrameIndex    %current frame number in sequence
         XPixels;            %number of pixels in first dimention
         YPixels;            %number of pixels in second dimention
         
         Capabilities;       % Capabilities structure from camera
-       
-        InstrumentName='AndorZyla' 
+        
+        InstrumentName='AndorZyla'
+        FigHandle;
+        Axes1;
+        Axes2;
     end
     
     properties (Hidden)
-        StartGUI=false;       %Defines GUI start mode.  'true' starts GUI on object creation. 
+        StartGUI=false;       %Defines GUI start mode.  'true' starts GUI on object creation.
     end
-      
-    properties 
+    
+    properties
         CamHandle;                  % Camera handle
         Binning=[1 1];              %   [binX binY]
         Data=[];                    %   last acquired data
@@ -62,13 +68,11 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         SequenceLength=1;           %   Kinetic Series length
         FrameRate;                  % Frame rate of aquisition
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
-        CycleMode;                  % 
+        CycleMode;                  %
         GuiDialog;                  % GUI dialog for the CameraParameters
-                                    % consider making GuiDialog abstract??
-        Height;
-        Width;
-        Stride;
-        
+        Zscale = [100,120];
+        HsmViewer;
+        % consider making GuiDialog abstract??
     end
     
     methods
@@ -78,11 +82,11 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         end
         
         function start(obj)  %  I might put this in initialize later, need to test it out first...
-           obj.initialize();
-%            obj.get_capabilities;
+            obj.initialize();
+            %            obj.get_capabilities;
         end
         
-        function initialize(obj)           
+        function initialize(obj)
             [p,~]=fileparts(which('MIC_AndorCameraZyla'));
             if exist(fullfile(p,'AndorCameraZyla_Properties.mat'),'file')
                 a=load(fullfile(p,'AndorCameraZyla_Properties.mat'));
@@ -93,8 +97,8 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 end
                 clear a;
             else
-                [SDK]=uigetdir(matlabroot,'Select Andor SDK3 Toolbox Directory');
-                obj.SDKPath=SDK;
+                [SDKPath]=uigetdir(matlabroot,'Select Andor SDK3 Toolbox Directory');
+                obj.SDKPath=SDKPath;
                 if exist(obj.SDKPath,'dir')
                     save(fullfile(p,'AndorCameraZyla_Properties.mat'),'SDKPath');
                 else
@@ -106,14 +110,22 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             
             obj.LastError=AT_InitialiseLibrary();
             AT_CheckError(obj.LastError);
-%             if isempty(obj.CameraIndex)
-%                 obj.getcamera;
-%             end
-%             [obj.LastError,hndl] = AT_Open(obj.CameraIndex);
+            %             if isempty(obj.CameraIndex)
+            %                 obj.getcamera;
+            %             end
+            %             [obj.LastError,hndl] = AT_Open(obj.CameraIndex);
             [obj.LastError,obj.CamHandle] = AT_Open(0); % currently running only 1 camera
             AT_CheckError(obj.LastError);
             disp('Camera initialized');
-                      
+            [obj.LastError] = AT_SetEnumString(obj.CamHandle,'ElectronicShutteringMode','Rolling');
+            AT_CheckWarning(obj.LastError);
+            [obj.LastError] = AT_SetEnumString(obj.CamHandle,'TriggerMode','Internal');
+            AT_CheckWarning(obj.LastError);
+            [obj.LastError] = AT_SetEnumString(obj.CamHandle,'PixelEncoding','Mono16');
+            AT_CheckWarning(obj.LastError);
+            [obj.LastError] = AT_SetEnumString(obj.CamHandle,'SimplePreAmpGainControl','16-bit (low noise & high well capacity)');
+            AT_CheckWarning(obj.LastError);
+
             obj.get_properties;
             obj.Binning=[1 1];
             obj.ExpTime_Focus=0.01;
@@ -125,156 +137,301 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             
             % load up camera params and capabilities
             obj.get_capabilities;
-            % set the camera properties
-            % set the camera to default settings
-%             obj.setCamProperties(obj.CameraSetting);
-
-            % set temperature and turn on camera cooler
-            % set temperature will not work on Luca R cameras!
-%             if obj.Capabilities.ulCameraType ~= 11 % not luca
-%                 obj.change_temperature(-80); % set the temperature
-%             end
-%             obj.LastError = CoolerON; % turn on the cooler!!!
-%             obj.errorcheck('CoolerON');
-            
+            %obj.reset();
         end
         
         function reset(obj)
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
             AT_CheckWarning(obj.LastError);
             [obj.LastError]=AT_Flush(obj.CamHandle);
-            AT_CheckWarning(obj.LastError);  
+            AT_CheckWarning(obj.LastError);
         end
-       
-        function out=start_sequence(obj)
+        
+        function Out=start_sequence(obj)
+            clc
             obj.AcquisitionType='sequence';
- 
-            if obj.ReadyForAcq==0
-                obj.setup_acquisition();
+            obj.setup_acquisition();
+            %obj.reset();
+            %Enable Metadata
+%             [obj.LastError] = AT_SetBool(obj.CamHandle,'MetadataEnable',1);
+%             AT_CheckWarning(obj.LastError);
+%             [obj.LastError] = AT_SetBool(obj.CamHandle,'MetadataTimestamp',1);
+%             AT_CheckWarning(obj.LastError);
+%             %Get Clock Frequency and Framerate
+            [obj.LastError,frameRate] = AT_GetFloat(obj.CamHandle,'FrameRate');
+            AT_CheckWarning(obj.LastError);
+%             [obj.LastError,clockFreq] = AT_GetInt(obj.CamHandle,'TimestampClockFrequency');
+%             AT_CheckWarning(obj.LastError);
+             fprintf('FrameRate %f fps\n',frameRate);
+            [obj.LastError,Exptime] = AT_GetFloat(obj.CamHandle,'ExposureTime');
+            AT_CheckWarning(obj.LastError);
+            [obj.LastError,readouttime] = AT_GetFloat(obj.CamHandle,'ReadoutTime');
+            fprintf('Exposure Time %f s\nReadout Time %f s\n',Exptime,readouttime);
+            
+            obj.CameraFrameIndex=0;
+            %queue buffers
+            for ii=1:40
+                [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
             end
+            Data=zeros(obj.Width,obj.Height,obj.SequenceLength,'uint16');
+            [obj.LastError] = AT_Command(obj.CamHandle, 'TimestampClockReset');
+            AT_CheckWarning(obj.LastError);
             obj.AbortNow=0;
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStart');
             AT_CheckWarning(obj.LastError);
-            
-            i=0;
-            while(i<obj.SequenceLength)
+            obj.IsRunning=1;
+            while obj.IsRunning
                 if obj.AbortNow
                     obj.AbortNow=0;
-                    out=[];
-                    break
-                end
-                [obj.LastError,buf] = AT_WaitBuffer(obj.CamHandle,1000);
-                AT_CheckWarning(obj.LastError);
-                [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.imagesize);
-                AT_CheckWarning(obj.LastError);
-                [obj.LastError,buf2] = AT_ConvertMono16ToMatrix(buf,obj.height,obj.width,obj.stride);
-                AT_CheckWarning(obj.LastError);
-
-                thisFilename = strcat(filename, num2str(i+1), '.tiff');
-                disp(['Writing Image ', num2str(i+1), '/',num2str(frameCount),' to disk']);
-                imwrite(buf2,thisFilename) %saves to current directory
-
-                i = i+1;
-            end
-            
-        end
-        
-        function Out=start_focus(obj)
-            obj.AcquisitionType='focus';
-
-            if obj.ReadyForAcq==0
-                obj.setup_acquisition();
-            end
-
-            [obj.LastError] = AT_Command(obj.CamHandle, 'AcquisitionStart');
-            AT_CheckWarning(obj.LastError);
-            [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes); 
-            IsRunning=1;
-            
-            while IsRunning
-                if obj.AbortNow
-                    obj.AbortNow=0;
-                    IsRunning=0;
+                    obj.IsRunning=0;
                     break
                 end
                 [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
                 AT_CheckWarning(obj.LastError);
                 
+                Im=obj.displaylastimage(); 
+                %[Im,~] = obj.getlastimage();
+                if isempty(Im)
+                    obj.IsRunning=0;
+                    break
+                end
+
+                obj.CameraFrameIndex=obj.CameraFrameIndex+1;
+                Data(:,:,obj.CameraFrameIndex)=Im;
+                %[obj.LastError,ticks] = AT_GetTimeStamp(buf,obj.ImageSizeBytes);
+                %time = double(ticks)/double(clockFreq);
+                %AT_CheckWarning(obj.LastError);
+                %fprintf('Frame %d - Ticks %ld, Time %f s\n',obj.CameraFrameIndex,ticks,time);
+                if obj.CameraFrameIndex==obj.SequenceLength
+                    break
+                end
+               
+            end
+            
+            if obj.AbortNow==0
+                [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
                 AT_CheckWarning(obj.LastError);
+
+                [obj.LastError]=AT_Flush(obj.CamHandle);
+                AT_CheckWarning(obj.LastError);
+            end
+            Out=Data;
+            obj.Data = Out;
+        end
+        function figdelete(obj)
+            obj.FigHandle = [];
+            obj.Axes1=[];
+            obj.Axes2=[];
+            obj.abort();
+        end
+        function Out=start_scan(obj,Nstep,pfit,ROIoffset)
+            clc
+            obj.AcquisitionType='sequence';
+            obj.setup_acquisition();
+            %Enable Metadata
+%             [obj.LastError] = AT_SetBool(obj.CamHandle,'MetadataEnable',1);
+%             AT_CheckWarning(obj.LastError);
+%             [obj.LastError] = AT_SetBool(obj.CamHandle,'MetadataTimestamp',1);
+%             AT_CheckWarning(obj.LastError);
+            %Get Clock Frequency and Framerate
+            [obj.LastError,frameRate] = AT_GetFloat(obj.CamHandle,'FrameRate');
+            AT_CheckWarning(obj.LastError);
+%             [obj.LastError,clockFreq] = AT_GetInt(obj.CamHandle,'TimestampClockFrequency');
+%             AT_CheckWarning(obj.LastError);
+            fprintf('FrameRate %f fps\n',frameRate);
+            [obj.LastError,Exptime] = AT_GetFloat(obj.CamHandle,'ExposureTime');
+            AT_CheckWarning(obj.LastError);
+            [obj.LastError,readouttime] = AT_GetFloat(obj.CamHandle,'ReadoutTime');
+            fprintf('Exposure Time %f s\nReadout Time %f s\n',Exptime,readouttime);
+            
+            obj.CameraFrameIndex=0;
+            N = max([1,round(frameRate/200)]);
+            %queue buffers
+            for ii=1:100
+                [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
+            end
+            Imstack=zeros(obj.Width,obj.Height,obj.SequenceLength,'uint16');
+            [obj.LastError] = AT_Command(obj.CamHandle, 'TimestampClockReset');
+            AT_CheckWarning(obj.LastError);
+            obj.AbortNow=0;
+%             if isempty(obj.FigHandle)
+%                 obj.FigHandle=figure('Position',[100,100,700,500]);
+%                 obj.Axes1 = axes('Position',[0,0,0.5,1],'Parent',obj.FigHandle); 
+%                 obj.Axes2 = axes('Position',[0.57,0.3,0.4,0.5],'Parent',obj.FigHandle); 
+%                 colormap(obj.Axes1,'gray')
+%                 set(obj.FigHandle,'DeleteFcn',@(h,e)obj.figdelete())
+%             end
+            obj.hsmviewer();
+            [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStart');
+            AT_CheckWarning(obj.LastError);
+
+            obj.IsRunning=1;
+            
+
+            while obj.IsRunning
+                if obj.AbortNow
+                    obj.AbortNow=0;
+                    obj.IsRunning=0;
+                    break
+                end
+                
+                [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
+                AT_CheckWarning(obj.LastError);
+                %Im=obj.displaylastimage(); 
+                [Im,~] = obj.getlastimage();
+                if isempty(Im)
+                    obj.IsRunning=0;
+                    break
+                end
+                obj.CameraFrameIndex=obj.CameraFrameIndex+1;
+                Imstack(:,:,obj.CameraFrameIndex)=Im;
+                %[obj.LastError,ticks] = AT_GetTimeStamp(buf,obj.ImageSizeBytes);
+                %time = double(ticks)/double(clockFreq);
+                %AT_CheckWarning(obj.LastError);
+                %fprintf('Frame %d - Ticks %ld, Time %f s\n',obj.CameraFrameIndex,ticks,time);
+                if obj.CameraFrameIndex==obj.SequenceLength
+                    break
+                end
+                if mod(obj.CameraFrameIndex,N*Nstep)==0
+                    ims=Imstack(:,:,obj.CameraFrameIndex-Nstep+1:obj.CameraFrameIndex);
+                    ImgXY = squeeze(mean(ims,1));
+                    getclim = get(obj.HsmViewer.Checkbox_autoscale,'Value');
+                    if getclim == 1
+                        clim = [101,quantile(ImgXY(:),0.999)];
+                        obj.Zscale = round(clim);
+                        set(obj.HsmViewer.Edit_zscale,'String',num2str(obj.Zscale));                        
+                    end
+                    Spec = squeeze(mean(mean(ims,2),3));
+                    %if ishandle(obj.FigHandle)
+                        imagesc(obj.HsmViewer.Axis_imag,ImgXY)
+                        colormap(gray)
+                        set(obj.HsmViewer.Axis_imag,'Clim',obj.Zscale)
+                        axis(obj.HsmViewer.Axis_imag,'equal')                        
+                        set(obj.HsmViewer.Axis_imag,'XTick',[])
+                        set(obj.HsmViewer.Axis_imag,'YTick',[])
+                        set(obj.HsmViewer.Axis_imag,'Color',[0,0,0])
+                        set(obj.HsmViewer.Text_framerate,'String',[num2str(frameRate/Nstep,3),' fps']);
+                        %obj.HsmViewer.Axis_imag.Visible = 'off';
+                        wv = polyval(pfit,[1:numel(Spec)]+obj.ROI(1)-ROIoffset);
+                        plot(obj.HsmViewer.Axis_spec,wv(2:end-1),Spec(2:end-1))
+                        obj.HsmViewer.Axis_spec.YLabel.String = 'Intensity';
+                        obj.HsmViewer.Axis_spec.XLabel.String = 'wave length (nm)';
+                        drawnow limitrate
+                    %end
+                end
+            end
+            if obj.AbortNow == 0
+                [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
+                AT_CheckWarning(obj.LastError);
+
+                [obj.LastError]=AT_Flush(obj.CamHandle);
+                AT_CheckWarning(obj.LastError);
+            end
+            Out=Imstack;
+            obj.Data = Out;
+        end
+        function Out=start_focus(obj)
+            obj.AcquisitionType='focus';
+            obj.setup_acquisition();
+            [obj.LastError] = AT_Command(obj.CamHandle, 'AcquisitionStart');
+            AT_CheckWarning(obj.LastError);
+            [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
+            obj.IsRunning=1;
+            obj.AbortNow=0;
+            while obj.IsRunning
+                if obj.AbortNow
+                    obj.AbortNow=0;
+                    obj.IsRunning=0;
+                    break
+                end
+                [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
+                AT_CheckWarning(obj.LastError);
+                
+                %[obj.LastError] = AT_Command(obj.CamHandle,'SoftwareTrigger');
+                %AT_CheckWarning(obj.LastError);
+                
                 obj.displaylastimage();
                 
             end
-            
+%             if obj.AbortNow
+%                 obj.AbortNow=0;
+%                 obj.IsRunning=0;
+%             end
+            if obj.AbortNow==0
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
             AT_CheckWarning(obj.LastError);
             [obj.LastError]=AT_Flush(obj.CamHandle);
             AT_CheckWarning(obj.LastError);
+            end
+            Out=obj.Data;
         end
         
-        function out = start_capture(obj)
+        function Out = start_capture(obj)
             obj.AcquisitionType='capture';
-            if obj.ReadyForAcq==0
-                obj.setup_acquisition;
-            end
-            [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.imagesize);
+            obj.setup_acquisition();
+            [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
             AT_CheckWarning(obj.LastError);
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStart');
             AT_CheckWarning(obj.LastError);
-            [obj.LastError,buf] = AT_WaitBuffer(obj.CamHandle,1000);
+            [obj.LastError,buf] = AT_WaitBuffer(obj.CamHandle,1000+1000*obj.ExpTime_Capture);
             AT_CheckWarning(obj.LastError);
-            [obj.LastError,out] = AT_ConvertMono16ToMatrix(buf,obj.height,obj.width,obj.stride);
-            AT_CheckWarning(obj.LastError); 
+            [obj.LastError,Out] = AT_ConvertMono16ToMatrix(buf,obj.Height,obj.Width,obj.Stride);
+            AT_CheckWarning(obj.LastError);
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
             AT_CheckWarning(obj.LastError);
             [obj.LastError]=AT_Flush(obj.CamHandle);
             AT_CheckWarning(obj.LastError);
             
             if obj.KeepData
-                obj.Data=out;
+                obj.Data=Out;
             end
-                        
+            
             switch obj.ReturnType
                 case 'dipimage'
-                    out=dip_image(out,'uint16');
+                    Out=dip_image(Out,'uint16');
                 case 'matlab'
-                     %already in uint16   
+                    %already in uint16
             end
         end
         
         function setup_acquisition(obj)
             
             % Common Setup
-            [rc] = AT_SetInt(obj.CamHandle,'AOILeft',obj.ROI(1)); 
-            AT_CheckError(rc);
-            [rc] = AT_SetInt(obj.CamHandle,'AOITop',obj.ROI(3));  
-            AT_CheckError(rc);   
+            obj.ImageSize=[obj.ROI(2)-obj.ROI(1)+1 obj.ROI(4)-obj.ROI(3)+1];
+            
             [rc] = AT_SetInt(obj.CamHandle,'AOIWidth',obj.ROI(2)-obj.ROI(1)+1);
             AT_CheckError(rc);
             [rc] = AT_SetInt(obj.CamHandle,'AOIHeight',obj.ROI(4)-obj.ROI(3)+1);
             AT_CheckError(rc);
+            [rc] = AT_SetInt(obj.CamHandle,'AOILeft',obj.ROI(1));
+            AT_CheckError(rc);
+            [rc] = AT_SetInt(obj.CamHandle,'AOITop',obj.ROI(3));
+            AT_CheckError(rc);
             
-            [obj.LastError] = AT_SetEnumString(obj.CamHandle,'TriggerMode','Internal');
-            AT_CheckWarning(obj.LastError);
-            [rc] = AT_SetEnumString(obj.CamHandle,'PixelEncoding','Mono16');
-            AT_CheckWarning(rc);
+%             [obj.LastError] = AT_SetEnumString(obj.CamHandle,'TriggerMode','Internal');
+%             AT_CheckWarning(obj.LastError);
+%             [obj.LastError] = AT_SetEnumString(obj.CamHandle,'PixelEncoding','Mono16');
+%             AT_CheckWarning(obj.LastError);
             [obj.LastError,obj.ImageSizeBytes] = AT_GetInt(obj.CamHandle,'ImageSizeBytes');
             AT_CheckWarning(obj.LastError);
             [obj.LastError,obj.Height] = AT_GetInt(obj.CamHandle,'AOIHeight');
             AT_CheckWarning(obj.LastError);
             [obj.LastError,obj.Width] = AT_GetInt(obj.CamHandle,'AOIWidth');
             AT_CheckWarning(obj.LastError);
-           
-                    
             
-            switch obj.AcquisitionType    
+            switch obj.AcquisitionType
                 case 'focus'
                     [obj.LastError] = AT_SetFloat(obj.CamHandle,'ExposureTime',obj.ExpTime_Focus);
                     AT_CheckWarning(obj.LastError);
                     [obj.LastError] = AT_SetEnumString(obj.CamHandle,'CycleMode','Continuous');
                     AT_CheckWarning(obj.LastError);
+                    [obj.LastError,MaxFrameRate] = AT_GetFloatMax(obj.CamHandle,'FrameRate');
+                    AT_CheckWarning(obj.LastError);
+                    [obj.LastError] = AT_SetFloat(obj.CamHandle,'FrameRate',MaxFrameRate*.99);
+                    AT_CheckWarning(obj.LastError);
                     [obj.LastError,obj.Stride] = AT_GetInt(obj.CamHandle,'AOIStride');
                     AT_CheckWarning(obj.LastError);
-
+                    
                 case 'capture'
                     [obj.LastError] = AT_SetFloat(obj.CamHandle,'ExposureTime',obj.ExpTime_Capture);
                     AT_CheckWarning(obj.LastError);
@@ -284,23 +441,36 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                     AT_CheckWarning(obj.LastError);
                     [obj.LastError,obj.Stride] = AT_GetInt(obj.CamHandle,'AOIStride');
                     AT_CheckWarning(obj.LastError);
-                   
+                    
                 case 'sequence'
                     [obj.LastError] = AT_SetFloat(obj.CamHandle,'ExposureTime',obj.ExpTime_Sequence);
                     AT_CheckWarning(obj.LastError);
-                    [obj.LastError] = AT_SetEnumString(obj.CamHandle,'CycleMode','Fixed');
+                    [obj.LastError,MaxFrameRate] = AT_GetFloatMax(obj.CamHandle,'FrameRate');
                     AT_CheckWarning(obj.LastError);
-                    [obj.LastError] = AT_SetEnumString(obj.CamHandle,'TriggerMode','Internal');
+                    [obj.LastError] = AT_SetFloat(obj.CamHandle,'FrameRate',floor(MaxFrameRate));
+                    AT_CheckWarning(obj.LastError);
+                    [obj.LastError] = AT_SetEnumString(obj.CamHandle,'CycleMode','Fixed');
                     AT_CheckWarning(obj.LastError);
                     [obj.LastError] = AT_SetInt(obj.CamHandle,'FrameCount',obj.SequenceLength);
                     AT_CheckWarning(obj.LastError);
-                    [obj.LastError,obj.Stride] = AT_GetInt(obj.CamHandle,'AOIStride'); 
+                    %[obj.LastError,MinExpTime] = AT_GetFloatMin(obj.CamHandle,'ExposureTime');
+                    %AT_CheckWarning(obj.LastError);
+                    %[obj.LastError] = AT_SetFloat(obj.CamHandle,'ExposureTime',MinExpTime*1.01);
+                    %AT_CheckWarning(obj.LastError);
+                    %[obj.LastError] = AT_SetEnumString(obj.CamHandle,'TriggerMode','Internal');
+                    %AT_CheckWarning(obj.LastError);
+                    [obj.LastError,obj.Stride] = AT_GetInt(obj.CamHandle,'AOIStride');
                     AT_CheckWarning(obj.LastError);
+                    %[obj.LastError] = AT_SetFloat(obj.CamHandle,'FrameRate',1/obj.ExpTime_Sequence);
+                    %AT_CheckWarning(obj.LastError);
+                    %[obj.LastError,MaxExpTime] = AT_GetFloatMax(obj.CamHandle,'ExposureTime');
+                    %AT_CheckWarning(obj.LastError);
+                    
             end
-           
+            
             %get back actual timings
-%             obj.get_parameters();
-            switch obj.AcquisitionType    
+            %             obj.get_parameters();
+            switch obj.AcquisitionType
                 case 'focus'
                     [obj.LastError,obj.ExpTime_Focus]=AT_GetFloat(obj.CamHandle, 'ExposureTime');
                 case 'capture'
@@ -318,11 +488,23 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             
         end
         
-        function Out=getlastimage(obj)
-                [obj.LastError,buf] = AT_WaitBuffer(obj.CamHandle,10000);
-                AT_CheckWarning(obj.LastError);
+        function [Out,buf]=getlastimage(obj)
+            [obj.LastError,buf] = AT_WaitBuffer(obj.CamHandle,1000);
+            AT_CheckWarning(obj.LastError);
+            if obj.LastError == 0
                 [obj.LastError,Out] = AT_ConvertMono16ToMatrix(buf,obj.Height,obj.Width,obj.Stride);
-                AT_CheckWarning(obj.LastError);  
+                
+                %             %%Hanieh to remove hot pixel
+                %             P=prctile(Out(Out>0),99.9);
+                %             Out(Out>P)=P;
+                %             obj.ImageHandle=imagesc(Out);
+                %             set(obj.ImageHandle,'cdata',Out);
+                %             %%Hanieh
+                AT_CheckWarning(obj.LastError);
+            else
+                obj.AbortNow = 0;
+                Out = [];
+            end
         end
         
         function errorcheck(obj)
@@ -330,6 +512,13 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         end
         
         function abort(obj)
+            
+            obj.AbortNow=1;
+            obj.IsRunning = 0;
+            [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
+            AT_CheckWarning(obj.LastError);
+            [obj.LastError]=AT_Flush(obj.CamHandle);
+            AT_CheckWarning(obj.LastError);
             
         end
         
@@ -341,7 +530,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             Children=[];
             
             %Add anything else we want to State here:
-
+            
         end
         
         function delete(obj)
@@ -353,10 +542,15 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             AT_CheckWarning(obj.LastError);
             [obj.LastError] = AT_FinaliseLibrary();
             AT_CheckWarning(obj.LastError);
-            disp('Zyla shutdown');            
+            disp('Zyla shutdown');
         end
-            
-    end 
+        
+        
+        function [temp, status] = call_temperature(obj)
+            [temp, status]=gettemperature(obj);
+        end
+        
+    end
     
     methods(Access=protected)
         function obj=get_properties(obj)
@@ -392,7 +586,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         function Success=unitTest()
             Success=0;
             %Create object
-            try 
+            try
                 A=MIC_AndorCameraZyla();
                 A.ExpTime_Focus=.1;
                 A.KeepData=1;
@@ -406,7 +600,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 A.start_capture()
                 dipshow(A.Data)
                 A.AcquisitionType='sequence'
-                A.ExpTime_Sequence=.01;
+                A.ExpTime_Sequence=.1;%changed from .1 Elton
                 A.SequenceLength=100;
                 A.setup_acquisition()
                 
@@ -432,6 +626,6 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 end
             end
         end
-                
+        
     end
 end
