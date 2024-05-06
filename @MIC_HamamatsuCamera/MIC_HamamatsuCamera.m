@@ -69,6 +69,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         
         function out=getlastimage(obj) %?
             if obj.TriggerModeNum == 32
+                pause(0.1);
                 [img]=DcamGetLastImageFast(obj.CameraHandle);
             else
                 [img]=DcamGetNewestFrame(obj.CameraHandle);
@@ -249,6 +250,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.AbortNow=1;
             DcamCapture(obj.CameraHandle);
             out=obj.getdata();
+            
 %             obj.displaylastimage();
             obj.abort();
             obj.AbortNow=0;

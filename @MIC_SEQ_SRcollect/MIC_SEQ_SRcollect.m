@@ -409,6 +409,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.Tol_Y = obj.Reg3DYTol;
             obj.AlignReg.Tol_Z = obj.Reg3DZTol;
             obj.AlignReg.MinPeakCorr = obj.MinPeakCorr;
+            obj.SCMOS_PixelSize = obj.AlignReg.PixelSize;
         end
         
         function unloadSample(obj)
