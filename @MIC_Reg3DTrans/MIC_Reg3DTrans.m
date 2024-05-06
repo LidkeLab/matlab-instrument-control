@@ -42,7 +42,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %         ChangeEMgain=false; % Flag for changing EM gain before and after acquiring transmission images
 %         EMgain;             % EM gain setting to use for transmission image acquisitions
         ChangeExpTime=true; % Flag for changing exposure time before and after acquiring transmission images
-        ExposureTime=0.01;  % Exposure time setting to use for transmission image acquisitions
+        ExposureTime=0.1;  % Exposure time setting to use for transmission image acquisitions
         
         % Other properties
         PixelSize;          % image pixel size (um)
@@ -668,7 +668,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             obj.ZStack_Pos = ...
                 (Z_Current-ZStackMaxDev:ZStackStep:Z_Current+ZStackMaxDev);
             N=length(obj.ZStack_Pos);
-            obj.ZStack=[];
+            ROI = obj.CameraObj.ROI;
+            obj.Zstack=zeros(ROI(4)-ROI(3)+1,ROI(2)-ROI(1)+1,N,'uint16');
             
             %change EMgain, shutter and exposure time if needed
 %             if obj.ChangeEMgain || obj.CamShutter
@@ -695,6 +696,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 %             if obj.ChangeEMgain || obj.CamShutter
 %                 obj.CameraObj.setCamProperties(CamSet);
 %             end
+
                         
             % Setup the camera based on the TriggerMode. 
             obj.CameraObj.TriggerMode = obj.CameraTriggerMode;
@@ -721,9 +723,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             else
                 obj.CameraObj.AcquisitionType = 'capture';
                 obj.CameraObj.setup_acquisition();
+                obj.CameraObj.ReturnType = 'matlab';
             end
                         
             % Collect the z-stack
+
             for nn=1:N
                 % Add a short pause to give misc. system components time to
                 % settle. 
@@ -739,6 +743,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 % Move the stage and allow it to settle (if needed).
                 obj.StageObj.setPosition(...
                     [X_Current, Y_Current, obj.ZStack_Pos(nn)]);
+
                 pause(obj.StageSettlingTime);
                     
                  % Capture an image at the current stage location.
@@ -758,7 +763,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     obj.ZStackFull(:, :, nn, :) = single(CurrentStack);
                     obj.ZStack(:, :, nn) = single(median(CurrentStack, 4));
                 end
+
                 
+                
+                obj.Zstack(:, :, nn)=single(obj.CameraObj.start_capture);
+                pause(0.1)
                 % Remove the characters identifying stack index and stack
                 % number from command line so that they can be updated.  
                 % This is being done to avoid clutter to the command
@@ -769,6 +778,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     fprintf('\b');
                 end
             end
+
             
             % If a software trigger was used to perform a fast acquisition,
             % we need to collect the stack now that all of the desired
@@ -793,6 +803,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             FocalInd = 1 + obj.ZStack_MaxDev/obj.ZStack_Step;
             obj.Image_Current = obj.ZStack(:, :, FocalInd);
             
+
 %             % close shutter if needed
 %             if obj.CamShutter
 %                 obj.CameraObj.setShutter(0);
