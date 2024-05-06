@@ -6,7 +6,7 @@ function guiParams(obj)
 
 
 % main camera param gui figure
-camFig = figure('Units','pixels','Position',[100 100 700 800],...
+camFig = figure('Units','pixels','Position',[100 100 700 1000],...
     'MenuBar','none','ToolBar','none','Visible','on',...
     'NumberTitle','off','UserData',0,'Tag','ParamSelector.gui');
 
@@ -73,7 +73,7 @@ handles.cancel_butt = uicontrol('Parent',camFig,'Style','pushbutton','String','C
         dialog_length = length(dialog_field);
         
         PosCounter = 1; % counter to position buttons!
-        PosAdj = 0.04*PosCounter-0.03;
+        PosAdj = 0.031*PosCounter-0.025;
         for ii = 1:dialog_length
             dialog_ui{ii} = [dialog_field{ii} '_ui'];
             dialog_text{ii} = [dialog_field{ii} '_text'];
@@ -144,7 +144,7 @@ handles.cancel_butt = uicontrol('Parent',camFig,'Style','pushbutton','String','C
             
           
             PosCounter = PosCounter+1; % increment the position counter!
-            PosAdj = 0.04*PosCounter-0.03;
+            PosAdj = 0.031*PosCounter-0.025;
             end
         end
     end

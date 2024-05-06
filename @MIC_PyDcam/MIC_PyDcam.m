@@ -54,7 +54,11 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         
         function shutdown(obj)
             % Object shutdown
-            obj.CameraHandle.dev_close();
+            try
+                obj.CameraHandle.dev_close();
+            catch
+                warning('no device opened')
+            end
             out = py.dcam.Dcamapi.uninit();
             clear obj.CameraHandle;
         end
