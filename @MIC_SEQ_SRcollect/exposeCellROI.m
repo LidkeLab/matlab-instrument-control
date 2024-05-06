@@ -22,16 +22,16 @@
     deltaY=(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
     if X>ImSize/2 & Y<ImSize/2
         NewPos_X=OldPos_X-deltaX; %mm
-        NewPos_Y=OldPos_Y-deltaY; %mm
+        NewPos_Y=OldPos_Y+deltaY; %mm
     elseif X>ImSize/2 & Y>ImSize/2
         NewPos_X=OldPos_X-deltaX; %mm
-        NewPos_Y=OldPos_Y+deltaY; %mm
+        NewPos_Y=OldPos_Y-deltaY; %mm
     elseif X<ImSize/2 & Y<ImSize/2
         NewPos_X=OldPos_X+deltaX; %mm
-        NewPos_Y=OldPos_Y-deltaY; %mm
+        NewPos_Y=OldPos_Y+deltaY; %mm
     else
         NewPos_X=OldPos_X+deltaX; %mm
-        NewPos_Y=OldPos_Y+deltaY; %mm
+        NewPos_Y=OldPos_Y-deltaY; %mm
     end
     NewPos=[NewPos_X,NewPos_Y]; %new
 

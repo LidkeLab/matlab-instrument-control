@@ -255,6 +255,7 @@ for ii = 1:obj.NumberOfSequences
             % will have its own group in the .h5 file.
             DataName = sprintf('Data%04d', ii);
             SequenceName = sprintf('Channel01/Zposition001/%s', DataName);
+            MIC_H5.saveWait();
             MIC_H5.createGroup(FileH5, SequenceName);
             
             % Save the exportState() exportables.

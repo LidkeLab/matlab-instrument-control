@@ -39,11 +39,11 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         
         % Operational properties.
         LampWait = 0.1; % Time to wait for full power to lamp (seconds)
-        ExposureTimeLampFocus = 0.02;
+        ExposureTimeLampFocus = 0.04;
         ExposureTimeLaserFocusLow = 0.2;
-        ExposureTimeLaserFocusHigh = 0.01;
-        ExposureTimeSequence = 0.01;
-        ExposureTimeCapture = 0.02;
+        ExposureTimeLaserFocusHigh = 0.04;
+        ExposureTimeSequence = 0.04;
+        ExposureTimeCapture = 0.04;
         NumberOfFrames = 6000;
         NumberOfSequences = 10;
         NAcquisitionCycles = 1; % number of acquisition cycles per cell
@@ -55,11 +55,13 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         DurationPreActivation = 10; % (seconds) time of pre-activation
         StabPeriod = 5; % Time between stabilization events (seconds)
         GridCorner = [1, 1] % 10x10 Full Frame Grid Corner (mm)
-        SCMOS_ROI_Collect = [897, 1152, 897, 1152];
+        SCMOS_ROI_Collect = [881, 1136, 937, 1192];%single-mode:[885,1140,961,1216];% multi-mode: [881, 1136, 937, 1192];
+        %SCMOS_ROI_Collect = [325, 1348, 513,  1536]; % Center 1024x1024 RoI Delft
+        %SCMOS_ROI_Collect = [897, 1152, 897, 1152];
         SCMOS_ROI_Full = [1, 2048, 1, 2048];
         OffsetDZ = 5; % Micron
         OffsetSearchZ = 25; % Micron
-        CoverslipZPosition = 1.2; % relative pos. of coverslip to stage
+        CoverslipZPosition = 1.5; % relative pos. of coverslip to stage
         OnDuringFocus647 = 0; % flag indicates 647nm laser on for focusing
         OnDuringSequence647 = 0; % flag indicates 647nm on for sequence
         OnDuringFocus405 = 0; % flag indicates 405nm laser on for focusing
@@ -103,7 +105,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
         Reg3DZTol = 0.05; % (um) correction along z to claim convergence
         MinPeakCorr = 0.7; % min. value of corr. to deem success
         MinAllowableZ = 0.65; % min. allowed z value as seen by stepper motor
-        MaxIterInitial = 10; % max. alignment iteration attempts for cell finding
+        MaxIterInitial = 5; % max. alignment iteration attempts for cell finding
         MaxIter = 5; % max. alignment iteration attempts for later sequences
         
         % Misc. other properties.
@@ -269,7 +271,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.CameraSCMOS.setCamProperties( ...
                 obj.CameraSCMOS.CameraSetting);
             obj.CameraSCMOS.ExpTime_Capture = 0.2;
-            obj.CameraSCMOS.ExpTime_Sequence = 0.01;
+            obj.CameraSCMOS.ExpTime_Sequence = 0.04;
             
             % Update the status indicator for the GUI.
             obj.StatusString = '';
@@ -340,6 +342,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             
             % Setup the needed laser(s).
             obj.Laser647 = MIC_MPBLaser();
+            %obj.Laser647 = MIC_TCubeLaserDiode('64849775', 'Power', 80, 182.5, 10);
             obj.Laser405 = MIC_TCubeLaserDiode('64841724', ...
                 'Power', 32.25, 20.05, 10);
             % Usage: 
@@ -406,6 +409,7 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
             obj.AlignReg.Tol_Y = obj.Reg3DYTol;
             obj.AlignReg.Tol_Z = obj.Reg3DZTol;
             obj.AlignReg.MinPeakCorr = obj.MinPeakCorr;
+            obj.SCMOS_PixelSize = obj.AlignReg.PixelSize;
         end
         
         function unloadSample(obj)
