@@ -40,7 +40,7 @@ function exposeGridPoint(obj)
     OldPos=[OldPos_X,OldPos_Y,OldPos_Z]; %new
     %find new position with respect to Motor's (0,0):
     deltaX=(abs(ImSize/2-X)*obj.SCMOS_PixelSize)*1/1000; %mm 
-    deltaY=(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
+    deltaY=-(abs(ImSize/2-Y)*obj.SCMOS_PixelSize)*1/1000; %mm
     if X>1024 & Y<1024
         NewPos_X=OldPos_X-deltaX; %mm
         NewPos_Y=OldPos_Y-deltaY; %mm
