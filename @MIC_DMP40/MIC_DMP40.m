@@ -1,5 +1,7 @@
 classdef MIC_DMP40 < MIC_Abstract
     % MIC_DMP40: Matlab Instrument Control Class for the Deformable Mirror
+
+     % CITATION: Ellyse Taylor, Lidke Lab, 2021
     
     
     properties(SetAccess=protected)
