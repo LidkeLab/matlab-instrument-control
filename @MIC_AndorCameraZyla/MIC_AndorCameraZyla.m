@@ -68,6 +68,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         SequenceLength=1;           %   Kinetic Series length
         FrameRate;                  % Frame rate of aquisition
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
+        TriggerMode;
         CycleMode;                  %
         GuiDialog;                  % GUI dialog for the CameraParameters
         Zscale = [100,120];
@@ -486,6 +487,9 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         
         function out=getdata(obj)
             
+        end
+        
+        function fireTrigger(obj)
         end
         
         function [Out,buf]=getlastimage(obj)

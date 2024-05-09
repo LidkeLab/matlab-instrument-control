@@ -60,10 +60,11 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         ROI;                        %   [Xstart Xend Ystart Yend]
         SequenceLength=1;           %   Kinetic Series length
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
+        TriggerMode;
         GuiDialog;                  % GUI dialog for the CameraParameters
                                     % consider making GuiDialog abstract??
-        AcquisitionTimeOutOffset
-        NumImage
+        AcquisitionTimeOutOffset;
+        NumImage;
     end
     
     methods
@@ -439,6 +440,9 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 clear out
             end
     
+        end
+        
+        function fireTrigger(obj)
         end
         
         function apply_camSetting(obj)
