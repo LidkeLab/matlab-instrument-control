@@ -14,30 +14,31 @@ function createDocumentation(inputFolderPath)
         folderPath = fullfile(inputFolderPath, atFolders(i).name);
         classFiles = dir(fullfile(folderPath, '*.m'));
         
-        % Create Readme.md file in the @folder
-        readmeFilePath = fullfile(folderPath, 'Readme.md');
-        fid = fopen(readmeFilePath, 'w');
+        % Create documentation directory within the @folder
+        docFolderPath = fullfile(folderPath, 'Documentation');
+        if ~isfolder(docFolderPath)
+            mkdir(docFolderPath);
+        end
         
         % Process each .m file in the @folder
         for j = 1:length(classFiles)
             classFilePath = fullfile(folderPath, classFiles(j).name);
+            % Generate output file path in the new location
+            outputFilePath = fullfile(docFolderPath, [classFiles(j).name(1:end-2), '.md']);
             
             try
                 % Extract comments and write to Markdown
-                markdownText = extractAndWriteComments(classFilePath);
-                fprintf(fid, '%s\n', markdownText);
+                extractAndWriteComments(classFilePath, outputFilePath);
             catch ME
                 warning('Failed to process %s: %s', classFilePath, ME.message);
             end
         end
-        
-        fclose(fid);
     end
     
     disp('Completed documentation for all classes.');
 end
 
-function markdownText = extractAndWriteComments(inputFilePath)
+function extractAndWriteComments(inputFilePath, outputFilePath)
     % Open the MATLAB .m file
     fid = fopen(inputFilePath, 'r');
     if fid == -1
@@ -59,18 +60,17 @@ function markdownText = extractAndWriteComments(inputFilePath)
     % Extract the comment block
     commentBlock = fileContents(startIndex:endIndex);
     
-    % Split the comment block into lines and remove MATLAB comment symbols
+    % Convert comment block from MATLAB comments to markdown format
     commentLines = strsplit(commentBlock, '\n');
-    commentLines = cellfun(@(x) strtrim(strrep(x, '%', '')), commentLines, 'UniformOutput', false);
-    commentLines = commentLines(~cellfun('isempty', commentLines)); % Remove empty lines
+    markdownText = strjoin(cellfun(@(x) strtrim(strrep(x, '%', '')), commentLines, 'UniformOutput', false), '\n');
     
-    % Format the first non-empty line as a header
-    if ~isempty(commentLines)
-        commentLines{1} = ['# ' commentLines{1}];
-        markdownText = strjoin(commentLines, '\n');
-    else
-        markdownText = '';
+    % Write to Markdown file
+    fid = fopen(outputFilePath, 'w');
+    if fid == -1
+        error('Output file cannot be created: %s', outputFilePath);
     end
-    
-    return;
+    fprintf(fid, '%s', markdownText);
+    fclose(fid);
 end
+
+% inputFolderPath = 'C:\Users\sajja\Documents\MATLAB\matlab-instrument-control\'
