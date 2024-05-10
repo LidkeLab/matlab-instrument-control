@@ -39,4 +39,4 @@ Shut down the camera
 camera.shutdown();
 ```
 ### CITATION: Sandeep Pallikkuth, Lidke Lab, 2018
-
+# choose betwee a list of camera models w/ serials
