@@ -6,6 +6,7 @@ MIC software package uses object-oriented programming where a class defines the 
 ## Class Structure of MIC
 <p align="center"><img src="ClassStructure.png" width="80%" height="80%"></p>
 
+See [MIC Classes](doc/MICclasses.md) for the complete detailed list.
 
 ## Common Features
 Each of the instrument components in MIC have export methods, unit tests and graphical user interfaces with a common format.
@@ -50,4 +51,3 @@ Example of microscope control class:
 ```
 MIC_TIRF_SRCollect()
 ```
-
