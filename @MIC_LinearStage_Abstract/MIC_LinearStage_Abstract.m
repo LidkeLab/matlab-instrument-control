@@ -1,7 +1,6 @@
 classdef MIC_LinearStage_Abstract < MIC_Abstract
-    % MIC_LinearStage_Abstract: Matlab Instrument Control abstract class 
-    % for linear stages.
-    %
+    % # MIC_LinearStage_Abstract: Matlab Instrument Control abstract class for linear stages.
+    % ## Description
     % This class defines a set of Abstract properties and methods that must
     % implemented in inheritting classes. This class also provides a simple 
     % and intuitive GUI.   
@@ -9,11 +8,23 @@ classdef MIC_LinearStage_Abstract < MIC_Abstract
     % inorder to enable the auto-naming functionality: 
     % 	obj=obj@MIC_LinearStage_Abstract(~nargout);
     %
-    % REQUIRES:
+    % ## REQUIRES:
     %   MIC_Abstract.m
     %   MATLAB 2014b or higher
     %
-    % Marjolein Meddens, Lidke Lab, 2017.
+
+%     ## Abstract Properties
+% - **PositionUnit:** Units of the position parameter (e.g., um, mm), specific to the stage's measurement.
+% - **CurrentPosition:** Current position of the stage.
+% - **MinPosition:** Minimum limit of the stage's range.
+% - **MaxPosition:** Maximum limit of the stage's range.
+% - **Axis:** Indicates the stage axis (X, Y, or Z) that the class controls.
+% 
+% ## Core Methods
+% - **Constructor (`MIC_LinearStage_Abstract(AutoName)`):** Initializes a new instance of a subclass, incorporating auto-naming functionality inherited from `MIC_Abstract`.
+% - **`center()`:** Moves the stage to its center position, calculated as the midpoint between `MinPosition` and `MaxPosition`.
+% - **`updateGui()`:** Refreshes the GUI elements to reflect current properties like position, ensuring the display is up-to-date with the stage's status.
+% Citation: Marjolein Meddens, Lidke Lab, 2017.
     
     properties (Abstract,SetAccess=protected)
         PositionUnit;          % Units of position parameter (eg. um/mm)

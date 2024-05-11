@@ -1,19 +1,22 @@
-# MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
+# # MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
+## Description
 Dynamixel Servos are used to control the rotation of filter wheels
 Setup instruction can be found at Z:\Lab General Info and
 Documents\TIRF Microscope\Build Instructions for Filter Wheel
 Setup.doc
-Example: obj=MIC_DynamixelServo(ServoId,Port,Bps);
+## Usage Example:
+obj=MIC_DynamixelServo(ServoId,Port,Bps);
 ServoId: Id of servo(is written on servo)
 Port: COM port to which servo is connected (Optional)
 Bps: Baud setting for port (Optional)
-Functions: delete, shutdown, checkCommStatus, exportState, ping,
+## Key Functions:
+delete, shutdown, checkCommStatus, exportState, ping,
 get.Firmware, get.GaolPosition, set.GoalPosition,
 get.Led, set.Led, get.Model, get.Moving,
 get.MovingSpeed, set.MovingSpeed, get.PresentPostion,
 get.PresentSpeed, get.PresentTemperature,
 get.PresentVoltage, get.Rotation, set.Rotation
-REQUIRES:
+## REQUIRES:
 Matlab 2014b or higher
 MIC_Abstract.m
 Roboplus software
