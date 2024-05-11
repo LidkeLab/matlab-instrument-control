@@ -669,7 +669,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 (Z_Current-ZStackMaxDev:ZStackStep:Z_Current+ZStackMaxDev);
             N=length(obj.ZStack_Pos);
             ROI = obj.CameraObj.ROI;
-            obj.Zstack=zeros(ROI(4)-ROI(3)+1,ROI(2)-ROI(1)+1,N,'uint16');
+            obj.ZStack=zeros(ROI(4)-ROI(3)+1,ROI(2)-ROI(1)+1,N,'uint16');
             
             %change EMgain, shutter and exposure time if needed
 %             if obj.ChangeEMgain || obj.CamShutter
@@ -766,8 +766,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
 
                 
                 
-                obj.Zstack(:, :, nn)=single(obj.CameraObj.start_capture);
-                pause(0.1)
+                %obj.ZStack(:, :, nn)=single(obj.CameraObj.start_capture);
+                %pause(0.1)
                 % Remove the characters identifying stack index and stack
                 % number from command line so that they can be updated.  
                 % This is being done to avoid clutter to the command
