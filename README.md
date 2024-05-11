@@ -51,3 +51,4 @@ Example of microscope control class:
 MIC_TIRF_SRCollect()
 ```
 
+## [MIC Classes](doc/MICclasses.md)

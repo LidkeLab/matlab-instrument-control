@@ -10,7 +10,7 @@
 [MIC_Abstract](../MIC_Abstract.m) | Matlab Instrument Control abstract class
 &nbsp;&nbsp;&nbsp;[@MIC_3DStage_Abstract](../@MIC_3DStage_Abstract/Readme.md) | abstract class for all stages
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_MCLNanoDrive](../@MIC_MCLNanoDrive/Readme.md) | control a 3D Peizo stage from Mad City Labs
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_NanoMaxPiezos](../@MIC_NanoMaxPiezos/Readme.md) in a Thorlabs NanoMax stage
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_NanoMaxPiezos](../@MIC_NanoMaxPiezos/Readme.md) | in a Thorlabs NanoMax stage
 &nbsp;&nbsp;&nbsp;[@MIC_Camera_Abstract](../@MIC_Camera_Abstract/Readme.md) | common interface for all cameras
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_AndorCamera](../@MIC_AndorCamera/Readme.md) | control an Andor camera
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_AndorCameraZyla](../@MIC_AndorCameraZyla/Readme.md) | control an Andor camera
