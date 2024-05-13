@@ -7,7 +7,7 @@
 [@MIC_ActiveReg3D_SPT](../@MIC_ActiveReg3D_SPT/Readme.md) | -
 [@MIC_H5](../@MIC_H5/Readme.md) | static methods for working with HDF5 files
 [@MIC_Joystick](../@MIC_Joystick/Readme.md) | control the TIRF stage with a joystick
-[MIC_Abstract](../MIC_Abstract.m) | Matlab Instrument Control abstract class
+[MIC_Abstract](../@MIC_Abstract/Readme.md) | Matlab Instrument Control abstract class
 &nbsp;&nbsp;&nbsp;[@MIC_3DStage_Abstract](../@MIC_3DStage_Abstract/Readme.md) | abstract class for all stages
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_MCLNanoDrive](../@MIC_MCLNanoDrive/Readme.md) | control a 3D Peizo stage from Mad City Labs
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_NanoMaxPiezos](../@MIC_NanoMaxPiezos/Readme.md) | in a Thorlabs NanoMax stage
