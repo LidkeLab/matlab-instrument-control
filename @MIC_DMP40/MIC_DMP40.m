@@ -1,5 +1,5 @@
 classdef MIC_DMP40 < MIC_Abstract
-% # MIC_DMP40 Class Documentation
+% MIC_DMP40 Class Documentation
 % 
 % ## Description
 % The `MIC_DMP40` class controls a deformable mirror using MATLAB. This class interfaces with the mirror through .NET assemblies, 

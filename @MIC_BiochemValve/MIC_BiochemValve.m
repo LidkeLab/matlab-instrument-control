@@ -1,6 +1,6 @@
 classdef MIC_BiochemValve < MIC_Abstract
 
-%    # MIC_BiochemValve Class 
+%  MIC_BiochemValve Class 
 
 % ## Description
 % The `MIC_BiochemValve` class manages BIOCHEM flow selection valves through communication with an Arduino. 
@@ -43,7 +43,7 @@ classdef MIC_BiochemValve < MIC_Abstract
 % % Managing power
 % Valves.powerSwitch12V();  % Toggle the 12V power line
 % ```
-% ### CITATION: David Schodt, Lidke Lab, 2018
+% CITATION: David Schodt, Lidke Lab, 2018
     
     
     properties (SetAccess = protected) % users shouldn't set these

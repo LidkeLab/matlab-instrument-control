@@ -1,6 +1,6 @@
 classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
 % 
-% # MIC_CoherentLaser561 Class 
+% MIC_CoherentLaser561 Class 
 % 
 % ## Description
 % The `MIC_CoherentLaser561` class is a MATLAB Instrument Class for controlling the Coherent Sapphire Laser 561 via a USB connection. 

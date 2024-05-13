@@ -1,4 +1,5 @@
 # Class to control Benchtop stepper motor.
+## Description
 This device might also be cotroled using the kinesis software.
 This class give you access to some of the functions in the long list
 of functions to control this device.
@@ -11,11 +12,12 @@ Setting, Device Startup Setting, klick on the botton in the Select
 Actuator Type box, from the popup menu in the top select the device
 that you wish to control (it could be either HS NanoMax 300 X Axis,
 HS NanoMax 300 Y Axis or HS NanoMax 300 Z Axis), then OK and Save.
+## Constructor
 Example: M = MIC_StepperMotor(70850323)
 Functions: constructor(), goHome(), getPosition(), getStatus(),
 getStatus(), moveJog(), moveToPosition(), setJogStep()
 getJogStep(), closeSBC(), delete(), exportState()
-REQUIREMENTS:
+## REQUIREMENTS:
 MATLAB 2014 or higher
 Kinesis software from thorlabs
 MIC_Abstract class.

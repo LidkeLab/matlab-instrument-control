@@ -1,17 +1,16 @@
 classdef MIC_TIRF_SRcollect < MIC_Abstract
-% MIC_TIRF_SRcollect: Matlab instrument class for controlling TIRF
-% microscope in room 118.
-%
+% MIC_TIRF_SRcollect: Matlab instrument class for controlling TIRF microscope.
+% ## Description
 % Super resolution data collection software for TIRF microscope. Creates
 % object calling MIC classes for Andor EMCCD camera, MCL NanoDrive stage,
 % 405 nm CrystaLaser, 488 nm SpectaPhysics Laser, 561 nm Coherent Laser,
 % 642 nm Thorlabs TCube Laser Diode, halogen lamp attached to microscope
 % and the registration class Reg3DTrans.
 % Works with Matlab Instrument Control (MIC) classes since March 2017
-%
+% ## Constructor
 % Example: TIRF=MIC_TIRF_SRcollect();
 %
-% REQUIRES:
+% ## REQUIRES:
 %   MIC_Abstract
 %   MIC_LightSource_Abstract
 %   MIC_AndorCamera

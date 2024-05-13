@@ -1,6 +1,6 @@
 classdef MIC_ActiveReg3D_SPT < handle     
 
-% # MIC_ActiveReg3D_SPT Class
+% MIC_ActiveReg3D_SPT Class
 % 
 % The `MIC_ActiveReg3D_SPT` class is designed for active 3D alignment and stabilization of images captured using a specific camera and stage setup in MATLAB. This class is a part of a microscope imaging suite and is used for precise correction and calibration to maintain focus and alignment during imaging sessions.
 % 
@@ -71,7 +71,7 @@ classdef MIC_ActiveReg3D_SPT < handle
 % % Perform imaging tasks
 % alignmentSystem.stop();
 %     
-%     
+%  Citations: Lidkelab, 2017.   
     properties
         CameraObj
         StageObj

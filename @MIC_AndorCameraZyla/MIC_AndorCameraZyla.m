@@ -1,5 +1,5 @@
 classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
-% # MIC_AndorCameraZyla Class
+% MIC_AndorCameraZyla Class
 % 
 % The `MIC_AndorCameraZyla` class interfaces with Andor Zyla cameras via the Andor SDK3, providing comprehensive control over camera operations in MATLAB. This class enables precise manipulation of camera settings and acquisition modes, tailored specifically for the Zyla model.
 % 

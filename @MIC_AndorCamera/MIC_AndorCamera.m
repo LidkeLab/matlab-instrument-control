@@ -1,5 +1,5 @@
 classdef MIC_AndorCamera < MIC_Camera_Abstract
-    %MIC_AndorCamera class 
+ % MIC_AndorCamera class 
 
 % 
 % The `MIC_AndorCamera` class in MATLAB is designed for controlling Andor cameras using the Andor SDK. This class handles camera operations such as initialization, capturing images, adjusting settings, and more.
@@ -75,6 +75,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
     %   Add shutter options so capture can be run with/without shutter
     %   GUI doesn't show programic updates to CameraSettings
     %   Clear of object doesn't warm up to shutdown. 
+    % Citations: Lidkelab, 2017.
     
     properties(Access=protected, Transient=true)
         AbortNow;           %stop acquisition flag

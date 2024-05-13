@@ -1,5 +1,5 @@
 classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
-% # MIC_HamamatsuCamera Class 
+% MIC_HamamatsuCamera Class 
 % 
 % ## Description
 % The `MIC_HamamatsuCamera` class inherits from `MIC_Camera_Abstract` and is specifically tailored for 

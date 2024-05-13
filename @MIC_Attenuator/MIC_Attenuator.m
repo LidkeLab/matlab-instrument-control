@@ -1,6 +1,6 @@
 classdef MIC_Attenuator < MIC_Abstract
 
-% # MIC_Attenuator Class
+% MIC_Attenuator Class
 %
 % The `MIC_Attenuator` class in MATLAB is designed for controlling optical attenuators through an 
 % NI DAQ card, providing precise adjustments to the attenuation level. This class integrates 

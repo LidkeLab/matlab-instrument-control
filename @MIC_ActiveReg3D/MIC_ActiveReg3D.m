@@ -1,6 +1,5 @@
-classdef MIC_ActiveReg3D < handle
-    
-% # MIC_ActiveReg3D
+classdef MIC_ActiveReg3D < handle 
+% MIC_ActiveReg3D
 % 
 % `MIC_ActiveReg3D` is a MATLAB class designed for three-dimensional active registration using camera and stage control via piezoelectric actuators. This class is intended for precision imaging applications where maintaining focus and alignment within sub-micron tolerances is crucial.
 % 
@@ -50,7 +49,7 @@ classdef MIC_ActiveReg3D < handle
 % 
 % % To stop the alignment process:
 % reg3d.stop();
-%     
+%  Citations: Lidkelab, 2017. 
 
    properties
         CameraObj

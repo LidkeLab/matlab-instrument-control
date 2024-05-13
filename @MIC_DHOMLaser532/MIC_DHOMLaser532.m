@@ -1,6 +1,6 @@
 classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
    
-    % # MIC_DHOMLaser532: Matlab Instrument Class for DHOM Laser 532.
+    % MIC_DHOMLaser532: Matlab Instrument Class for DHOM Laser 532.
     % ## Description 
     % This class controls DHOM laser module, setting power within the range of 0 to
     % 400 mW (measured on 2/23/2017). The power modulation 

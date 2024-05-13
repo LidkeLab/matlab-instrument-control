@@ -1,6 +1,6 @@
 classdef MIC_Camera_Abstract < MIC_Abstract
   
-% # MIC_Camera_Abstract Class
+% MIC_Camera_Abstract Class
 % 
 % The `MIC_Camera_Abstract` class serves as a base class for creating specific camera control classes in MATLAB. This abstract class provides a structured approach to implement common camera functionalities, ensuring consistency and ease of use across different camera models.
 % 
@@ -42,7 +42,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
 % - `getlastimage()`: Retrieves the most recent image captured.
 % - `getdata()`: Retrieves all data acquired in the current session.
 
-% ### CITATION: Sajjad Khan, Lidkelab, 2024.  
+% CITATION: Sajjad Khan, Lidkelab, 2024.  
     
 %These are not abstract so we can give set functions
     properties

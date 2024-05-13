@@ -1,6 +1,6 @@
 classdef MIC_HSM488Laser<MIC_LightSource_Abstract
 
-%  # MIC_HSM488Laser Class 
+% MIC_HSM488Laser Class 
 % 
 % ## Description
 % The `MIC_HSM488Laser` class is used for controlling the HSM 488 nm laser, part of the MIC framework. 

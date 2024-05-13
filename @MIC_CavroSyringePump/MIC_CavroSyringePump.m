@@ -1,6 +1,6 @@
 classdef MIC_CavroSyringePump < MIC_Abstract
 
-% # MIC_CavroSyringePump Class 
+% MIC_CavroSyringePump Class 
 % 
 % ## Description
 % The `MIC_CavroSyringePump` class controls a Cavro syringe pump via USB, specifically designed for 

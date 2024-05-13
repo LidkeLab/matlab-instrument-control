@@ -1,5 +1,5 @@
 classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
-    % # MIC_CrystaLaser561: Matlab Instrument Class for control of CrystaLaser 561 nm.
+    % MIC_CrystaLaser561: Matlab Instrument Class for control of CrystaLaser 561 nm.
     % ## Description: 
     % This class Controls CrystaLaser module; can switch the laser ON/OFF, but cannot  
     % set power. Power for this laser is set using the knob on the front 

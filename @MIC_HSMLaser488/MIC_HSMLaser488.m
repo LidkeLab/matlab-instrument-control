@@ -1,5 +1,5 @@
 classdef MIC_HSMLaser488<MIC_LightSource_Abstract
-%  # MIC_HSMLaser488 Class 
+% MIC_HSMLaser488 Class 
 % 
 % ## Description
 % The `MIC_HSMLaser488` class is used for controlling a 488 nm laser mounted on the HSM microscope. 

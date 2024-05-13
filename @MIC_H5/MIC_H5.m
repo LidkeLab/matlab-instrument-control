@@ -1,6 +1,6 @@
 classdef MIC_H5 
 
-% # MIC_H5 Class: MIC_H5 A collection of static methods for working with HDF5 files 
+% MIC_H5 Class: MIC_H5 A collection of static methods for working with HDF5 files 
 % 
 % ## Description
 % The `MIC_H5` class is designed for handling HDF5 file operations in MATLAB. 

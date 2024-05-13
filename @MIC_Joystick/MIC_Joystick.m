@@ -1,5 +1,5 @@
 classdef MIC_Joystick < handle
-    % # Matlab instrument class to control the TIRF stage with a joystick
+    % Matlab instrument class to control the TIRF stage with a joystick
     % ## Description
     % This class controls a microscope stage with a joystick, if said joystick
     % is turned ON through the GUI. You can change the speed/sensitivity in microns/second 

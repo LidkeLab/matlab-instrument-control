@@ -1,5 +1,5 @@
 classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
-    % # MIC_KCubePiezo Matlab Instrument Control Class for ThorLabs Cube Piezo
+    % MIC_KCubePiezo Matlab Instrument Control Class for ThorLabs Cube Piezo
     % ## Description
     %   This class controls a linear piezo stage using the Thorlabs KCube Piezo
     %   controller KPZ101 and TCube strain gauge controller KSG101. It uses the Thorlabs 
@@ -36,7 +36,6 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
     %   Thorlabs.MotionControl.KCube.StrainGauge.dll
     %   Thorlabs.MotionControl.DeviceManager.dll
     %
-    
     % Citation: Keith Lidke, LidkeLab, 2018.
     
     properties (SetAccess=protected)

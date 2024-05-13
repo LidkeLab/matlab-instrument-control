@@ -1,14 +1,11 @@
 classdef MIC_RebelStarLED < MIC_LightSource_Abstract
     % MIC_RebelStarLED: Matlab Instrument Control Class for the Rebel Star LED
-    %
+    % ## Description
     % This class controls a Luxeon Rebel Star LED via a 700 mA 'BUCKPUCK'
     % model 3023-D-E-700.  The power can be set between 0 and 100% as well as
     % turned off or on.
-    %
     % The current from the LED driver is regulated by the analog voltage output
-    % of a NI DAQ card. The Constructor requires the Device and Channel
-    % details.
-    %
+    % of a NI DAQ card. The Constructor requires the Device and Channel details.
     % The output current, and therfore the light output follows the
     % relationship
     %    C_out/C_max = (V_off - V_in)/(V_off - V_100)
@@ -19,11 +16,11 @@ classdef MIC_RebelStarLED < MIC_LightSource_Abstract
     %
     % Link to Driver:
     % http://www.luxeonstar.com/700ma-external-dimming-buckpuck-dc-driver-leaded
-    %
+    % ## Constructor
     % Example: RS = MIC_RebelStarLED('Dev1', 'ao1');
-    % Functions: delete, setPower, on, off, exportState, shutdown
+    % ## Key Functions: delete, setPower, on, off, exportState, shutdown
     %
-    % REQUIREMENTS:
+    % ## REQUIREMENTS:
     %   MIC_Abstract.m
     %   MIC_LightSource_Abstract.m
     %   Data Acquisition Toolbox

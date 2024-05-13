@@ -1,6 +1,6 @@
 classdef MIC_CrystaLaser405 < MIC_LightSource_Abstract
    
-    % # MIC_CrystaLaser405: Matlab Instrument Class for CrystaLaser 405 nm.
+    % MIC_CrystaLaser405: Matlab Instrument Class for CrystaLaser 405 nm.
     % ## Description
     % Controls CrystaLaser module; setting power within the range of 0 to
     % 10 mW (The values measured on 2/23/2017 are 0.25 to 8.5 mW). 

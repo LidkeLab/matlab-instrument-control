@@ -1,5 +1,5 @@
 classdef MIC_DynamixelServo < MIC_Abstract
-    %   # MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
+    % MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
     % ## Description
     %   Dynamixel Servos are used to control the rotation of filter wheels
     %   Setup instruction can be found at Z:\Lab General Info and
