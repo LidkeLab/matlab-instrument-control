@@ -67,10 +67,10 @@ function comments = extractComments(filePath)
 end
 
 function writeReadme(folderPath, comments)
-    readmePath = fullfile(folderPath, 'README.md');
+    readmePath = fullfile(folderPath, 'Readme.md');
     fid = fopen(readmePath, 'wt');
     if fid == -1
-        error('Cannot create README.md in %s.', folderPath);
+        error('Cannot create Readme.md in %s.', folderPath);
     end
     
     fprintf(fid, '# %s\n', comments);  % Write comments with Markdown header
