@@ -2,4 +2,6 @@
 Matlab Instrument Control Camera Class.
 REQUIRES:
 MIC_Abstract.m
+
 CITATION: Sajjad Khan, Lidkelab, 2024.
+

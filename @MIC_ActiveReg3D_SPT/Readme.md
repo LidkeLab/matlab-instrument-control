@@ -1,6 +1,8 @@
 # MIC_ActiveReg3D_SPT Class
+
 ## Description
 The `MIC_ActiveReg3D_SPT` class is designed for active 3D alignment and stabilization of images captured using a specific camera and stage setup in MATLAB. This class is a part of a microscope imaging suite and is used for precise correction and calibration to maintain focus and alignment during imaging sessions.
+
 ## Properties
 - `CameraObj`: Camera object handling image capture.
 - `StageObj`: Stage object handling the positioning of the sample.
@@ -25,29 +27,40 @@ The `MIC_ActiveReg3D_SPT` class is designed for active 3D alignment and stabiliz
 - `Timer`: Timer object for periodic alignment tasks.
 - `Period`: Period of the alignment timer.
 - `PlotFigureHandle`: Handle for the plot figure.
+
 ## Methods
 ### `Constructor`
 - Initializes a new instance of the `MIC_ActiveReg3D_SPT` with a specified camera and stage object.
+
 ### `exportState`
 - Exports the current state of the object including all historical data.
+
 ### `calibrate`
 - Calibrates the camera and stage setup by moving the stage and capturing images to determine the pixel size.
+
 ### `takeRefImageStack`
 - Takes a reference image stack around the current Z position for future alignment.
+
 ### `start`, `stop`
 - Starts and stops the periodic alignment process.
+
 ### `align2imageFit`
 - Aligns the current image to the reference by adjusting the Z position and correcting based on XY shifts.
+
 ### `findZPos`
 - Finds the optimal Z position based on the maximum cross-correlation with the reference stack.
+
 ### `findXYShift`
 - Calculates the shift in XY plane needed to align the current image with the reference.
+
 ### `capture_single`
 - Captures a single image from the camera.
+
 ## Usage Example
+
 ```matlab
-cameraObj = YourCameraDriver();  Initialize your camera driver
-stageObj = YourStageDriver();  Initialize your stage driver
+cameraObj = YourCameraDriver(); % Initialize your camera driver
+stageObj = YourStageDriver(); % Initialize your stage driver
 alignmentSystem = MIC_ActiveReg3D_SPT(cameraObj, stageObj);
 alignmentSystem.calibrate();
 alignmentSystem.takeRefImageStack();
@@ -56,3 +69,4 @@ Perform imaging tasks
 alignmentSystem.stop();
 ```
 ### Citations: Lidkelab, 2017.
+

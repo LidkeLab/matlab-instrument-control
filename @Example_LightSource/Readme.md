@@ -3,3 +3,4 @@ This class provides full functionalities for a simulated light source such as La
 REQUIRES:
 MIC_LightSource_Abstract.m
 CITATION: Sajjad Khan, Lidkelab, 2024.
+
