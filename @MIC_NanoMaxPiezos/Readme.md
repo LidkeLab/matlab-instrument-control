@@ -14,7 +14,7 @@ The `MIC_NanoMaxPiezos` class provides comprehensive control over the three piez
 ## Installation Notes
 Before using this class, ensure that all dependent classes and required Thorlabs drivers are installed and properly configured on your system.
 ## Methods
-### Constructor (`MIC_NanoMaxPiezos()`)
+### `Constructor (MIC_NanoMaxPiezos())`
 Initializes piezo controllers for x, y, and z axes based on provided serial numbers. It attempts to connect to the piezos, with error handling to manage connection issues.
 ### `center()`
 Centers all three piezo stages.
@@ -38,4 +38,4 @@ disp(state);
 Clean up on completion
 delete(nmPiezos);
 ```
-CITATION: David James Schodt (Lidkelab, 2018)
+### CITATION: David James Schodt (Lidkelab, 2018)

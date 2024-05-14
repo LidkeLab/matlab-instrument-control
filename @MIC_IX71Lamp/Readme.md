@@ -1,4 +1,4 @@
-# # MIC_IX71Lamp Class
+# MIC_IX71Lamp Class
 ## Description
 The `MIC_IX71Lamp` class is a MATLAB Instrument Control Class used to manage the Olympus lamp,
 which can be turned on and off and adjusted in terms of power. It is part of the microscope control framework
@@ -32,5 +32,4 @@ Turn off the lamp and clean up
 lamp.off();
 delete(lamp);
 ```
-CITATION:
-Mohamadreza Fazel and Hanieh Mazloom-Farsibaf, Lidkelab, 2017
+### CITATION: Mohamadreza Fazel and Hanieh Mazloom-Farsibaf, Lidkelab, 2017

@@ -1,4 +1,5 @@
-# # MIC_ActiveReg3D
+# MIC_ActiveReg3D
+## Description
 `MIC_ActiveReg3D` is a MATLAB class designed for three-dimensional active registration using camera and stage control via piezoelectric actuators. This class is intended for precision imaging applications where maintaining focus and alignment within sub-micron tolerances is crucial.
 ## Features
 - Three-dimensional control of piezo stages (`Stage_Piezo_X`, `Stage_Piezo_Y`, `Stage_Piezo_Z`).
@@ -36,3 +37,5 @@ reg3d.takeRefImageStack();
 reg3d.start();
 To stop the alignment process:
 reg3d.stop();
+```
+### Citations: Lidkelab, 2017.

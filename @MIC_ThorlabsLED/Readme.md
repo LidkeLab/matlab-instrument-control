@@ -35,7 +35,7 @@ delete(obj)
 shutdown(obj)
 - Sets power to zero, turns off the lamp, and cleans up resources.
 - Usage: obj.shutdown();
-## Usage
+## Usage Example
 To create an instance of the `MIC_ThorlabsLED` class:
 ```matlab
 obj = MIC_ThorlabsLED('Dev1', 'ao1');
@@ -52,4 +52,4 @@ led.off();
 Clean up
 led.delete();
 ```
-CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
+### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.

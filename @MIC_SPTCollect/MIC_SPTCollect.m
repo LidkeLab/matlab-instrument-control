@@ -1,10 +1,11 @@
 classdef MIC_SPTCollect < MIC_Abstract
     % MIC_SPTCollect Single Particle Tracking/Superresolution data collection software. 
+    %
     % ## Description
     % Super resolution and Single Particle Tracking data collection
     % class for SPT microscope Works with Matlab Instrument Control (MIC)
     % classes since August 2017
-    
+    %
     %  ## Constructor
     % SPT=MIC_SPTCollect();
     %
@@ -14,7 +15,7 @@ classdef MIC_SPTCollect < MIC_Abstract
     %   MIC_SyringePump MIC_ThorlabsIR MIC_ThorlabLED MIC_MCLNanoDrive
     %   MIC_Reg3DTrans
     %
-    % CITATION: Hanieh Mazloom-Farsibaf   August 2017 (Keith A. Lidke's lab)
+    % ### CITATION: Hanieh Mazloom-Farsibaf August 2017 (Keith A. Lidke's lab)
     
     properties
         % Hardware objects

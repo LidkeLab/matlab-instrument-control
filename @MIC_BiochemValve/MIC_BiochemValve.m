@@ -1,7 +1,6 @@
 classdef MIC_BiochemValve < MIC_Abstract
-
 %  MIC_BiochemValve Class 
-
+%
 % ## Description
 % The `MIC_BiochemValve` class manages BIOCHEM flow selection valves through communication with an Arduino. 
 % It provides functionality to open and close valves, and includes an emergency shutoff to cut power to both the valves
@@ -11,7 +10,8 @@ classdef MIC_BiochemValve < MIC_Abstract
 % - MATLAB R2014b or later
 % - MATLAB Support Package for Arduino Hardware:     
 % 
-% NOTE: You may need to setup the Arduino you are using
+% ##NOTE
+% You may need to setup the Arduino you are using
 % specifically even if this package was installed previously.
 % Matlab needs to upload software onto the Arduino before
 % creation of an instance of this class. 
@@ -43,7 +43,7 @@ classdef MIC_BiochemValve < MIC_Abstract
 % % Managing power
 % Valves.powerSwitch12V();  % Toggle the 12V power line
 % ```
-% CITATION: David Schodt, Lidke Lab, 2018
+% ### CITATION: David Schodt, Lidke Lab, 2018
     
     
     properties (SetAccess = protected) % users shouldn't set these

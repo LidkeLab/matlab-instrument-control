@@ -1,4 +1,4 @@
-# # MIC_IRSyringPump Class
+# MIC_IRSyringPump Class
 ## Description
 The `MIC_IRSyringPump` class extends the `MIC_ThorlabsIR` class to include control over a syringe pump during IR imaging sessions. This class is specifically designed for simultaneous operation of a syringe pump and an IR camera, enabling precise timing of fluid delivery relative to image acquisition. It is tailored for use in single-particle tracking (SPT) microscopy applications within Lidke's Lab.
 ## Requirements
@@ -23,4 +23,4 @@ Display the acquired data
 figure; imagesc(max(irSyringePump.Data, [], 3)); axis image; colormap gray;
 title('Max Intensity Projection of Acquired Sequence');
 ```
-CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
+### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.

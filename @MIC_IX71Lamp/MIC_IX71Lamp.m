@@ -1,5 +1,4 @@
 classdef MIC_IX71Lamp < MIC_LightSource_Abstract
-
 % MIC_IX71Lamp Class 
 % 
 % ## Description
@@ -41,7 +40,7 @@ classdef MIC_IX71Lamp < MIC_LightSource_Abstract
 % lamp.off();
 % delete(lamp);
 % ``` 
-   % CITATION: Mohamadreza Fazel and Hanieh Mazloom-Farsibaf, Lidkelab, 2017   
+% ### CITATION: Mohamadreza Fazel and Hanieh Mazloom-Farsibaf, Lidkelab, 2017   
     
    properties (SetAccess=protected)
         InstrumentName='MIC_IX71Lamp' % Descriptive Instrument Name

@@ -1,4 +1,4 @@
-# # MIC_IMGSourceCamera: Matlab instument class for ImagingSource camera.
+# MIC_IMGSourceCamera: Matlab instument class for ImagingSource camera.
 ## Description
 It requires dll to be registered in MATLAB.
 TISImaq interfaces directly with the IMAQ Toolbox. This allows you to
@@ -21,4 +21,4 @@ delete, shutdown, exportState
 MIC_Abstract.m
 MIC_Camera_Abstract.m
 MATLAB software version R2013a or later
-CITATION: , Lidkelab, 2017.
+### CITATION: , Lidkelab, 2017.

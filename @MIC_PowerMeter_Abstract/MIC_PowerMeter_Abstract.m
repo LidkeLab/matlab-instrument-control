@@ -1,7 +1,7 @@
 classdef MIC_PowerMeter_Abstract < MIC_Abstract
 %  MIC_PowerMeter_Abstract
 % 
-% ## Overview
+% ## Description
 % `MIC_PowerMeter_Abstract` is a MATLAB class derived from `MIC_Abstract` to interface with the power meter (specifically the PM100D model). It enables the measurement of optical power and temperature, and displays this data in real-time through a graphical user interface (GUI).
 % 
 % ## Features
@@ -32,7 +32,7 @@ classdef MIC_PowerMeter_Abstract < MIC_Abstract
 % % Properly shutting down the device:
 % pm.Shutdown();
 % ```
-% Citation: Sajjad Khan, Lidkelab, 2024.
+% ### Citation: Sajjad Khan, Lidkelab, 2024.
     properties
         
         VisaObj             %Visa Object (Virtual Instrument Standard Architecture=VISA)

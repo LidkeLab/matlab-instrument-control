@@ -1,5 +1,6 @@
 classdef MIC_NDFilterWheel < MIC_Abstract
     %  MIC_NDFilterWheel: Matlab Instrument Control for servo operated Filter wheel containing Neutral Density filters
+    %
     %  ## Description
     % Filter wheel should be controlled by Dynamixel Servos. See "Z:\Lab 
     %  General Info and Documents\TIRF Microscope\Build Instructions for 
@@ -11,6 +12,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
     %  can be calibrated by setting the servo rotation such that the 
     %  specific filter is in the optical path. The Rotation property of the
     %  servo gives the right position value for that filter.
+    %
     % ## Usage Example
     %  Example: obj=MIC_NDFilterWheel(ServoId,FracTransmVals,FilterPos);
     %          ServoId: Id of servo, is written on servo
@@ -22,14 +24,16 @@ classdef MIC_NDFilterWheel < MIC_Abstract
     %                   index should correspond to order in FracTransmVals
     %  Example for 6 filters:
     %  FWobj = MIC_NDFilterWheel(1, [1 0.8 0.6 0.4 0.2 0], [0 60 120 180 240 300])
-    %  ## Key Functions: setFilter, exportState, setTransmittance get.CurrentFilter, get.CurrentTransmittance
+    %
+    %  ## Key Functions: 
+    % setFilter, exportState, setTransmittance get.CurrentFilter, get.CurrentTransmittance
     %
     %  ## REQUIRES
     %   Matlab 2014b or higer
     %   MIC_Abstract.m
     %   MIC_DynamixelServo.m
     %
-    % CITATION: Marjolein Meddens, Lidke Lab, 2017.
+    % ### CITATION: Marjolein Meddens, Lidke Lab, 2017.
     
     properties (SetAccess=protected)
         InstrumentName = 'NDFilterWheel';

@@ -10,9 +10,10 @@ be prompted to select the location of MicroDrive.dll.  On a Windows
 machine, this is typically placed by default in
 C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll  during the
 installation process (installation files provided by MCL).
-NOTE: I had to manually modify MicroDrive.h to remove the precompiler
+## NOTE:
+I had to manually modify MicroDrive.h to remove the precompiler
 directives related to the '_cplusplus' stuff.  I was getting
-errors otherwise that I didn't know what to do about! -DS 2021
+errors otherwise that I didn't know what to do about! -DS 2021.
 ## Features
 - Direct control over MCL micro-positioner stages through MATLAB using C libraries.
 - Auto-detection and handling of hardware errors with comprehensive error reporting.
@@ -42,7 +43,7 @@ PX = MIC_MCLMicroDrive(true);
 PX.gui();
 PX.moveDistance(5);   Moves the stage 5 mm from the current position
 ```
-Citation: David J. Schodt (Lidkelab, 2021) based on MIC_MCLNanoDrive class.
+### Citation: David J. Schodt (Lidkelab, 2021) based on MIC_MCLNanoDrive class.
 # connectStage attempts to connect to the stage.
 This method will use the MCL libraries to attempt to connect to an MCL
 micro-drive stage attached to the calling computer.

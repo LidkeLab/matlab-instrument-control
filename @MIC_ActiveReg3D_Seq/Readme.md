@@ -1,5 +1,5 @@
-# # MIC_ActiveReg3D_Seq
-## Overview
+# MIC_ActiveReg3D_Seq
+## Description
 `MIC_ActiveReg3D_Seq` is a MATLAB class designed for 3D sequential active registration using a camera and piezo stages. This class manages the positioning and alignment of optical components in three-dimensional space to correct for positional drifts during imaging processes.
 ## Properties
 - **CameraObj**: Object handling camera operations.
@@ -30,3 +30,4 @@
 - **capture_single()**: Captures a single image from the camera.
 ## Usage
 Instantiate the class with the required camera and stage objects. Use the methods provided to calibrate, set the reference image stack, start/stop the alignment process, and retrieve alignment data.
+### Citations: Lidkelab, 2019.

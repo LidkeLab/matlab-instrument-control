@@ -1,5 +1,4 @@
 classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
-% 
 % MIC_CoherentLaser561 Class 
 % 
 % ## Description
@@ -18,7 +17,7 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
 % ## Installation
 % Ensure that all required classes (`MIC_Abstract`, `MIC_LightSource_Abstract`, `MIC_FilterWheel`, `MIC_DynamixelServo`, 
 % `MIC_ShutterTTL`) are in your MATLAB path. The laser connects via a specified COM port (e.g., 'COM3').
-
+%
 % ## Key Functions
 % - **Constructor (`MIC_CoherentLaser561(SerialPort)`):** Initializes the laser on a specified COM port, sets up the filter wheel and shutter, and establishes serial communication.
 % - **`on()`:** Activates the laser, opening the shutter and setting the laser state to on.
@@ -33,20 +32,16 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
 % ```matlab
 % % Create an instance of the Coherent Laser 561 on COM3
 % CL561 = MIC_CoherentLaser561('COM3');
-% 
 % % Set power to 50 mW
 % CL561.setPower(50);
-% 
 % % Turn on the laser
 % CL561.on();
-% 
 % % Turn off the laser
 % CL561.off();
-% 
 % % Delete the object when done
 % delete(CL561);
 % ```    
-% CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.  
+% ### CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.  
 
     properties (SetAccess=protected)
         InstrumentName='CoherentLaser561' % Descriptive Instrument Name

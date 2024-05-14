@@ -43,7 +43,7 @@ classdef MIC_NanoMax < MIC_Abstract
 % % Clean up and close the system
 % delete(nanoStage);
 % ```   
-%   CITATION: Sandeep Pallikuth, Lidkelab, 2017 & Sajjad Khan, Lidkelab, 2021.    
+% ### CITATION: Sandeep Pallikuth, Lidkelab, 2017 & Sajjad Khan, Lidkelab, 2021.    
     properties
         StartGUI;                   % starting gui
         SerialN;                    % for SEQ controller: 70850323

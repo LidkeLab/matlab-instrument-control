@@ -4,7 +4,6 @@ classdef MIC_RB_PSFEng < MIC_Abstract
 % ## Overview
 % The `MIC_RB_PSFEng` class is designed for super-resolution data collection in PSF (Point Spread Function) engineering on Reflected Beam Microscopes and similar setups. This class interfaces with hardware components like Spatial Light Modulators (SLMs), cameras, lasers, and piezoelectric stages to facilitate the exploration and design of PSFs. It includes methods for PSF construction, pupil position calibration, and other related utilities.
 % 
-% 
 % ## Requirements
 % - MATLAB 2016b or later.
 % - Dependence on several custom classes for hardware interaction:
@@ -12,7 +11,6 @@ classdef MIC_RB_PSFEng < MIC_Abstract
 %   - `MIC_HamamatsuCamera`: for camera controls.
 %   - `MIC_TCubeLaserDiode`: for laser controls.
 %   - `MIC_TCubePiezo`: for piezo stage operations.
-% - Ensure these classes are in your MATLAB path.
 % 
 % ## Installation
 % 1. Clone this repository or download the files into your MATLAB working directory.
@@ -20,7 +18,6 @@ classdef MIC_RB_PSFEng < MIC_Abstract
 % 
 % ## Usage Example
 % Below is an example on how to initialize and use the `MIC_RB_PSFEng` class within MATLAB:
-% 
 % ```matlab
 % % Initialize camera, laser, piezo, and SLM objects
 % camera = MIC_HamamatsuCamera();
@@ -37,8 +34,7 @@ classdef MIC_RB_PSFEng < MIC_Abstract
 % % Example to display the optimal pupil
 % psfEngine.dispOptimalPupil();
 % ```   
-% CITATION: Sandeep Pallikuth & Marjolein Meddens, Lidke Lab 2017. 
-% Sajjad Khan, Lidkelab, 2021.
+% ### CITATION: Sandeep Pallikuth & Marjolein Meddens, Lidke Lab 2017. Sajjad Khan, Lidkelab, 2021.
     properties
         % Instruments
         SLM                 % SLM object (MIC_HamamatsuLCOS)

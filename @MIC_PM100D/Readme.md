@@ -9,10 +9,11 @@ the current power and the maximum measured power. To run this code
 you need the power meter to be connected to the machine.
 ## Constructor
 Example: P = MIC_PM100D; P.gui
-## Key Functions: constructor(), exportState(), send(), minMaxWavelength(), getWavelength(), measure(), setWavelength(), shutdown()
+## Key Functions:
+constructor(), exportState(), send(), minMaxWavelength(), getWavelength(), measure(), setWavelength(), shutdown()
 ## REQUIREMENTS:
 NI_DAQ  (VISA and ICP Interfaces) should be installed.
 MATLAB 2014 or higher.
 MIC_Abstract.m
 MIC_PowerMeter_Abstract.m
-CITATION: Mohamadreza Fazel, Lidkelab, 2017.
+### CITATION: Mohamadreza Fazel, Lidkelab, 2017.

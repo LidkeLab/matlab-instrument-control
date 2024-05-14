@@ -1,7 +1,7 @@
 classdef MIC_OptotuneLens < MIC_Abstract
 % MIC_OptotuneLens
 % 
-% ## Overview
+% ## Description
 % The `MIC_OptotuneLens` MATLAB class facilitates control over an Optotune Electrical Lens via serial communication. The class interfaces with the lens using an embedded Atmel ATmega32U4 microcontroller, allowing for precise adjustments of focal power and monitoring of the lens temperature.
 % 
 % ## Features
@@ -10,7 +10,7 @@ classdef MIC_OptotuneLens < MIC_Abstract
 % - **Drift Compensation**: Enable drift compensation to maintain focal stability.
 % - **Firmware Interaction**: Retrieve and interact with the lens firmware, accommodating different firmware versions for command compatibility.
 % 
-% ## Prerequisites
+% ## Requirements
 % - MATLAB 2016b or later.
 % - Instrument Control Toolbox for MATLAB for serial port communication.
 % - Optotune lens driver and firmware installed and properly configured.
@@ -20,9 +20,7 @@ classdef MIC_OptotuneLens < MIC_Abstract
 % 2. Connect the Optotune lens to your computer via a USB port and install any necessary drivers.
 % 3. Clone this repository or download the class file directly into your MATLAB working directory.
 % 
-% ## Usage
-% 
-% ### Example
+% ## Usage Example
 % ```matlab
 % % Creating an instance of the MIC_OptotuneLens class
 % lens = MIC_OptotuneLens('COM3');  % Replace 'COM3' with the actual COM port
@@ -41,7 +39,7 @@ classdef MIC_OptotuneLens < MIC_Abstract
 % % Cleanup
 % delete(lens);
 % ```   
-% Citation: Marjolein Meddens, Lidke Lab 2017
+% ### Citation: Marjolein Meddens, Lidke Lab 2017
     properties (SetAccess=protected)
         InstrumentName = 'OptotuneLens' %Descriptive instrument name
         MinFocalPower   % Maximum focal power (dpt) of lens

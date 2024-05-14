@@ -1,23 +1,20 @@
 classdef MIC_AndorCamera < MIC_Camera_Abstract
  % MIC_AndorCamera class 
-
 % 
+% ## Description
 % The `MIC_AndorCamera` class in MATLAB is designed for controlling Andor cameras using the Andor SDK. This class handles camera operations such as initialization, capturing images, adjusting settings, and more.
 % 
 % ## Features
-% 
 % - Full control over Andor camera settings including exposure time, ROI, and binning.
 % - Different acquisition modes: focus, capture, and sequence.
 % - Integration with the Andor SDK for advanced camera operations.
 % - Provides methods for starting and stopping acquisitions, setting temperatures, and managing the camera shutter.
 % 
 % ## Requirements
-% 
 % - MATLAB
 % - Andor MATLAB SDK version 2.94.30005 or higher.
 % 
 % ## Properties
-% 
 % - `CameraObj`: Object representing the camera.
 % - `ImageSize`: Current size of the ROI.
 % - `ExpTime_Focus`, `ExpTime_Capture`, `ExpTime_Sequence`: Exposure times for different modes.
@@ -25,7 +22,6 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
 % - `Binning`: Current binning settings.
 % 
 % ## Methods
-% 
 % ### `start`
 % Initializes the camera and sets up the acquisition based on the current settings.
 % 
@@ -64,18 +60,18 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
 % 
 % % Close the camera
 % camera.shutdown();
-
-% Requires:
+% ```
+% ## Requirement:
 % Andor MATLAB SDK 2.94.30005 or higher  
-
-    
-    %   TODO:
+%
+% ## To Do:
     %   Add quarter CCD left, right ROI selection (for TIRF system). 
     %   Fix warning error about not acquiring
     %   Add shutter options so capture can be run with/without shutter
     %   GUI doesn't show programic updates to CameraSettings
     %   Clear of object doesn't warm up to shutdown. 
-    % Citations: Lidkelab, 2017.
+    % 
+    % ### Citations: Lidkelab, 2017.
     
     properties(Access=protected, Transient=true)
         AbortNow;           %stop acquisition flag

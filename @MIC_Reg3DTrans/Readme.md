@@ -11,14 +11,14 @@ There are several properties that are system specific. These need
 to be specified after initialization of the class, before using
 any of the functionality. See properties section for explanation
 and which ones.
-## REQUIRES
+## REQUIREMENT
 Matlab 2014b or higher
 MIC_Abstract
-MICROSCOPE SPECIFIC SETTINGS
+## MICROSCOPE SPECIFIC SETTINGS
 TIRF: LampPower=?; LampWait=2.5; CamShutter=true; ChangeEMgain=true;
 EMgain=2; ChangeExpTime=true; ExposureTime=0.01;
-Citations: Marjolein Meddens,  Lidke Lab 2017
-Update:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
+### Citations: Marjolein Meddens,  Lidke Lab 2017
+### Updated version:Hanieh Mazloom-Farsibaf, Lidke Lab 2018.
 # findStackOffset estimates a sub-pixel offset between two stacks.
 findStackoffset() will estimate the offset between two 3D stacks of
 images.  This method computes an integer pixel offset between the two

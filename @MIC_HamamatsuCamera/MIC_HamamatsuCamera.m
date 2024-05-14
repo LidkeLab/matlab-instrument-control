@@ -51,7 +51,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
 % % Clean up on completion
 % delete(cam);
 % ```
-%  Citation: Sajjad Khan, Lidkelab, 2024      
+%  ### Citation: Lidkelab 2020     
     properties(Access=protected)
         AbortNow;           %stop acquisition flag
         ErrorCode;

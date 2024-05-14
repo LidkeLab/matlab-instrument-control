@@ -1,10 +1,10 @@
 classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     % MIC_MCLNanoDrive controls the Mad City Labs 3D Piezo Stage
+    %
     %   ## Description
     %   This class controls a 3D Peizo stage from Mad City Labs.  The class
     %   uses 'calllib' to directly call funtions from the madlib.dll. The instument
     %   is attached via USB.
-    %
     %   The first time an object of this class is created, the user must
     %   direct the object to the 'madlib.h' header file.  This is usually
     %   located here:  C:\Program Files\Mad City Labs\NanoDrive
@@ -20,6 +20,7 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     % - MIC_Abstract.m
     % - MATLAB 2014b or higher
     % - Mad City Labs drivers and `madlib.h` installed on the system.
+    %
     % ## Installation Notes
     % During the first initialization of this class on a system, users are prompted to direct the class to the `madlib.h` header file, typically located in `C:\Program Files\Mad City Labs\NanoDrive`.
     %
@@ -50,8 +51,7 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     % % Display the GUI
     % stage.gui();
     % ```
-    
-    % Citation:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
+    % ### Citation:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
 
      properties (SetAccess=protected)
         InstrumentName='MCLNanoDrive'; 

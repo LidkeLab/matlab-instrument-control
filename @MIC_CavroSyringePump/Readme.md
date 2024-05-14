@@ -1,4 +1,4 @@
-# # MIC_CavroSyringePump Class
+# MIC_CavroSyringePump Class
 ## Description
 The `MIC_CavroSyringePump` class controls a Cavro syringe pump via USB, specifically designed for
 pump PN 20740556 -D. This class may work with other Cavro brand syringe pumps but has only been tested with the
@@ -24,7 +24,7 @@ Pump.querySyringePump();
 Disconnect and cleanup
 delete(Pump);
 ```
-CITATION: David Schodt, Lidke Lab, 2018
+### CITATION: David Schodt, Lidke Lab, 2018
 # Checks to see if an ASCII answer block is a valid response from the Cavro
 syringe pump and cleans up the message if needed.
 INPUTS:

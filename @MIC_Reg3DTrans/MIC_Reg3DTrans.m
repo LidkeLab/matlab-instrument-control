@@ -1,5 +1,5 @@
 classdef MIC_Reg3DTrans < MIC_Abstract
-    %MIC_Reg3DTrans Register a sample to a stack of transmission images Class that performs 3D registration using transmission images
+    % MIC_Reg3DTrans Register a sample to a stack of transmission images Class that performs 3D registration using transmission images
     % 
     % ## INPUT
     %    CameraObj - camera object -- tested with MIC_AndorCamera only
@@ -15,16 +15,16 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     %    any of the functionality. See properties section for explanation
     %    and which ones.
     % 
-    % ## REQUIRES
+    % ## REQUIREMENT
     %    Matlab 2014b or higher
     %    MIC_Abstract
     %  
-    % MICROSCOPE SPECIFIC SETTINGS
+    % ## MICROSCOPE SPECIFIC SETTINGS
     % TIRF: LampPower=?; LampWait=2.5; CamShutter=true; ChangeEMgain=true; 
-    %       EMgain=2; ChangeExpTime=true; ExposureTime=0.01;   
+    %  EMgain=2; ChangeExpTime=true; ExposureTime=0.01;   
     
-    %  Citations: Marjolein Meddens,  Lidke Lab 2017
-    % Update:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
+    % ### Citations: Marjolein Meddens,  Lidke Lab 2017
+    % ### Updated version:Hanieh Mazloom-Farsibaf, Lidke Lab 2018.
     
     properties
         % Input

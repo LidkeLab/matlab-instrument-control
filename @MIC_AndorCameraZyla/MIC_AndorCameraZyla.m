@@ -1,22 +1,20 @@
 classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
 % MIC_AndorCameraZyla Class
 % 
+% ## Description
 % The `MIC_AndorCameraZyla` class interfaces with Andor Zyla cameras via the Andor SDK3, providing comprehensive control over camera operations in MATLAB. This class enables precise manipulation of camera settings and acquisition modes, tailored specifically for the Zyla model.
 % 
 % ## Features
-% 
 % - Direct integration with Andor SDK3.
 % - Support for multiple acquisition modes including focus, capture, and sequence.
 % - Customizable Region of Interest (ROI), binning settings, and exposure times.
 % - Automatic handling of camera initialization and shutdown procedures.
 % 
 % ## Requirements
-% 
 % - MATLAB
 % - Andor MATLAB SDK3 version 2.94.30005 or higher.
 % 
 % ## Properties
-% 
 % - `CameraHandle`: Reference to the camera handle used in SDK calls.
 % - `ImageSize`: Current size of the ROI in pixels.
 % - `ExpTime_Focus`, `ExpTime_Capture`, `ExpTime_Sequence`: Exposure times for different operational modes.
@@ -24,7 +22,6 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
 % - `Binning`: Pixel binning configuration.
 % 
 % ## Methods
-% 
 % ### `initialize`
 % Prepares the camera for operation by loading the SDK and setting default configurations.
 % 
@@ -50,10 +47,8 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
 % camera.setup_acquisition('sequence');
 % camera.SequenceLength = 100;
 % camera.start_sequence();
-% 
 % % Capture a single frame
 % camera.start_capture();
-% 
 % % Shut down the camera
 % camera.shutdown();
 % ```

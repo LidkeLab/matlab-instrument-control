@@ -1,5 +1,4 @@
 classdef MIC_IRSyringPump < MIC_ThorlabsIR
-
 % MIC_IRSyringPump Class 
 % 
 % ## Description
@@ -33,7 +32,7 @@ classdef MIC_IRSyringPump < MIC_ThorlabsIR
 % figure; imagesc(max(irSyringePump.Data, [], 3)); axis image; colormap gray;
 % title('Max Intensity Projection of Acquired Sequence');
 % ```   
-% CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
+% ### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
 
     properties
         SP          % an obj for MIC_SyringePump to control Syringe pump

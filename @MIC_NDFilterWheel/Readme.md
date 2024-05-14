@@ -21,12 +21,13 @@ corresponding to filter positions, order (linear
 index should correspond to order in FracTransmVals
 Example for 6 filters:
 FWobj = MIC_NDFilterWheel(1, [1 0.8 0.6 0.4 0.2 0], [0 60 120 180 240 300])
-## Key Functions: setFilter, exportState, setTransmittance get.CurrentFilter, get.CurrentTransmittance
+## Key Functions:
+setFilter, exportState, setTransmittance get.CurrentFilter, get.CurrentTransmittance
 ## REQUIRES
 Matlab 2014b or higer
 MIC_Abstract.m
 MIC_DynamixelServo.m
-CITATION: Marjolein Meddens, Lidke Lab, 2017.
+### CITATION: Marjolein Meddens, Lidke Lab, 2017.
 # gui Graphical User Interface to MIC_NDFilterWheel
 GUI has functionality to change which filter is used
 Marjolein Meddens, Lidke Lab 2017

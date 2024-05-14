@@ -40,6 +40,6 @@ stage.center();
 Display the GUI
 stage.gui();
 ```
-Citation:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
+### Citation:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
 # certain errors throw variable error codes but are specific to axis controls, this is logical branch for that
 # set the ErrorCode static codes as a structure

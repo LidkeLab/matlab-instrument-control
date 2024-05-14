@@ -47,4 +47,4 @@ Turn the laser off and clean up
 laser.off();
 delete(laser);
 ```
-Citation: Sajjad Khan, Lidkelab, 2024.
+### Citation: Sajjad Khan, Lidkelab, 2024.

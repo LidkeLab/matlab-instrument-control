@@ -1,5 +1,6 @@
 classdef MIC_StepperMotor < MIC_Abstract
     % Class to control Benchtop stepper motor.
+    %
     % ## Description
     % This device might also be cotroled using the kinesis software.
     % This class give you access to some of the functions in the long list
@@ -13,11 +14,14 @@ classdef MIC_StepperMotor < MIC_Abstract
     % Actuator Type box, from the popup menu in the top select the device
     % that you wish to control (it could be either HS NanoMax 300 X Axis, 
     % HS NanoMax 300 Y Axis or HS NanoMax 300 Z Axis), then OK and Save.
+    %
     % ## Constructor
-    % Example: M = MIC_StepperMotor(70850323)
-    % Functions: constructor(), goHome(), getPosition(), getStatus(), 
-    %            getStatus(), moveJog(), moveToPosition(), setJogStep()
-    %            getJogStep(), closeSBC(), delete(), exportState()
+    % M = MIC_StepperMotor(70850323)
+    %
+    % ## Key Functions:
+    % constructor(), goHome(), getPosition(), getStatus(), 
+    % getStatus(), moveJog(), moveToPosition(), setJogStep()
+    % getJogStep(), closeSBC(), delete(), exportState()
     %
     % ## REQUIREMENTS:
     %   MATLAB 2014 or higher
@@ -25,7 +29,7 @@ classdef MIC_StepperMotor < MIC_Abstract
     %   MIC_Abstract class.
     %   Access to the mexfunctions for this device. (kinesis_SBC_function).
     %
-    % CITATION: Mohamadreza Fazel, Lidkelab, 2017.
+    % ### CITATION: Mohamadreza Fazel, Lidkelab, 2017.
     
     properties (SetAccess=protected)
         InstrumentName = 'StepperMotor'; %instrument name

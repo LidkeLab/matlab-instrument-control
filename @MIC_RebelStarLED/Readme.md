@@ -12,14 +12,15 @@ Where C_out is the output current, V_in is the input voltage,
 V_off is the voltage where output current drops to zero and V_100 is the
 Voltage where current begins to drop from 100. V_off and V_100 must be
 measured and set in the class.
-Link to Driver:
+## Link to Driver:
 http://www.luxeonstar.com/700ma-external-dimming-buckpuck-dc-driver-leaded
 ## Constructor
 Example: RS = MIC_RebelStarLED('Dev1', 'ao1');
-## Key Functions: delete, setPower, on, off, exportState, shutdown
+## Key Functions:
+delete, setPower, on, off, exportState, shutdown
 ## REQUIREMENTS:
 MIC_Abstract.m
 MIC_LightSource_Abstract.m
 Data Acquisition Toolbox
 MATLAB NI-DAQmx driver installed via the Support Package Installer
-CITATION: Lidkelab, 2017.
+### CITATION: Lidkelab, 2017.

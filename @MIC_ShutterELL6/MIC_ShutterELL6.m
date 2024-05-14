@@ -1,5 +1,6 @@
 classdef MIC_ShutterELL6 < MIC_Abstract 
     %  MIC_ShutterELL6
+    %
     % ## Overview
     % MIC_ShutterELL6 Matlab Instrument Control Class for the 2-position
     % slider ELL6, which can be used as a shutter (or filter slider).
@@ -23,7 +24,7 @@ classdef MIC_ShutterELL6 < MIC_Abstract
     % - Data Acquisition Toolbox on MATLAB
     % - MATLAB 2014b or higher
     %
-    % ## Installation
+    % ## Note
     % To use the `MIC_ShutterELL6` class, ensure that the required files are in your MATLAB path.
     %
     % ## Usage
@@ -35,7 +36,7 @@ classdef MIC_ShutterELL6 < MIC_Abstract
     % shutter.gui();
     % delete(shutter);
     % ```
-    % Citation: Gert-Jan based on ShutterTLL (by Farzin)
+    % ### Citation: Gert-Jan based on ShutterTLL (by Farzin)
     
     properties(SetAccess=protected)
         

@@ -28,7 +28,8 @@ classdef MIC_RB_SRcollect < MIC_Abstract
 % 1. Ensure all dependent classes are available in your MATLAB path.
 % 2. Clone or download this repository into your MATLAB environment.
 % 3. Instantiate an object using the command: `SRC = MIC_RB_SRcollect();`
-% ## Methods Overview
+%
+% ## Methods 
 % - `setupPiezo()`: Configures and initializes the piezo stages.
 % - `loadref()`: Loads a reference image for alignment.
 % - `takecurrent()`: Captures the current image from the camera.
@@ -53,7 +54,7 @@ classdef MIC_RB_SRcollect < MIC_Abstract
 % % Start acquisition
 % SRC.StartSequence();
 % ```   
-% Citation: Marjolein Meddens, Lidke Lab 2017
+% ### Citation: Marjolein Meddens, Lidke Lab 2017
     properties
         % Hardware objects
         Camera;         % Hamamatsu Camera

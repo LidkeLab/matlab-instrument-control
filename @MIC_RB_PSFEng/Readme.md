@@ -8,7 +8,6 @@ The `MIC_RB_PSFEng` class is designed for super-resolution data collection in PS
 - `MIC_HamamatsuCamera`: for camera controls.
 - `MIC_TCubeLaserDiode`: for laser controls.
 - `MIC_TCubePiezo`: for piezo stage operations.
-- Ensure these classes are in your MATLAB path.
 ## Installation
 1. Clone this repository or download the files into your MATLAB working directory.
 2. Ensure all dependent classes (`MIC_HamamatsuLCOS`, `MIC_HamamatsuCamera`, `MIC_TCubeLaserDiode`, `MIC_TCubePiezo`) are also included in your MATLAB path.
@@ -27,8 +26,7 @@ psfEngine.calibratePupilPosition();
 Example to display the optimal pupil
 psfEngine.dispOptimalPupil();
 ```
-CITATION: Sandeep Pallikuth & Marjolein Meddens, Lidke Lab 2017.
-Sajjad Khan, Lidkelab, 2021.
+### CITATION: Sandeep Pallikuth & Marjolein Meddens, Lidke Lab 2017. Sajjad Khan, Lidkelab, 2021.
 # blazeScanIntensity Calculates expected intensity during blaze scan
 Function consists of 4 parts:
 1. Pupil function is unblazed

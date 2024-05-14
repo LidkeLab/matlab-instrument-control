@@ -1,9 +1,11 @@
 classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
     % MIC_KCubePiezo Matlab Instrument Control Class for ThorLabs Cube Piezo
+    %
     % ## Description
     %   This class controls a linear piezo stage using the Thorlabs KCube Piezo
     %   controller KPZ101 and TCube strain gauge controller KSG101. It uses the Thorlabs 
     %   Kinesis C-API via pre-complied mex files. 
+    %
     %   ## Key Functions
 % - **Constructor (`MIC_KCubePiezo(SerialNoKPZ001, SerialNoKSG001, AxisLabel)`):** Initializes the device with specific serial numbers and the designated axis. Establishes connections and calibrates the device for use.
 % - **`openDevices()`:** Opens connections to the KCube Piezo and Strain Gauge controllers using Thorlabs Kinesis C-API.
@@ -14,7 +16,7 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
 % - **`getPosition()`:** Retrieves the current position of the piezo stage, providing feedback on the stage's location in its operational range.
 % - **`shutdown()`:** Completes the session by turning off the devices and ensuring all settings are reset to prevent damage or misconfiguration for future operations.
 % - **`exportState()`:** Exports the current operational state, including position, calibration data, and system settings, useful for session logging or debugging.
-
+%
     % ## Usage Example
     %   PX=MIC_KCubePiezo(SerialNoKPZ001,SerialNoKSG001,AxisLabel)
     %   PX.gui()
@@ -36,7 +38,7 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
     %   Thorlabs.MotionControl.KCube.StrainGauge.dll
     %   Thorlabs.MotionControl.DeviceManager.dll
     %
-    % Citation: Keith Lidke, LidkeLab, 2018.
+    % ### Citation: Keith Lidke, LidkeLab, 2018.
     
     properties (SetAccess=protected)
         PositionUnit='um';          % Units of position parameter (eg. um/mm)

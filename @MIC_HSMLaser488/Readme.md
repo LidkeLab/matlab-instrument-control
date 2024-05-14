@@ -1,4 +1,4 @@
-# # MIC_HSMLaser488 Class
+# MIC_HSMLaser488 Class
 ## Description
 The `MIC_HSMLaser488` class is used for controlling a 488 nm laser mounted on the HSM microscope.
 This class facilitates the operation of the laser through a MATLAB interface, leveraging both a shutter and a
@@ -33,4 +33,4 @@ Turn the laser off and delete the object
 laser.off();
 delete(laser);
 ```
-CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
+### CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.

@@ -1,4 +1,4 @@
-# # MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
+# MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
 ## Description
 Dynamixel Servos are used to control the rotation of filter wheels
 Setup instruction can be found at Z:\Lab General Info and
@@ -26,7 +26,7 @@ DynamixelSDK (most likely will be installed during installation of
 Roboplus, if not it can be found on the Roboplus webpage)
 All files that are not specifically for the Roboplus software should
 be extracted into C:\Program Files(x86)\ROBOTIS\USB2Dynamixel
-CITATION: Marjolein Meddens, Lidke Lab, 2017.
+### CITATION: Marjolein Meddens, Lidke Lab, 2017.
 # gui Graphical User Interface to MIC_DynamixelServo
 GUI has functionality to change position and set rotation speed. Also
 it lets you turn the LED on and off

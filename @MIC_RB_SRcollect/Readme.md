@@ -23,7 +23,7 @@ The `MIC_RB_SRcollect` class is designed for super-resolution data collection on
 1. Ensure all dependent classes are available in your MATLAB path.
 2. Clone or download this repository into your MATLAB environment.
 3. Instantiate an object using the command: `SRC = MIC_RB_SRcollect();`
-## Methods Overview
+## Methods
 - `setupPiezo()`: Configures and initializes the piezo stages.
 - `loadref()`: Loads a reference image for alignment.
 - `takecurrent()`: Captures the current image from the camera.
@@ -45,7 +45,7 @@ SRC.Laser642.setPower(10);  Set laser power
 Start acquisition
 SRC.StartSequence();
 ```
-Citation: Marjolein Meddens, Lidke Lab 2017
+### Citation: Marjolein Meddens, Lidke Lab 2017
 # blazeScanIntensity Calculates expected intensity during blaze scan
 Function consists of 4 parts:
 1. Pupil function is unblazed

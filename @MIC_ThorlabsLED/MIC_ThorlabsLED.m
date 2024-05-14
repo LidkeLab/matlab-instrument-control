@@ -1,5 +1,6 @@
 classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     % MIC_ThorlabsLED Matlab Instrument Class for control of the Thorlabs LED
+    %
     %  ## Description
     % This class controls a LED lamp with different wavelength from Thorlabs.
     % Requires TTL input from the Analogue Input/Output channel of NI card
@@ -7,7 +8,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     % BNC cable is needed to connect to device.
     % Set Trig=MOD on control device for Lamp and turn on knob manually
     % more than zero to control from computer.
-    
+    %
     % ## Requirements
     % - `MIC_Abstract.m`
     % - `MIC_LightSource_Abstract.m`
@@ -17,6 +18,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     %
     % ## Installation
     % Ensure all required files are in the MATLAB path and that the NI-DAQmx driver is correctly installed and configured on your system.
+    %
     % ## Functions:
         %   on(obj)
         %       - Turns the LED lamp ON.
@@ -44,7 +46,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
         %       - Sets power to zero, turns off the lamp, and cleans up resources.
         %       - Usage: obj.shutdown();
         %
-    % ## Usage
+    % ## Usage Example
     % To create an instance of the `MIC_ThorlabsLED` class:
     % ```matlab
     % obj = MIC_ThorlabsLED('Dev1', 'ao1');
@@ -66,7 +68,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     % Clean up
     % led.delete();
     % ```
-    % CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
+    % ### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
     properties (SetAccess=protected)
         InstrumentName='ThorlabsLED'  %Name of instrument
         Power=0;            % Currently Set Output Power

@@ -9,11 +9,12 @@ to initialize the camera
 For the first time it is required to load the directory of .dll file
 from Program Files.
 ## Constructor
-Example: obj=MIC_ThorlabsIR();
-## Key Function: initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_properties, exportState, unitTest
+obj=MIC_ThorlabsIR();
+## Key Function:
+initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_properties, exportState, unitTest
 ## REQUIREMENTS:
 MIC_Abstract.m
 MIC_Camera_Abstract.m
 MATLAB software version R2016b or later
 uc480DotNet.dll file downloaded from the Thorlabs website for DCx cameras
-CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
+### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.

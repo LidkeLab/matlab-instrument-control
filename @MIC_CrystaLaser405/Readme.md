@@ -1,4 +1,4 @@
-# # MIC_CrystaLaser405: Matlab Instrument Class for CrystaLaser 405 nm.
+# MIC_CrystaLaser405: Matlab Instrument Class for CrystaLaser 405 nm.
 ## Description
 Controls CrystaLaser module; setting power within the range of 0 to
 10 mW (The values measured on 2/23/2017 are 0.25 to 8.5 mW).
@@ -11,6 +11,7 @@ cable pin configuration is:
 Pins 4-5: paired (for interlock); Pin 2: Analog; Pin 3: TTL; Pin6: GND.
 The power range of the laser is set using the knob on front panel of
 controller.
+## Note:
 Please check the laser is turned on at the controller before calling funtions in
 this class
 ## Usage Example
@@ -23,4 +24,4 @@ MIC_LightSource_Abstract.m
 MATLAB software version R2016b or later
 Data Acquisition Toolbox
 MATLAB NI-DAQmx driver installed via the Support Package Installer
-CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
+### CITATION: Sandeep Pallikkuth, Lidkelab, 2017.

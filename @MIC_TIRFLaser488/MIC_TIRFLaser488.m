@@ -1,10 +1,11 @@
-
 classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
     % MIC_NewportLaser488: Matlab Instrument Class for Newport Cyan Laser 488 on TIRF microscope.
-    % ## Overview
+    %
+    % ## Description
     %      The `MIC_TIRFLaser488` is a MATLAB instrument class for controlling the Newport Cyan Laser 488 used in
     %      TIRF (Total Internal Reflection Fluorescence) microscopy setups. It integrates functionalities for managing
     %      laser power through ND (Neutral Density) filter wheels and a shutter for toggling the laser ON and OFF.
+    %
     % ## Requirements
     % - `MIC_Abstract.m`
     % - `MIC_LightSource_Abstract.m`
@@ -60,7 +61,7 @@ classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
     % % Clean up
     % laser.delete();
     % ```
-    % CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
+    % ### CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
     properties (SetAccess=protected)  
         InstrumentName = 'TIRFLaser488' %instrument name
     end

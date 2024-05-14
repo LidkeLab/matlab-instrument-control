@@ -1,5 +1,4 @@
 classdef MIC_H5 
-
 % MIC_H5 Class: MIC_H5 A collection of static methods for working with HDF5 files 
 % 
 % ## Description
@@ -30,7 +29,6 @@ classdef MIC_H5
 % % Display the structure of the HDF5 file
 % h5disp(File);
 % ```
-% 
 % ## Key Functions
 % - **`createFile(File)`:** Creates an empty HDF5 file. If the file already exists, it issues a warning rather than overwriting the existing file.
 % - **`createGroup(File, Group)`:** Adds a new group to an existing HDF5 file. If the group already exists, the creation process is skipped to avoid duplication.

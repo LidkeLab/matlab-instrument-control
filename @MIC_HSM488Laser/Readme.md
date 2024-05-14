@@ -1,4 +1,4 @@
-# # MIC_HSM488Laser Class
+# MIC_HSM488Laser Class
 ## Description
 The `MIC_HSM488Laser` class is used for controlling the HSM 488 nm laser, part of the MIC framework.
 The laser control involves manual operation as well as automated control via a shutter and an attenuator.

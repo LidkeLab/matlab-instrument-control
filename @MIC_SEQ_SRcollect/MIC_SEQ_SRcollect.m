@@ -1,12 +1,14 @@
 classdef MIC_SEQ_SRcollect < MIC_Abstract
 % MIC_SEQ_SRcollect SuperResolution data collection software.
+%
 % ## Description
 % Super resolution data collection class for Sequential microscope
 % Works with Matlab Instrument Control (MIC) classes since March 2017
-
-%  ## Constructor: SEQ=MIC_SEQ_SRcollect();
-% ## Methods Overview
-% 
+%
+%  ## Constructor: 
+% SEQ=MIC_SEQ_SRcollect();
+%
+% ## Methods 
 % ### Initialization and Configuration
 % - `MIC_SEQ_SRcollect()`: Constructor for the class that initializes the connection to all the necessary hardware components.
 % - `setupSCMOS()`: Sets up the main sCMOS camera used for data collection.
@@ -49,8 +51,8 @@ classdef MIC_SEQ_SRcollect < MIC_Abstract
 %   Matlab 2014b or higher
 %   matlab-instrument-control
 %   sma-core-alpha (if using PublishResults flag)
-
-% Citations: 
+%
+% ### Citations: 
 % First version: Sheng Liu 
 % Second version: Farzin Farzam  
 % MIC compatible version: Farzin Farzam

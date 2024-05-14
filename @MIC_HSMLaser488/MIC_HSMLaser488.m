@@ -41,7 +41,7 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
 % laser.off();
 % delete(laser);
 % ```
-% CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
+% ### CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
 
     properties (SetAccess=protected)
         InstrumentName='HSM488Laser' % Descriptive Instrument Name

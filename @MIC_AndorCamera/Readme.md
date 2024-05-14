@@ -1,4 +1,5 @@
 # MIC_AndorCamera class
+## Description
 The `MIC_AndorCamera` class in MATLAB is designed for controlling Andor cameras using the Andor SDK. This class handles camera operations such as initialization, capturing images, adjusting settings, and more.
 ## Features
 - Full control over Andor camera settings including exposure time, ROI, and binning.
@@ -41,14 +42,16 @@ Capture a single image
 camera.start_capture();
 Close the camera
 camera.shutdown();
-Requires:
+```
+## Requirement:
 Andor MATLAB SDK 2.94.30005 or higher
-TODO:
+## To Do:
 Add quarter CCD left, right ROI selection (for TIRF system).
 Fix warning error about not acquiring
 Add shutter options so capture can be run with/without shutter
 GUI doesn't show programic updates to CameraSettings
 Clear of object doesn't warm up to shutdown.
+### Citations: Lidkelab, 2017.
 # if nargin ~= 2
 error('AndorCamera:WrongNumberOfInputs','errorcheck requires the function name and return code');
 end

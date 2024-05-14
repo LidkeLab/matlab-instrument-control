@@ -1,4 +1,4 @@
-# # MIC_BiochemValve Class
+# MIC_BiochemValve Class
 ## Description
 The `MIC_BiochemValve` class manages BIOCHEM flow selection valves through communication with an Arduino.
 It provides functionality to open and close valves, and includes an emergency shutoff to cut power to both the valves
@@ -6,7 +6,8 @@ and a syringe pump.
 ## Installation Requirements
 - MATLAB R2014b or later
 - MATLAB Support Package for Arduino Hardware:
-NOTE: You may need to setup the Arduino you are using
+##NOTE
+You may need to setup the Arduino you are using
 specifically even if this package was installed previously.
 Matlab needs to upload software onto the Arduino before
 creation of an instance of this class.

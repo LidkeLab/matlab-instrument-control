@@ -1,4 +1,4 @@
-# # MIC_HamamatsuCamera Class
+# MIC_HamamatsuCamera Class
 ## Description
 The `MIC_HamamatsuCamera` class inherits from `MIC_Camera_Abstract` and is specifically tailored for
 controlling Hamamatsu cameras in MATLAB. It offers comprehensive control over camera settings such as exposure time,
@@ -40,5 +40,5 @@ state = cam.exportState();
 Clean up on completion
 delete(cam);
 ```
-Citation: Sajjad Khan, Lidkelab, 2024
+### Citation: Lidkelab 2020
 # choose betwee a list of camera models w/ serials

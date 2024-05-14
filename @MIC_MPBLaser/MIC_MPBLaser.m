@@ -1,5 +1,6 @@
 classdef MIC_MPBLaser < MIC_LightSource_Abstract
     %   MIC_MPBLaser Matlab Instrument Control Class for the MPB-laser.
+    %
     %   ## Description
     % This class controls the PMB-laser.
     %   The constructor do not need any info about the port, it will
@@ -57,7 +58,7 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
     % laser.off();
     % delete(laser);
     % ```
-    %  Citation: Sajjad Khan, Lidkelab, 2024.
+    % ### Citation: Sajjad Khan, Lidkelab, 2024.
     properties (SetAccess=protected)
         InstrumentName='MPBLaser647'; %Name of the instrument.
     end

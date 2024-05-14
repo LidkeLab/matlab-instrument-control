@@ -19,7 +19,7 @@ can be between 0 and F.
 - MIC_Abstract.m
 - Data Acquisition Toolbox on MATLAB
 - MATLAB 2014b or higher
-## Installation
+## Note
 To use the `MIC_ShutterELL6` class, ensure that the required files are in your MATLAB path.
 ## Usage
 To create an instance of the `MIC_ShutterELL6` class, specify the COM port and shutter address as arguments:
@@ -30,4 +30,4 @@ shutter.close();  Closes the shutter
 shutter.gui();
 delete(shutter);
 ```
-Citation: Gert-Jan based on ShutterTLL (by Farzin)
+### Citation: Gert-Jan based on ShutterTLL (by Farzin)

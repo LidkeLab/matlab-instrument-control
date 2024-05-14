@@ -1,5 +1,6 @@
 classdef MIC_DynamixelServo < MIC_Abstract
     % MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
+    % 
     % ## Description
     %   Dynamixel Servos are used to control the rotation of filter wheels
     %   Setup instruction can be found at Z:\Lab General Info and
@@ -11,6 +12,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
     %           ServoId: Id of servo(is written on servo)
     %           Port: COM port to which servo is connected (Optional)
     %           Bps: Baud setting for port (Optional)
+    %
     %   ## Key Functions: 
      %             delete, shutdown, checkCommStatus, exportState, ping, 
     %              get.Firmware, get.GaolPosition, set.GoalPosition,
@@ -30,7 +32,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
     %     All files that are not specifically for the Roboplus software should 
     %       be extracted into C:\Program Files(x86)\ROBOTIS\USB2Dynamixel
     %   
-    %   CITATION: Marjolein Meddens, Lidke Lab, 2017.
+    %  ### CITATION: Marjolein Meddens, Lidke Lab, 2017.
 
     properties(SetAccess=protected)
         InstrumentName = 'DynamixelServo'; % MIC instrument name

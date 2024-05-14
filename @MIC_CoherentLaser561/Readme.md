@@ -1,4 +1,4 @@
-# # MIC_CoherentLaser561 Class
+# MIC_CoherentLaser561 Class
 ## Description
 The `MIC_CoherentLaser561` class is a MATLAB Instrument Class for controlling the Coherent Sapphire Laser 561 via a USB connection.
 It integrates with additional classes like `FilterWheel` and `Shutter` to manage laser power output continuously
@@ -35,4 +35,4 @@ CL561.off();
 Delete the object when done
 delete(CL561);
 ```
-CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
+### CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.

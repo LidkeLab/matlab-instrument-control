@@ -1,6 +1,5 @@
 classdef MIC_SeqReg3DTrans < MIC_Abstract
-    %MIC_SeqReg3DTrans Register a sample to a stack of transmission images
-    %  Class that performs 3D registration using transmission images
+    % MIC_SeqReg3DTrans Register a sample to a stack of transmission images class that performs 3D registration using transmission images
     % 
     % ## INPUT
     %    CameraObj - camera object -- tested with MIC_AndorCamera only
@@ -8,7 +7,7 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     %    LampObj - lamp object -- tested with MIC_IX71Lamp only, will work
     %                             with other lamps that inherit from
     %                             MIC_LightSource_Abstract
-    %    Calibration file (optional)
+    % ### Calibration file (optional)
     %
     % ## SETTING (IMPORTANT!!)
     %    There are several properties that are system specific. These need
@@ -16,9 +15,11 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     %    any of the functionality. See properties section for explanation
     %    and which ones.
     %
-    % ## REQUIRES
+    % ## REQUIREMENTS
     %    Matlab 2014b or higher
     %    MIC_Abstract
+    %
+    % ### Citations: Lidkelab 2017
     
     properties
         CameraObj

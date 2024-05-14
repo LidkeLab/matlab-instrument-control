@@ -1,5 +1,5 @@
-# # MIC_RAMANLaser785
-## Overview
+# MIC_RAMANLaser785
+## Description
 `MIC_RAMANLaser785` is a MATLAB class designed to control the 785 nm ONDAX laser used in RAMAN Lightsheet microscopes. This class manages the connection via an RS232-USB interface and provides functionalities such as setting the laser power, reading the current status, and integrating with a calibration file for accurate power settings.
 ## Requirements
 - MATLAB 2016b or later.
@@ -23,4 +23,4 @@ RL785.getStatus();
 Properly turn off the laser and clean up resources.
 RL785.delete();
 ```
-CITATION: Sandeep Pallikkuth, Lidkelab, 2020.
+### CITATION: Sandeep Pallikkuth, Lidkelab, 2020.

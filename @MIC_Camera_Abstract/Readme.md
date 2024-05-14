@@ -1,4 +1,5 @@
-# # MIC_Camera_Abstract Class
+# MIC_Camera_Abstract Class
+## Description
 The `MIC_Camera_Abstract` class serves as a base class for creating specific camera control classes in MATLAB. This abstract class provides a structured approach to implement common camera functionalities, ensuring consistency and ease of use across different camera models.
 ## Features
 - Uniform interface for various camera operations such as focus, capture, and sequence modes.
@@ -30,7 +31,6 @@ These methods must be implemented by subclasses to handle specific camera functi
 - `getlastimage()`: Retrieves the most recent image captured.
 - `getdata()`: Retrieves all data acquired in the current session.
 ### CITATION: Sajjad Khan, Lidkelab, 2024.
-These are not abstract so we can give set functions
 # GUI  gui for Camera class
 EXAMPLES:
 CamObj = guiTest; create empty test gui object

@@ -1,4 +1,4 @@
-# # MIC_DMP40 Class Documentation
+# MIC_DMP40 Class Documentation
 ## Description
 The `MIC_DMP40` class controls a deformable mirror using MATLAB. This class interfaces with the mirror through .NET assemblies,
 specifically designed for the Thorlabs DMP40 deformable mirror. It utilizes a digital-to-analog converter (DAC)
@@ -38,7 +38,7 @@ mirror.setZernikeModes([0.2, 0.4, 0.1, ...]);
 Clean up and delete the object when done
 delete(mirror);
 ```
-CITATION: Sajjad Khan, Lidke Lab, 2024.
+### CITATION: Sajjad Khan, Lidke Lab, 2024.
 # .NET
 CS Example:
 C:\Program Files (x86)\IVI Foundation\VISA\WinNT\TLDFM\Examples\DotNet
