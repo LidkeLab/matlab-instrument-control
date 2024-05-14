@@ -11,7 +11,7 @@ For the first time it is required to load the directory of .dll file
 from Program Files.
 
 ## Constructor
-obj=MIC_ThorlabsIR();
+obj=MIC_ThorlabsIR()
 
-## Key Function:
+## Key Function
 

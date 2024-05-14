@@ -1,10 +1,8 @@
 classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
-% MIC_CoherentLaser561 Class 
+%  MIC_CoherentLaser561 Class 
 % 
 % ## Description
-% The `MIC_CoherentLaser561` class is a MATLAB Instrument Class for controlling the Coherent Sapphire Laser 561 via a USB connection. 
-%  It integrates with additional classes like `FilterWheel` and `Shutter` to manage laser power output continuously 
-%  from 0 to 100 mW, despite the laser controller's minimum power setting of 10 mW.
+% The `MIC_CoherentLaser561` class is a MATLAB Instrument Class for controlling the Coherent Sapphire Laser 561 via a USB connection. It integrates with additional classes like `FilterWheel` and `Shutter` to manage laser power output continuously from 0 to 100 mW, despite the laser controller's minimum power setting of 10 mW.
 % 
 % ## Requirements
 % - MATLAB 2016b or later
@@ -15,9 +13,8 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
 % - MIC_ShutterTTL
 % 
 % ## Installation
-% Ensure that all required classes (`MIC_Abstract`, `MIC_LightSource_Abstract`, `MIC_FilterWheel`, `MIC_DynamixelServo`, 
-% `MIC_ShutterTTL`) are in your MATLAB path. The laser connects via a specified COM port (e.g., 'COM3').
-%
+% Ensure that all required classes (`MIC_Abstract`, `MIC_LightSource_Abstract`, `MIC_FilterWheel`, `MIC_DynamixelServo`, `MIC_ShutterTTL`) are in your MATLAB path. The laser connects via a specified COM port (e.g., 'COM3').
+% 
 % ## Key Functions
 % - **Constructor (`MIC_CoherentLaser561(SerialPort)`):** Initializes the laser on a specified COM port, sets up the filter wheel and shutter, and establishes serial communication.
 % - **`on()`:** Activates the laser, opening the shutter and setting the laser state to on.

@@ -12,12 +12,12 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
     % from Program Files.    
     %
     % ## Constructor
-    % obj=MIC_ThorlabsIR();
+    % obj=MIC_ThorlabsIR()
     %
-    % ## Key Function: 
+    % ## Key Function 
     % initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_properties, exportState, unitTest  
     %     
-    % ## REQUIREMENTS: 
+    % ## REQUIREMENTS 
     %   MIC_Abstract.m
     %   MIC_Camera_Abstract.m
     %   MATLAB software version R2016b or later
