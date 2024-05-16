@@ -16,6 +16,11 @@ function createDocumentation(basePath)
         fprintf('Processing %s\n', folderPath);
         processFolder(folderPath);
     end
+%         for i = 10
+%         folderPath = fullfile(basePath, targetDirs{i});
+%         fprintf('Processing %s\n', folderPath);
+%         processFolder(folderPath);
+%         end
 end
 
 function processFolder(folderPath)
@@ -43,6 +48,7 @@ function comments = extractComments(filePath)
         insideCommentBlock = false;
         comments = '';
         while ischar(tline)
+            %tline
             if contains(tline, 'classdef')
                 insideCommentBlock = true;  % Start capturing comments after classdef
             elseif contains(tline, 'properties')

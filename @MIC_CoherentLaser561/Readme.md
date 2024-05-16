@@ -20,4 +20,22 @@ Ensure that all required classes (`MIC_Abstract`, `MIC_LightSource_Abstract`, `M
 - **`off()`:** Deactivates the laser, closing the shutter and turning the laser off.
 - **`setPower(Power_in)`:** Adjusts the laser's output power. This method selects the appropriate filter based on the desired power setting and modifies the laser's power output accordingly.
 - **`getCurrentPower()`:** Fetches and displays the current power setting from the laser.
+- **`GetStatus()`:** Queries the laser for its current operational status, updating internal status Properties.
+- **`delete()`:** Safely terminates the connection to the laser, ensuring all resources are properly released.
+- **`exportState()`:** Exports a snapshot of the laser's current settings, including power and operational state.
+
+## Usage Example
+```matlab
+Create an instance of the Coherent Laser 561 on COM3
+CL561 = MIC_CoherentLaser561('COM3');
+Set power to 50 mW
+CL561.setPower(50);
+Turn on the laser
+CL561.on();
+Turn off the laser
+CL561.off();
+Delete the object when done
+delete(CL561);
+```
+### CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
 

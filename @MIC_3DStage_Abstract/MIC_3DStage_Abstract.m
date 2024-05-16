@@ -2,7 +2,7 @@ classdef MIC_3DStage_Abstract < MIC_Abstract
     % MIC_3DStage_Abstract Matlab Instrument Abstact Class for all stages Matlab Instrument Class 
     %
     % ## Description
-    % This class defines a set of abstract properties and methods that must
+    % This class defines a set of abstract Properties and methods that must
     % implemented in inheritting classes for all stages devices.  
     % This also provides a simple and intuitive GUI interface.   
     % 

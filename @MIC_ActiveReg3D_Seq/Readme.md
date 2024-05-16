@@ -22,4 +22,18 @@
 - Timer, Period: Timer object and its period for periodic alignment checks.
 
 ## Methods
+- Constructor: Initializes the camera and stage settings.
+- calibrate: Calibrates the pixel size by moving the stage and capturing images.
+- takeRefImageStack: Captures a stack of images at different Z positions to create a reference stack.
+- start: Starts periodic alignment using a timer.
+- stop: Stops the periodic alignment and cleans up.
+- align2imageFit: Main function to align current images to the reference by adjusting the stage positions based on calculated shifts.
+- findZPos: Finds the best in-focus Z position by cross-correlating the current image with the reference stack.
+- findXYShift: Computes the XY shift required to align the current image with the reference.
+- capture_single: Captures a single image from the camera.
+
+## Usage
+Instantiate the class with the required camera and stage objects. Use the methods provided to calibrate, set the reference image stack, start/stop the alignment process, and retrieve alignment data.
+
+### Citations: Lidkelab, 2019.
 

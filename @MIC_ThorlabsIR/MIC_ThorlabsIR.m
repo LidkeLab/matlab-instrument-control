@@ -15,7 +15,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
     % obj=MIC_ThorlabsIR()
     %
     % ## Key Function 
-    % initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_properties, exportState, unitTest  
+    % initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_Properties, exportState, unitTest  
     %     
     % ## REQUIREMENTS 
     %   MIC_Abstract.m

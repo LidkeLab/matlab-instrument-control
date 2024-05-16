@@ -2,7 +2,7 @@ classdef MIC_Abstract < handle
     % MIC_Abstract Matlab Instrumentation Control Abstract Class
     % 
     % ## Description
-    % This abstract class defines a set of properties and methods that must
+    % This abstract class defines a set of Properties and methods that must
     % be implemented in all inheritting classes.  It also provides:
     % 1: A convienient auto-naming feature that will assign the object to a
     % variable name based on the InstrumentName property.  

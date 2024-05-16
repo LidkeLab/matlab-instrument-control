@@ -1,5 +1,8 @@
 classdef MIC_SeqReg3DTrans < MIC_Abstract
-    % MIC_SeqReg3DTrans Register a sample to a stack of transmission images class that performs 3D registration using transmission images
+    % MIC_SeqReg3DTrans 
+    % 
+    % ## Description
+    % This class Register a sample to a stack of transmission images class that performs 3D registration using transmission images
     % 
     % ## INPUT
     %    CameraObj - camera object -- tested with MIC_AndorCamera only
@@ -10,9 +13,9 @@ classdef MIC_SeqReg3DTrans < MIC_Abstract
     % ### Calibration file (optional)
     %
     % ## SETTING (IMPORTANT!!)
-    %    There are several properties that are system specific. These need
+    %    There are several Properties that are system specific. These need
     %    to be specified after initialization of the class, before using
-    %    any of the functionality. See properties section for explanation
+    %    any of the functionality. See Properties section for explanation
     %    and which ones.
     %
     % ## REQUIREMENTS

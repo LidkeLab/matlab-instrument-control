@@ -21,7 +21,7 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
 % - **`off()`:** Deactivates the laser, closing the shutter and turning the laser off.
 % - **`setPower(Power_in)`:** Adjusts the laser's output power. This method selects the appropriate filter based on the desired power setting and modifies the laser's power output accordingly.
 % - **`getCurrentPower()`:** Fetches and displays the current power setting from the laser.
-% - **`GetStatus()`:** Queries the laser for its current operational status, updating internal status properties.
+% - **`GetStatus()`:** Queries the laser for its current operational status, updating internal status Properties.
 % - **`delete()`:** Safely terminates the connection to the laser, ensuring all resources are properly released.
 % - **`exportState()`:** Exports a snapshot of the laser's current settings, including power and operational state.
 % 

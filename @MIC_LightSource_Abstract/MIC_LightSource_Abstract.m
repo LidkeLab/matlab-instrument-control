@@ -2,7 +2,7 @@ classdef MIC_LightSource_Abstract < MIC_Abstract
     % MIC_LightSource_Abstract: Matlab Instrument Abstact Class for all light source Matlab Instrument Class.
     %
     % ## Description
-    % This class defines a set of abstract properties and methods that must
+    % This class defines a set of abstract Properties and methods that must
     % implemented in inheritting classes for all light source devices.
     % This also provides a simple and intuitive GUI interface.
     %

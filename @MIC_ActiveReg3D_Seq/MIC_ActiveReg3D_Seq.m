@@ -23,7 +23,7 @@ classdef MIC_ActiveReg3D_Seq < handle
 % - Timer, Period: Timer object and its period for periodic alignment checks.
 % 
 % ## Methods
-% - Constructor: Initializes the camera and stage settings, and loads properties.
+% - Constructor: Initializes the camera and stage settings.
 % - calibrate: Calibrates the pixel size by moving the stage and capturing images.
 % - takeRefImageStack: Captures a stack of images at different Z positions to create a reference stack.
 % - start: Starts periodic alignment using a timer.

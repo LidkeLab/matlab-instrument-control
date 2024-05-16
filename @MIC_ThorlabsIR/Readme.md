@@ -14,4 +14,13 @@ from Program Files.
 obj=MIC_ThorlabsIR()
 
 ## Key Function
+initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_Properties, exportState, unitTest
+
+## REQUIREMENTS
+MIC_Abstract.m
+MIC_Camera_Abstract.m
+MATLAB software version R2016b or later
+uc480DotNet.dll file downloaded from the Thorlabs website for DCx cameras
+
+### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
 

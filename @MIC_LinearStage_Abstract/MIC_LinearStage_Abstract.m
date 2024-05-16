@@ -2,7 +2,7 @@ classdef MIC_LinearStage_Abstract < MIC_Abstract
     % MIC_LinearStage_Abstract: Matlab Instrument Control abstract class for linear stages.
     %
     % ## Description
-    % This class defines a set of Abstract properties and methods that must
+    % This class defines a set of Abstract Properties and methods that must
     % implemented in inheritting classes. This class also provides a simple 
     % and intuitive GUI.   
     %
@@ -25,7 +25,7 @@ classdef MIC_LinearStage_Abstract < MIC_Abstract
 % ## Methods
 % - **Constructor (`MIC_LinearStage_Abstract(AutoName)`):** Initializes a new instance of a subclass, incorporating auto-naming functionality inherited from `MIC_Abstract`.
 % - **`center()`:** Moves the stage to its center position, calculated as the midpoint between `MinPosition` and `MaxPosition`.
-% - **`updateGui()`:** Refreshes the GUI elements to reflect current properties like position, ensuring the display is up-to-date with the stage's status.
+% - **`updateGui()`:** Refreshes the GUI elements to reflect current Properties like position, ensuring the display is up-to-date with the stage's status.
 %
 % ### Citation: Marjolein Meddens, Lidke Lab, 2017.
     
