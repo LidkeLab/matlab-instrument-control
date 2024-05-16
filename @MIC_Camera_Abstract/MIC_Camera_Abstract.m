@@ -38,7 +38,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
 % - `getlastimage()`: Retrieves the most recent image captured.
 % - `getdata()`: Retrieves all data acquired in the current session.
 %
-% ### CITATION: Sajjad Khan, Lidkelab, 2024.  
+% ### CITATION: Lidkelab, 2017.  
     
     properties
         AcquisitionType='focus';    %'sequence','capture','focus'
