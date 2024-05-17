@@ -60,7 +60,9 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         ROI;                        %   [Xstart Xend Ystart Yend]
         SequenceLength=1;           %   Kinetic Series length
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
-        TriggerMode;
+
+        TriggerMode='internal';
+
         GuiDialog;                  % GUI dialog for the CameraParameters
                                     % consider making GuiDialog abstract??
         AcquisitionTimeOutOffset;
@@ -442,8 +444,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
     
         end
         
-        function fireTrigger(obj)
-        end
+
         
         function apply_camSetting(obj)
             % update CameraSetting struct from GUI
@@ -1006,6 +1007,12 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         function setcurrentcamera(obj)
             obj.LastError=SetCurrentCamera(obj.CameraHandle);
             obj.errorcheck('SetCurrentCamera')
+        end
+        
+        function fireTrigger(obj)
+            % For now, just throw a warning since we haven't implemented
+            % software triggering for the Andor cameras.
+            warning('Software triggered capturing not yet implemented!')
         end
         
     end
