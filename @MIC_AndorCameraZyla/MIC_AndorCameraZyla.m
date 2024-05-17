@@ -224,7 +224,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             obj.Axes2=[];
             obj.abort();
         end
-        function start_scan_v1(obj)
+        function start_scan(obj)
             clc
             obj.AcquisitionType='sequence';
             obj.setup_acquisition();
@@ -297,7 +297,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             Out = permute(Out,[2,3,1]); % [y,x_scan,wave]
         end
 
-        function Out=start_scan(obj,Nstep,pfit,ROIoffset)
+        function Out=start_scan_v0(obj,Nstep,pfit,ROIoffset)
             clc
             obj.AcquisitionType='sequence';
             obj.setup_acquisition();
