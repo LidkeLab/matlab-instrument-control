@@ -2,9 +2,12 @@
 
 |**MIC** classes|description|
 -------------|---
-[@MIC_ActiveReg3D](../@MIC_ActiveReg3D/Readme.md) | -
-[@MIC_ActiveReg3D_Seq](../@MIC_ActiveReg3D_Seq/Readme.md) | -
-[@MIC_ActiveReg3D_SPT](../@MIC_ActiveReg3D_SPT/Readme.md) | -
+[@MIC_ActiveReg3D](../@MIC_ActiveReg3D/Readme.md) | active 3D registration using
+ camera and stage control via piezoelectric actuators
+[@MIC_ActiveReg3D_Seq](../@MIC_ActiveReg3D_Seq/Readme.md) | 3D sequential active
+ registration using a camera and piezo stages
+[@MIC_ActiveReg3D_SPT](../@MIC_ActiveReg3D_SPT/Readme.md) | precise correction a
+nd calibration to maintain focus and alignment during imaging sessions
 [@MIC_H5](../@MIC_H5/Readme.md) | static methods for working with HDF5 files
 [@MIC_Joystick](../@MIC_Joystick/Readme.md) | control the TIRF stage with a joystick
 [@MIC_Abstract](../@MIC_Abstract/Readme.md) | Matlab Instrument Control abstract class
