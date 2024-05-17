@@ -37,10 +37,10 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_KCubePiezo](../@MIC_KCubePiezo/Readme.md) | control a Thorlabs KCube Piezo stage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_MCLMicroDrive](../@MIC_MCLMicroDrive/Readme.md) | control a Mad City Labs Micro Stage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_TCubePiezo](../@MIC_TCubePiezo/Readme.md) | control a Thorlabs TCube Piezo stage
-&nbsp;&nbsp;&nbsp;[@MIC_PowerMeter_Abstract](../@MIC_PowerMeter_Abstract/Readme.md)
+&nbsp;&nbsp;&nbsp;[@MIC_PowerMeter_Abstract](../@MIC_PowerMeter_Abstract/Readme.md) |  control a power meter (PM100D)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_PM100D](../@MIC_PM100D/Readme.md) | control the power meter PM100D
 &nbsp;&nbsp;&nbsp;[@MIC_APTPiezo](../@MIC_APTPiezo/Readme.md) | control the Thorlabs APT piezo
-&nbsp;&nbsp;&nbsp;[@MIC_APTPiezoXYZ](../@MIC_APTPiezoXYZ/Readme.md)
+&nbsp;&nbsp;&nbsp;[@MIC_APTPiezoXYZ](../@MIC_APTPiezoXYZ/Readme.md) control 3 APT Piezos (Thorlabs)
 &nbsp;&nbsp;&nbsp;[@MIC_Attenuator](../@MIC_Attenuator/Readme.md) | control the Attenuator
 &nbsp;&nbsp;&nbsp;[@MIC_BiochemValve](../@MIC_BiochemValve/Readme.md) | control the BIOCHEM flow selection valves
 &nbsp;&nbsp;&nbsp;[@MIC_CavroSyringePump](../@MIC_CavroSyringePump/Readme.md) | control the Cavro syringe pump PN 20740556 -D
@@ -59,10 +59,10 @@
 &nbsp;&nbsp;&nbsp;[@MIC_Reg3DTrans](../@MIC_Reg3DTrans/Readme.md) | register a sample to a stack of transmission images
 &nbsp;&nbsp;&nbsp;[@MIC_SeqReg3DTrans](../@MIC_SeqReg3DTrans/Readme.md) | register a sample to a stack of transmission images for the Sequential microscope
 &nbsp;&nbsp;&nbsp;[@MIC_SEQ_SRcollect](../@MIC_SEQ_SRcollect/Readme.md) | data collection for the Sequential microscope
-&nbsp;&nbsp;&nbsp;[@MIC_ShutterELL6](../@MIC_ShutterELL6/Readme.md)
+&nbsp;&nbsp;&nbsp;[@MIC_ShutterELL6](../@MIC_ShutterELL6/Readme.md) | control slider ELL6, which can be used as a shutter (or filter slider)
 &nbsp;&nbsp;&nbsp;[@MIC_ShutterTTL](../@MIC_ShutterTTL/Readme.md) | control a Thorlabs SH05 shutter via a Thorlabs KSC101 solenoid controller
 &nbsp;&nbsp;&nbsp;[@MIC_SPTCollect](../@MIC_SPTCollect/Readme.md) | Single Particle Tracking/Super Resolution data collection software
 &nbsp;&nbsp;&nbsp;[@MIC_StepperMotor](../@MIC_StepperMotor/Readme.md) | control Benchtop stepper motor
-&nbsp;&nbsp;&nbsp;[@MIC_SyringePump](../@MIC_SyringePump/Readme.md)
+&nbsp;&nbsp;&nbsp;[@MIC_SyringePump](../@MIC_SyringePump/Readme.md) | control Syringe Pump by kdScientific (Model: LEGATO100)
 &nbsp;&nbsp;&nbsp;[@MIC_TIRF_SRcollect](../@MIC_TIRF_SRcollect/Readme.md) | control TIRF microscope
-&nbsp;&nbsp;&nbsp;[@MIC_Triggerscope](../@MIC_Triggerscope/Readme.md)
+&nbsp;&nbsp;&nbsp;[@MIC_Triggerscope](../@MIC_Triggerscope/Readme.md) | control a Triggerscope (written for 3B and 4)
