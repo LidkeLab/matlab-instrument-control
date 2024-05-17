@@ -33,6 +33,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
         GuiDialog;
         TimeOut = 10000;     % ms
+        TriggerMode;
     end
     properties (Hidden)
         StartGUI=false;     %Defines GUI start mode.  'true' starts GUI on object creation.
@@ -66,6 +67,8 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
         function errorcheck(obj,funcname)
         end
         function initialize(obj)
+        end
+        function fireTrigger(obj)
         end
 
         function initializeDcam(obj,envpath)
