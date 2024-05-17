@@ -51,13 +51,15 @@ DACIndices = NonZeroIndices(NonZeroIndices > obj.IOChannels);
 NProgramLines = size(obj.SignalArray, 2);
 NSignals = numel(NonZeroIndices);
 NDACSignals = numel(DACIndices);
-NInitializerCommands = 3;
+NInitializerCommands = 5;
 NCommands = NInitializerCommands + NDACSignals ...
     + (NProgramLines*NSignals) + logical(Arm);
 CommandSequence = cell(NCommands, 1);
 CommandSequence{1} = 'CLEAR_ALL';
 CommandSequence{2} = sprintf('TRIGMODE,%i', TriggerModeInt);
-CommandSequence{3} = sprintf('TIMECYCLES,%i', NLoops);
+CommandSequence{3} = 'SAVESETTINGS';
+CommandSequence{4} = 'RESET';
+CommandSequence{5} = sprintf('TIMECYCLES,%i', NLoops);
 CommandSequence{NCommands} = 'ARM';
 VoltageRangeIndex = ones(2*obj.IOChannels, 1);
 for ii = 1:NDACSignals
