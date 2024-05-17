@@ -40,7 +40,6 @@
 &nbsp;&nbsp;&nbsp;[@MIC_PowerMeter_Abstract](../@MIC_PowerMeter_Abstract/Readme.md) |  control a power meter (PM100D)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_PM100D](../@MIC_PM100D/Readme.md) | control the power meter PM100D
 &nbsp;&nbsp;&nbsp;[@MIC_APTPiezo](../@MIC_APTPiezo/Readme.md) | control the Thorlabs APT piezo
-&nbsp;&nbsp;&nbsp;[@MIC_APTPiezoXYZ](../@MIC_APTPiezoXYZ/Readme.md) control 3 APT Piezos (Thorlabs)
 &nbsp;&nbsp;&nbsp;[@MIC_Attenuator](../@MIC_Attenuator/Readme.md) | control the Attenuator
 &nbsp;&nbsp;&nbsp;[@MIC_BiochemValve](../@MIC_BiochemValve/Readme.md) | control the BIOCHEM flow selection valves
 &nbsp;&nbsp;&nbsp;[@MIC_CavroSyringePump](../@MIC_CavroSyringePump/Readme.md) | control the Cavro syringe pump PN 20740556 -D
