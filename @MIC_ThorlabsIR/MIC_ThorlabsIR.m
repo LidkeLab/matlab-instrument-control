@@ -274,7 +274,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
             % Export current state of the Camera
             %Get default properties
             Attributes=obj.exportParameters();
-            Data=[];
+            Data=obj.Data;
             Children=[];
             
         end

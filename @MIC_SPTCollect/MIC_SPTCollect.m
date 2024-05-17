@@ -314,8 +314,6 @@ classdef MIC_SPTCollect < MIC_Abstract
         function align(obj)
             % Align to current reference image
             switch obj.RegType
-%                 case 'Self'
-% %                     obj.takeref();
                 case 'Ref'
                     if isempty(obj.R3DObj.Image_Reference)
                         obj.loadref();
@@ -655,8 +653,12 @@ obj.Lamp850Obj.off();
                 case 'h5'
                     FileH5=fullfile(obj.SaveDir,[obj.BaseFileName s '.h5']);
                     MIC_H5.createFile(FileH5);
-                    MIC_H5.createGroup(FileH5,'Data');
-                    MIC_H5.createGroup(FileH5,'Data/Channel01');
+                    % old version
+                    % MIC_H5.createGroup(FileH5,'Data');
+                    % MIC_H5.createGroup(FileH5,'Data/Channel01');
+                    % new version
+                    MIC_H5.createGroup(FileH5,'Channel01');
+                    MIC_H5.createGroup(FileH5,'Channel01/Zposition001');
                 otherwise
                     error('StartSequence:: unknown file save type')
             end
@@ -820,7 +822,9 @@ obj.Lamp850Obj.off();
                     errordlg('Window was closed before capture complete.  No Data Saved.','Capture Failed');
                     return;
                 end
-                
+                if strcmp(obj.SaveFileType,'h5')
+                    obj.IRCameraObj.Data=Image_BF{nn};
+                end 
                 %Save
                 switch obj.SaveFileType
                     case 'mat'
@@ -834,7 +838,11 @@ obj.Lamp850Obj.off();
                         end
                     case 'h5' %This will become default
                         S=sprintf('Data%04d',nn)
-                        MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
+%                         MIC_H5.writeAsync_uint16(FileH5,'Data/Channel01',S,sequence);
+                        MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition001',S,sequence);
+%                         if ~isempty(Image_BF)
+%                         MIC_H5.writeAsync_uint16(FileH5,'Channel01/Zposition002',S,Image_BF);
+%                         end 
                     otherwise
                         error('StartSequence:: unknown SaveFileType')
                 end
@@ -844,9 +852,12 @@ obj.Lamp850Obj.off();
                 case 'mat'
                     %Nothing to do
                 case 'h5' %This will become default
-                    S='MIC_TIRF_SRcollect';
-                    MIC_H5.createGroup(FileH5,S);
-                    obj.save2hdf5(FileH5,S);  %Not working yet
+%                     S='MIC_TIRF_SRcollect';
+%                     MIC_H5.createGroup(FileH5,S);
+%                     obj.save2hdf5(FileH5,S);  %Not working yet
+                        S='Channel01/Zposition001'; % -modified SP
+                        MIC_H5.createGroup(FileH5,S);
+                        obj.save2hdf5(FileH5,S);
                 otherwise
                     error('StartSequence:: unknown SaveFileType')
             end
