@@ -70,9 +70,15 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
         CycleMode;                  %
         GuiDialog;                  % GUI dialog for the CameraParameters
+
+                                    % consider making GuiDialog abstract??
+
+        TriggerMode='internal';
+
         Zscale = [100,120];
         HsmViewer;
         % consider making GuiDialog abstract??
+
     end
     
     methods
@@ -561,6 +567,8 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             
         end
         
+
+        
         function [Out,buf]=getlastimage(obj)
             [obj.LastError,buf] = AT_WaitBuffer(obj.CamHandle,1000);
             AT_CheckWarning(obj.LastError);
@@ -617,6 +625,15 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             AT_CheckWarning(obj.LastError);
             disp('Zyla shutdown');
         end
+
+            
+        function fireTrigger(obj)
+            % For now, just throw a warning since we haven't implemented
+            % software triggering for the Andor cameras.
+            warning('Software triggered capturing not yet implemented!')
+        end
+     
+
         
         
         function [temp, status] = call_temperature(obj)
@@ -624,6 +641,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         end
         
     end
+
     
     methods(Access=protected)
         function obj=get_properties(obj)

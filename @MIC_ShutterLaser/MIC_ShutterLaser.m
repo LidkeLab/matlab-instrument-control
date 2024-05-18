@@ -1,85 +1,60 @@
-classdef MIC_DMP40 < MIC_Abstract
-    % MIC_DMP40: Matlab Instrument Control Class for the Deformable Mirror
-
-     % CITATION: Ellyse Taylor, Lidke Lab, 2021
+classdef MIC_ShutterLaser < MIC_Abstract 
+    % MIC_ShutterTTL: Matlab Instrument Control Class for the shutter
+    %
+    % This class controls on/off of a laser object
+    %
+    % Example: obj=MIC_ShutterLaser(laserobj);
+    % Functions: close, open, delete, exportState 
+    %
+    % REQUIRES:
+    %   MIC_Abstract.m
+    %
+    % CITATION: Sheng, Lidkelab, 2024.
     
     
     properties(SetAccess=protected)
         
-        InstrumentName = 'DMP40';
-        DAQ=[];
+        InstrumentName = 'ShutterLaser';
+        Laserobj;
         IsOpen;
-        DMP40   %DMP40 .NET class
     end
     
     
     properties
-        
-        NIDevice  %DAQ card device number at the USB port of the computer
-        DOChannel; %included both port and line information
+     
+
         StartGUI = 0; %uses MIC_Abstract to bring up the GUI (so, no need for a gui function in MIC_ShutterTTL)
-        %         Position  %either 1 or 0 (to show open or close respectively)
-        NIString  %shows the combination of Device/Port/Line the shutter is using
+%         Position  %either 1 or 0 (to show open or close respectively)
     end
     
     methods
-        function obj = MIC_DMP40() % constructor
-            
+        function obj = MIC_ShutterLaser(laserobj) % constructor
+           % daqreset; %reset any former session that might prevent the DAQ card to be available
+            % when you are making an object for this class, you should do it this way: obj= ShutterTTL('Dev1','Port0','Line1')
+            % of course you need to put the numbers after Dev,Port and Line
+            % based on the physical connections of the shutter to your NI-DAQ card
             obj = obj@MIC_Abstract(~nargout);
-            
-            %setup and make connection to DM
-           
-            %Change directly to the dlls (We will find workaround)
-            cd('C:\Program Files\IVI Foundation\VISA\Win64\Bin')
-            % path to .NET assemblies
-            p='C:\Program Files (x86)\Microsoft.NET\Primary Interop Assemblies'
-            
-            % Add the assemblies to matlab using full path. Full path is important
-            DMX=NET.addAssembly(fullfile(p,'Thorlabs.TLDFMX_64.Interop.dll'))
-            DM=NET.addAssembly(fullfile(p,'Thorlabs.TLDFM_64.Interop.dll'))
-            
-           
-            %Check if device is present
-            [Status,N]=Thorlabs.TLDFM_64.Interop.TLDFM.get_device_count()
-            if N<1
-                warning('MIC_DMP40:: No Mirror Found')
-            end
-            
-            % Get device info
-            deviceindex=0;
-            manufacturer=System.Text.StringBuilder;
-            instrumentName=System.Text.StringBuilder;
-            serialNumber=System.Text.StringBuilder;
-            resourceName=System.Text.StringBuilder; %need this
-            
-            [Status,deviceAvailable]=Thorlabs.TLDFM_64.Interop.TLDFM.get_device_information(...
-                deviceindex,manufacturer,instrumentName,serialNumber,resourceName)
 
-            % Create DM Object
-            obj.DMP40=Thorlabs.TLDFM_64.Interop.TLDFM(resourceName.ToString,true,true)
-
+            
+            obj.Laserobj=laserobj;
+            obj.close;
         end
         
         function delete(obj)
-            obj.DMP40.Dispose %close com to mirror
             delete(obj.GuiFigure);
         end
         
-        function setMirrorVoltages(VoltageArray)
-            
-            
+        function close(obj)  %closes the shutter
+            obj.Laserobj.off();
+            obj.IsOpen=0;
+
         end
         
-        function setTiltVoltages(VoltageArray)
-            
-            
+        function open(obj) %opens the shutter
+            obj.Laserobj.on();
+            obj.IsOpen=1;
+
         end
-        
-        function setZernikeModes(ZernikeArray)
-            
-            
-        end
-        
         
         %gui
         function gui(obj)
@@ -88,7 +63,7 @@ classdef MIC_DMP40 < MIC_Abstract
             obj.GuiFigure.Visible = 'on';
             set(obj.GuiFigure,'MenuBar','none')
             set(obj.GuiFigure,'NumberTitle','off')
-            set(obj.GuiFigure,'Name','ShutterTTL')
+            set(obj.GuiFigure,'Name','ShutterLaser')
             h=uicontrol('Style','togglebutton',...
                 'String','Shutter Closed','Position',[90 105,80,70],...
                 'BackgroundColor',[0  0  0],'Callback',@ToggleLight);
@@ -107,7 +82,7 @@ classdef MIC_DMP40 < MIC_Abstract
                     set(h,'ForegroundColor',[1 1 1])
                     obj.close;
                 end
-                % display('Button pressed');
+               % display('Button pressed');
             end
             
             
@@ -124,7 +99,7 @@ classdef MIC_DMP40 < MIC_Abstract
             Attributes.IsOpen = obj.IsOpen;
             Attributes.InstrumentName = obj.InstrumentName;
             Data = [];
-            Children = [];
+            Childern = [];
         end
         
         
@@ -134,18 +109,16 @@ classdef MIC_DMP40 < MIC_Abstract
     
     methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
         % test this class on command line by: MIC_ShutterTTL.unitTest('Dev1','Port0','Line1')
-        function State=unitTest(NIDevice,DOChannel)
+        function State=unitTest(laserobj)
             % Unit test of object functionality
             
-            if nargin<2
-                error('MIC_ShutterTTL:NIDevice, Port and Line must be defined')
-            end
+
             
-            % release(MIC_ShutterTTL('Dev1','Port0','Line1'))
+           % release(MIC_ShutterTTL('Dev1','Port0','Line1'))
             %Create an Object and Test open, close
             fprintf('Creating Object\n')
             % release()
-            S=MIC_ShutterTTL(NIDevice,DOChannel);
+            S=MIC_ShutterLaser(laserobj);
             S.open;
             fprintf('Shutter Open\n')
             pause(.5);
@@ -156,7 +129,7 @@ classdef MIC_DMP40 < MIC_Abstract
             clear S;
             %Create an Object and Repeat Test
             fprintf('Creating Object\n')
-            S=MIC_ShutterTTL(NIDevice,DOChannel);
+            S=MIC_ShutterLaser(laserobj);
             S.open;
             fprintf('Shutter Open\n')
             pause(.5);
