@@ -11,7 +11,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         ImageHandle;
         ReadyForAcq=0;      %If not, call setup_acquisition
         TextHandle;
-        SDKPath = 'C:\Users\lidkelab\Documents\GitHub\matlab-instrument-control\source\MIC\DCAM4\x64\Release';
+        
     end
     
     properties(SetAccess = protected)
@@ -44,13 +44,10 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         ROI;                %   [Xstart Xend Ystart Yend]
         SequenceLength=1;   %   Kinetic Series length
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
-        ScanMode;           %   scan mode for Hamamatsu sCMOS camera
         TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
-        DefectCorrection;   %   defect correction  for Hamamatsu sCMOS camera
         GuiDialog;
         Timeout = 1000;        % timeout sent to several DCAM functions (milliseconds)
         EventMaskString = 'DCAMWAIT_CAPEVENT_CYCLEEND'; % wait event mask used in DCAM functions (see dcamprop.h DCAMWAIT_EVENT)
-        APIPath = 'C:\Program Files\dcamsdk4\inc\dcamapi4.h';
     end
     
     properties (Hidden)
@@ -108,30 +105,27 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                 fprintf('Getting Hamamatsu Camera Info.\n')
                 obj.getcamera()
             end
-            obj.Binning=1;
-            obj.ScanMode=1; %scan mode is slow
-            obj.DefectCorrection=1;% defection correction is off
-            obj.XPixels=2048;
-            obj.YPixels=2048;
-            obj.ROI=[1,obj.XPixels,1,obj.YPixels];
-            obj.TriggerMode=int32(hex2dec('0001'));
-            obj.ExpTime_Focus=single(0.004);
-            obj.ExpTime_Capture=single(0.004);
-            obj.ExpTime_Sequence=single(0.004);
+
+            obj.get_propertiesDcam()
+            ExposureTime = obj.CameraSetting.EXPOSURE_TIME.Value;
+            obj.ReturnType='matlab';
+            obj.ExpTime_Focus=ExposureTime;
+            obj.ExpTime_Capture=ExposureTime;
+            obj.ExpTime_Sequence=ExposureTime;
             
-            obj.CameraSetting.Binning.Bit=obj.Binning;
-            obj.CameraSetting.TriggerMode.Bit=obj.TriggerMode;
-            obj.CameraSetting.ScanMode.Bit=obj.ScanMode;
-            obj.CameraSetting.DefectCorrection.Bit=obj.DefectCorrection;
-            
-            obj.CameraSetting.Binning.Ind=1;
-            obj.CameraSetting.TriggerMode.Ind=1;
-            obj.CameraSetting.ScanMode.Ind=1;
-            obj.CameraSetting.DefectCorrection.Ind=1;
-            
+            obj.XPixels = obj.CameraSetting.SUBARRAY_HSIZE.Value;
+            obj.YPixels = obj.CameraSetting.SUBARRAY_VSIZE.Value;
+            obj.ImageSize = [obj.XPixels,obj.YPixels];
+
+            obj.CameraSetting.READOUT_SPEED.Value = 1;
+            obj.CameraSetting.DEFECT_CORRECT_MODE.Ind = 1;
+            obj.CameraSetting.SUBARRAY_MODE.Ind = 2;
+            obj.CameraSetting.TRIGGER_SOURCE.Ind = 1;
             obj.setCamProperties(obj.CameraSetting);
-            GuiCurSel = MIC_HamamatsuCamera.camSet2GuiSel(obj.CameraSetting);
+            obj.ROI = [1,obj.XPixels,1,obj.YPixels];
+            GuiCurSel = MIC_PyDcam.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
+            obj.gui();
         end
         
         function setup_acquisition(obj)
@@ -502,69 +496,151 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         function [temp, status] = call_temperature(obj)
             [temp, status]=gettemperature(obj);
         end
-        function build_guiDialog(obj,GuiCurSel)
-            % build GuiDialog based on current selected camera parameters
-            % handles dependencies in user settables
-            % also defines what is user configurable
-            % GuiCurSel: current selection of Gui parameters
-            
-            % GuiDialog.Binning: fixed options
-            % GuiDialog.TriggerMode: fixed options
-            % GuiDialog.ScanMode: fixed options
-            
-            obj.GuiDialog.Binning.Desc={'1 x 1 binning','2 x 2 binning', '4 x 4 binning'};
-            obj.GuiDialog.Binning.Bit=[1,2,4];
-            obj.GuiDialog.TriggerMode.Desc=...
-                {'Internal','External','Software','MasterPulse'};
-            obj.GuiDialog.TriggerMode.Bit=int32([1, 2, 3, 4]);
-            obj.GuiDialog.ScanMode.Desc={'Slow','Fast'};
-            obj.GuiDialog.ScanMode.Bit=[1,2];
-            obj.GuiDialog.DefectCorrection.Desc={'OFF','ON'};
-            obj.GuiDialog.DefectCorrection.Bit=[1,2];
-            % now have defined what does to GUI, transfer uiType, current
-            % selection
-            guiFields = fields(obj.GuiDialog);
-            for ii=1:length(guiFields)
-                obj.GuiDialog.(guiFields{ii}).uiType = 'select';
-                obj.GuiDialog.(guiFields{ii}).curVal = GuiCurSel.(guiFields{ii}).Val;
+
+
+        function get_propertiesDcam(obj)
+            idprop = DCAM4GetPropNextID(obj.CameraHandle,int32(0));
+            while idprop ~= 0
+                pinfo = obj.get_propAttr(idprop);
+                obj.CameraSetting.(pinfo.Name).idprop = idprop;
+                obj.CameraSetting.(pinfo.Name).Type = pinfo.Type;
+                obj.CameraSetting.(pinfo.Name).Desc = pinfo.Option;
+                obj.CameraSetting.(pinfo.Name).Range = pinfo.Range;
+                obj.CameraSetting.(pinfo.Name).Readable = pinfo.Readable;
+                obj.CameraSetting.(pinfo.Name).Writable = pinfo.Writable;
+                switch pinfo.Type
+                    case 'bounded'
+                        obj.CameraSetting.(pinfo.Name).Value = pinfo.Value;
+                        
+                    case 'enum'
+                        obj.CameraSetting.(pinfo.Name).Bit = pinfo.Option{pinfo.Value};
+                        obj.CameraSetting.(pinfo.Name).Ind = pinfo.Value;
+                end
+
+                idprop = DCAM4GetPropNextID(obj.CameraHandle,idprop);
             end
+
         end
-        
+
+        function Pinfo = get_propAttr(obj,idprop)
+            pinfo = DCAM4GetPropInfo(obj.CameraHandle,idprop);
+            pinfo = pinfo.struct;
+            propname = strrep(pinfo.Name.char,' ','_');
+            propname = strrep(propname,'[','');
+            propname = strrep(propname,']','');
+            Pinfo.Name = propname;
+            ptype = pinfo.Type.char;
+            Pinfo.Range = pinfo.Range.double;
+            Pinfo.Writable = pinfo.writable;
+            Pinfo.Readable = pinfo.readable;
+            Pinfo.Unit = pinfo.unit.char;
+            if Pinfo.Readable
+                value = obj.getProperty(idprop);
+            else
+                value = nan;
+            end
+            
+            if strcmp(ptype,'MODE')
+                option = cell(1,Pinfo.Range(2));
+                for ii = Pinfo.Range(1):Pinfo.Range(2)
+                    valuetext = string(DCAM4GetPropValueText(obj.CameraHandle,idprop,ii));
+                    option{ii} = valuetext{1};
+                end
+                type = 'enum';
+            else
+                type = 'bounded';
+                option = 0;
+            end
+            Pinfo.Option = option;
+            Pinfo.Type = type;
+            Pinfo.Value = value;
+        end
+
+        function Value = getProperty(obj,idprop)
+            Value = DCAM4GetProperty(obj.CameraHandle,idprop);
+        end
+
+        function setProperty(obj,idprop,value)
+            DCAM4SetProperty(obj.CameraHandle,idprop,value);
+        end
+
+        function setCamProperties(obj,Infield)
+            status = obj.HtsuGetStatus();
+            if strcmp(status,'READY')||strcmp(status,'BUSY')
+                obj.abort;
+  
+            end            
+
+            % Set up properties
+            fieldp=fields(Infield);
+            for ii=1:length(fieldp)
+                idprop = Infield.(fieldp{ii}).idprop;
+
+                if Infield.(fieldp{ii}).Writable
+                    pinfo = obj.get_propAttr(idprop);
+                    switch pinfo.Type
+                        case 'enum'
+                            value = Infield.(fieldp{ii}).Ind;
+                        case 'bounded'
+                            value = Infield.(fieldp{ii}).Value;
+                    end
+                    if pinfo.Value ~= value
+                        [out,err] = obj.setProperty(idprop,value);
+                        
+                    end
+                end
+            end
+
+        end
+
+        function build_guiDialog(obj,GuiCurSel)
+            % gui building
+            fieldp=fields(GuiCurSel);
+            for ii=1:length(fieldp)
+                pInfo= obj.CameraSetting.(fieldp{ii});
+                switch pInfo.Type
+                    case 'enum'
+                        obj.GuiDialog.(fieldp{ii}).Desc=pInfo.Desc;
+                        if (pInfo.Range(1)~=pInfo.Range(2)) && pInfo.Writable
+                            obj.GuiDialog.(fieldp{ii}).uiType='select';
+                        end
+                    case 'bounded'
+                        obj.GuiDialog.(fieldp{ii}).Range=pInfo.Range;
+                        obj.GuiDialog.(fieldp{ii}).Desc=num2str(pInfo.Range);
+                        if (pInfo.Range(1)~=pInfo.Range(2)) && pInfo.Writable
+                            obj.GuiDialog.(fieldp{ii}).uiType='input';
+                        end
+                end
+                if (pInfo.Range(1)~=pInfo.Range(2)) && pInfo.Writable
+                    obj.GuiDialog.(fieldp{ii}).enable=1;
+                else
+                    obj.GuiDialog.(fieldp{ii}).enable=2;
+                end
+                obj.GuiDialog.(fieldp{ii}).curVal=GuiCurSel.(fieldp{ii}).Val;
+            end
+            
+        end
+
+
         function apply_camSetting(obj)
             % update CameraSetting struct from GUI
-            guiFields = fields(obj.GuiDialog);
+            guiFields=fields(obj.GuiDialog);
             for ii=1:length(guiFields)
-                disp(['Writing ',guiFields{ii},' in CameraSetting...']);
-                ind=obj.GuiDialog.(guiFields{ii}).curVal;
-                obj.CameraSetting.(guiFields{ii}).Ind=ind;
-                obj.CameraSetting.(guiFields{ii}).Bit=obj.GuiDialog.(guiFields{ii}).Bit(ind);
+                pInfo= obj.CameraSetting.(guiFields{ii});
+                switch pInfo.Type
+                    case 'enum'
+                        ind=obj.GuiDialog.(guiFields{ii}).curVal;
+                        obj.CameraSetting.(guiFields{ii}).Ind = ind;
+                        obj.CameraSetting.(guiFields{ii}).Bit=obj.GuiDialog.(guiFields{ii}).Desc{ind};
+                    case 'bounded'
+                        val=obj.GuiDialog.(guiFields{ii}).curVal;
+                        obj.CameraSetting.(guiFields{ii}).Value=val;
+                end
+
             end
         end
-        
-        function setCamProperties(obj,Infield)
-            Fields = fields(Infield);
-            for ii=1:length(Fields)
-                obj.(Fields{ii})=Infield.(Fields{ii}).Bit;
-            end
-            
-            % Set binning.
-            % DCAM_IDPROP_BINNING <-> 0x00401110 <-> 4198672
-            obj.setProperty(obj.CameraHandle, 4198672, obj.Binning);
-            
-            % Set the scan mode.
-            % DCAM_IDPROP_READOUTSPEED <-> 0x00400110 <-> 4194576
-            % DCAMPROP_READOUTSPEED__SLOWEST <-> 1
-            % DCAMPROP_READOUTSPEED__FASTEST <-> 2 (dcamprop.h seems wrong!)
-            obj.setProperty(obj.CameraHandle, 4194576, obj.ScanMode);
-            
-            % Set the trigger mode.
-            % DCAM_IDPROP_TRIGGERSOURCE <-> 0x00100110 <-> 1048848
-            obj.setProperty(obj.CameraHandle, 1048848, obj.TriggerMode);
-            
-            % Set defect correction.
-            % DCAM_IDPROP_DEFECTCORRECT_MODE <-> 0x00470010 <-> 4653072
-            obj.setProperty(obj.CameraHandle, 4653072, obj.DefectCorrection);
-        end
+
+     
         
         function [Attributes,Data,Children]=exportState(obj)
             %Get default properties
@@ -578,45 +654,58 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         %METHODS-----------------------------------------------------------------
         function set.ROI(obj,ROI)
             obj.ReadyForAcq=0;
-            status=obj.HtsuGetStatus();
-            if strcmp(status,'Ready')||strcmp(status,'Busy')
+            status = obj.HtsuGetStatus();
+            if strcmp(status,'READY')||strcmp(status,'BUSY')
                 obj.abort;
+                
+            end            
+            Hoffset = obj.valuecheck('SUBARRAY_HPOS',ROI(1)-1);
+            HWidth = obj.valuecheck('SUBARRAY_HSIZE',ROI(2)-ROI(1)+1);
+            Voffset = obj.valuecheck('SUBARRAY_VPOS',ROI(3)-1);
+            VWidth = obj.valuecheck('SUBARRAY_VSIZE',ROI(4)-ROI(3)+1);
+
+            curHpos = obj.getProperty(obj.CameraSetting.SUBARRAY_HPOS.idprop);
+            curVpos = obj.getProperty(obj.CameraSetting.SUBARRAY_VPOS.idprop);
+            if Hoffset>curHpos
+                obj.setProperty(obj.CameraSetting.SUBARRAY_HSIZE.idprop,HWidth);
+                obj.setProperty(obj.CameraSetting.SUBARRAY_HPOS.idprop,Hoffset);
+            else
+                obj.setProperty(obj.CameraSetting.SUBARRAY_HPOS.idprop,Hoffset);
+                obj.setProperty(obj.CameraSetting.SUBARRAY_HSIZE.idprop,HWidth);
             end
-            Step=4/obj.Binning;
-            Hoffset=round((ROI(1)-1)/Step)*Step;
-            HWidth=round((ROI(2)-ROI(1)+1)/Step)*Step;
-            HWidth(HWidth<Step)=Step;
-            HWidth(HWidth>(obj.XPixels/obj.Binning-Hoffset))=obj.XPixels/obj.Binning-Hoffset;
-            
-            Voffset=round((ROI(3)-1)/Step)*Step;
-            VWidth=round((ROI(4)-ROI(3)+1)/Step)*Step;
-            VWidth(VWidth<Step)=Step;
-            VWidth(VWidth>(obj.YPixels/obj.Binning-Voffset))=obj.YPixels/obj.Binning-Voffset;
-            fprintf('\nROI(1) and ROI(3) should be from %d to %d in step of %d',1,obj.XPixels/obj.Binning-Step+1,Step);
-            fprintf('\nROI(2) and ROI(4) should be from %d to %d in step of %d\n',Step,obj.XPixels/obj.Binning,Step);
+            if Voffset>curVpos
+                obj.setProperty(obj.CameraSetting.SUBARRAY_VSIZE.idprop,VWidth);
+                obj.setProperty(obj.CameraSetting.SUBARRAY_VPOS.idprop,Voffset);
+            else
+                obj.setProperty(obj.CameraSetting.SUBARRAY_VPOS.idprop,Voffset);
+                obj.setProperty(obj.CameraSetting.SUBARRAY_VSIZE.idprop,VWidth);
+            end
+
+            obj.CameraSetting.SUBARRAY_HPOS.Value = Hoffset;
+            obj.CameraSetting.SUBARRAY_HSIZE.Value = HWidth;
+            obj.CameraSetting.SUBARRAY_VPOS.Value = Voffset;
+            obj.CameraSetting.SUBARRAY_VSIZE.Value = VWidth;
+
+            GuiCurSel = MIC_PyDcam.camSet2GuiSel(obj.CameraSetting);
+            obj.build_guiDialog(GuiCurSel);
             
             obj.ROI=[Hoffset+1,Hoffset+HWidth,Voffset+1,Voffset+VWidth];
             obj.ImageSize=[HWidth,VWidth];
-            
-            % Set the appropriate ROI properties:
-            % DCAM_IDPROP_SUBARRAYMODE <-> 0x00402150 <-> 4202832
-            % DCAMPROP_MODE__ON <-> 2
-            % DCAM_IDPROP_SUBARRAYHPOS <-> 0x00402110 <-> 4202768
-            % DCAM_IDPROP_SUBARRAYHSIZE <-> 0x00402120 <-> 4202784
-            % DCAM_IDPROP_SUBARRAYVPOS <-> 0x00402130 <-> 4202800
-            % DCAM_IDPROP_SUBARRAYVSIZE <-> 0x00402140 <-> 4202816
-            % NOTE: Depending on the values being set, errors can occur due
-            %       to inconsistencies between offset and width, hence I'm
-            %       setting the offset to 0 temporarily before setting the
-            %       desired value.
-            obj.setProperty(obj.CameraHandle, 4202832, 2)
-            obj.setProperty(obj.CameraHandle, 4202768, 0);
-            obj.setProperty(obj.CameraHandle, 4202800, 0);
-            obj.setProperty(obj.CameraHandle, 4202784, HWidth);
-            obj.setProperty(obj.CameraHandle, 4202768, Hoffset);
-            obj.setProperty(obj.CameraHandle, 4202816, VWidth);
-            obj.setProperty(obj.CameraHandle, 4202800, Voffset);
+
         end
+
+        function out = valuecheck(obj,propname,val)
+            step = obj.CameraSetting.(propname).Range(3);
+            out = round(val/step)*step;
+            if val<obj.CameraSetting.(propname).Range(1)
+                out = obj.CameraSetting.(propname).Range(1);
+            end
+            if val>obj.CameraSetting.(propname).Range(2)
+                out = obj.CameraSetting.(propname).Range(2);
+            end
+
+        end
+
         function set.ExpTime_Focus(obj,in)
             obj.ReadyForAcq=0;
             obj.ExpTime_Focus=in;
@@ -692,6 +781,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             
         end
         
+
         function GuiCurSel = camSet2GuiSel(CameraSetting)
             % translate current camera settings to GUI selections
             cameraFields = fields(CameraSetting);
@@ -703,11 +793,10 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                 end
             end
         end
-        
-        [HexString] = propertyToHex(PropertyString, APIFilePath);
-        [PropertyString] = hexToProperty(HexString, Prefix, APIFilePath);
-        setProperty(CameraHandle, Property, Value, APIFilePath);
-        [Value] = getProperty(CameraHandle, Property, APIFilePath);
+        %[HexString] = propertyToHex(PropertyString, APIFilePath);
+        %[PropertyString] = hexToProperty(HexString, Prefix, APIFilePath);
+        %setProperty(CameraHandle, Property, Value, APIFilePath);
+        %[Value] = getProperty(CameraHandle, Property, APIFilePath);
         [Value] = setGetProperty(CameraHandle, Property, Value, APIFilePath);
         prepareForCapture(CameraHandle, CaptureMode, NImages);
     end
