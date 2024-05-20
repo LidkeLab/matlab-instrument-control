@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.9.34728.123
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DCAM4AllocMemory", "DCAM4AllocMemory\DCAM4AllocMemory.vcxproj", "{67B25442-47A5-4B26-8806-6B64DFEBF998}"
 EndProject
@@ -42,6 +42,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DCAM4CopyFrameBundle", "DCAM4CopyFrameBundle\DCAM4CopyFrameBundle.vcxproj", "{98329529-3C12-4F7C-BCD3-8D7BE85B64A0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DCAM4CopyLastFrameBundle", "DCAM4CopyLastFrameBundle\DCAM4CopyLastFrameBundle.vcxproj", "{A9992B97-9D0B-4A7B-9377-CCDEF3AEA99B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DCAM4QueryValue", "DCAM4QueryValue\DCAM4QueryValue.vcxproj", "{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -211,6 +213,14 @@ Global
 		{A9992B97-9D0B-4A7B-9377-CCDEF3AEA99B}.Release|x64.Build.0 = Release|x64
 		{A9992B97-9D0B-4A7B-9377-CCDEF3AEA99B}.Release|x86.ActiveCfg = Release|Win32
 		{A9992B97-9D0B-4A7B-9377-CCDEF3AEA99B}.Release|x86.Build.0 = Release|Win32
+		{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}.Debug|x64.ActiveCfg = Debug|x64
+		{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}.Debug|x64.Build.0 = Debug|x64
+		{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}.Debug|x86.ActiveCfg = Debug|Win32
+		{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}.Debug|x86.Build.0 = Debug|Win32
+		{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}.Release|x64.ActiveCfg = Release|x64
+		{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}.Release|x64.Build.0 = Release|x64
+		{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}.Release|x86.ActiveCfg = Release|Win32
+		{AEED6A0A-77CF-4EE8-BF20-66B577152BCB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

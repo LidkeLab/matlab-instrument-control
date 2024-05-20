@@ -17,13 +17,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	int32 nFrames;
 	int32 timeout;
 	unsigned long mMask;
-	DCAMWAIT_EVENT eventMask;
+	//DCAMWAIT_EVENT eventMask;
 	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
 	handle = (HDCAM)mHandle[0];
 	nFrames = (int32)mxGetScalar(prhs[1]);
 	timeout = (int32)mxGetScalar(prhs[2]);
-	mMask = (unsigned long)mxGetScalar(prhs[3]);
-	eventMask = (DCAMWAIT_EVENT)mMask;
+	//mMask = (unsigned long)mxGetScalar(prhs[3]);
+	//eventMask = (DCAMWAIT_EVENT)mMask;
 
 	// Prepare some of the DCAM structures.
 	DCAMWAIT_OPEN waitopen;
@@ -34,7 +34,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	waitopen.hdcam = handle;
 	memset(&waitstart, 0, sizeof(waitstart));
 	waitstart.size = sizeof(waitstart);
-	waitstart.eventmask = eventMask;
+	waitstart.eventmask = DCAMWAIT_CAPEVENT_CYCLEEND;
 	waitstart.timeout = timeout;
 	memset(&pFrame, 0, sizeof(pFrame));
 	pFrame.size = sizeof(pFrame);

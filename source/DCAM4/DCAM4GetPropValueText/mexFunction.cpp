@@ -41,7 +41,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	if (failed(error))
 	{
-		mexPrintf("Error = 0x%08lX\ndcamprop_getvaluetext() failed.\n", error);
+		//mexPrintf("Error = 0x%08lX\ndcamprop_getvaluetext() failed.\n", error);
 		plhs[0] = mxCreateString("");
 	}
 	else {

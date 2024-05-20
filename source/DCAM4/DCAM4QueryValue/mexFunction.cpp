@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-// [] = DCAM4AllocMemory(cameraHandle, nFrames)
+// [] = DCAM4QueryValue(cameraHandle, nFrames)
 // Allocate memory for 'cameraHandle' to capture 'nFrames'.
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
@@ -19,24 +19,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	int32 iProp;
 	mHandle = (unsigned long*)mxGetUint64s(prhs[0]);
 	handle = (HDCAM)mHandle[0];
-	iProp = (int32)mxGetScalar(prhs[1]); // property IDs
+	iProp = (int32)mxGetScalar(prhs[1]);
+
+	// Prepare the outputs.
+	double* propertyValue;
+	plhs[0] = mxCreateDoubleScalar(123);
+	propertyValue = (double*)mxGetData(plhs[0]);
 
 	// Call the dcam function.
 	DCAMERR error;
-
-	error = dcamprop_getnextid(handle, &iProp, DCAMPROP_OPTION_SUPPORT);
-
-	// Prepare the outputs.
-	mwSize outsize[1];
-	outsize[0] = 1;
-	plhs[0] = mxCreateNumericArray(1, outsize, mxINT32_CLASS, mxREAL);
-	*mxGetInt32s(plhs[0]) = iProp;
-	
-
+	error = dcamprop_queryvalue(handle, iProp, propertyValue, DCAMPROP_OPTION_NEXT);
 	if (failed(error))
 	{
-		//mexPrintf("Error = 0x%08lX\ndcamprop_getnextid() failed.\n", error);
-		*mxGetInt32s(plhs[0]) = 0;
+		mexPrintf("Error = 0x%08lX\ndcamprop_queryvalue() failed.\n", error);
 	}
 
 	return;

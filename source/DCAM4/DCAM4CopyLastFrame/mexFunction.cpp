@@ -11,27 +11,17 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	handle = (HDCAM)mHandle[0];
 
 	// Prepare some of the DCAM structures.
-	mwSize outsize[1];
-	DCAMBUF_FRAME pFrame;
-	DCAMWAIT_OPEN waitopen;
-	DCAMWAIT_START waitstart;
+	
 	int32 timeout;
 	timeout = (int32)mxGetScalar(prhs[1]);
-	DCAMCAP_TRANSFERINFO transferInfo;
-	memset(&pFrame, 0, sizeof(pFrame));
-	pFrame.size = sizeof(pFrame);
+
+
+	// open wait handle.
+	DCAMERR error;
+	DCAMWAIT_OPEN waitopen;
 	memset(&waitopen, 0, sizeof(waitopen));
 	waitopen.size = sizeof(waitopen);
 	waitopen.hdcam = handle;
-	memset(&waitstart, 0, sizeof(waitstart));
-	waitstart.size = sizeof(waitstart);
-	waitstart.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY;
-	waitstart.timeout = timeout;
-	memset(&transferInfo, 0, sizeof(transferInfo));
-	transferInfo.size = sizeof(transferInfo);
-
-	// Create the HDCAMWAIT handle.
-	DCAMERR error;
 	error = dcamwait_open(&waitopen);
 	if (failed(error))
 	{
@@ -39,7 +29,24 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		return;
 	}
 
+	// wait image
+	HDCAMWAIT hwait = waitopen.hwait;
+	DCAMWAIT_START waitstart;
+	memset(&waitstart, 0, sizeof(waitstart));
+	waitstart.size = sizeof(waitstart);
+	waitstart.eventmask = DCAMWAIT_CAPEVENT_FRAMEREADY;
+	waitstart.timeout = timeout;
+	error = dcamwait_start(hwait, &waitstart);
+	if (failed(error))
+	{
+		mexPrintf("Error = 0x%08lX\ndcamwait_start() failed.\n", error);
+		return;
+	}
+
 	// Determine the frame index of the most recently transfered image.
+	DCAMCAP_TRANSFERINFO transferInfo;
+	memset(&transferInfo, 0, sizeof(transferInfo));
+	transferInfo.size = sizeof(transferInfo);
 	error = dcamcap_transferinfo(handle, &transferInfo);
 	if (failed(error))
 	{
@@ -48,6 +55,9 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	}
 
 	// Prepare the DCAMBUF_FRAME and initialize the output for MATLAB.
+	DCAMBUF_FRAME pFrame;
+	memset(&pFrame, 0, sizeof(pFrame));
+	pFrame.size = sizeof(pFrame);
 	pFrame.iFrame = transferInfo.nNewestFrameIndex;
 	error = dcambuf_lockframe(handle, &pFrame);
 	if (failed(error))
@@ -55,6 +65,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 		mexPrintf("Error = 0x%08lX\ndcambuf_lockframe() failed.\n", error);
 		return;
 	}
+
+	mwSize outsize[1];
 	outsize[0] = (long long)pFrame.width * (long long)pFrame.height;
 	plhs[0] = mxCreateNumericArray(1, outsize, mxUINT16_CLASS, mxREAL);
 
@@ -65,6 +77,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int	nrhs, const	mxArray* prhs[])
 	{
 		mexPrintf("Error = 0x%08lX\ndcambuf_copyframe() failed.\n", error);
 		return;
+	}
+
+	// close wait handle
+	dcamwait_close(hwait);
+	if (failed(error))
+	{
+		mexPrintf("Error = 0x%08lX\ndcamwait_close() failed.\n", error);
 	}
 
 	return;

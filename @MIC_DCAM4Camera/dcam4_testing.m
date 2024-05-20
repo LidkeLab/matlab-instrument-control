@@ -91,8 +91,19 @@ end
 toc
 Images = CameraSCMOS.finishTriggeredCapture(CameraSCMOS.SequenceLength);
 
-%% dcam4 testing property list
-cam = MIC_DCAM4Camera();
+%% dcam4 testing: triggered capture
+CameraSCMOS = MIC_DCAM4Camera();
+
+CameraSCMOS.SequenceLength = 20;
+CameraSCMOS.ExpTime_Sequence = 0.01;
+CameraSCMOS.setup_fast_acquisition();
+tic;
+for ii = 1:CameraSCMOS.SequenceLength
+    disp(ii)
+    CameraSCMOS.triggeredCapture();
+end
+toc
+Images = CameraSCMOS.finishTriggeredCapture(CameraSCMOS.SequenceLength);
 
 
 

@@ -1,4 +1,4 @@
-function prepareForCapture(CameraHandle, NImages)
+function prepareForCapture(obj, NImages)
 %prepareForCapture runs a few functions to prepare the camera for capturing. 
 %
 %
@@ -11,10 +11,10 @@ function prepareForCapture(CameraHandle, NImages)
 
 
 % Release the existing memory buffer.
-DCAM4ReleaseMemory(CameraHandle)
+DCAM4ReleaseMemory(obj.CameraHandle)
 
 % Allocate a new memory buffer.
-DCAM4AllocMemory(CameraHandle, NImages)
+DCAM4AllocMemory(obj.CameraHandle, NImages)
 
 
 end

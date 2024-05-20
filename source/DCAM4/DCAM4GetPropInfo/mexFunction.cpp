@@ -124,13 +124,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 		return;
 	}
 	prop.name = text;
-	mexPrintf("number of fields: %d.\n", NUMBER_OF_FIELDS);
-	mexPrintf("Name: %s.\n", text);
-	mexPrintf("writable: %d.\n", prop.writable);
-	mexPrintf("readable: %d.\n", prop.readable);
-	mexPrintf("Type: %s.\n", prop.type);
-	mexPrintf("Unit: %s.\n", prop.unit);
-	mexPrintf("Range: %0.2f, %0.2f, %0.2f.\n", prop.range[0],prop.range[1],prop.range[2]);
+	//mexPrintf("number of fields: %d.\n", NUMBER_OF_FIELDS);
+	//mexPrintf("Name: %s.\n", text);
+	//mexPrintf("writable: %d.\n", prop.writable);
+	//mexPrintf("readable: %d.\n", prop.readable);
+	//mexPrintf("Type: %s.\n", prop.type);
+	//mexPrintf("Unit: %s.\n", prop.unit);
+	//mexPrintf("Range: %0.2f, %0.2f, %0.2f.\n", prop.range[0],prop.range[1],prop.range[2]);
 	// Assign output
 	
 	mxArray* field_value;

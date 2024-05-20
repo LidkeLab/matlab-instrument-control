@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\share\helper.cpp" />
     <ClCompile Include="mexFunction.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -31,8 +30,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a9992b97-9d0b-4a7b-9377-ccdef3aea99b}</ProjectGuid>
-    <RootNamespace>DCAM4CopyLastFrameBundle</RootNamespace>
+    <ProjectGuid>{aeed6a0a-77cf-4ee8-bf20-66b577152bcb}</ProjectGuid>
+    <RootNamespace>DCAM4QueryValue</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
