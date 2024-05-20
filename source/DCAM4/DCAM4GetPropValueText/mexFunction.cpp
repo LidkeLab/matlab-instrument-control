@@ -37,11 +37,15 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	DCAMERR error;
 	error = dcamprop_getvaluetext(handle, &pvt);
 
-	plhs[0] = mxCreateString(pvt.text);
+	
 
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcamprop_getvaluetext() failed.\n", error);
+		plhs[0] = mxCreateString("");
+	}
+	else {
+		plhs[0] = mxCreateString(pvt.text);
 	}
 
 	return;

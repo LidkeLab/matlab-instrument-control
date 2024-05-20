@@ -91,5 +91,8 @@ end
 toc
 Images = CameraSCMOS.finishTriggeredCapture(CameraSCMOS.SequenceLength);
 
+%% dcam4 testing property list
+cam = MIC_DCAM4Camera();
+
 
 

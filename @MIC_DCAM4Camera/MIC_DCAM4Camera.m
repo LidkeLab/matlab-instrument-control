@@ -100,7 +100,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         end
         
         function initialize(obj)
-            addpath(obj.SDKPath)
+            %addpath(obj.SDKPath)
             if isempty(obj.CameraIndex)
                 fprintf('Getting Hamamatsu Camera Info.\n')
                 obj.getcamera()
@@ -119,11 +119,11 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
 
             obj.CameraSetting.READOUT_SPEED.Value = 1;
             obj.CameraSetting.DEFECT_CORRECT_MODE.Ind = 1;
-            obj.CameraSetting.SUBARRAY_MODE.Ind = 2;
+            obj.CameraSetting.SUBARRAY_MODE.Ind = 1;
             obj.CameraSetting.TRIGGER_SOURCE.Ind = 1;
             obj.setCamProperties(obj.CameraSetting);
             obj.ROI = [1,obj.XPixels,1,obj.YPixels];
-            GuiCurSel = MIC_PyDcam.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = MIC_DCAM4Camera.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
             obj.gui();
         end
@@ -524,16 +524,20 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
 
         function Pinfo = get_propAttr(obj,idprop)
             pinfo = DCAM4GetPropInfo(obj.CameraHandle,idprop);
-            pinfo = pinfo.struct;
-            propname = strrep(pinfo.Name.char,' ','_');
+            
+            propname = strrep(pinfo.name,' ','_');
             propname = strrep(propname,'[','');
             propname = strrep(propname,']','');
             Pinfo.Name = propname;
-            ptype = pinfo.Type.char;
-            Pinfo.Range = pinfo.Range.double;
+            ptype = pinfo.type;
+            if pinfo.range(1)<0 % range is not available
+                Pinfo.Range = [1,2,-1]; % 'OFF', 'ON'
+            else
+                Pinfo.Range = pinfo.range;
+            end
             Pinfo.Writable = pinfo.writable;
             Pinfo.Readable = pinfo.readable;
-            Pinfo.Unit = pinfo.unit.char;
+            Pinfo.Unit = pinfo.unit;
             if Pinfo.Readable
                 value = obj.getProperty(idprop);
             else

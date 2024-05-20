@@ -36,6 +36,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	if (failed(error))
 	{
 		mexPrintf("Error = 0x%08lX\ndcamprop_getnextid() failed.\n", error);
+		*mxGetInt32s(plhs[0]) = 0;
 	}
 
 	return;
