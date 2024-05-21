@@ -30,12 +30,11 @@ classdef MIC_3DStage_Abstract < MIC_Abstract
     end
     
     methods (Abstract)
-        center(obj);                % Set to the center
+        center(obj, AxisBool);                % Set to the center
         setPosition(obj,Position);  % Set to any position
     end
     
 end
-
 
 
 

@@ -42,7 +42,8 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         SequenceLength=1;   %   Kinetic Series length
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
         ScanMode;           %   scan mode for Hamamatsu sCMOS camera
-        TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
+        TriggerMode = 'internal'; %   trigger mode for Hamamatsu sCMOS
+        TriggerModeNum;  % numeric trigger mode for camera
         DefectCorrection;   %   defect correction  for Hamamatsu sCMOS camera
         GuiDialog;
     end
@@ -67,7 +68,8 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
         end
         
         function out=getlastimage(obj) %?
-            if obj.TriggerMode == 32
+            if obj.TriggerModeNum == 32
+                pause(0.1);
                 [img]=DcamGetLastImageFast(obj.CameraHandle);
             else
                 [img]=DcamGetNewestFrame(obj.CameraHandle);
@@ -101,18 +103,18 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.YPixels=2048;
             obj.ImageSize=[obj.XPixels,obj.YPixels];
             obj.ROI=[1,obj.XPixels,1,obj.YPixels];
-            obj.TriggerMode=int32(hex2dec('0001'));
+            obj.TriggerModeNum = int32(1);
             obj.ExpTime_Focus=single(0.004);
             obj.ExpTime_Capture=single(0.004);
             obj.ExpTime_Sequence=single(0.004);
             
             obj.CameraSetting.Binning.Bit=obj.Binning;
-            obj.CameraSetting.TriggerMode.Bit=obj.TriggerMode;
+            obj.CameraSetting.TriggerModeNum.Bit = obj.TriggerModeNum;
             obj.CameraSetting.ScanMode.Bit=obj.ScanMode;
             obj.CameraSetting.DefectCorrection.Bit=obj.DefectCorrection;
             
             obj.CameraSetting.Binning.Ind=1;
-            obj.CameraSetting.TriggerMode.Ind=1;
+            obj.CameraSetting.TriggerModeNum.Ind=1;
             obj.CameraSetting.ScanMode.Ind=1;
             obj.CameraSetting.DefectCorrection.Ind=1;
             
@@ -128,7 +130,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             if strcmp(status,'Ready')||strcmp(status,'Busy')
                 obj.abort;
             end
-            status=obj.HtsuGetStatus;
+
             switch obj.AcquisitionType
                 case 'focus'        %Run-Till-Abort
                     captureMode=1; %sequence
@@ -142,12 +144,52 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                     [currentET]=DcamSetExposureTime(obj.CameraHandle,obj.ExpTime_Capture);
                     DcamCaptureSettings(obj.CameraHandle,captureMode,TotalFrame);
                     obj.ExpTime_Capture=currentET;
-                case 'sequence'     %Kinetic Series
-                    captureMode=0; %snap
-                    [currentET]=DcamSetExposureTime(obj.CameraHandle,obj.ExpTime_Sequence);
-                    % allocate memory for capturing data
-                    DcamCaptureSettings(obj.CameraHandle,captureMode,obj.SequenceLength);
-                    obj.ExpTime_Sequence=currentET;
+                case 'sequence'     %Kinetic Series           
+                    % Set the exposure time of the camera. 
+                    [currentET] = DcamSetExposureTime(obj.CameraHandle, ...
+                        obj.ExpTime_Sequence);
+                    obj.ExpTime_Sequence = currentET;
+                    
+                    % Allocate memory for the sequence.
+                    % NOTE: The above comment was a remnant of the previous
+                    %       version of this code and I'm not sure if it's
+                    %       accurate.  I'm leaving the comment just in
+                    %       case. DS 3/21/19
+                    captureMode = 0;
+                    DcamCaptureSettings(obj.CameraHandle, ...
+                        captureMode, obj.SequenceLength);
+                                            
+                    % Based on the TriggerMode property, decide if further
+                    % action is needed to setup the sequence. 
+                    if strcmpi(obj.TriggerMode, 'software')
+                        % When TriggerMode is set to 'software', we want to
+                        % prepare for a 'fast' acquisition in which we send
+                        % software triggers to the camera through MATLAB.
+                        
+                        % Ensure that the camera is ready to proceed.
+                        Status = obj.HtsuGetStatus();
+                        if strcmp(Status, 'Ready')
+                            obj.ReadyForAcq = 1;
+                        end
+                        
+                        % Set the TriggerMode on the camera as appropriate.
+                        TriggerModeIdx = 4; % 4 = Software mode
+                        obj.CameraSetting.TriggerModeNum.Ind = ...
+                            TriggerModeIdx;
+                        
+                        % Refer to GuiDialog to get right Bit value.
+                        obj.CameraSetting.TriggerModeNum.Bit = ...
+                            obj.GuiDialog.TriggerModeNum.Bit(...
+                            TriggerModeIdx);
+                        
+                        % Apply the trigger mode to the camera. 
+                        DcamSetTriggerMode(obj.CameraHandle, ...
+                            obj.CameraSetting.TriggerModeNum.Bit);
+                        
+                        % Avoid hitting the rest of the code here (not
+                        % needed for triggered captures). 
+                        return
+                    end
             end
             
             status=obj.HtsuGetStatus;
@@ -177,12 +219,11 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             
             % set Trigger mode to Software so we can use firetrigger
             TriggerModeIdx = 4; % Software mode
-            obj.CameraSetting.TriggerMode.Ind = TriggerModeIdx;
+            obj.CameraSetting.TriggerModeNum.Ind = TriggerModeIdx;
             % need to refer to GuiDialog to get right Bit value
-            obj.CameraSetting.TriggerMode.Bit = obj.GuiDialog.TriggerMode.Bit(TriggerModeIdx);
-            obj.TriggerMode = obj.CameraSetting.TriggerMode.Bit;
+            obj.CameraSetting.TriggerModeNum.Bit = obj.GuiDialog.TriggerModeNum.Bit(TriggerModeIdx);
             % apply trigger mode
-            DcamSetTriggerMode(obj.CameraHandle,obj.TriggerMode);
+            DcamSetTriggerMode(obj.CameraHandle,obj.CameraSetting.TriggerModeNum.Bit);
             
             % start capture so triggering can start
             DcamCapture(obj.CameraHandle);
@@ -209,6 +250,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             obj.AbortNow=1;
             DcamCapture(obj.CameraHandle);
             out=obj.getdata();
+            
 %             obj.displaylastimage();
             obj.abort();
             obj.AbortNow=0;
@@ -330,49 +372,67 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             end
         end
         
-        function out=start_sequence(obj)
-            %obj.AcquisitionType='sequence';
-            obj.abort;
-            obj.AcquisitionType='sequence';
-%             status=obj.HtsuGetStatus;
-%             if strcmp(status,'Ready')||strcmp(status,'Busy')
-%                 obj.abort;
-%             end
-            obj.setup_acquisition;
+        function out = start_sequence(obj)
+            % Prepare the camera to collect the sequence. 
+            obj.abort();
+            obj.AcquisitionType = 'sequence';
+            obj.setup_acquisition();
+            obj.AbortNow = 0;
             
-            obj.AbortNow=0;
+            % Start the capture (what the camera does with this command
+            % will depend on the TriggerMode). 
             DcamCapture(obj.CameraHandle);
             
-            Camstatus=obj.HtsuGetStatus;
-            while strcmp(Camstatus,'Busy')
+            % Determine how to proceed based on the TriggerMode, i.e. if
+            % TriggerMode = 'software', we just want to tell the camera to
+            % await the trigger and then return to the code that called
+            % start_sequence().
+            if strcmpi(obj.TriggerMode, 'software')
+                % For a software trigger, we just need to exit this method
+                % and return control to the invoking function.
+                return
+            else
+                % If the TriggerMode isn't software, we'll assume we can
+                % just proceed as normal (this will not work as needed for
+                % TriggerMode = 'external'). 
+                Camstatus=obj.HtsuGetStatus();
+                while strcmp(Camstatus,'Busy')
+                    if obj.AbortNow
+                        obj.AbortNow=0;
+                        out=[];
+                        break;
+                    end
+                    obj.displaylastimage();
+                    Camstatus=obj.HtsuGetStatus();
+                end
+                
                 if obj.AbortNow
+                    obj.abort();
                     obj.AbortNow=0;
                     out=[];
-                    break;
+                    return;
                 end
-                obj.displaylastimage;
-                Camstatus=obj.HtsuGetStatus;
+                
+                out=obj.getdata();
+                
+                if obj.KeepData
+                    obj.Data=out;
+                end
+                
+                switch obj.ReturnType
+                    case 'dipimage'
+                        out=dip_image(out,'uint16');
+                    case 'matlab'
+                        %already in uint16
+                end
             end
+        end
+        
+        function fireTrigger(obj)
+            %fireTrigger sends a software trigger to the camera.
             
-            if obj.AbortNow
-                obj.abort;
-                obj.AbortNow=0;
-                out=[];
-                return;
-            end
-            
-            out=obj.getdata;
-             
-            if obj.KeepData
-                obj.Data=out;
-            end
-            
-            switch obj.ReturnType
-                case 'dipimage'
-                    out=dip_image(out,'uint16');
-                case 'matlab'
-                    %already in uint16
-            end
+            % Fire the software trigger.
+            DcamFireTrigger(obj.CameraHandle);
         end
         
         function TriggeredCapture(obj)
@@ -387,12 +447,11 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                         
             % set Trigger mode back to Internal so data can be captured
             TriggerModeIdx = 1; % Internal mode
-            obj.CameraSetting.TriggerMode.Ind = TriggerModeIdx;
+            obj.CameraSetting.TriggerModeNum.Ind = TriggerModeIdx;
             % need to refer to GuiDialog to get right Bit value
-            obj.CameraSetting.TriggerMode.Bit = obj.GuiDialog.TriggerMode.Bit(TriggerModeIdx);
-            obj.TriggerMode = obj.CameraSetting.TriggerMode.Bit;
+            obj.CameraSetting.TriggerModeNum.Bit = obj.GuiDialog.TriggerModeNum.Bit(TriggerModeIdx);
             % apply trigger mode
-            DcamSetTriggerMode(obj.CameraHandle,obj.TriggerMode);
+            DcamSetTriggerMode(obj.CameraHandle,obj.CameraSetting.TriggerModeNum.Bit);
         end
         
         function out=take_sequence(obj)
@@ -477,9 +536,9 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             
             obj.GuiDialog.Binning.Desc={'1 x 1 binning','2 x 2 binning', '4 x 4 binning'};
             obj.GuiDialog.Binning.Bit=[1,2,4];
-            obj.GuiDialog.TriggerMode.Desc={'Internal','Edge','Level', 'Software',...
+            obj.GuiDialog.TriggerModeNum.Desc={'Internal','Edge','Level', 'Software',...
                                             'Start','SyncreADout'};
-            obj.GuiDialog.TriggerMode.Bit=int32([hex2dec('0001'),hex2dec('0002'),hex2dec('0004'),...
+            obj.GuiDialog.TriggerModeNum.Bit=int32([hex2dec('0001'),hex2dec('0002'),hex2dec('0004'),...
                                             hex2dec('0020'),hex2dec('0200'),hex2dec('0400')]);                            
             obj.GuiDialog.ScanMode.Desc={'Slow','Fast'};                            
             obj.GuiDialog.ScanMode.Bit=[1,2];
@@ -512,7 +571,19 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             end
             DcamSetBinning(obj.CameraHandle,obj.Binning);
             DcamSetScanMode(obj.CameraHandle,obj.ScanMode);
-            DcamSetTriggerMode(obj.CameraHandle,obj.TriggerMode);
+            % Determine the appropriate TriggerMode bit given the specified
+            % TriggerMode.
+            switch obj.TriggerMode
+                case 'internal'
+                    obj.TriggerModeNum = int32(1);
+                case 'software'
+                    obj.TriggerModeNum = int32(4);
+                case 'external'
+                    % Not sure what the bit for external is, this ought to
+                    % be changed later on...
+                    obj.TriggerModeNum = int32(4);
+            end
+            DcamSetTriggerMode(obj.CameraHandle, obj.TriggerModeNum);
             DCAMSetDefectCorrection(obj.CameraHandle,obj.DefectCorrection);
         end
     

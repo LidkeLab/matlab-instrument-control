@@ -342,6 +342,7 @@ ControlHandles.ResetGUIButton = uicontrol(ControlPanel, ...
 
 % Add axes to the PlotPanel.
 PlotAxes = axes(PlotPanel);
+PlotAxes.Toolbar.Visible = 'on';
 hold(PlotAxes, 'on');
 
 % If obj.SignalStruct is already populated, attempt to re-plot those 

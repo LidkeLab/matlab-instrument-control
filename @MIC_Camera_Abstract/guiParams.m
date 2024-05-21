@@ -6,7 +6,7 @@ function guiParams(obj)
 
 
 % main camera param gui figure
-camFig = figure('Units','pixels','Position',[100 100 700 800],...
+camFig = figure('Units','pixels','Position',[100 100 700 1000],...
     'MenuBar','none','ToolBar','none','Visible','on',...
     'NumberTitle','off','UserData',0,'Tag','ParamSelector.gui');
 
@@ -73,14 +73,21 @@ handles.cancel_butt = uicontrol('Parent',camFig,'Style','pushbutton','String','C
         dialog_length = length(dialog_field);
         
         PosCounter = 1; % counter to position buttons!
-        PosAdj = 0.07*PosCounter-0.05;
+        PosAdj = 0.031*PosCounter-0.025;
         for ii = 1:dialog_length
             dialog_ui{ii} = [dialog_field{ii} '_ui'];
             dialog_text{ii} = [dialog_field{ii} '_text'];
             dialog_Rtext{ii} = [dialog_field{ii} '_Rtext'];
             if ~isfield(GuiDialog.(dialog_field{ii}), 'uiType')
             else
+%                 if GuiDialog.(dialog_field{ii}).enable
+%                     enable = 'on';
+%                 else
+%                     enable = 'off';
+%                 end
+                enable = 'on';
                 % build Gui based on type of uicontrol
+                
                 switch GuiDialog.(dialog_field{ii}).uiType
                     case 'select'
                         % bit
@@ -94,9 +101,9 @@ handles.cancel_butt = uicontrol('Parent',camFig,'Style','pushbutton','String','C
                                 val = 1;
                             end
                             handles.gui.(dialog_text{ii}) = uicontrol('Parent',handles.camPan,'Style','text','String',...
-                                                    dialog_field{ii},'Units','normalized','Position',[0.2, PosAdj 0.2 0.05]);
+                                                    dialog_field{ii},'Units','normalized','Position',[0.05, PosAdj 0.35 0.03],'Enable',enable);
                             handles.gui.(dialog_ui{ii}) = uicontrol('Parent',handles.camPan,'Style','popupmenu','String',...
-                                                     desc,'Value',val,'Units','normalized','BackgroundColor',[1 1 1],'Position',[0.4, PosAdj 0.25 0.05]);
+                                                     desc,'Value',val,'Units','normalized','BackgroundColor',[1 1 1],'Position',[0.4, PosAdj 0.25 0.03],'Enable',enable);
                             if isfield(GuiDialog.(dialog_field{ii}),'rebuild') && GuiDialog.(dialog_field{ii}).rebuild
                                 set(handles.gui.(dialog_ui{ii}),'CallBack',@rebuildGuiOpt)
                             end
@@ -117,11 +124,11 @@ handles.cancel_butt = uicontrol('Parent',camFig,'Style','pushbutton','String','C
                                 enable = 'off';
                             end
                             handles.gui.(dialog_text{ii}) = uicontrol('Parent',handles.camPan,'Style','text','String',...
-                                                    [dialog_field{ii}],'Units','normalized','Position',[0.2, PosAdj 0.2 0.05],'Enable',enable);
+                                                    [dialog_field{ii}],'Units','normalized','Position',[0.05, PosAdj 0.35 0.03],'Enable',enable);
                             handles.gui.(dialog_ui{ii}) = uicontrol('Parent',handles.camPan,'Style','edit','String',...
-                                                    num2str(val),'Units','normalized','BackgroundColor',[1 1 1],'Position',[0.4, PosAdj 0.25 0.05],'Enable',enable);     
+                                                    num2str(val),'Units','normalized','BackgroundColor',[1 1 1],'Position',[0.4, PosAdj 0.25 0.03],'Enable',enable);     
                             handles.gui.(dialog_Rtext{ii}) = uicontrol('Parent',handles.camPan,'Style','text','String',...
-                                                    ['Range is [',num2str(range),']'],'Units','normalized','Position',[0.65, PosAdj 0.25 0.05],'Enable','off');                   
+                                                    ['Range is ',regexprep(mat2str(range,4),'\s+','   ')],'Units','normalized','Position',[0.65, PosAdj 0.25 0.03],'Enable','off');                   
                         catch exception
                             throw(exception);
                         end
@@ -133,10 +140,12 @@ handles.cancel_butt = uicontrol('Parent',camFig,'Style','pushbutton','String','C
                                                     'Value',val,'Units','normalized','Position',[0.4, PosAdj 0.1 0.05]);
                     otherwise
                 end
-            end
+                
+            
           
             PosCounter = PosCounter+1; % increment the position counter!
-            PosAdj = 0.07*PosCounter-0.05;
+            PosAdj = 0.031*PosCounter-0.025;
+            end
         end
     end
 
@@ -155,19 +164,21 @@ handles.cancel_butt = uicontrol('Parent',camFig,'Style','pushbutton','String','C
         nGuiFields = length(guiFields);
         for ii=1:nGuiFields
             ui_fields = [guiFields{ii},'_ui'];
-            disp(ui_fields);
-            ui_h = uiStruct.(ui_fields);
-            switch get(ui_h,'Style')
-                case 'popupmenu'
-                    GuiCurSel.(guiFields{ii}).Val = get(ui_h,'value');
-                case 'edit'
-                    GuiCurSel.(guiFields{ii}).Val = str2num(get(ui_h,'string'));
-                otherwise % really just checkbox
-                    GuiCurSel.(guiFields{ii}).Val = get(ui_h,'value');
+            %disp(ui_fields);
+            if isfield(uiStruct, ui_fields)
+                ui_h = uiStruct.(ui_fields);
+                switch get(ui_h,'Style')
+                    case 'popupmenu'
+                        GuiCurSel.(guiFields{ii}).Val = get(ui_h,'value');
+                    case 'edit'
+                        GuiCurSel.(guiFields{ii}).Val = str2num(get(ui_h,'string'));
+                    otherwise % really just checkbox
+                        GuiCurSel.(guiFields{ii}).Val = get(ui_h,'value');
+                end
             end
-            % get current selected parameters            
+            % get current selected parameters
         end
-        
-    end    
+
+    end
 end
 
