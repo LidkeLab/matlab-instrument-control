@@ -51,3 +51,8 @@ Example of microscope control class:
 ```
 MIC_TIRF_SRCollect()
 ```
+
+## Installation Notes
+Each instrument needs be controlled by its own drivers, which must be installed on the system. With the installation of the drivers, either the header file or dynamic-link library is installed. For example, the `MIC_MCLNanoDrive` class controls the Mad City Labs 3D Piezo stage and requires the `madlib.h` header file. During the first initialization of this class on a system, users are prompted to direct the class to the `madlib.h` header file, typically located in `C:\Program Files\Mad City Labs\NanoDrive`. \\
+
+Similarly, the `MIC_MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
