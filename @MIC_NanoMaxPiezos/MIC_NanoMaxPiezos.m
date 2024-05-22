@@ -176,7 +176,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                     
                     if round(PiezoPosition, 1) == TestPosition
                         % Position matches TestPosition to the nearest
-                        % 1/10um: re-center piezo and break the loop.
+                        % 1/10 um: re-center piezo and break the loop.
                         obj.(StagePiezo).center();
                         break
                     elseif jj == obj.MaxPiezoConnectAttempts
@@ -222,15 +222,38 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             obj.StagePiezoZ.delete();
         end
         
+
         function center(obj)
             % Center the three piezos in the NanoMax stage.
             obj.StagePiezoX.center();
             obj.StagePiezoY.center();
             obj.StagePiezoZ.center();
+
+        function center(obj, AxisBool)
+            % This method will center the stage along the axes specified in
+            % AxisBool.  For example, if AxisBool = [1; 0; 1], the stage
+            % will be centered along the X and Z axes, and the Y axis will
+            % remain unchanged. 
+
             
-            % Update the piezo position property, assuming a successful
-            % centering.
-            obj.Position = [10, 10, 10];
+            % Check if the AxisBool was entered, setting a default if not.
+            if ~exist('AxisBool', 'var')
+                AxisBool = [1; 1; 1];
+            end
+            
+            % Center the three piezos in the NanoMax stage. 
+            if AxisBool(1)
+                obj.StagePiezoX.center();
+                obj.Position(1) = 10;
+            end
+            if AxisBool(2)
+                obj.StagePiezoY.center();
+                obj.Position(2) = 10;
+            end
+            if AxisBool(3)
+                obj.StagePiezoZ.center();
+                obj.Position(3) = 10;
+            end
         end
         
         function setPosition(obj, Position)

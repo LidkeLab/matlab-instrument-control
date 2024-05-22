@@ -102,8 +102,8 @@ classdef MIC_GalvoDigital < MIC_Abstract
             end
             
             % set zeros to all channels to turn off LED lamps on the chip
-            outputSingleScan(obj.DAQsessionAngle,ones(1,16));
-            outputSingleScan(obj.DAQsessionEnable,[1 1 1 1]);
+%             outputSingleScan(obj.DAQsessionAngle,ones(1,16));
+%             outputSingleScan(obj.DAQsessionEnable,[1 1 1 1]);
             obj.Sequence=[];
         end
         
@@ -149,7 +149,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
             Offset=obj.Offset;
             
             
-            AngleSteps = (Offset:StepSize:Offset+StepSize*(NumberOfStepsPerScan-1)) + obj.Range;
+            AngleSteps = (Offset:StepSize:Offset+StepSize*(NumberOfStepsPerScan-1))+ obj.Range;
             TTLWordRounded = floor((2^16-1)* AngleSteps/(2*obj.Range));
             
             % Calculations:
@@ -167,10 +167,10 @@ classdef MIC_GalvoDigital < MIC_Abstract
             for ii = 1:TTLWordRoundedSize                                              % Each iteration of this loop finds a binary array for the given integer number and populates the step positions for one scan.
                 %binVec = dec2bin(data, nBits)-'0' to create a double
                 %instead of char {output of dex2bin is char}
-                TTLWordBinary(ii,:) = dec2bin(TTLWordRounded(ii), 16) - '0';           % Convert each TTLWord integer into a binary array. Each row represents a converted integer. The -'0' takes each character in a string and converts it into a double.
+                TTLWordBinary(ii,:) = flip(dec2bin(TTLWordRounded(ii), 16) - '0');           % Convert each TTLWord integer into a binary array. Each row represents a converted integer. The -'0' takes each character in a string and converts it into a double.
             end
             obj.Offset = Offset;
-            
+            TTLWordBinary(TTLWordRoundedSize,:) = TTLWordBinary(1,:);
             % clear all channels before creating a new sequence of words
             obj.clearSession();
             
@@ -199,7 +199,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
             % send the list of 16bit Words to the backgorund of MATLAB
             startBackground(obj.DAQsessionAngle);
             % update gui from 
-            obj.updateGui();
+            %obj.updateGui();
         end
         
         function Word = angle2word(obj,Angle)
@@ -252,7 +252,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
             end
             
             %obj.clearSession;
-            flip(dec2bin(obj.Word, 16) - '0')
+            flip(dec2bin(obj.Word, 16) - '0');
             obj.Sequence=flip(dec2bin(obj.Word, 16) - '0');
             obj.enable;
             outputSingleScan(obj.DAQsessionAngle,obj.Sequence);

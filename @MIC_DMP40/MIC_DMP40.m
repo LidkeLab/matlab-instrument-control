@@ -47,7 +47,8 @@ classdef MIC_DMP40 < MIC_Abstract
 % % Clean up and delete the object when done
 % delete(mirror);
 % ```
- % ### CITATION: Ellyse Taylor, Lidke Lab, 2024.
+% ### CITATION: Ellyse Taylor, Lidke Lab, 2024.
+
     properties(SetAccess=protected)
         
         InstrumentName = 'DMP40';

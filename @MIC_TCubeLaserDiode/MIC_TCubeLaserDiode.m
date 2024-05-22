@@ -138,6 +138,7 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
                 obj.setPower(obj.Power); %Set Power if changed while off 
                 obj.PowerSet=1;
             end
+            pause(0.25)
         end
         
         function off(obj)

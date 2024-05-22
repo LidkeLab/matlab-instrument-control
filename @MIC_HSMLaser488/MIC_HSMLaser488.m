@@ -60,7 +60,7 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
         MaxPower;
         IsOn=0;             % On or Off State.  0,1 for off,on
         MaxPower_Laser=45;  %Maximum Power by LaserInstrument (without Attenuator and Filter)
-        MaxPower_LaserFilter=4.45;       % Maximum Power Setting after Filter 2 
+        MaxPower_LaserFilter=1.8;       % Maximum Power Setting after Filter 2 
         Max_Attenuator;
     end
     
@@ -76,13 +76,13 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
             obj=obj@MIC_LightSource_Abstract(~nargout);
             
             % Initialize Shutter
-            obj.Shutter=MIC_ShutterTTL('Dev1','Port1/Line2');
+            obj.Shutter=MIC_ShutterTTL('Dev1','Port1/Line1');
             
             % Initialize Attenuator
-            obj.Attenuator=MIC_Attenuator('Dev1','ao1');
+            obj.Attenuator=MIC_Attenuator('Dev1','ao0');
             
             % Obtain MaxPower and MinPower for gui
-            obj.Attenuator.loadCalibration('Filter 2');
+            obj.Attenuator.loadCalibration('LaserCalib');
             obj.MaxPower=obj.Attenuator.MaxTransmission*obj.MaxPower_LaserFilter/100;
             obj.MinPower=obj.Attenuator.MinTransmission*obj.MaxPower_LaserFilter/100;
             obj.Power=obj.MinPower;
@@ -117,9 +117,9 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
                 error('MIC_CoherentLaser561: Set_Power: Requested Power Above Maximum')
             end
             
-            if obj.IsOn
-               obj.off;
-            end 
+%             if obj.IsOn
+%                obj.off;
+%             end 
             
             obj.Attenuator.Transmission=100*Power_in/obj.MaxPower_LaserFilter;
             if obj.Attenuator.Transmission > obj.Max_Attenuator

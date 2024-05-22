@@ -82,6 +82,9 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
         AbortNow=0;     % Flag for aborting acquisition
         RegType='None'; % Registration type, can be 'None', 'Self' or 'Ref'
         SaveFileType='mat'  %Save to *.mat or *.h5.  Options are 'mat' or 'h5'
+        UseStackCorrelation = 1; % use 3D stack correlation reg. method
+        UseGPU = 0; % if UseStackCorrelation, use GPU for findStackOffset
+        Image_Reference;    % Reference image (center of reference image stack)
     end
     
     properties (SetAccess = protected)
@@ -207,8 +210,10 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 return
             end
             obj.R3DObj.RefImageFile = fullfile(b,a);
-            tmp=load(obj.R3DObj.RefImageFile,'Image_Reference');
-            obj.R3DObj.Image_Reference=tmp.Image_Reference;
+            tmp=load(obj.R3DObj.RefImageFile,'ReferenceStack');
+            obj.R3DObj.ReferenceStack=tmp.ReferenceStack;
+            RefInd = (obj.R3DObj.ZStack_MaxDev / obj.R3DObj.ZStack_Step) + 1;
+            obj.Image_Reference =tmp.ReferenceStack(:, :, RefInd);
         end
         
         function takecurrent(obj)
@@ -254,6 +259,8 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on();
                 pause(obj.LampWait);
+                obj.R3DObj.UseStackCorrelation=obj.UseStackCorrelation;
+                obj.R3DObj.UseGPU=obj.UseGPU;
                 obj.R3DObj.align2imageFit();
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
@@ -265,7 +272,7 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
         
         function showref(obj)
             % Displays current reference image
-            dipshow(obj.R3DObj.Image_Reference);
+            dipshow(obj.Image_Reference);
         end
         
         function takeref(obj)
@@ -284,7 +291,9 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 obj.LampObj.setPower(obj.LampPower);
                 obj.LampObj.on();
                 pause(obj.LampWait);
-                obj.R3DObj.takerefimage();
+                obj.R3DObj.takeRefStack();
+                RefInd = (obj.R3DObj.ZStack_MaxDev / obj.R3DObj.ZStack_Step) + 1;
+                obj.Image_Reference =tmp.ReferenceStack(:, :, RefInd);
                 % change back camera setting to the values before using the R3DTrans class
                 obj.R3DObj.CameraObj.setShutter(0);
                 CamSet.EMGain.Value = EMGTemp;
@@ -295,7 +304,7 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
         
         function saveref(obj)
             % Saves current reference image
-            obj.R3DObj.saverefimage();
+            obj.R3DObj.saveRefStack();
         end
         
         function focusLow(obj)
@@ -447,8 +456,8 @@ classdef MIC_TIRF_SRcollect < MIC_Abstract
                 case 'Self' %take and save the reference image
                     obj.takeref();
                     f=fullfile(obj.SaveDir,[obj.BaseFileName s '_ReferenceImage']);
-                    Image_Reference=obj.R3DObj.Image_Reference; %#ok<NASGU>
-                    save(f,'Image_Reference');
+                    ReferenceStack=obj.R3DObj.ReferenceStack; %#ok<NASGU>
+                    save(f,'ReferenceStack');
            end
             
            switch obj.SaveFileType

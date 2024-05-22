@@ -81,6 +81,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
         ROI;                %   [Xstart Xend Ystart Yend]
         SequenceLength;     %   Kinetic Series length
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
+        TriggerMode;        %   'software', 'internal', 'external'
     end
     
     methods
@@ -266,14 +267,14 @@ classdef MIC_Camera_Abstract < MIC_Abstract
     
     methods(Access=protected)
         
-        function displaylastimage(obj)
+        function Data=displaylastimage(obj)
             
-            im=obj.getlastimage();
-            
+            Data=obj.getlastimage();
+            im=Data;
             %open window if necessary
             if isempty(obj.FigureHandle)||~ishandle(obj.FigureHandle)
                 obj.FigureHandle=figure;
-                obj.ImageHandle=image(im');
+                obj.ImageHandle=imagesc(im');
                 set(obj.FigureHandle,'Name','CameraLive');
                 set(obj.FigureHandle,'DeleteFcn',@(h,e)obj.abortnow())
                 set(obj.FigureHandle,'colormap',gray(256))
@@ -282,6 +283,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
                 set(gca,'xlim',[0.5,size(im,1)],'ylim',[0.5,size(im,2)])%'ed
                 set(gca,'Visible','off')
                 set(gca,'Position',[0 0 1 1])
+                set(obj.ImageHandle,'CDataMapping','scaled')
                 %set position of the figure
                 if ~isempty(obj.FigurePos)
                     set(obj.FigureHandle,'position',obj.FigurePos);
@@ -298,15 +300,21 @@ classdef MIC_Camera_Abstract < MIC_Abstract
             mx=double(max(max(im)));
             mn=double(min(min(im)));
             if obj.AutoScale
-                im = single(im-mn)/(mx-mn);
-                im=255*im';
+                %im = single(im-mn)/(mx-mn);
+                %im=255*im';
+                set(obj.ImageHandle.Parent,'CLim',[mn,mx])
             else
-                im = single(in-obj.LUTScale(1))/(obj.LUTScale(2)-obj.LUTScale(1));
-                im=255*im';
+
+
+                %im = single(im-obj.LUTScale(1))/(obj.LUTScale(2)-obj.LUTScale(1));
+                %im=255*im';
+                set(obj.ImageHandle.Parent,'CLim',obj.LUTScale)
+
+
             end
             
             %update data
-            set(obj.ImageHandle,'cdata',im);
+            set(obj.ImageHandle,'cdata',im');
             
             
             %range display
@@ -339,6 +347,7 @@ classdef MIC_Camera_Abstract < MIC_Abstract
         start_capture(obj)
         start_focus(obj)
         start_sequence(obj)
+        fireTrigger(obj)
     end
     
     methods(Abstract,Access=protected)

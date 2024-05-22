@@ -63,6 +63,7 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
         SequenceCycleTime;     %Kinetic Series cycle time (1/frame rate)
         Cam;                   %.NET Camera Object
         MemID;                 %Camera memory ID
+        TriggerMode='internal';
     end
     
     methods
@@ -274,9 +275,15 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
             % Export current state of the Camera
             %Get default properties
             Attributes=obj.exportParameters();
-            Data=[];
+            Data=obj.Data;
             Children=[];
             
+        end
+        
+        function fireTrigger(obj)
+            % For now, just throw a warning since we haven't implemented
+            % software triggering for the Andor cameras.
+            warning('Software triggered capturing not yet implemented!')
         end
     end
     
