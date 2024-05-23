@@ -37,5 +37,5 @@ These methods must be implemented by subclasses to handle specific camera functi
 - `getlastimage()`: Retrieves the most recent image captured.
 - `getdata()`: Retrieves all data acquired in the current session.
 
-### CITATION: Sajjad Khan, Lidkelab, 2024.
+### CITATION: Lidkelab, 2017.
 

@@ -46,5 +46,5 @@ mirror.setZernikeModes([0.2, 0.4, 0.1, ...]);
 Clean up and delete the object when done
 delete(mirror);
 ```
-### CITATION: Sajjad Khan, Lidke Lab, 2024.
+### CITATION: Ellyse Taylor, Lidke Lab, 2024.
 

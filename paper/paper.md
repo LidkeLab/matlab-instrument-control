@@ -78,8 +78,6 @@ MBMM added MIC_DynamixelServo, MIC_GalvoAnalog, and MIC_HamamatsuLCOS class.
 DJS added 3D registration, MIC_BiochemValve, MIC_CavroSyringePump, MIC_H5, and MIC_MCLMicroDrive.
 MF added MIC_Attenuator and MIC_StepperMotor. 
 HMF added MIC_3DStage_Abstract, MIC_CoherentLaser561, MIC_GalvoDigital, MIC_IRSyringPump, and MIC_MCLNanoDrive.
-SL, FF, SP, SK added Sequential SR Collect. 
-SL, SP, MBMM, SK added TIRF SR Collect. 
 ET added MIC_DMP40 and updated MIC_Triggerscope.
 FF added MIC_FlipMountTTL, MIC_ShutterTTL. 
 SP & SK added MIC_NanoMax.
