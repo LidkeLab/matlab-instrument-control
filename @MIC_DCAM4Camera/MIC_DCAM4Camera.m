@@ -104,7 +104,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                 fprintf('Getting Hamamatsu Camera Info.\n')
                 obj.getcamera()
             end
-
+            
+            obj.abort();
             obj.get_propertiesDcam()
             ExposureTime = obj.CameraSetting.EXPOSURE_TIME.Value;
             obj.ReturnType='matlab';
