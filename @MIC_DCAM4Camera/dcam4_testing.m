@@ -105,5 +105,18 @@ end
 toc
 Images = CameraSCMOS.finishTriggeredCapture(CameraSCMOS.SequenceLength);
 
+%% test get frame bundle
+CameraSCMOS.SequenceLength = 100;
+CameraSCMOS.ExpTime_Sequence = 0.02;
+CameraSCMOS.start_scan();
+for ii=1:2
+out = CameraSCMOS.getlastframebundle(50);
+
+end
+
+out1=CameraSCMOS.Data;
+
+
+CameraSCMOS.HtsuGetStatus
 
 

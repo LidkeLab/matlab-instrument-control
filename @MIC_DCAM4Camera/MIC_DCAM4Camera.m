@@ -29,6 +29,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         YPixels;            %number of pixels in second dimention
         InstrumentName='HamamatsuCamera'
         TriggerPause; % pause (seconds) after trigger firing in fireTrigger()
+        IsRunning;
+        CameraFrameIndex;
     end
     
     properties (Hidden)
@@ -80,6 +82,13 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             % Return the last image taken by the camera.
             Image = DCAM4CopyLastFrame(obj.CameraHandle, obj.Timeout);
             Image = reshape(Image, obj.ImageSize(1), obj.ImageSize(2));
+        end
+
+        function out = getoneframe(obj)
+            % Return the frame at frameId.
+            Image = DCAM4CopyOneFrame(obj.CameraHandle, obj.CameraFrameIndex,obj.Timeout);
+            out = reshape(Image, obj.ImageSize(1), obj.ImageSize(2));
+
         end
         
         function Data = getdata(obj)
@@ -403,6 +412,48 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             end
         end
         
+        function start_scan(obj)
+            obj.abort;
+            obj.AcquisitionType='sequence';
+
+            obj.setup_acquisition();
+            CaptureMode = 0;
+            obj.AbortNow=0;
+            obj.IsRunning=1;
+            obj.CameraFrameIndex=0;
+            obj.Data=zeros(obj.ImageSize(1), obj.ImageSize(2), ...
+                        obj.SequenceLength,'uint16');
+            DCAM4StartCapture(obj.CameraHandle, CaptureMode); % what we call sequence needs snap mode
+
+        end
+
+        function out = getlastframebundle(obj,Nframe)
+            Camstatus=obj.HtsuGetStatus;
+
+            while strcmp(Camstatus,'Busy')
+                if obj.AbortNow
+                    obj.abort()
+                    obj.AbortNow=0;
+                    obj.IsRunning=0;
+                    break
+                end
+
+                out = getoneframe(obj);
+                obj.CameraFrameIndex=obj.CameraFrameIndex+1;
+                obj.Data(:,:,obj.CameraFrameIndex)=out;
+                Camstatus=obj.HtsuGetStatus;
+                
+                if mod(obj.CameraFrameIndex,Nframe)==0
+                    break;
+                end
+            end
+            if ~strcmp(Camstatus,'Busy')
+                obj.abort;
+                obj.IsRunning = 0;
+            end
+            out = obj.Data(:,:,obj.CameraFrameIndex-Nframe+1:obj.CameraFrameIndex);
+        end
+
         function triggeredCapture(obj)
             obj.fireTrigger();
             obj.displaylastimage();
