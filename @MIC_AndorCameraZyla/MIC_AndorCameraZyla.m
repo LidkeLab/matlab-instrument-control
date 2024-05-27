@@ -292,7 +292,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 end
             end
             
-            if obj.AbortNow == 0
+            if obj.IsRunning == 0
                 [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
                 AT_CheckWarning(obj.LastError);
 
