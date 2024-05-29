@@ -38,6 +38,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         Model;              %camera model
         CameraParameters;   %camera specific parameters
         IsRunning;
+        Abortnow;
         CameraCap;          % capability (all options) of camera parameters created by qw
         CameraSetting;      % current setting of camera parameters created by qw
         CameraFrameIndex    %current frame number in sequence
@@ -254,7 +255,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             [obj.LastError] = AT_Command(obj.CamHandle, 'TimestampClockReset');
             AT_CheckWarning(obj.LastError);
             obj.AbortNow=0;
-
+            obj.Abortnow=0;
 
 
             [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStart');
@@ -272,6 +273,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 if obj.AbortNow
                     obj.AbortNow=0;
                     obj.IsRunning=0;
+                    obj.Abortnow=1;
                     break
                 end
                 [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
@@ -299,7 +301,9 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 [obj.LastError]=AT_Flush(obj.CamHandle);
                 AT_CheckWarning(obj.LastError);
             end
-            Out = obj.Data(:,:,obj.CameraFrameIndex-Nframe+1:obj.CameraFrameIndex);
+            if obj.CameraFrameIndex>=Nframe
+                Out = obj.Data(:,:,obj.CameraFrameIndex-Nframe+1:obj.CameraFrameIndex);
+            end
             Out = permute(Out,[2,3,1]); % [y,x_scan,wave]
         end
 
@@ -606,12 +610,28 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         function [Attributes,Data,Children]=exportState(obj)
             
             %Get default properties
-            Attributes=[];
+            Attributes = obj.exportParameters();
             Data=[];
             Children=[];
             
             %Add anything else we want to State here:
             
+        end
+        function params = exportParameters(obj)
+            params.AcquisitionType=obj.AcquisitionType;
+            params.ImageSize=obj.ImageSize;
+            params.LastError=obj.LastError;
+            params.Manufacturer=obj.Manufacturer;
+            params.Model=obj.Model;
+            params.XPixels=obj.XPixels;
+            params.YPixels=obj.YPixels;
+            params.Binning=obj.Binning;
+            params.ExpTime_Focus=obj.ExpTime_Focus;
+            params.ExpTime_Capture=obj.ExpTime_Capture;
+            params.ExpTime_Sequence=obj.ExpTime_Sequence;
+            params.ROI=obj.ROI;
+            params.SequenceLength=obj.SequenceLength;
+            params.SequenceCycleTime=obj.SequenceCycleTime;
         end
         
         function delete(obj)

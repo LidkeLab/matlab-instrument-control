@@ -367,10 +367,11 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         function out=start_sequence(obj)
             obj.AcquisitionType='sequence';
  
-            if ~obj.CameraSetting.ManualShutter.Bit
-                obj.openShutter();    
+            if isfield(obj.CameraCap,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.openShutter();    
+                end
             end
-            
             if obj.ReadyForAcq==0
                 obj.setup_acquisition();
             end
@@ -415,8 +416,10 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             [a b obj.NumImage] =GetNumberAvailableImages;
 
             % close shutter
-            if ~obj.CameraSetting.ManualShutter.Bit
-                obj.closeShutter;  
+            if isfield(obj.CameraCap,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.closeShutter;  
+                end
             end
             
             if obj.AbortNow
