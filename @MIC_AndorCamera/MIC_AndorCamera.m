@@ -569,7 +569,11 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
 
         end
         
-        
+        function fireTrigger(obj)
+            % For now, just throw a warning since we haven't implemented
+            % software triggering for the Andor cameras.
+            warning('Software triggered capturing not yet implemented!')
+        end
         
         %- SET METHODS--------------------------------------------------
         function set.ROI(obj,ROI)
@@ -1009,11 +1013,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             obj.errorcheck('SetCurrentCamera')
         end
         
-        function fireTrigger(obj)
-            % For now, just throw a warning since we haven't implemented
-            % software triggering for the Andor cameras.
-            warning('Software triggered capturing not yet implemented!')
-        end
+
         
     end
     
