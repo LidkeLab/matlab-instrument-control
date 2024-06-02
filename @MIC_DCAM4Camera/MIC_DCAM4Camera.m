@@ -134,7 +134,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.ROI = [1,obj.XPixels,1,obj.YPixels];
             GuiCurSel = MIC_DCAM4Camera.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
-            obj.gui();
+            %obj.gui();
             obj.abort();
         end
         
