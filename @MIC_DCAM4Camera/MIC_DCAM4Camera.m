@@ -46,6 +46,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         ROI;                %   [Xstart Xend Ystart Yend]
         SequenceLength=1;   %   Kinetic Series length
         SequenceCycleTime;  %   Kinetic Series cycle time (1/frame rate)
+        FrameRate;
         TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
         GuiDialog;
         Timeout = 1000;        % timeout sent to several DCAM functions (milliseconds)
@@ -163,8 +164,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             % readout.
 
             obj.SequenceCycleTime = obj.getProperty(obj.CameraSetting.INTERNAL_FRAME_INTERVAL.idprop);
-
-            
+            obj.Timeout = 1000+obj.SequenceCycleTime*1e3;
+            obj.FrameRate = 1/obj.SequenceCycleTime;
             status=obj.HtsuGetStatus;
             if strcmp(status,'Ready')
                 obj.ReadyForAcq=1;
@@ -452,6 +453,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                 obj.IsRunning = 0;
             end
             out = obj.Data(:,:,obj.CameraFrameIndex-Nframe+1:obj.CameraFrameIndex);
+            out = permute(out,[2,3,1]); % [y,x_scan,wave]
         end
 
         function triggeredCapture(obj)
