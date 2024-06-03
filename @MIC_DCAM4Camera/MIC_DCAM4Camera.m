@@ -49,8 +49,9 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         FrameRate;
         TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
         GuiDialog;
-        Timeout = 1000;        % timeout sent to several DCAM functions (milliseconds)
+        Timeout = 10000;        % timeout sent to several DCAM functions (milliseconds)
         %EventMaskString = 'DCAMWAIT_CAPEVENT_CYCLEEND'; % wait event mask used in DCAM functions (see dcamprop.h DCAMWAIT_EVENT)
+        Abortnow;
     end
     
 %     properties (Hidden)
@@ -164,7 +165,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             % readout.
 
             obj.SequenceCycleTime = obj.getProperty(obj.CameraSetting.INTERNAL_FRAME_INTERVAL.idprop);
-            obj.Timeout = 1000+obj.SequenceCycleTime*1e3;
+            obj.Timeout = 10000+obj.SequenceCycleTime*1e3;
             obj.FrameRate = 1/obj.SequenceCycleTime;
             status=obj.HtsuGetStatus;
             if strcmp(status,'Ready')
@@ -420,6 +421,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.setup_acquisition();
             CaptureMode = 0;
             obj.AbortNow=0;
+            obj.Abortnow=0;
             obj.IsRunning=1;
             obj.CameraFrameIndex=0;
             obj.Data=zeros(obj.ImageSize(1), obj.ImageSize(2), ...
@@ -436,6 +438,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                     obj.abort()
                     obj.AbortNow=0;
                     obj.IsRunning=0;
+                    obj.Abortnow=1;
                     break
                 end
 
@@ -449,7 +452,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
                 end
             end
             if ~strcmp(Camstatus,'Busy')
-                obj.abort;
+                %obj.abort;
                 obj.IsRunning = 0;
             end
             out = obj.Data(:,:,obj.CameraFrameIndex-Nframe+1:obj.CameraFrameIndex);
