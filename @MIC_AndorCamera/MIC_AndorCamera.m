@@ -304,8 +304,12 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         
         function out=start_focus(obj)
             obj.AcquisitionType='focus';
-            obj.openShutter;
-             
+            %obj.openShutter;
+            if isfield(obj.CameraSetting,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.openShutter;    
+                end
+            end 
             if obj.ReadyForAcq==0
                 obj.setup_acquisition;
             end
@@ -336,8 +340,12 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 
             end
     
-            obj.closeShutter;
-            
+            %obj.closeShutter;
+            if isfield(obj.CameraSetting,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.closeShutter();
+                end
+            end
             if obj.AbortNow
                     obj.LastError=AbortAcquisition;
                     obj.AbortNow=0;
