@@ -29,7 +29,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
         YPixels;            %number of pixels in second dimention
         InstrumentName='HamamatsuCamera'
         TriggerPause; % pause (seconds) after trigger firing in fireTrigger()
-        IsRunning;
+        IsRunning = 0;
         CameraFrameIndex;
     end
     
