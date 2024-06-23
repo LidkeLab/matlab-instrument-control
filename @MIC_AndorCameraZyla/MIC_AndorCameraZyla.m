@@ -38,7 +38,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         Model;              %camera model
         CameraParameters;   %camera specific parameters
         IsRunning;
-        Abortnow;
+        
         CameraCap;          % capability (all options) of camera parameters created by qw
         CameraSetting;      % current setting of camera parameters created by qw
         CameraFrameIndex    %current frame number in sequence
@@ -79,7 +79,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         Zscale = [100,120];
         HsmViewer;
         % consider making GuiDialog abstract??
-
+        Abortnow;
     end
     
     methods
@@ -210,12 +210,13 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 %AT_CheckWarning(obj.LastError);
                 %fprintf('Frame %d - Ticks %ld, Time %f s\n',obj.CameraFrameIndex,ticks,time);
                 if obj.CameraFrameIndex==obj.SequenceLength
+                    obj.IsRunning = 0;
                     break
                 end
                
             end
             
-            if obj.AbortNow==0
+            if obj.IsRunning==0
                 [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
                 AT_CheckWarning(obj.LastError);
 
