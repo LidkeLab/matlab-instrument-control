@@ -271,6 +271,9 @@ classdef MIC_Camera_Abstract < MIC_Abstract
             
             Data=obj.getlastimage();
             im=Data;
+            if obj.AbortNow
+                return;
+            end
             %open window if necessary
             if isempty(obj.FigureHandle)||~ishandle(obj.FigureHandle)
                 obj.FigureHandle=figure;

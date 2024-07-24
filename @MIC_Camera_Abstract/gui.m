@@ -251,19 +251,21 @@ initialize;
     % get temperature
     function displayTemp(varargin)
         [temp, status] = obj.call_temperature;
-        switch status
-            case 0 %Acquiring Drive
-                set(varargin{nargin},'ForeGroundColor','black');
-                set(varargin{nargin},'String','not init');
-            case 1 % Temperature Stabilized
-                set(varargin{nargin},'ForeGroundColor','green');
-                set(varargin{nargin},'String',num2str(temp));
-            case 2 % Temperature Not Reached
-                set(varargin{nargin},'ForeGroundColor','red');
-                set(varargin{nargin},'String',num2str(temp));
-            case 3 % Temperature Drift
-                set(varargin{nargin},'ForeGroundColor','blue');
-                set(varargin{nargin},'String',num2str(temp));
+        if isvalid(varargin{nargin})
+            switch status
+                case 0 %Acquiring Drive
+                    set(varargin{nargin},'ForeGroundColor','black');
+                    set(varargin{nargin},'String','not init');
+                case 1 % Temperature Stabilized
+                    set(varargin{nargin},'ForeGroundColor','green');
+                    set(varargin{nargin},'String',num2str(temp));
+                case 2 % Temperature Not Reached
+                    set(varargin{nargin},'ForeGroundColor','red');
+                    set(varargin{nargin},'String',num2str(temp));
+                case 3 % Temperature Drift
+                    set(varargin{nargin},'ForeGroundColor','blue');
+                    set(varargin{nargin},'String',num2str(temp));
+            end
         end
         
     end

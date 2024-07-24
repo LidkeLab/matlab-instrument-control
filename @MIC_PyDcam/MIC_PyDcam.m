@@ -141,6 +141,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             obj.CameraSetting.READOUT_SPEED.Value = 1;
             obj.CameraSetting.DEFECT_CORRECT_MODE.Ind = 1;
             obj.CameraSetting.SUBARRAY_MODE.Ind = 2;
+            obj.CameraSetting.TRIGGER_SOURCE.Ind = 1;
             obj.setCamProperties(obj.CameraSetting);
             obj.ROI = [1,obj.XPixels,1,obj.YPixels];
             GuiCurSel = MIC_PyDcam.camSet2GuiSel(obj.CameraSetting);
@@ -592,6 +593,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             Voffset = obj.valuecheck('SUBARRAY_VPOS',ROI(3)-1);
             VWidth = obj.valuecheck('SUBARRAY_VSIZE',ROI(4)-ROI(3)+1);
 
+            %dcamprop_setvalue( hdcam, DCAM_IDPROP_SUBARRAYMODE, DCAMPROP_MODE__OFF );
             curHpos = obj.getProperty(obj.CameraSetting.SUBARRAY_HPOS.idprop);
             curVpos = obj.getProperty(obj.CameraSetting.SUBARRAY_VPOS.idprop);
             if Hoffset>curHpos
@@ -640,23 +642,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             Data=[];
             Children=[];
         end
-        function params = exportParameters(obj)
-            params=obj.CameraParameters;
-            params.AcquisitionType=obj.AcquisitionType;
-            params.ImageSize=obj.ImageSize;
-            params.LastError=obj.LastError;
-            params.Manufacturer=obj.Manufacturer;
-            params.Model=obj.Model;
-            params.XPixels=obj.XPixels;
-            params.YPixels=obj.YPixels;
-            params.Binning=obj.Binning;
-            params.ExpTime_Focus=obj.ExpTime_Focus;
-            params.ExpTime_Capture=obj.ExpTime_Capture;
-            params.ExpTime_Sequence=obj.ExpTime_Sequence;
-            params.ROI=obj.ROI;
-            params.SequenceLength=obj.SequenceLength;
-            params.SequenceCycleTime=obj.SequenceCycleTime;
-        end
+
 
 
     end

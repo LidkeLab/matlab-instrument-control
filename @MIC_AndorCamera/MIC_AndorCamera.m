@@ -361,8 +361,12 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         
         function out=start_focus(obj)
             obj.AcquisitionType='focus';
-            obj.openShutter;
-             
+            %obj.openShutter;
+            if isfield(obj.CameraSetting,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.openShutter;    
+                end
+            end 
             if obj.ReadyForAcq==0
                 obj.setup_acquisition;
             end
@@ -393,8 +397,12 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
                 
             end
     
-            obj.closeShutter;
-            
+            %obj.closeShutter;
+            if isfield(obj.CameraSetting,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.closeShutter();
+                end
+            end
             if obj.AbortNow
                     obj.LastError=AbortAcquisition;
                     obj.AbortNow=0;
@@ -424,10 +432,11 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         function out=start_sequence(obj)
             obj.AcquisitionType='sequence';
  
-            if ~obj.CameraSetting.ManualShutter.Bit
-                obj.openShutter();    
+            if isfield(obj.CameraCap,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.openShutter();    
+                end
             end
-            
             if obj.ReadyForAcq==0
                 obj.setup_acquisition();
             end
@@ -472,8 +481,10 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             [a b obj.NumImage] =GetNumberAvailableImages;
 
             % close shutter
-            if ~obj.CameraSetting.ManualShutter.Bit
-                obj.closeShutter;  
+            if isfield(obj.CameraCap,'ManualShutter')
+                if ~obj.CameraSetting.ManualShutter.Bit
+                    obj.closeShutter;  
+                end
             end
             
             if obj.AbortNow
@@ -501,7 +512,11 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
     
         end
         
-
+        function fireTrigger(obj)
+            % For now, just throw a warning since we haven't implemented
+            % software triggering for the Andor cameras.
+            warning('Software triggered capturing not yet implemented!')
+        end
         
         function apply_camSetting(obj)
             % update CameraSetting struct from GUI
@@ -1066,11 +1081,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             obj.errorcheck('SetCurrentCamera')
         end
         
-        function fireTrigger(obj)
-            % For now, just throw a warning since we haven't implemented
-            % software triggering for the Andor cameras.
-            warning('Software triggered capturing not yet implemented!')
-        end
+
         
     end
     
