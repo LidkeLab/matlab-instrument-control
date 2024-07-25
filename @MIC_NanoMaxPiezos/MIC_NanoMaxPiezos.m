@@ -223,12 +223,6 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
         end
         
 
-        function center(obj)
-            % Center the three piezos in the NanoMax stage.
-            obj.StagePiezoX.center();
-            obj.StagePiezoY.center();
-            obj.StagePiezoZ.center();
-
         function center(obj, AxisBool)
             % This method will center the stage along the axes specified in
             % AxisBool.  For example, if AxisBool = [1; 0; 1], the stage
@@ -379,5 +373,5 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             fprintf('Unit test for MIC_NanoMaxPiezos completed successfully.\n');
         end
     end
-
+    
 end
