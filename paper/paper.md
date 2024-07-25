@@ -60,7 +60,7 @@ To address this critical need, we have developed the MATLAB Instrument Control (
 
 MIC not only supports the development and control of new instruments but also integrates seamlessly with MATLAB's comprehensive data and image analysis tools, as well as with SMITE[@Schodt:2023] allowing researchers to process data in real-time during experiments. This capability is crucial for iterative testing and development in experimental setups. For example, the SMLM/SPT analysis software suite SMITE was developed in sync with MIC, so acquiring data and performing analyses flow smoothly. Additionally, MIC is designed to be user-friendly for those familiar with MATLAB, offering customizable control classes, extensive export methods, unit tests, and graphical user interfaces for each instrument component.
 
-An example of MIC’s utility is demonstrated through a custom-built Sequential microscope [@10.1371/journal.pone.0203291] and [@MUDUMBI2024113603] class specifically designed for dSTORM based super-resolution imaging systems. Similary another usage of MIC is demonstrated through a class designed for TIRF based super-resolution imaging systems [@Fazel2022]. Each of these classes includes an intuitive graphical user interface that manages multiple excitation lasers and camera settings, simplifying complex data collection tasks. The Sequential and TIRF microscope GUIs are represented in Figure-1 (a) and (b), respectively.![MIC GUIs](MIC_overview2.png) *Figure-1: MIC Graphical User Interfaces(GUI); (a) Camera control GUI (b) Light source (TIRF Laser488) GUI (c) Linear stage (TCubePiezo X) GUI (d) 3D stage (NanoMax Stage Control) GUI (e) Power meter GUI*.
+An example of MIC’s utility is demonstrated through a custom-built Sequential microscope [@10.1371/journal.pone.0203291] and [@MUDUMBI2024113603] class specifically designed for dSTORM based super-resolution imaging systems. Similary another usage of MIC is demonstrated through a class designed for TIRF based super-resolution imaging systems [@Fazel2022]. Each of these classes includes an intuitive graphical user interface that manages multiple excitation lasers and camera settings, simplifying complex data collection tasks. The MIC GUIs are represented in Figure-1.![MIC GUIs](MIC_overview2.png) *Figure-1: MIC Graphical User Interfaces(GUI); (a) Camera control GUI (b) Light source (TIRF Laser488) GUI (c) Linear stage (TCubePiezo X) GUI (d) 3D stage (NanoMax Stage Control) GUI (e) Power meter GUI*.
 
 Micro-Manager[@Edelstein2010], an alternative platform for controlling microscopy systems, and is also customizable, supporting a wide range of hardware devices, is primarily built on Java and operates independently of MATLAB. Micro-Manager comes with its own GUI. The interface and controls are based on Java, which might require users to adapt if they are not familiar with Micro-Manager’s own system or Java programming. While MIC is specifically designed for integration with MATLAB, MIC benefits from MATLAB’s extensive analytical and computational capabilities. It is developed in MATLAB and leverages its object-oriented programming features. This integration allows for immediate data processing and image analysis during data collection, which is particularly valuable for users who are already proficient in MATLAB and rely on its ecosystem for their research workflows.
 
@@ -74,6 +74,7 @@ SK & MJW added GitHub documentation.
 SK added the example classes with their GUIs, and added unit tests. 
 KAL added MIC_AndorCamera and MIC_KCubePiezo. 
 SP added MIC_AndorCameraZyla and various laser classes.
+SL added MIC_DCAM4Camera to control Hamamatsu cameras using the DCAM4 API.
 MBMM added MIC_DynamixelServo, MIC_GalvoAnalog, and MIC_HamamatsuLCOS class.
 DJS added 3D registration, MIC_BiochemValve, MIC_CavroSyringePump, MIC_H5, and MIC_MCLMicroDrive.
 MF added MIC_Attenuator and MIC_StepperMotor. 
@@ -85,7 +86,7 @@ All authors reviewed the manuscript.
 
 # Acknowledgements
 
-This work was supported by NIH grants
+This work was supported by NIH grants 1R01GM140284, 
 K12GM088021 (ASERT-IRACDA program),
 NCI P30CA118100,
 NCI R01CA248166,
