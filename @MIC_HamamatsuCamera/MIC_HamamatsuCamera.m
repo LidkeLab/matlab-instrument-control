@@ -495,7 +495,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             %obj.abort;
             [imgall]=DcamGetAllFrames(obj.CameraHandle,numFrames);
             out=reshape(imgall,obj.ImageSize(1),obj.ImageSize(2),numFrames);
-                        
+            obj.abort;            
             % set Trigger mode back to Internal so data can be captured
             TriggerModeIdx = 1; % Internal mode
             obj.CameraSetting.TriggerModeNum.Ind = TriggerModeIdx;
@@ -628,7 +628,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
                 case 'internal'
                     obj.TriggerModeNum = int32(1);
                 case 'software'
-                    obj.TriggerModeNum = int32(4);
+                    obj.TriggerModeNum = int32(32);
                 case 'external'
                     % Not sure what the bit for external is, this ought to
                     % be changed later on...
