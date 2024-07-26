@@ -716,7 +716,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 
                 % Setup the acquisition to prepare for the triggered
                 % captures. 
-                obj.CameraObj.setup_acquisition();
+                obj.CameraObj.setup_fast_acquisition();
                 
                 % Call the camera start_sequence() method to initiate the
                 % triggered capture process. 
@@ -754,6 +754,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % and collect the stack at the end.
                     for ii = 1:NMean
                         obj.CameraObj.fireTrigger();
+                        pause(obj.CameraObj.TriggerPause)
                     end
                 else
                     % Capture the image as usual.
@@ -787,7 +788,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % made to camera parameters (e.g. the length of a sequence). 
             if strcmpi(obj.CameraTriggerMode, 'software')
                 CurrentStack = single(...
-                    obj.CameraObj.FinishTriggeredCapture(N * NMean));
+                    obj.CameraObj.finishTriggeredCapture(N * NMean));
                 obj.ZStackFull = [];
                 for ii = 1:N
                     ZIndicesToAverage = (1:NMean) + (ii-1)*NMean;
