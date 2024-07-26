@@ -3,8 +3,6 @@
 |**MIC** classes|description|
 -------------|---
 [@MIC_ActiveReg3D](../@MIC_ActiveReg3D/Readme.md) | active 3D registration using camera and stage control via piezoelectric actuators
-[@MIC_ActiveReg3D_Seq](../@MIC_ActiveReg3D_Seq/Readme.md) | 3D sequential active registration using a camera and piezo stages
-[@MIC_ActiveReg3D_SPT](../@MIC_ActiveReg3D_SPT/Readme.md) | precise correction/calibration to maintain focus/alignment during imaging
 [@MIC_H5](../@MIC_H5/Readme.md) | static methods for working with HDF5 files
 [@MIC_Joystick](../@MIC_Joystick/Readme.md) | control the TIRF stage with a joystick
 [@MIC_Abstract](../@MIC_Abstract/Readme.md) | Matlab Instrument Control abstract class
@@ -14,6 +12,7 @@
 &nbsp;&nbsp;&nbsp;[@MIC_Camera_Abstract](../@MIC_Camera_Abstract/Readme.md) | common interface for all cameras
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_AndorCamera](../@MIC_AndorCamera/Readme.md) | control an Andor camera
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_AndorCameraZyla](../@MIC_AndorCameraZyla/Readme.md) | control an Andor camera
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_DCAM4Camera](../@MIC_DCAM4Camera/Readme.md) | control a Hamamatsu camera using the DCAM4 API
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_HamamatsuCamera](../@MIC_HamamatsuCamera/Readme.md) | control a Hamamatsu camera
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_IMGSourceCamera](../@MIC_IMGSourceCamera/Readme.md) | control an ImagingSource camera
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_ThorlabsIR](../@MIC_ThorlabsIR/Readme.md) | control a Thorlabs IR camera
@@ -53,15 +52,9 @@
 &nbsp;&nbsp;&nbsp;[@MIC_NanoMax](../@MIC_NanoMax/Readme.md) | control NanoMax stage
 &nbsp;&nbsp;&nbsp;[@MIC_NDFilterWheel](../@MIC_NDFilterWheel/Readme.md) | servo operated Filter wheel containing Neutral Density filters
 &nbsp;&nbsp;&nbsp;[@MIC_OptotuneLens](../@MIC_OptotuneLens/Readme.md) | control Optotune Electrical Lens
-&nbsp;&nbsp;&nbsp;[@MIC_RB_PSFEng](../@MIC_RB_PSFEng/Readme.md) | Super Resolution data collection software on PSF engineering setups such as RB
-&nbsp;&nbsp;&nbsp;[@MIC_RB_SRcollect](../@MIC_RB_SRcollect/Readme.md) | Super Resolution data collection software on the Reflected Beam Microscope
 &nbsp;&nbsp;&nbsp;[@MIC_Reg3DTrans](../@MIC_Reg3DTrans/Readme.md) | register a sample to a stack of transmission images
-&nbsp;&nbsp;&nbsp;[@MIC_SeqReg3DTrans](../@MIC_SeqReg3DTrans/Readme.md) | register a sample to a stack of transmission images for the Sequential microscope
-&nbsp;&nbsp;&nbsp;[@MIC_SEQ_SRcollect](../@MIC_SEQ_SRcollect/Readme.md) | data collection for the Sequential microscope
 &nbsp;&nbsp;&nbsp;[@MIC_ShutterELL6](../@MIC_ShutterELL6/Readme.md) | control slider ELL6, which can be used as a shutter (or filter slider)
 &nbsp;&nbsp;&nbsp;[@MIC_ShutterTTL](../@MIC_ShutterTTL/Readme.md) | control a Thorlabs SH05 shutter via a Thorlabs KSC101 solenoid controller
-&nbsp;&nbsp;&nbsp;[@MIC_SPTCollect](../@MIC_SPTCollect/Readme.md) | Single Particle Tracking/Super Resolution data collection software
 &nbsp;&nbsp;&nbsp;[@MIC_StepperMotor](../@MIC_StepperMotor/Readme.md) | control Benchtop stepper motor
 &nbsp;&nbsp;&nbsp;[@MIC_SyringePump](../@MIC_SyringePump/Readme.md) | control Syringe Pump by kdScientific (Model: LEGATO100)
-&nbsp;&nbsp;&nbsp;[@MIC_TIRF_SRcollect](../@MIC_TIRF_SRcollect/Readme.md) | control TIRF microscope
 &nbsp;&nbsp;&nbsp;[@MIC_Triggerscope](../@MIC_Triggerscope/Readme.md) | control a Triggerscope (written for 3B and 4)
