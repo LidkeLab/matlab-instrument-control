@@ -1,29 +1,36 @@
 classdef MIC_CavroSyringePump < MIC_Abstract
-    %WARNING: This is a prototype class and is not ready for use.
-    %MIC class for control of the Cavro syringe pump PN 20740556 -D. 
-    %
-    % This class is used to control a Cavro syringe pump via USB.  This
-    % class may work for a wide range of Cavro brand syringe pumps, however
-    % it has only been tested for pump PN 20740556 -D .  It can perform any
-    % syringe pump operation described in the Cavro XP3000 operators manual
-    % (e.g. in Appendix G - Command Quick Reference). 
-    %
-    % Example: Pump = MIC_CavroSyringePump();
-    % Functions: delete, exportState, updateGui, gui, connectSyringePump,
-    %            readAnswerBlock, executeCommand, reportCommand,
-    %            querySyringePump, cleanAnswerBlock, decodeStatusByte,
-    %            unitTest
-    %
-    % REQUIREMENTS:
-    %   Windows operating system (should work with unix systems with
-    %       modifications only to serial port behaviors)
-    %   MATLAB 2014b or later required.
-    %   MATLAB R2017a or later recommended. 
-    %   MIC_Abstract.m
-    %
-    % CITATION: David Schodt, Lidke Lab, 2018
-    
-    
+% MIC_CavroSyringePump Class 
+% 
+% ## Description
+% The `MIC_CavroSyringePump` class controls a Cavro syringe pump via USB, specifically designed for 
+% pump PN 20740556 -D. This class may work with other Cavro brand syringe pumps but has only been tested with the 
+% specified model. It can perform any operation described in the Cavro XP3000 operators manual (e.g. in Appendix G - Command Quick Reference). 
+% 
+% ## Installation Requirements
+% - MATLAB R2014b or later (R2017a or later recommended)
+% - Operating System: Windows (modifications required for UNIX systems, particularly in serial port behaviors)
+% - Dependency: `MIC_Abstract.m`
+% 
+% ##  Functions: 
+% delete, exportState, updateGui, gui, connectSyringePump,
+% readAnswerBlock, executeCommand, reportCommand,
+% querySyringePump, cleanAnswerBlock, decodeStatusByte, unitTest
+% 
+% ## Usage
+% ```matlab
+% % Create an instance of the Cavro syringe pump controller
+% Pump = MIC_CavroSyringePump();
+% % Connect to the pump
+% [Message, Status] = Pump.connectSyringePump();
+% % Execute a command to move the plunger
+% Pump.executeCommand('Move Plunger to 1000');
+% % Check the pump's status
+% Pump.querySyringePump();
+% % Disconnect and cleanup
+% delete(Pump);
+% ```   
+% ### CITATION: David Schodt, Lidke Lab, 2018
+
     properties
         DeviceAddress = 1; % ASCII address for device
         DeviceSearchTimeout = 10; % timeout(s) to search for a pump

@@ -135,9 +135,9 @@ handles.cancel_butt = uicontrol('Parent',camFig,'Style','pushbutton','String','C
                     case 'binary'
                             val = GuiDialog.(dialog_field{ii}).curVal;
                             handles.gui.(dialog_text{ii}) = uicontrol('Parent',handles.camPan,'Style','text','String',...
-                                                    dialog_field{ii},'Units','normalized','Position',[0.2, PosAdj 0.2 0.05]);
+                                                    dialog_field{ii},'Units','normalized','Position',[0.05, PosAdj 0.35 0.03]);
                             handles.gui.(dialog_ui{ii}) = uicontrol('Parent',handles.camPan,'Style','checkbox','Max',2,'Min',1,...
-                                                    'Value',val,'Units','normalized','Position',[0.4, PosAdj 0.1 0.05]);
+                                                    'Value',val,'Units','normalized','Position',[0.4, PosAdj 0.1 0.03]);
                     otherwise
                 end
                 

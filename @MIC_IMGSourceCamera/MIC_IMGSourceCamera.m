@@ -1,11 +1,12 @@
 classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
     % MIC_IMGSourceCamera: Matlab instument class for ImagingSource camera.
     %
-    % Requires dll to be registered in MATLAB.
+    % ## Description 
+    % It requires dll to be registered in MATLAB.
     % TISImaq interfaces directly with the IMAQ Toolbox. This allows you to 
     % bring image data directly into MATLAB for analysis, visualization, 
     % and modelling.
-    % The plugin allows the access to all camera properties as they are 
+    % The plugin allows the access to all camera Properties as they are 
     % known from IC Capture. The plugin works in all Matlab versions 
     % since 2013a. Last tested version is R2016b.
     % After installing the plugin it must be registered in Matlab manually.
@@ -15,15 +16,18 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
     % http://www.theimagingsource.com/support/downloads-for-windows/extensions/icmatlabr2013b/
     % This was done with imaqtool using Tools menu.
     %
+    % ## Contructor
     % Example: obj=MIC_IMGSourceCamera();
-    % Functions: delete, shutdown, exportState
     %
-    % REQUIREMENTS: 
+    % ## Key Functions:
+    % delete, shutdown, exportState
+    %
+    % ## REQUIREMENTS: 
     %   MIC_Abstract.m
     %   MIC_Camera_Abstract.m
     %   MATLAB software version R2013a or later
     %
-    % CITATION: , Lidkelab, 2017.
+    % ### CITATION: , Lidkelab, 2017.
     
     properties(Access=protected)
         AbortNow;           %stop acquisition flag

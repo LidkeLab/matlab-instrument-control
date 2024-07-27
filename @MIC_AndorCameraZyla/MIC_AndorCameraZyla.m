@@ -1,18 +1,59 @@
 classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
-    %MIC_AndorCamera class for Zyla
-    %
-    %   Usage:
-    %           CAM=AndorCameraZyla
-    %           CAM.gui
-    %
-    %   Requires:
-    %       Andor MATLAB SDK3 2.94.30005 or higher
-    %
-    %
-    %   TODO:
-    %
-    % CITATION: Sandeep Pallikkuth, Lidke Lab, 2018
-    
+% MIC_AndorCameraZyla Class
+% 
+% ## Description
+% The `MIC_AndorCameraZyla` class interfaces with Andor Zyla cameras via the Andor SDK3, providing comprehensive control over camera operations in MATLAB. This class enables precise manipulation of camera settings and acquisition modes, tailored specifically for the Zyla model.
+% 
+% ## Features
+% - Direct integration with Andor SDK3.
+% - Support for multiple acquisition modes including focus, capture, and sequence.
+% - Customizable Region of Interest (ROI), binning settings, and exposure times.
+% - Automatic handling of camera initialization and shutdown procedures.
+% 
+% ## Requirements
+% - MATLAB
+% - Andor MATLAB SDK3 version 2.94.30005 or higher.
+% 
+% ## Properties
+% - `CameraHandle`: Reference to the camera handle used in SDK calls.
+% - `ImageSize`: Current size of the ROI in pixels.
+% - `ExpTime_Focus`, `ExpTime_Capture`, `ExpTime_Sequence`: Exposure times for different operational modes.
+% - `ROI`: Region of interest specified as [Xstart, Xend, Ystart, Yend].
+% - `Binning`: Pixel binning configuration.
+% 
+% ## Methods
+% ### `initialize`
+% Prepares the camera for operation by loading the SDK and setting default configurations.
+% 
+% ### `start_sequence`
+% Initiates a sequence acquisition based on predefined settings.
+% 
+% ### `start_focus`
+% Starts a continuous acquisition for focusing purposes, providing live updates to the image display.
+% 
+% ### `start_capture`
+% Captures a single image using the current camera settings.
+% 
+% ### `shutdown`
+% Properly closes the camera connection and cleans up resources to ensure a safe shutdown process.
+% 
+% ## Usage Example
+% 
+% ```matlab
+% % Instantiate the camera
+% camera = MIC_AndorCameraZyla();
+% 
+% % Configure the camera for a sequence acquisition
+% camera.setup_acquisition('sequence');
+% camera.SequenceLength = 100;
+% camera.start_sequence();
+% % Capture a single frame
+% camera.start_capture();
+% % Shut down the camera
+% camera.shutdown();
+% ```
+% ### CITATION: Sandeep Pallikkuth, Lidke Lab, 2018
+
     properties(Access=protected, Transient=true)
         AbortNow;           %stop acquisition flag
         ErrorCode;
@@ -38,6 +79,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         Model;              %camera model
         CameraParameters;   %camera specific parameters
         IsRunning;
+        
         CameraCap;          % capability (all options) of camera parameters created by qw
         CameraSetting;      % current setting of camera parameters created by qw
         CameraFrameIndex    %current frame number in sequence
@@ -78,7 +120,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         Zscale = [100,120];
         HsmViewer;
         % consider making GuiDialog abstract??
-
+        Abortnow;
     end
     
     methods
@@ -209,12 +251,13 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
                 %AT_CheckWarning(obj.LastError);
                 %fprintf('Frame %d - Ticks %ld, Time %f s\n',obj.CameraFrameIndex,ticks,time);
                 if obj.CameraFrameIndex==obj.SequenceLength
+                    obj.IsRunning = 0;
                     break
                 end
                
             end
             
-            if obj.AbortNow==0
+            if obj.IsRunning==0
                 [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
                 AT_CheckWarning(obj.LastError);
 
@@ -230,7 +273,83 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             obj.Axes2=[];
             obj.abort();
         end
-        function Out=start_scan(obj,Nstep,pfit,ROIoffset)
+        function start_scan(obj)
+            clc
+            obj.AcquisitionType='sequence';
+            obj.setup_acquisition();
+            %Get Clock Frequency and Framerate
+            [obj.LastError,frameRate] = AT_GetFloat(obj.CamHandle,'FrameRate');
+            AT_CheckWarning(obj.LastError);
+            fprintf('FrameRate %f fps\n',frameRate);
+            [obj.LastError,Exptime] = AT_GetFloat(obj.CamHandle,'ExposureTime');
+            AT_CheckWarning(obj.LastError);
+            [obj.LastError,readouttime] = AT_GetFloat(obj.CamHandle,'ReadoutTime');
+            fprintf('Exposure Time %f s\nReadout Time %f s\n',Exptime,readouttime);
+            
+            obj.CameraFrameIndex=0;
+            obj.FrameRate = frameRate;
+            
+            %queue buffers
+            for ii=1:100
+                [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
+            end
+            obj.Data=zeros(obj.Width,obj.Height,obj.SequenceLength,'uint16');
+            [obj.LastError] = AT_Command(obj.CamHandle, 'TimestampClockReset');
+            AT_CheckWarning(obj.LastError);
+            obj.AbortNow=0;
+            obj.Abortnow=0;
+
+
+            [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStart');
+            AT_CheckWarning(obj.LastError);
+
+            obj.IsRunning=1;
+            
+
+
+
+        end
+        function Out = getlastframebundle(obj,Nframe)
+            N = max([1,round(obj.FrameRate/200)]);
+            while obj.IsRunning
+                if obj.AbortNow
+                    obj.AbortNow=0;
+                    obj.IsRunning=0;
+                    obj.Abortnow=1;
+                    break
+                end
+                [obj.LastError] = AT_QueueBuffer(obj.CamHandle,obj.ImageSizeBytes);
+                AT_CheckWarning(obj.LastError);
+                [Im,~] = obj.getlastimage();
+                if isempty(Im)
+                    obj.IsRunning = 0;
+                    break
+                end
+                obj.CameraFrameIndex=obj.CameraFrameIndex+1;
+                obj.Data(:,:,obj.CameraFrameIndex)=Im;
+                if obj.CameraFrameIndex==obj.SequenceLength
+                    obj.IsRunning = 0;
+                    break
+                end
+                if mod(obj.CameraFrameIndex,N*Nframe)==0
+                    break;
+                end
+            end
+            
+            if obj.IsRunning == 0
+                [obj.LastError] = AT_Command(obj.CamHandle,'AcquisitionStop');
+                AT_CheckWarning(obj.LastError);
+
+                [obj.LastError]=AT_Flush(obj.CamHandle);
+                AT_CheckWarning(obj.LastError);
+            end
+            if obj.CameraFrameIndex>=Nframe
+                Out = obj.Data(:,:,obj.CameraFrameIndex-Nframe+1:obj.CameraFrameIndex);
+            end
+            Out = permute(Out,[2,3,1]); % [y,x_scan,wave]
+        end
+
+        function Out=start_scan_v0(obj,Nstep,pfit,ROIoffset)
             clc
             obj.AcquisitionType='sequence';
             obj.setup_acquisition();
@@ -533,12 +652,28 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         function [Attributes,Data,Children]=exportState(obj)
             
             %Get default properties
-            Attributes=[];
+            Attributes = obj.exportParameters();
             Data=[];
             Children=[];
             
             %Add anything else we want to State here:
             
+        end
+        function params = exportParameters(obj)
+            params.AcquisitionType=obj.AcquisitionType;
+            params.ImageSize=obj.ImageSize;
+            params.LastError=obj.LastError;
+            params.Manufacturer=obj.Manufacturer;
+            params.Model=obj.Model;
+            params.XPixels=obj.XPixels;
+            params.YPixels=obj.YPixels;
+            params.Binning=obj.Binning;
+            params.ExpTime_Focus=obj.ExpTime_Focus;
+            params.ExpTime_Capture=obj.ExpTime_Capture;
+            params.ExpTime_Sequence=obj.ExpTime_Sequence;
+            params.ROI=obj.ROI;
+            params.SequenceLength=obj.SequenceLength;
+            params.SequenceCycleTime=obj.SequenceCycleTime;
         end
         
         function delete(obj)

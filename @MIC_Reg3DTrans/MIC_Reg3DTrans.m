@@ -1,8 +1,10 @@
 classdef MIC_Reg3DTrans < MIC_Abstract
-    %MIC_Reg3DTrans Register a sample to a stack of transmission images
-    %  Class that performs 3D registration using transmission images
+    % MIC_Reg3DTrans  
+    %
+    % ## Description
+    % This class Register a sample to a stack of transmission images Class that performs 3D registration using transmission images
     % 
-    % INPUT
+    % ## INPUT
     %    CameraObj - camera object -- tested with MIC_AndorCamera only
     %    StageObj - stage object -- tested with MIC_MCLNanoDrive only
     %    LampObj - lamp object -- tested with MIC_IX71Lamp only, will work
@@ -10,23 +12,22 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     %                             MIC_LightSource_Abstract
     %    Calibration file (optional)
     %
-    % SETTING (IMPORTANT!!)
-    %    There are several properties that are system specific. These need
+    % ## SETTING (IMPORTANT!!)
+    %    There are several Properties that are system specific. These need
     %    to be specified after initialization of the class, before using
-    %    any of the functionality. See properties section for explanation
+    %    any of the functionality. See Properties section for explanation
     %    and which ones.
     % 
-    % REQUIRES
+    % ## REQUIREMENT
     %    Matlab 2014b or higher
     %    MIC_Abstract
     %  
-    % MICROSCOPE SPECIFIC SETTINGS
-    % TIRF: LampPower=?; LampWait=2.5; CamShutter=true; ChangeEMgain=true; 
-    %       EMgain=2; ChangeExpTime=true; ExposureTime=0.01;   
+    % ## MICROSCOPE SPECIFIC SETTINGS
+    % TIRF: LampPower=2; LampWait=2.5; CamShutter=true; ChangeEMgain=true; 
+    %  EMgain=2; ChangeExpTime=true; ExposureTime=0.01;   
     
-    %created by
-    % Marjolein Meddens,  Lidke Lab 2017
-    % Update:Hanieh Mazloom-Farsibaf, Lidke Lab 2018
+    % ### Citations: Marjolein Meddens,  Lidke Lab 2017
+    % ### Updated version:Hanieh Mazloom-Farsibaf, Lidke Lab 2018.
     
     properties
         % Input
@@ -715,11 +716,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                 
                 % Setup the acquisition to prepare for the triggered
                 % captures. 
-                obj.CameraObj.setup_acquisition();
+                obj.CameraObj.setup_fast_acquisition();
                 
                 % Call the camera start_sequence() method to initiate the
                 % triggered capture process. 
-                obj.CameraObj.start_sequence(); 
+                %obj.CameraObj.start_sequence(); 
             else
                 obj.CameraObj.AcquisitionType = 'capture';
                 obj.CameraObj.setup_acquisition();
@@ -753,6 +754,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
                     % and collect the stack at the end.
                     for ii = 1:NMean
                         obj.CameraObj.fireTrigger();
+                        pause(obj.CameraObj.TriggerPause)
                     end
                 else
                     % Capture the image as usual.
@@ -786,7 +788,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             % made to camera parameters (e.g. the length of a sequence). 
             if strcmpi(obj.CameraTriggerMode, 'software')
                 CurrentStack = single(...
-                    obj.CameraObj.FinishTriggeredCapture(N * NMean));
+                    obj.CameraObj.finishTriggeredCapture(N * NMean));
                 obj.ZStackFull = [];
                 for ii = 1:N
                     ZIndicesToAverage = (1:NMean) + (ii-1)*NMean;
