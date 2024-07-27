@@ -641,7 +641,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
 
         end
         
-        
+
         
         %- SET METHODS--------------------------------------------------
         function set.ROI(obj,ROI)
