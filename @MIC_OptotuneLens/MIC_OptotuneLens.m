@@ -1,15 +1,45 @@
 classdef MIC_OptotuneLens < MIC_Abstract
-    % MIC_OptotuneLens Matlab Instrument Class for Optotune Electrical Lens
-    %
-    % Communication with the Lens is through the Optotune Lens Driver which
-    % contains an  Atmel ATmega32U4 Microcontroller that runs a virtual com
-    % port driver provided by Atmel
-    %
-    % REQUIRES
-    %
-    %
-    % Marjolein Meddens, Lidke Lab 2017
-    
+% MIC_OptotuneLens
+% 
+% ## Description
+% The `MIC_OptotuneLens` MATLAB class facilitates control over an Optotune Electrical Lens via serial communication. The class interfaces with the lens using an embedded Atmel ATmega32U4 microcontroller, allowing for precise adjustments of focal power and monitoring of the lens temperature.
+% 
+% ## Features
+% - **Focal Power Control**: Set and adjust the focal power of the Optotune lens within a defined range.
+% - **Temperature Monitoring**: Fetch the current operating temperature of the lens.
+% - **Drift Compensation**: Enable drift compensation to maintain focal stability.
+% - **Firmware Interaction**: Retrieve and interact with the lens firmware, accommodating different firmware versions for command compatibility.
+% 
+% ## Requirements
+% - MATLAB 2016b or later.
+% - Instrument Control Toolbox for MATLAB for serial port communication.
+% - Optotune lens driver and firmware installed and properly configured.
+% 
+% ## Installation
+% 1. Ensure MATLAB and the required toolboxes are installed.
+% 2. Connect the Optotune lens to your computer via a USB port and install any necessary drivers.
+% 3. Clone this repository or download the class file directly into your MATLAB working directory.
+% 
+% ## Usage Example
+% ```matlab
+% % Creating an instance of the MIC_OptotuneLens class
+% lens = MIC_OptotuneLens('COM3');  % Replace 'COM3' with the actual COM port
+% 
+% % Setting Focal Power
+% desiredPower = 2;  % in diopters
+% lens.setFocalPower(desiredPower);
+% 
+% % Reading Temperature
+% temperature = lens.getTemperature();
+% disp(['Current Lens Temperature: ', num2str(temperature), ' °C']);
+% 
+% % Enabling Drift Compensation
+% lens.enableDriftCompensation();
+% 
+% % Cleanup
+% delete(lens);
+% ```   
+% ### Citation: Marjolein Meddens, Lidke Lab 2017
     properties (SetAccess=protected)
         InstrumentName = 'OptotuneLens' %Descriptive instrument name
         MinFocalPower   % Maximum focal power (dpt) of lens
@@ -436,9 +466,57 @@ classdef MIC_OptotuneLens < MIC_Abstract
         end
     end
     
-    methods (Static)
-        function result=unitTest()
+methods (Static)
+    function unitTest()
+        fprintf('Starting unit test for MIC_OptotuneLens class.\n');
+        
+        % Example COM port, change this as needed
+        ComPort = 'COM3'; 
+        
+        % Create an instance of the OptotuneLens class
+        try
+            optoLens = MIC_OptotuneLens(ComPort);
+            fprintf('Successfully created MIC_OptotuneLens object on %s.\n', ComPort);
+        catch
+            error('Failed to create MIC_OptotuneLens object.');
         end
         
+        % Test setting a specific focal power
+        try
+            testPower = 5; % example focal power to set, adjust as needed within valid range
+            optoLens.setFocalPower(testPower);
+            fprintf('Successfully set focal power to %g dpt.\n', testPower);
+        catch
+            error('Failed to set focal power.');
+        end
+        
+        % Test getting temperature
+        try
+            temperature = optoLens.getTemperature();
+            fprintf('Current lens temperature: %g degrees Celsius.\n', temperature);
+        catch
+            error('Failed to get lens temperature.');
+        end
+        
+        % Test exporting the current state
+        try
+            [Attributes, Data, Children] = optoLens.exportState();
+            fprintf('State Export:\n');
+            disp(Attributes);
+        catch
+            error('Failed to export the current state.');
+        end
+        
+        % Clean up by deleting the instance
+        try
+            delete(optoLens);
+            fprintf('MIC_OptotuneLens object deleted successfully.\n');
+        catch
+            error('Failed to delete MIC_OptotuneLens object.');
+        end
+        
+        fprintf('Unit test for MIC_OptotuneLens completed successfully.\n');
     end
+end
+
 end

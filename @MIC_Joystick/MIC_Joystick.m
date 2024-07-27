@@ -1,6 +1,7 @@
 classdef MIC_Joystick < handle
     % Matlab instrument class to control the TIRF stage with a joystick
-    % 
+    %
+    % ## Description
     % This class controls a microscope stage with a joystick, if said joystick
     % is turned ON through the GUI. You can change the speed/sensitivity in microns/second 
     % on your joystick with the two edit buttons on the GUI. When turning the
@@ -18,10 +19,12 @@ classdef MIC_Joystick < handle
     %                JS=MIC_Joystick()
     %                JS.StageObj=Stg
     %                JS.gui
-    % REQUIRES:
+    %
+    % ## REQUIRES:
     % MIC_MCLNanoDrive
     % HebiJoystick: https://www.mathworks.com/matlabcentral/fileexchange/61306-hebirobotics-matlabinput
     
+    % ###Citation: Sajjad Khan, Lidkelab, 2024.
     properties
         JS_activate=0  %used to control when Joystick is on
         FigGUI         %Figure for your GUI

@@ -28,9 +28,8 @@ int NDims;
 int Size[5] = {1,1,1,1,1};
 unsigned short * dataMATLAB;
 double IsSaving = 0;
-int CompressionLevel = 0;
+int CompressionLevel = 5;
 int IsCopied = 0;    
-bool Append;
 
 void Save(void *p){
 
@@ -40,6 +39,7 @@ void Save(void *p){
 	int elemsize = 2;
 	int Nelem = 1; 
 	hsize_t dims[5] = {0,0,0,0,0};
+	hsize_t chunk_dims[5] = {0,0,0,0,0};
 	
 	hid_t           file, space, dset, dcpl,gid;    /* Handles */
 	herr_t          status;
@@ -47,13 +47,19 @@ void Save(void *p){
 	for (int n = 0; n < NDims; n++)
 		Nelem = Nelem*Size[n];
 
+
 	//mexPrintf("NDims %d Nelem %d\n",NDims, Nelem);
 
 	//This does the fliplr() operation needed to convert column major (MATLAB) to row-major (HDF5)
 	for (int n = 0; n < NDims; n++)
 		dims[n] = (const hsize_t)Size[NDims-n-1];
 
-	
+
+	//This is make chunks in the size of images
+	chunk_dims[0] = 1; //chunk size in largest dimension
+	for (int n = 1; n < NDims; n++)
+		chunk_dims[n] = (const hsize_t)Size[NDims - n - 1];
+
 	//copy data to local heap
 	data = (unsigned short *)calloc(Nelem, sizeof(unsigned short));
 	memcpy(data, dataMATLAB, Nelem*sizeof(unsigned short));
@@ -72,22 +78,27 @@ void Save(void *p){
 	//mexPrintf("group %s\n", group);
 	gid = H5Gopen(file, group, H5P_DEFAULT);
 	//mexPrintf("gid %d\n", gid);
+	
+	
 	/*
 	* Create dataspace.  Setting maximum size to NULL sets the maximum
 	* size to be the current size.
 	*/
 	space = H5Screate_simple(NDims, dims, NULL);
 
+
 	/*
 	* Create the dataset creation property list, add the gzip
 	* compression filter and set the chunk size.
 	*/
 	dcpl = H5Pcreate(H5P_DATASET_CREATE); 
-	status = H5Pset_deflate(dcpl, 5);
-	//mexPrintf("Deflate Status: %d\n", status);
-	//dims[NDims - 1] = 1;
-	status = H5Pset_chunk(dcpl, NDims, dims);
+	
+	status =  H5Pset_chunk(dcpl, NDims, chunk_dims);
 
+	status = H5Pset_deflate(dcpl, CompressionLevel);
+	//mexPrintf("Deflate Status: %d\n", status);
+	
+	
 	/*
 	* Create the dataset.
 	*/
@@ -135,22 +146,25 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 		return;
 	}
 
-	if (nrhs != 4)
-		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,DatSetName,Data,Append)");
+	if (nrhs < 4)
+		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data,CompressionLevel)");
 
 	//validate input values(this section better not be blank!)
 
 	if (!mxIsClass(prhs[0], "char"))
-		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data).  First input must be character array.");
+		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data,CompressionLevel).  First input must be character array.");
 
 	if (!mxIsClass(prhs[1], "char"))
-		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data).  Second input must be character array.");
+		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data,CompressionLevel).  Second input must be character array.");
 
 	if (!mxIsClass(prhs[2], "char"))
-		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data).  Third input must be character array.");
+		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data,CompressionLevel).  Third input must be character array.");
 
 	if (!mxIsClass(prhs[3], "uint16"))
-		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data).  Fourth input must be uint16.");
+		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data,CompressionLevel).  Fourth input must be uint16.");
+
+	if ((nrhs == 5)) if (!mxIsScalar(prhs[4]))
+		mexErrMsgTxt("Proper Usage: [Err]=H5Write_Async(File,Group,DatSetName,Data,CompressionLevel).  Fifth input must be a scalar 0-9.");
 
 	//declare all vars
 
@@ -186,7 +200,9 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 
 	dataMATLAB = (unsigned short *)mxGetData(prhs[3]);
 
-
+	if ((nrhs ==5))
+		CompressionLevel = (int)mxGetScalar(prhs[4]);
+	
 	for (i = 0; i < NDims; i++) Size[i] = Dims[i];
 
 	//do stuff
@@ -206,9 +222,6 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 		mexPrintf("gzip filter not available for encoding and decoding.\n");
 	}
 
-	Append = (bool)mxGetScalar(prhs[3]);
-
-	
 	mexPrintf("Starting Save...\n", status);
 
 	IsCopied = 0;

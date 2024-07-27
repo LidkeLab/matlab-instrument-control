@@ -1,8 +1,8 @@
 function getcamera(obj)
 
 % Print out a list of the available cameras.
-NCameras = DCAM4PrintCameraList(); 
-
+%NCameras = DCAM4PrintCameraList(); 
+NCameras = DCAM4Init();
 % If needed, ask the user to select the desired camera.  If we have more
 % than two cameras, this will just select the first camera!
 if (NCameras== 2)

@@ -1,28 +1,49 @@
 classdef MIC_BiochemValve < MIC_Abstract
-    %WARNING: This is a prototype class and is not ready for use.
-    %Class used for control of the BIOCHEM flow selection valves.
-    %
-    % This class controls (indirectly) the BIOCHEM flow selection valves
-    % via communication with an Arduino.  It can open and close specific
-    % valves as well as cut power to both the valves and the syringe pump
-    % (this functionality is given here as an emergency shutoff, the
-    % shutting down of the syringe pump is just a side effect of the
-    % emergency shutdown to the valves). 
-    %
-    % Example: Valves = MIC_BiochemValve();
-    % Functions: delete, exportState, gui, powerSwitch12V, powerSwitch24V, 
-    %            openValve, closeValve, unitTest
-    %
-    % REQUIREMENTS: 
-    %   MATLAB R2014b or later.
-    %   MATLAB Support Package for Arduino Hardware installed
-    %       NOTE: You may need to setup the Arduino you are using
-    %       specifically even if this package was installed previously.
-    %       Matlab needs to upload software onto the Arduino before
-    %       creation of an instance of this class. 
-    %   MIC_Abstract.m
-    % 
-    % CITATION: David Schodt, Lidke Lab, 2018
+%  MIC_BiochemValve Class 
+%
+% ## Description
+% The `MIC_BiochemValve` class manages BIOCHEM flow selection valves through communication with an Arduino. 
+% It provides functionality to open and close valves, and includes an emergency shutoff to cut power to both the valves
+% and a syringe pump.
+% 
+% ## Installation Requirements
+% - MATLAB R2014b or later
+% - MATLAB Support Package for Arduino Hardware:     
+% 
+% ##NOTE
+% You may need to setup the Arduino you are using
+% specifically even if this package was installed previously.
+% Matlab needs to upload software onto the Arduino before
+% creation of an instance of this class. 
+% 
+% **Note:** Ensure the Arduino is properly set up as MATLAB needs to upload software onto it before using this class.
+% 
+% ## Dependencies
+% - `MIC_Abstract.m` 
+% 
+% ## Key Functions
+% - **delete()**: Deletes the object and closes connection to Arduino.
+% - **exportState()**: Exports the current state of the instrument.
+% - **gui()**: Launches a graphical user interface for the valve controller.
+% - **powerSwitch12V()**: Toggles power on the 12V line controlling the valves.
+% - **powerSwitch24V()**: Toggles power on the 24V line that powers both the syringe pump and the BIOCHEM valves after stepping down to 12V.
+% - **openValve(ValveNumber)**: Opens the specified valve.
+% - **closeValve(ValveNumber)**: Closes the specified valve.
+% - **unitTest(SerialPort)**: Performs a unit test of the valve controller on a specified serial port.
+% 
+% ## Usage
+% ```matlab
+% % Creating an instance of the valve controller
+% Valves = MIC_BiochemValve();
+% 
+% % Opening and closing a valve
+% Valves.openValve(3);  % Open valve number 3
+% Valves.closeValve(3); % Close valve number 3
+% 
+% % Managing power
+% Valves.powerSwitch12V();  % Toggle the 12V power line
+% ```
+% ### CITATION: David Schodt, Lidke Lab, 2018
     
     
     properties (SetAccess = protected) % users shouldn't set these
