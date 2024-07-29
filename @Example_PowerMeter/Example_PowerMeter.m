@@ -6,7 +6,9 @@ classdef Example_PowerMeter < MIC_PowerMeter_Abstract
     
     % REQUIRES:
     % MIC_PowerMeter_Abstract.m
-    %
+    
+    % Documentation: For detailed documentation check Readme.md file.
+    
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     properties (SetAccess = protected)
         InstrumentName = 'ExamplePowerMeter';

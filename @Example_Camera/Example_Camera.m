@@ -4,8 +4,11 @@ classdef Example_Camera < MIC_Camera_Abstract
     
     % REQUIRES: 
     % MIC_Abstract.m
-    %
+    
+    % Documentation: For detailed documentation check Readme.md file.
+    
     % CITATION: Sajjad Khan, Lidkelab, 2024.
+
     properties(SetAccess=protected)
         InstrumentName = 'Simulated Camera';
         CameraIndex = 1;
@@ -27,6 +30,7 @@ classdef Example_Camera < MIC_Camera_Abstract
         ROI = [1 1024 1 768];
         SequenceLength = 10;
         SequenceCycleTime = 0.1;
+        TriggerMode = 'internal';
     end
 
     properties(Access=protected)
@@ -39,14 +43,13 @@ classdef Example_Camera < MIC_Camera_Abstract
         TimerHandle; % Timer object handle
     end
     
-     properties (Hidden)
+    properties (Hidden)
         StartGUI = false; % GUI does not start automatically by default
     end
 
     methods
         function obj = Example_Camera()
             obj = obj@MIC_Camera_Abstract(~nargout);
-           
         end
 
         function state = exportState(obj)
@@ -69,12 +72,12 @@ classdef Example_Camera < MIC_Camera_Abstract
 
         function out = getlastimage(obj)
             disp('Retrieving last image.');
-            out = rand(obj.ImageSize);
+            out = rand(obj.ImageSize); % Simulate an image
         end
 
         function out = getdata(obj)
             disp('Getting data.');
-            out = rand(obj.ImageSize);
+            out = rand(obj.ImageSize); % Simulate data acquisition
             obj.Data = out;
         end
 
@@ -93,26 +96,18 @@ classdef Example_Camera < MIC_Camera_Abstract
         
         function shutdown(obj)
             disp('Shutting down the camera.');
-            
-            % Ensure that any ongoing processes are aborted
             obj.abort();
-            
-            % Check if TimerHandle is a valid object and stop/delete it if it is
             if ~isempty(obj.TimerHandle) && isobject(obj.TimerHandle) && isvalid(obj.TimerHandle)
                 stop(obj.TimerHandle);
                 delete(obj.TimerHandle);
                 obj.TimerHandle = [];
             end
-            
-            % Check if FigureHandle is a valid handle and close it if it is
             if ishandle(obj.FigureHandle)
                 close(obj.FigureHandle);
                 obj.FigureHandle = [];
             end
-            
             disp('Camera shutdown completed.');
         end
-        
         
         function img = start_capture(obj)
             disp('Starting capture mode.');
@@ -147,10 +142,16 @@ classdef Example_Camera < MIC_Camera_Abstract
             end
         end
         
+        function fireTrigger(obj)
+            disp('Firing trigger.');
+            % Simulate firing trigger
+        end
+        
         function setupGUI(obj)
+            % Create a figure for the GUI
+            obj.FigureHandle = figure('Name', 'Camera Control', 'CloseRequestFcn', @(src, event) obj.closeGui());
             
-            
-            Create a button for focus
+            % Create a button for focus
             uicontrol('Style', 'pushbutton', 'String', 'Focus', ...
                 'Position', [20, 50, 70, 25], ...
                 'Callback', @(src, evnt)obj.onButtonClicked(src));
@@ -167,8 +168,6 @@ classdef Example_Camera < MIC_Camera_Abstract
             
             disp('GUI setup complete.');
         end
-        
-        
         
         function onButtonClicked(obj, src)
             % Change the button color to green
@@ -237,8 +236,6 @@ classdef Example_Camera < MIC_Camera_Abstract
             end
         end
 
-
-
         function [temp, status] = call_temperature(obj)
             temp = 22; % Example temperature in Celsius
             status = 1; % Temperature stabilized
@@ -268,9 +265,8 @@ classdef Example_Camera < MIC_Camera_Abstract
             Success = true; % Assume success for simplicity
             obj.abort();
             disp('Unit test completed successfully.');
-            
         end
     end
 end
-
-% To close gui properly, press Abort -> Exit -> Confirm.
+% To open GUI, create obj = Example_Camera() then call obj.gui()
+% To close GUI properly, press Abort -> Exit -> Confirm.

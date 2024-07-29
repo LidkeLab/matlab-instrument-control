@@ -4,7 +4,9 @@ classdef Example_LinearStage < MIC_LinearStage_Abstract
     
     % REQUIRES:
     % MIC_LinearStage_Abstract.m
-    %
+    
+    % Documentation: For detailed documentation check Readme.md file.
+    
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     
     properties (SetAccess = protected)

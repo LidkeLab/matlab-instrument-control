@@ -5,6 +5,8 @@ classdef Example_3DStage< MIC_3DStage_Abstract
     % REQUIRES:
     % MIC_3DStage_Abstract.m
     
+    % Documentation: For detailed documentation check Readme.md file.
+    
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     
     properties (SetAccess = protected)

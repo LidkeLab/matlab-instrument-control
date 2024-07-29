@@ -5,6 +5,8 @@ classdef Example_LightSource < MIC_LightSource_Abstract
     % REQUIRES:
     % MIC_LightSource_Abstract.m
     
+    % Documentation: For detailed documentation check Readme.md file.
+    
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     
     properties (SetAccess = protected)
