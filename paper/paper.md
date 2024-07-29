@@ -46,7 +46,7 @@ affiliations:
    index: 2
  - name: Department of Mathematics and Statistics, University of New Mexico
    index: 3
-date: May 2024
+date: July 2024
 bibliography: paper.bib
 
 ---
@@ -74,7 +74,7 @@ SK wrote the manuscript.
 SK & MJW added GitHub documentation.
 SK added the example classes with their GUIs, and added unit tests. 
 KAL added MIC_AndorCamera and MIC_KCubePiezo. 
-SP added MIC_AndorCameraZyla and various laser classes.
+SP added MIC_AndorCameraZyla and various laser classes. SK tested the laser classes.
 SL added MIC_DCAM4Camera to control Hamamatsu cameras using the DCAM4 API.
 MBMM added MIC_DynamixelServo, MIC_GalvoAnalog, and MIC_HamamatsuLCOS class.
 DJS added 3D registration, MIC_BiochemValve, MIC_CavroSyringePump, MIC_H5, and MIC_MCLMicroDrive.
