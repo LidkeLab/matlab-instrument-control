@@ -94,7 +94,7 @@ Each instrument will be controlled by its own drivers, which must be installed o
 Similarly, the `MIC_MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
 
 ## Documentation
-The detailed documentation of each MIC class can be found here [MIC Classes](doc/MICclasses.md).
+The detailed documentation of each MIC class can be found here: [MIC Classes](doc/MICclasses.md).
 
 ## Contribution
-We welcome contributions to the MIC project. Please see the [CONTRIBUTING.md](doc/CONTRIBUTING.md) file for more information.
+We welcome contributions to the MIC project. Please see [CONTRIBUTING](doc/CONTRIBUTING.md) for more information.
