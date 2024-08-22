@@ -1,10 +1,15 @@
 name: MATLAB Tests
 
-# Trigger the workflow on push to the main branch
+# Controls when the action will run.
 on:
+  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   test:
@@ -19,8 +24,8 @@ jobs:
     # Step 2: Set up MATLAB
     - name: Set up MATLAB
       uses: matlab-actions/setup-matlab@v1
-      with:
-        release: R2020a  # You can adjust this to the version you use
+      # with:
+      #   release: R2020a  # You can adjust this to the version you use
 
     # Step 3: Run the MATLAB test script
     - name: Run MATLAB tests
