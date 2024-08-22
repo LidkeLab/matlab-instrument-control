@@ -1,0 +1,28 @@
+name: MATLAB Tests
+
+# Trigger the workflow on push to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    # Use a Linux-based runner for the job
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Set up MATLAB
+    - name: Set up MATLAB
+      uses: matlab-actions/setup-matlab@v1
+      with:
+        release: R2020a  # You can adjust this to the version you use
+
+    # Step 3: Run the MATLAB test script
+    - name: Run MATLAB tests
+      run: |
+        matlab -batch "run('run_tests.m');"
