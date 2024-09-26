@@ -137,12 +137,12 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             %This function is called in the destructor to delete the communication port.
             fclose(obj.VisaObj);
         end
-     function delete(obj)
-         %This function close the comunication port and close the gui.
-        delete(obj.GuiFigure);
-        obj.shutdown(); 
-        clear obj;
-     end
-      
-   end
-end
+        function delete(obj)
+            %This function closes the communication port and close the gui.
+           delete(obj.GuiFigure);
+           obj.shutdown();
+        end % delete
+
+   end % methods
+
+end % classdef
