@@ -36,7 +36,14 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             obj@MIC_PowerMeter_Abstract(~nargout);
 
             % Find a VISA-USB object.
+            % TODO -- the following commands to find the device assume
+            % only one device is connected
             vendorinfo = instrhwinfo('visa','ni');
+            if isempty(vendorinfo.ObjectConstructorName)
+                fprintf('No devices found\n')
+                return
+            end
+
             s=vendorinfo.ObjectConstructorName{1};
 
             if isempty(obj.VisaObj)
