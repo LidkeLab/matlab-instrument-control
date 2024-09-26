@@ -113,8 +113,8 @@ function guiFig=gui(obj)
     obj.GuiFigure.Name = obj.InstrumentName;
     % Move the GUI to the center of the screen.
     movegui(guiFig,'center');
-    % Make the GUI visible.
-    guiFig.Visible = 'on';
+
+
 
 
 
