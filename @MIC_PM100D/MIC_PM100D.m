@@ -80,7 +80,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
                 fprintf('The port is closed and the object is deleted.\n');
                 fprintf('The class is successfully tested :)\n')
             catch E
-                fprintf('Sorry an error has ocured :(\n');
+                fprintf('Sorry an error has occurred :(\n');
                 E
             end
         end % unitTest
@@ -119,20 +119,20 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             %This either measures the power or temperature.
             switch obj.Ask
                 case 'power'
-                    Out=str2double(send(obj,'MEASURE:POWER?'))*1000;
+                    Out=str2double(obj.send('MEASURE:POWER?'))*1000;
                 case 'temp'
-                    Out=str2double(send(obj,'MEASURE:TEMPERATURE?'));
+                    Out=str2double(obj.send('MEASURE:TEMPERATURE?'));
             end
         end
 
         function out=measurePower(obj)
             % Measure power
-            out=str2double(send(obj,'MEASURE:POWER?'))*1000;
+            out=str2double(obj.send('MEASURE:POWER?'))*1000;
         end
 
         function out=measureTemperature(obj)
             % Measure temperature
-            out=str2double(send(obj,'MEASURE:TEMPERATURE?'));
+            out=str2double(obj.send('MEASURE:TEMPERATURE?'));
         end
 
         function setWavelength(obj,lambda)
