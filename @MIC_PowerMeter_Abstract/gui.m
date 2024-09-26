@@ -119,7 +119,7 @@ function guiFig=gui(obj)
        % popup menu
        %
        % when user select to measure either power or temp this function
-       % is called and it assign the specified string to thhe property
+       % is called and it assign the specified string to the property
        % Ask. Moreover, it sets the labels for the figure.
        str = source.String;
        val = source.Value;
