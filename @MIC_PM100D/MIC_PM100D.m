@@ -114,6 +114,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             obj.Lambda=str2double(send(obj,'CORRECTION:WAVELENGTH?'));
             fprintf('Wavelength: %d nm \n',obj.Lambda);
         end
+
         function Out=measure(obj)
             %This either measures the power or temperature.
             switch obj.Ask
@@ -121,8 +122,17 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
                     Out=str2double(send(obj,'MEASURE:POWER?'))*1000;
                 case 'temp'
                     Out=str2double(send(obj,'MEASURE:TEMPERATURE?'));
-            end 
+            end
         end
+
+        function out=measurePower(obj)
+            % Measure power
+            out=str2double(send(obj,'MEASURE:POWER?'))*1000;
+        end
+
+        function out=measureTemperature(obj)
+            % Measure temperature
+            out=str2double(send(obj,'MEASURE:TEMPERATURE?'));
         end
 
         function setWavelength(obj,lambda)
