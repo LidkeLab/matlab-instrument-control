@@ -91,14 +91,13 @@ function guiFig=gui(obj)
     set([guiFig,hget,hStartplot,htext1],'Units','normalized');
 
     %getting the current wavelength to be displayed on gui.
-    getWavelength(obj);
+    obj.getWavelength;
 
     %WL = sprintf('%0.5f',str2double(obj.Lambda));
     set(hedit1,'String',obj.Lambda);
 
     %measuring the current power.
-    obj.Ask='power';
-    OutPower=measure(obj);
+    OutPower=obj.measurePower;
     StrPow = sprintf('%0.5f',OutPower);
     set(hedit2,'String',StrPow);
 
@@ -113,10 +112,6 @@ function guiFig=gui(obj)
     obj.GuiFigure.Name = obj.InstrumentName;
     % Move the GUI to the center of the screen.
     movegui(guiFig,'center');
-
-
-
-
 
 
     % Callback functions follow
