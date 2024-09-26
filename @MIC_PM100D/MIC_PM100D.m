@@ -123,20 +123,36 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
                     Out=str2double(send(obj,'MEASURE:TEMPERATURE?'));
             end 
         end
-     
-     function setWavelength(obj)
-         %setting the wavelength 
-         if obj.Lambda < 400 || obj.Lambda > 1100
-             error('The wavelength is out of the range [400nm, 1100nm].');
-         end
-             
-         s = sprintf('CORRECTION:WAVELENGTH %g nm',obj.Lambda);
-         fprintf(obj.VisaObj, s);
-     end
-     function shutdown(obj)
-            %This function is called in the destructor to delete the communication port.
-            fclose(obj.VisaObj);
         end
+
+        function setWavelength(obj,lambda)
+            % Setting the compensation wavelength
+            %
+            % serWavelength(lambda)
+            %
+            % Inputs
+            % lambda [optional] - scalar in nm between 400 and 1100
+            %      If lambda is not supplied, the value in the class Lambda
+            %      property is used instead. If it is supplied, the Lambda
+            %      property is assigned as lambda.
+            %
+            %
+            if nargin>1
+                if (lambda < 400 || lambda > 1100)
+                   error('The wavelength is out of the range [400nm, 1100nm].');
+                else
+                    obj.Lambda = lambda;
+                end
+            end
+            s = sprintf('CORRECTION:WAVELENGTH %g nm',obj.Lambda);
+            fprintf(obj.VisaObj, s);
+        end % setWavelength
+
+        function shutdown(obj)
+               %This function is called in the destructor to delete the communication port.
+               fclose(obj.VisaObj);
+        end % shutdown
+
         function delete(obj)
             %This function closes the communication port and close the gui.
            delete(obj.GuiFigure);
