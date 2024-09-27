@@ -197,6 +197,9 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
 
         function shutdown(obj)
                %This function is called in the destructor to delete the communication port.
+               if isempty(obj.VisaObj)
+                   return
+               end
                fclose(obj.VisaObj);
         end % shutdown
 
