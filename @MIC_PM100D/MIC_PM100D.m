@@ -48,9 +48,9 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             s=vendorinfo.ObjectConstructorName{1};
             obj.VisaObj = eval(s);
             fopen(obj.VisaObj);
-            
+
             % Measure the limits of the wavelength.
-            obj.Limits=minMaxWavelength(obj);
+            obj.Limits=obj.minMaxWavelength;
 
             % TODO: this process of using the "Ask" property to determine
             % whether to read light power or temperature is very weird 
