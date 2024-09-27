@@ -99,6 +99,22 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             Reply=fscanf(obj.VisaObj,'%s');
         end
 
+        function devInfo = reportDeviceInfo(obj)
+            % Return string describing the model number, etc, of the power meter
+            devInfo = obj.send('*IDN?');
+        end
+
+        function devInfo = reportSensorInfo(obj)
+            % Return string describing the sensor head
+            devInfo = obj.send(':SYST:SENS:IDN?');
+        end
+
+        function autoRange = isAutoRangeEnabled(obj)
+            % Return 1 if autorange is enabled. 0 otherwise
+            autoRange = obj.send(':SENS:POWER:RANG:AUTO?');
+            autoRange = str2num(autoRange);
+        end
+
         function Limits=minMaxWavelength(obj)
             %Reading the limits of the wavelength.
             %
