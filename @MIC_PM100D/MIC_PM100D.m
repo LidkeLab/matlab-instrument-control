@@ -44,21 +44,17 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
                 return
             end
 
+            % Use the constructor command to connect to the device.
             s=vendorinfo.ObjectConstructorName{1};
-
-            if isempty(obj.VisaObj)
-                obj.VisaObj = eval(s);
-            else
-
-                fclose(obj.VisaObj);
-                clear obj.VisaObj;
-                obj.VisaObj = eval(s);
-            end
-            % Connect to instrument object
+            obj.VisaObj = eval(s);
             fopen(obj.VisaObj);
+            
             % Measure the limits of the wavelength.
             obj.Limits=minMaxWavelength(obj);
 
+            % TODO: this process of using the "Ask" property to determine
+            % whether to read light power or temperature is very weird 
+            % and should be removed. 
             obj.Ask = 'power'; % by default we read power
         end %constructor
 
