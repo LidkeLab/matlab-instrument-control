@@ -3,7 +3,7 @@
 ## Description
 Controls the [ThorLabs PM100D](https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=3341&pn=PM100D) light power meter.
 The class can retrieve the current power and current temperature. 
-The wavelenghth of the light can be set programatically, as can the wavelength (within the 400 nm to 1100 nm range).
+The wavelength of the light can be set programatically, as can the wavelength (within the sensor limits).
 The gui shows a movie of the plot of the
 measured power where the shown period can be modified. It also shows
 the current power and the maximum measured power. To run this code

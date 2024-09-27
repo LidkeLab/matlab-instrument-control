@@ -3,9 +3,9 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
     %
     % ## Description
     % Controls power meter PM100D, gets the current power. It can also gets
-    % the current temperature. The wavelenght of the light can also be
-    % set for power measurement, where the range of the wavelength is
-    % 400nm < Lambda < 1100nm. The gui shows a movie of the plot of the
+    % the current temperature. The wavelengtj of the light can also be
+    % set for power measurement (within the sensor limits). The gui shows 
+    % a movie of the plot of the
     % measured power where the shown period can be modified. It also shows
     % the current power and the maximum measured power. To run this code
     % you need the power meter to be connected to the machine.
@@ -144,8 +144,10 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             %
             %
             if nargin>1
-                if (lambda < 400 || lambda > 1100)
-                   error('The wavelength is out of the range [400nm, 1100nm].');
+                if (lambda < obj.Limits(1) || lambda > obj.Limits(2))
+                   fprintf('The wavelength is out of the range [%dnm, %dnm]\n', ...
+                       obj.Limits);
+                   return
                 else
                     obj.Lambda = lambda;
                 end
