@@ -48,6 +48,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             s=vendorinfo.ObjectConstructorName{1};
             obj.VisaObj = eval(s);
             fopen(obj.VisaObj);
+            fprintf('Connected to VISA power meter device\n')
 
             % Measure the limits of the wavelength.
             obj.Limits=obj.minMaxWavelength;
@@ -100,14 +101,15 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
 
         function Limits=minMaxWavelength(obj)
             %Reading the limits of the wavelength.
-            R1=obj.send('CORRECTION:WAVELENGTH? MIN');
-            R2=obj.send('CORRECTION:WAVELENGTH? MAX');
+            %
+            R1=obj.send('SENS:CORR:WAV? MIN');
+            R2=obj.send('SENS:CORR:WAV? MAX');
             Limits = [str2double(R1) str2double(R2)];
         end
 
         function getWavelength(obj)
             %Reading the current wavelength of the instrument.
-            obj.Lambda=str2double(send(obj,'CORRECTION:WAVELENGTH?'));
+            obj.Lambda=str2double(send(obj,'SENS:CORR:WAV?'));
             fprintf('Wavelength: %d nm \n',obj.Lambda);
         end
 
@@ -143,6 +145,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             %      property is assigned as lambda.
             %
             %
+           
             if nargin>1
                 if (lambda < obj.Limits(1) || lambda > obj.Limits(2))
                    fprintf('The wavelength is out of the range [%dnm, %dnm]\n', ...
@@ -152,7 +155,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
                     obj.Lambda = lambda;
                 end
             end
-            s = sprintf('CORRECTION:WAVELENGTH %g nm',obj.Lambda);
+            s = sprintf('SENS:CORR:WAV %g ',obj.Lambda);
             fprintf(obj.VisaObj, s);
         end % setWavelength
 
