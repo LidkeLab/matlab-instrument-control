@@ -95,6 +95,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
 
         function Reply=send(obj,Message)
             %Sending a message to the power-meter and getting a feedback.
+
             fprintf(obj.VisaObj,Message);
             Reply=fscanf(obj.VisaObj,'%s');
         end
@@ -115,6 +116,25 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
             autoRange = str2num(autoRange);
         end
 
+        function disableAutoRange(obj)
+            % Disable auto-range
+            fprintf(obj.VisaObj,'SENSE:POWER:RANGE:AUTO OFF');
+        end
+      
+        function enableAutoRange(obj)
+            % Enable auto-range
+            fprintf(obj.VisaObj,'SENSE:POWER:RANGE:AUTO ON');
+        end
+
+        function setAutoRange(obj,autoRange)
+            % Set auto-range. 
+            % autoRange is a string (TODO: for now)
+            %
+            % e.g.
+            % setAutoRange('0.1')
+            fprintf(obj.VisaObj,sprintf('SENSE:POWER:RANGE %s',autoRange));
+        end
+      
         function Limits=minMaxWavelength(obj)
             %Reading the limits of the wavelength.
             %
