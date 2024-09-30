@@ -196,7 +196,6 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         end
         
         function Out=start_sequence(obj)
-            clc
             obj.AcquisitionType='sequence';
             obj.setup_acquisition();
             %obj.reset();
@@ -274,7 +273,6 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             obj.abort();
         end
         function start_scan(obj)
-            clc
             obj.AcquisitionType='sequence';
             obj.setup_acquisition();
             %Get Clock Frequency and Framerate
@@ -350,7 +348,6 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         end
 
         function Out=start_scan_v0(obj,Nstep,pfit,ROIoffset)
-            clc
             obj.AcquisitionType='sequence';
             obj.setup_acquisition();
             %Enable Metadata
