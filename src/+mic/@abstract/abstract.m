@@ -62,7 +62,7 @@ classdef abstract < handle
             % obects InstrumentName.
             curVars = evalin('base',sprintf('who(''%s*'');',obj.InstrumentName));
             varPattern = sprintf('%s%%i',obj.InstrumentName);
-            varName = mic,abstract.nextUnusedName(curVars,varPattern);
+            varName = mic.abstract.nextUnusedName(curVars,varPattern);
             assignin('base',varName,obj);
             fprintf('Assigned new %s object as variable "%s"\n',obj.InstrumentName, varName);
         end

@@ -1,8 +1,8 @@
-classdef MIC_PowerMeter_Abstract < MIC_Abstract
-%  MIC_PowerMeter_Abstract
+classdef abstract < mic.abstract
+%  mic.powermeter.abstract
 % 
 % ## Description
-% `MIC_PowerMeter_Abstract` is a MATLAB class derived from `MIC_Abstract` to interface with the power meter (specifically the PM100D model). It enables the measurement of optical power and temperature, and displays this data in real-time through a graphical user interface (GUI).
+% `mic.powermeter.abstract` is a MATLAB class derived from `mic.abstract` to interface with the power meter (specifically the PM100D model). It enables the measurement of optical power and temperature, and displays this data in real-time through a graphical user interface (GUI).
 % 
 % ## Features
 % - **Real-Time Data Acquisition**: Measures and plots power or temperature data in real time.
@@ -18,11 +18,11 @@ classdef MIC_PowerMeter_Abstract < MIC_Abstract
 % 1. Ensure that MATLAB and the required toolboxes are installed on your system.
 % 2. Install the National Instruments NI-DAQ driver compatible with your device.
 % 3. Ensure that VISA software is installed for proper communication with the device.
-% 4. Clone this repository or download the `MIC_PowerMeter_Abstract.m` file into your MATLAB working directory.
+% 4. Clone this repository or download the `mic.powermeter.abstract.m` file into your MATLAB working directory.
 % 
 % ## Usage Example
 % ```matlab
-% pm = MIC_PowerMeter_Abstract('AutoNameHere');
+% pm = mic.powermeter.abstract('AutoNameHere');
 % % Start the GUI plot. `edit1` and `edit2` are handles to GUI components where the results are displayed.
 % pm.guiPlot(edit1, edit2);
 % 
@@ -55,8 +55,8 @@ classdef MIC_PowerMeter_Abstract < MIC_Abstract
     
     methods
         
-        function obj=MIC_PowerMeter_Abstract(AutoName)
-            obj=obj@MIC_Abstract(AutoName);
+        function obj=abstract(AutoName)
+            obj=obj@mic.abstract(AutoName);
         end
         
         function guiPlot(obj,edit1,edit2)

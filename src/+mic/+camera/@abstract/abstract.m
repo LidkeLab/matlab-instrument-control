@@ -1,8 +1,8 @@
-classdef MIC_Camera_Abstract < MIC_Abstract
-% MIC_Camera_Abstract Class
+classdef abstract < mic.abstract
+% mic.camera.abstract Class
 % 
 % ## Description
-% The `MIC_Camera_Abstract` class serves as a base class for creating specific camera control classes in MATLAB. This abstract class provides a structured approach to implement common camera functionalities, ensuring consistency and ease of use across different camera models.
+% The `mic.camera.abstract` class serves as a base class for creating specific camera control classes in MATLAB. This abstract class provides a structured approach to implement common camera functionalities, ensuring consistency and ease of use across different camera models.
 % 
 % ## Features
 % - Uniform interface for various camera operations such as focus, capture, and sequence modes.
@@ -86,9 +86,9 @@ classdef MIC_Camera_Abstract < MIC_Abstract
     
     methods
         
-        function obj = MIC_Camera_Abstract(AutoName)
+        function obj = abstract(AutoName)
             %Constructor 
-            obj=obj@MIC_Abstract(AutoName);
+            obj=obj@mic.abstract(AutoName);
             
             if nargin<1
                 obj.CameraIndex=[];

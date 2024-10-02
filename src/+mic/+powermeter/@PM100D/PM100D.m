@@ -1,5 +1,5 @@
-classdef MIC_PM100D < MIC_PowerMeter_Abstract 
-    % MIC_PM100D: Matlab Instrument class to control power meter PM100D.
+classdef PM100D < mic.powermeter.abstract 
+    % mic.powermeter.PM100D: Matlab Instrument class to control power meter PM100D.
     %
     % ## Description
     % Controls power meter PM100D, gets the current power. It can also gets
@@ -11,7 +11,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
     % you need the power meter to be connected to the machine.
     %
     % ## Constructor
-    % Example: P = MIC_PM100D; P.gui
+    % Example: P = mic.powermeter.PM100D; P.gui
     %
     % ## Key Functions: 
     % constructor(), exportState(), send(), minMaxWavelength(), getWavelength(), measure(), setWavelength(), shutdown()
@@ -19,8 +19,8 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
     % ## REQUIREMENTS:
     %    NI_DAQ  (VISA and ICP Interfaces) should be installed.
     %    MATLAB 2014 or higher.
-    %    MIC_Abstract.m
-    %    MIC_PowerMeter_Abstract.m
+    %    mic.Abstract.m
+    %    mic.powermeter.abstract.m
     %
     % ### CITATION: Mohamadreza Fazel, Lidkelab, 2017.
     
@@ -28,10 +28,10 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
         InstrumentName='PM100D'; %Name of the instrument.
     end
     methods (Static)
-        function obj=MIC_PM100D
+        function obj=PM100D
             %This is the constructor.
-            %example PM = MIC_PM100D
-            obj@MIC_PowerMeter_Abstract(~nargout);    
+            %example PM = mic.powermeter.PM100D
+            obj@mic.powermeter.abstract(~nargout);    
            
             % Find a VISA-USB object.
             vendorinfo = instrhwinfo('visa','ni');
@@ -53,7 +53,7 @@ classdef MIC_PM100D < MIC_PowerMeter_Abstract
       function unitTest()
           %testing the class.
           try
-          TestObj=MIC_PM100D();
+          TestObj=mic.powermeter.PM100D();
           fprintf('Constructor is run and an object of the class is made.\n');
           Limit = minMaxWavelength(TestObj);
           fprintf('Min wavelength: %d, Max wavelength: %d\n', Limit(1),Limit(2));

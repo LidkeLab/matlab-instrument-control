@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-% gui: Graphical User Interface to MIC_LinearStage_Abstract
+% gui: Graphical User Interface to mic.linearstage.abstract
 % Functionality:
 %   Move the stage by moving the slider or clicking the jog buttons
 %   Outside jog buttons (C) are for coarse steps
@@ -15,7 +15,7 @@ function guiFig = gui(obj)
 %   To identify the children which need updating they are given tags:
 %   Slider has tag "positionSlider"
 %   Set position edit box has tag "positionEdit"
-%   For example see MIC_Example_LinearStage
+%   For example see mic.linearstage.example
 %
 % Marjolein Meddens, Lidke Lab 2017
 
@@ -139,13 +139,13 @@ properties2gui();
     function setPos(~,~)
         Value=str2double(handles.editSetPos.String);
         if Value < obj.MinPosition 
-            warning('MIC_LinearStage_Abstract:GuiInvPos',...
+            warning('mic.linearstage.abstract:GuiInvPos',...
                 'Invalid Position (%i %s) Position cannot be smaller then %i %s, moving to minimum position',...
                 Value, obj.PositionUnit, obj.MinPosition, obj.PositionUnit);
             Value = obj.MinPosition;
         end
         if Value > obj.MaxPosition 
-            warning('MIC_LinearStage_Abstract:GuiInvPos',...
+            warning('mic.linearstage.abstract:GuiInvPos',...
                 'Invalid Position (%i %s) Position cannot be larger then %i %s, moving to maximum position',...
                 Value, obj.PositionUnit, obj.MaxPosition, obj.PositionUnit);
             Value = obj.MaxPosition;

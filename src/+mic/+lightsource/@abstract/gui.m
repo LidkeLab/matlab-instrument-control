@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-%gui Graphical User Interface to MIC_LightSource_Abstarct
+%gui Graphical User Interface to mic.lightsource.abstract
 
 %Prevent opening more than one figure for same instrument
 if ishandle(obj.GuiFigure)
