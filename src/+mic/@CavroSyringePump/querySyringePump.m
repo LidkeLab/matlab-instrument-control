@@ -1,7 +1,7 @@
 function querySyringePump(obj)
 %Queries an initialized Cavro syringe pump and returns the received message
 % INPUTS:
-%   obj: An instance of the MIC_CavroSyringePump class.
+%   obj: An instance of the mic.CavroSyringePump class.
 %
 % CITATION: David Schodt, Lidke Lab, 2018
 

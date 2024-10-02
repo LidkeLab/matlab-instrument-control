@@ -1,7 +1,7 @@
 function connectSyringePump(obj)
 %Connects to a Cavro syringe pump and returns messages from the device. 
 % INPUTS:
-%   obj: An instance of the MIC_CavroSyringePump class.
+%   obj: An instance of the mic.CavroSyringePump class.
 % 
 % MATLAB R2017a or later recommended for this method.
 %

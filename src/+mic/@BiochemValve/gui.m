@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-%Graphical user interface for MIC_BiochemValve.
+%Graphical user interface for mic.BiochemValve.
 
 %{
 Specify general GUI behaviors. 

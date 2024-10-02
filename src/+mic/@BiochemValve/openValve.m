@@ -3,7 +3,7 @@ function openValve(obj, ValveNumber)
 %flow selection valve. 
 %
 % INPUTS: 
-%   obj: An instance of the MIC_BiochemValve class.
+%   obj: An instance of the mic.BiochemValve class.
 %   ValveNumber: The number specifying which valve on the BIOCHEM flow
 %                selection valve to open. 
 %                NOTE: this may be mapped to the relay block on the relay

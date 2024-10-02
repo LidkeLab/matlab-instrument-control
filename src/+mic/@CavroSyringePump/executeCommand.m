@@ -1,7 +1,7 @@
 function executeCommand(obj, Command)
 %Sends a command given by Command to the Cavro syringe pump.
 % INPUTS: 
-%   obj: An instance of the MIC_CavroSyringePump class.
+%   obj: An instance of the mic.CavroSyringePump class.
 %   Command: A string of command(s) as summarized in the Cavro
 %            XP 3000 syringe pump manual page G-1 or described 
 %            in detail starting on page 3-21, e.g. 

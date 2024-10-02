@@ -1,8 +1,8 @@
-classdef MIC_Attenuator < MIC_Abstract
-% MIC_Attenuator Class
+classdef Attenuator < mic.MIC_Abstract
+% mic.Attenuator Class
 %
 % ## Description
-% The `MIC_Attenuator` class in MATLAB is designed for controlling optical attenuators through an 
+% The `mic.Attenuator` class in MATLAB is designed for controlling optical attenuators through an 
 % NI DAQ card, providing precise adjustments to the attenuation level. This class integrates 
 % seamlessly with MATLAB's Data Acquisition Toolbox and is part of a broader suite of instrument control classes.
 % You can also use the power meter to callibrate the attenuator for a new setup and then use it. 
@@ -29,8 +29,8 @@ classdef MIC_Attenuator < MIC_Abstract
 % - `PowerBeforeAttenuator`: Power measured before the attenuator, useful for calibration.
 % 
 % ## Methods
-% ### `MIC_Attenuator(NIDevice, AOChannel)`
-% Constructor for creating an instance of `MIC_Attenuator`. Requires NI device and analog output channel specifications.
+% ### `mic.Attenuator(NIDevice, AOChannel)`
+% Constructor for creating an instance of `mic.Attenuator`. Requires NI device and analog output channel specifications.
 % 
 % ### `loadCalibration(Name)`
 % Loads a calibration file specified by `Name`, which adjusts the attenuation curve based on previously gathered data.
@@ -47,7 +47,7 @@ classdef MIC_Attenuator < MIC_Abstract
 % ## Usage Example
 % ```matlab
 % % Initialize the attenuator with specific NI DAQ settings
-% attenuator = MIC_Attenuator('Dev1', 'ao1');
+% attenuator = mic.Attenuator('Dev1', 'ao1');
 % 
 % % Load calibration data
 % attenuator.loadCalibration('CalibrationFile.mat');
@@ -85,18 +85,18 @@ classdef MIC_Attenuator < MIC_Abstract
     end
     
     methods
-        function obj=MIC_Attenuator(NIDevice,AOChannel)
-            % Creates a MIC_Transmission object and sets output to minimum 
+        function obj=Attenuator(NIDevice,AOChannel)
+            % Creates a Transmission object and sets output to minimum 
             % and turns off Transmission. 
-            % Example: A=MIC_Attenuator('Dev1','ao1')
+            % Example: A=mic.Attenuator('Dev1','ao1')
             % The first and second input can be found if you open 'NI MAX',
             % go to Devices and Interfaces click on the Device and then go
             % to 'test panel' on the top right.
             
             if nargin<2
-                error('MIC_Transmission::NIDevice and AOChannel must be defined')
+                error('mic.Transmission::NIDevice and AOChannel must be defined')
             end
-            obj=obj@MIC_Abstract(~nargout);
+            obj=obj@mic.MIC_Abstract(~nargout);
             %Set up the NI Daq Object
             obj.DAQ = daq.createSession('ni');
             addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage');
@@ -189,9 +189,9 @@ classdef MIC_Attenuator < MIC_Abstract
         methods (Static=true)
             function unitTest(NIDevice,AOChannel)
                 % Unit test of object functionality
-                % Example: MIC_Attenuator.unitTest('Dev1','ao1')
+                % Example: mic.Attenuator.unitTest('Dev1','ao1')
                 try
-                   TestObj=MIC_Attenuator(NIDevice,AOChannel);
+                   TestObj=mic.Attenuator(NIDevice,AOChannel);
                    fprintf('The object was successfully created.\n');
                    setTransmission(TestObj,TestObj.MaxTransmission);
                    fprintf('The attenuation is successfully set to the max attenuation.\n');pause(1);
@@ -212,7 +212,7 @@ classdef MIC_Attenuator < MIC_Abstract
                   % Wavelength is the wavelength of the beam that you want to
                   % attenuate.
                   % object for power meter
-                  Pm = MIC_PM100D;
+                  Pm = mic.PM100D;
                   %setting the wavelength
                   Pm.Lambda = Wavelength;
                   Pm.setWavelength;
@@ -229,9 +229,9 @@ classdef MIC_Attenuator < MIC_Abstract
                 %Then the callibration result will be saved in fill called the given "Name".
                 %The input "BeforeAttenuator" is the output of findMaxPower()
                 %function.
-                %Example: MIC_Attenuator.calibration('Dev1','ao1',Out,'Name')
+                %Example: mic.Attenuator.calibration('Dev1','ao1',Out,'Name')
                 if nargin<2
-                    error('MIC_Transmission::NIDevice and AOChannel must be defined')
+                    error('mic.Transmission::NIDevice and AOChannel must be defined')
                 end
                 %Set up the NI Daq Object
                 DAQQ = daq.createSession('ni');
@@ -239,7 +239,7 @@ classdef MIC_Attenuator < MIC_Abstract
                 Voltage = 0:0.5:5;
                 a = length(Voltage);
                 OutTransmission = zeros(1,a);
-                Pm = MIC_PM100D;
+                Pm = mic.PM100D;
                 Pm.Ask = 'power';
                 for ii = 1:a
                     outputSingleScan(DAQQ,Voltage(ii));
@@ -252,7 +252,7 @@ classdef MIC_Attenuator < MIC_Abstract
                 xlabel('Voltage(V)')
                 ylabel('Transmission(%)')
                 legend('Transmission vs V')
-                filedir=fullfile(pwd,'\@MIC_Attenuator');
+                filedir=fullfile(pwd,'\@Attenuator');
                 save(fullfile(filedir,Name),'Voltage','NormTransmission','BeforeAttenuator');
                 Pm.delete();
         end

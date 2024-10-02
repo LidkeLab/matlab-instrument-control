@@ -2,7 +2,7 @@ function [DataBlock] = reportCommand(obj, Command)
 %Queries the syringe pump with a report command and returns the
 %decoded DataBlock. 
 % INPUTS: 
-%   obj: An instance of the MIC_CavroSyringePump class.
+%   obj: An instance of the mic.CavroSyringePump class.
 %   Command: A string containing a Cavro Report Command from
 %            the table on page G-3 of the Cavro XP 3000 syringe 
 %            pump manual, e.g. Command = '/1?' or 

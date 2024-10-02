@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-%Graphical user interface for MIC_CavroSyringePump.
+%Graphical user interface for mic.CavroSyringePump.
 
 %{
 Specify general GUI behaviors. 

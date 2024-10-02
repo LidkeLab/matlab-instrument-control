@@ -1,4 +1,4 @@
-classdef MIC_H5 
+classdef H5 
 % MIC_H5 Class: MIC_H5 A collection of static methods for working with HDF5 files 
 % 
 % ## Description

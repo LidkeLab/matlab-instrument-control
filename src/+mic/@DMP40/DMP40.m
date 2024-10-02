@@ -1,14 +1,14 @@
-classdef MIC_DMP40 < MIC_Abstract
-% MIC_DMP40 Class Documentation
+classdef DMP40 < mic.MIC_Abstract
+% mic.DMP40 Class Documentation
 % 
 % ## Description
-% The `MIC_DMP40` class controls a deformable mirror using MATLAB. This class interfaces with the mirror through .NET assemblies, 
+% The `mic.DMP40` class controls a deformable mirror using MATLAB. This class interfaces with the mirror through .NET assemblies, 
 % specifically designed for the Thorlabs DMP40 deformable mirror. It utilizes a digital-to-analog converter (DAC) 
 % to set voltages for mirror deformation and can apply different voltages to control tilt, Zernike modes, and other mirror settings.
 % 
 % ## Requirements
 % - MATLAB R2016b or later
-% - MIC_Abstract.m
+% - mic.MIC_Abstract.m
 % - .NET assemblies installed for Thorlabs DMP40 (.dll files for mirror control)
 % - .NET environment setup for MATLAB
 % 
@@ -22,7 +22,7 @@ classdef MIC_DMP40 < MIC_Abstract
 %    NET.addAssembly(fullfile(p,'Thorlabs.TLDFM_64.Interop.dll'));
 % ```
 % ## Key Functions
-% - **Constructor (`MIC_DMP40()`):** Sets up the initial connection to the deformable mirror using specified .NET libraries and verifies device availability.
+% - **Constructor (`DMP40()`):** Sets up the initial connection to the deformable mirror using specified .NET libraries and verifies device availability.
 % - **`setMirrorVoltages(VoltageArray)`:** Applies specific voltages to control the overall shape and curvature of the deformable mirror.
 % - **`setTiltVoltages(VoltageArray)`:** Adjusts the tilt of the mirror using voltages for precise alignment or calibration tasks.
 % - **`setZernikeModes(ZernikeArray)`:** Utilizes Zernike polynomial coefficients to manipulate the mirror surface for advanced optical wavefront shaping.
@@ -33,7 +33,7 @@ classdef MIC_DMP40 < MIC_Abstract
 % ## Usage Example
 % ```matlab
 % % Initialize the deformable mirror
-% mirror = MIC_DMP40();
+% mirror = mic.DMP40();
 % 
 % % Set mirror voltages for a specific application
 % mirror.setMirrorVoltages([1.0, 0.5, 0.3, ...]);
@@ -54,6 +54,7 @@ classdef MIC_DMP40 < MIC_Abstract
         InstrumentName = 'DMP40';
         DAQ=[];
         IsOpen;
+A PROBLEM! property or event may not use the same name as the name of the class (DMP40).
         DMP40   %DMP40 .NET class
     end
     
@@ -62,15 +63,15 @@ classdef MIC_DMP40 < MIC_Abstract
         
         NIDevice  %DAQ card device number at the USB port of the computer
         DOChannel; %included both port and line information
-        StartGUI = 0; %uses MIC_Abstract to bring up the GUI (so, no need for a gui function in MIC_ShutterTTL)
+        StartGUI = 0; %uses MIC_Abstract to bring up the GUI (so, no need for a gui function in ShutterTTL)
         %         Position  %either 1 or 0 (to show open or close respectively)
         NIString  %shows the combination of Device/Port/Line the shutter is using
     end
     
     methods
-        function obj = MIC_DMP40() % constructor
+        function obj = DMP40() % constructor
             
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.MIC_Abstract(~nargout);
             
             %setup and make connection to DM
            
@@ -87,7 +88,7 @@ classdef MIC_DMP40 < MIC_Abstract
             %Check if device is present
             [Status,N]=Thorlabs.TLDFM_64.Interop.TLDFM.get_device_count()
             if N<1
-                warning('MIC_DMP40:: No Mirror Found')
+                warning('mic.DMP40:: No Mirror Found')
             end
             
             % Get device info
@@ -178,19 +179,19 @@ classdef MIC_DMP40 < MIC_Abstract
     
     
     methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
-        % test this class on command line by: MIC_ShutterTTL.unitTest('Dev1','Port0','Line1')
+        % test this class on command line by: mic.ShutterTTL.unitTest('Dev1','Port0','Line1')
         function State=unitTest(NIDevice,DOChannel)
             % Unit test of object functionality
             
             if nargin<2
-                error('MIC_ShutterTTL:NIDevice, Port and Line must be defined')
+                error('mic.ShutterTTL:NIDevice, Port and Line must be defined')
             end
             
-            % release(MIC_ShutterTTL('Dev1','Port0','Line1'))
+            % release(mic.ShutterTTL('Dev1','Port0','Line1'))
             %Create an Object and Test open, close
             fprintf('Creating Object\n')
             % release()
-            S=MIC_ShutterTTL(NIDevice,DOChannel);
+            S=mic.ShutterTTL(NIDevice,DOChannel);
             S.open;
             fprintf('Shutter Open\n')
             pause(.5);
@@ -201,7 +202,7 @@ classdef MIC_DMP40 < MIC_Abstract
             clear S;
             %Create an Object and Repeat Test
             fprintf('Creating Object\n')
-            S=MIC_ShutterTTL(NIDevice,DOChannel);
+            S=mic.ShutterTTL(NIDevice,DOChannel);
             S.open;
             fprintf('Shutter Open\n')
             pause(.5);

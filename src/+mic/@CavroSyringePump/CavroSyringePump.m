@@ -1,5 +1,5 @@
-classdef MIC_CavroSyringePump < MIC_Abstract
-% MIC_CavroSyringePump Class 
+classdef CavroSyringePump < mic.MIC_Abstract
+% mic.CavroSyringePump Class 
 % 
 % ## Description
 % The `MIC_CavroSyringePump` class controls a Cavro syringe pump via USB, specifically designed for 
@@ -9,7 +9,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
 % ## Installation Requirements
 % - MATLAB R2014b or later (R2017a or later recommended)
 % - Operating System: Windows (modifications required for UNIX systems, particularly in serial port behaviors)
-% - Dependency: `MIC_Abstract.m`
+% - Dependency: `mic.MIC_Abstract.m`
 % 
 % ##  Functions: 
 % delete, exportState, updateGui, gui, connectSyringePump,
@@ -19,7 +19,7 @@ classdef MIC_CavroSyringePump < MIC_Abstract
 % ## Usage
 % ```matlab
 % % Create an instance of the Cavro syringe pump controller
-% Pump = MIC_CavroSyringePump();
+% Pump = mic.CavroSyringePump();
 % % Connect to the pump
 % [Message, Status] = Pump.connectSyringePump();
 % % Execute a command to move the plunger
@@ -68,12 +68,12 @@ classdef MIC_CavroSyringePump < MIC_Abstract
        
     
     methods
-        function obj = MIC_CavroSyringePump()
+        function obj = CavroSyringePump()
             %Constructor for the Cavro syringe pump object.
                        
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.MIC_Abstract(~nargout);
             
             % Set property listener(s). 
             addlistener(obj, 'StatusByte', 'PostSet', ...

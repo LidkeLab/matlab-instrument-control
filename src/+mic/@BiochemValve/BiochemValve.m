@@ -1,8 +1,8 @@
-classdef MIC_BiochemValve < MIC_Abstract
-%  MIC_BiochemValve Class 
+classdef BiochemValve < mic.MIC_Abstract
+%  mic.BiochemValve Class 
 %
 % ## Description
-% The `MIC_BiochemValve` class manages BIOCHEM flow selection valves through communication with an Arduino. 
+% The `mic.BiochemValve` class manages BIOCHEM flow selection valves through communication with an Arduino. 
 % It provides functionality to open and close valves, and includes an emergency shutoff to cut power to both the valves
 % and a syringe pump.
 % 
@@ -19,7 +19,7 @@ classdef MIC_BiochemValve < MIC_Abstract
 % **Note:** Ensure the Arduino is properly set up as MATLAB needs to upload software onto it before using this class.
 % 
 % ## Dependencies
-% - `MIC_Abstract.m` 
+% - `mic.MIC_Abstract.m` 
 % 
 % ## Key Functions
 % - **delete()**: Deletes the object and closes connection to Arduino.
@@ -34,7 +34,7 @@ classdef MIC_BiochemValve < MIC_Abstract
 % ## Usage
 % ```matlab
 % % Creating an instance of the valve controller
-% Valves = MIC_BiochemValve();
+% Valves = mic.BiochemValve();
 % 
 % % Opening and closing a valve
 % Valves.openValve(3);  % Open valve number 3
@@ -70,12 +70,12 @@ classdef MIC_BiochemValve < MIC_Abstract
     
     
     methods
-        function obj = MIC_BiochemValve()
+        function obj = BiochemValve()
             %Constructor for the BIOCHEM valve object.
             
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.MIC_Abstract(~nargout);
             
             % Search for/connect to an Arduino connected via USB.
             if isempty(obj.SerialPort) 

@@ -1,4 +1,4 @@
-classdef MIC_Joystick < handle
+classdef Joystick < handle
     % Matlab instrument class to control the TIRF stage with a joystick
     %
     % ## Description

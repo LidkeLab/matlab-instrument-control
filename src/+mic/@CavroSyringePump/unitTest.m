@@ -16,7 +16,7 @@ function unitTest(SerialPort)
 
 
 % Create a syringe pump object. 
-Pump = MIC_CavroSyringePump; 
+Pump = mic.CavroSyringePump; 
 
 % Set the SerialPort property to that specified by the user (if given). 
 if exist('SerialPort', 'var')
