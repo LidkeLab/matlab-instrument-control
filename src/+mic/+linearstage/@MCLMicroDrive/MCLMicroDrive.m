@@ -1,5 +1,5 @@
-classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
-    % MIC_MCLMicroDrive controls a Mad City Labs Micro Stage
+classdef MCLMicroDrive < mic.linearstage.abstract
+    % mic.linearstage.MCLMicroDrive controls a Mad City Labs Micro Stage
     %
     % ## Description
     % This class controls a Mad City Labs (MCL) micro-positioner stage.
@@ -25,7 +25,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     % - Auto-connect functionality for ease of use in experimental setups.
     %
     % ## Key Methods
-    % - **Constructor (`MIC_MCLMicroDrive(AutoConnect)`):** Initializes a connection to the MCL stage. If `AutoConnect` is true, the constructor attempts to establish a connection immediately.
+    % - **Constructor (`mic.linearstage.MCLMicroDrive(AutoConnect)`):** Initializes a connection to the MCL stage. If `AutoConnect` is true, the constructor attempts to establish a connection immediately.
     % - **`setPosition(Position)`:** Sets the desired position of the stage. *(Note: Currently not functional due to lack of a position encoder in our hardware.)*
     % - **`getPosition()`:** Retrieves the current position of the stage. *(Note: Currently not functional due to lack of a position encoder in our hardware.)*
     % - **`center()`:** Moves the stage to its center position. *(Note: Currently not functional due to lack of a position encoder in our hardware.)*
@@ -37,8 +37,8 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     % - **`delete()`:** Properly releases the hardware and cleans up resources on object destruction.
     %
     % ## Requirements
-    % - MIC_LinearStage_Abstract.m
-    % - MIC_Abstract.m
+    % - mic.linearstage.abstract.m
+    % - mic.abstract.m
     % - MATLAB 2014b or higher
     % - MCL MicroDrive files installed on the system.
     % - MicroDrive.dll located typically in `C:\Program Files\Mad City Labs\MicroDrive\`
@@ -46,11 +46,11 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     % ## Usage Example
     % ```matlab
     % % Assuming MicroDrive.dll is correctly installed and the MATLAB path is set
-    % PX = MIC_MCLMicroDrive(true);
+    % PX = mic.linearstage.MCLMicroDrive(true);
     % PX.gui();
     % PX.moveDistance(5);  % Moves the stage 5 mm from the current position
     % ```
-    % ### Citation: David J. Schodt (Lidkelab, 2021) based on MIC_MCLNanoDrive class.
+    % ### Citation: David J. Schodt (Lidkelab, 2021) based on mic.linearstage.MCLNanoDrive class.
     
     properties (SetAccess = protected)
         % Generic name of the instrument (char array)
@@ -124,8 +124,8 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
     end
     
     methods
-        function obj = MIC_MCLMicroDrive(AutoConnect)
-            %MIC_MCLMicroDrive is the class constructor.
+        function obj = MCLMicroDrive(AutoConnect)
+            %MCLMicroDrive is the class constructor.
             % The optional input AutoConnect is a boolean flag to specify
             % whether or not to attemp to connect to the stage in this
             % constructor.
@@ -136,7 +136,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
             end
             
             % Prepare the class instance.
-            obj = obj@MIC_LinearStage_Abstract(~nargout);
+            obj = obj@mic.linearstage.abstract(~nargout);
             
             % Define the error code structure and set obj.LastError to the
             % default choice (i.e., no error).
@@ -192,9 +192,9 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
             
             % Check for a .mat file specifying the DLL path and ask the
             % user to specify this path if needed.
-            ClassPath = fileparts(which('MIC_MCLMicroDrive'));
+            ClassPath = fileparts(which('mic.linearstage.MCLMicroDrive'));
             PropertiesFile = fullfile(ClassPath, ...
-                'MIC_MCLMicroDrive_Properties.mat');
+                'mic.linearstage.MCLMicroDrive_Properties.mat');
             if exist(PropertiesFile, 'file')
                 % Load the existing path information on this computer.
                 load(PropertiesFile, 'DLLPath');
@@ -213,7 +213,7 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
             
             % Connect to the micro-drive controller.
             % NOTE: A returned handle of 0 means there was an error.  As
-            %       was done in MIC_MCLNanoDrive, we'll set a custom error
+            %       was done in MCLNanoDrive, we'll set a custom error
             %       in obj.LastError to indicate this failure (if needed).
             if AutoConnect
                 fprintf('Connecting to MCL MicroDrive Controller...\n')
@@ -235,9 +235,9 @@ classdef MIC_MCLMicroDrive < MIC_LinearStage_Abstract
                 warning('MicroDrive.dll was not selected')
                 return
             end
-            ClassPath = fileparts(which('MIC_MCLMicroDrive'));
+            ClassPath = fileparts(which('mic.linearstage.MCLMicroDrive'));
             FilePath = fullfile(ClassPath, ...
-                'MIC_MCLMicroDrive_Properties.mat');
+                'mic.linearstage.MCLMicroDrive_Properties.mat');
             DLLPath = obj.DLLPath;
             save(FilePath, 'DLLPath');
         end

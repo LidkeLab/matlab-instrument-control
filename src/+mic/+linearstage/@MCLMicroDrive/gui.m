@@ -1,5 +1,5 @@
 function gui(obj, GUIParent)
-%gui is the GUI method for the MIC_MCLMicroDrive class.
+%gui is the GUI method for the mic.linearstage.MCLMicroDrive class.
 % This GUI has several elements which can be used to control a (single
 % axis) Mad City Labs micro-drive stage.
 %

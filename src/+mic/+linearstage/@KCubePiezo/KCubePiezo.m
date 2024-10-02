@@ -1,5 +1,5 @@
-classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
-    % MIC_KCubePiezo Matlab Instrument Control Class for ThorLabs Cube Piezo
+classdef KCubePiezo < mic.linearstage.abstract
+    % mic.linearstage.KCubePiezo Matlab Instrument Control Class for ThorLabs Cube Piezo
     %
     % ## Description
     %   This class controls a linear piezo stage using the Thorlabs KCube Piezo
@@ -7,7 +7,7 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
     %   Kinesis C-API via pre-complied mex files. 
     %
     %   ## Key Functions
-% - **Constructor (`MIC_KCubePiezo(SerialNoKPZ001, SerialNoKSG001, AxisLabel)`):** Initializes the device with specific serial numbers and the designated axis. Establishes connections and calibrates the device for use.
+% - **Constructor (`mic.linearstage.KCubePiezo(SerialNoKPZ001, SerialNoKSG001, AxisLabel)`):** Initializes the device with specific serial numbers and the designated axis. Establishes connections and calibrates the device for use.
 % - **`openDevices()`:** Opens connections to the KCube Piezo and Strain Gauge controllers using Thorlabs Kinesis C-API.
 % - **`closeDevices()`:** Safely closes the connections to the piezo and strain gauge controllers to ensure the system is properly shut down.
 % - **`zeroStrainGauge()`:** Sets the strain gauge to zero to ensure accurate position feedback, essential for precise operations.
@@ -18,7 +18,7 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
 % - **`exportState()`:** Exports the current operational state, including position, calibration data, and system settings, useful for session logging or debugging.
 %
     % ## Usage Example
-    %   PX=MIC_KCubePiezo(SerialNoKPZ001,SerialNoKSG001,AxisLabel)
+    %   PX=mic.linearstage.KCubePiezo(SerialNoKPZ001,SerialNoKSG001,AxisLabel)
     %   PX.gui()
     %   PX.setPosition(10);
     %
@@ -30,8 +30,8 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
     %   4-check box of "Persist Settings to the Device" (in Settings)
     %
     % ## REQUIRES: 
-    %   MIC_Abstract.m
-    %   MIC_LinearStage_Abstract.m
+    %   mic,Abstract.m
+    %   mic.linearstage,abstract.m
     %   Precompiled set of mex files Kinesis_KCube_PCC_*.mex64 and Kinesis_KCube_SG_*.mex64
     %   The following dll must be in system path or same directory as mex files: 
     %   Thorlabs.MotionControl.KCube.Piezo.dll
@@ -62,13 +62,13 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
     end
     
     methods
-        function obj=MIC_KCubePiezo(SerialNoKPZ001,SerialNoKSG001,AxisLabel)
-            % Creates a MIC_KCubePiezo object and centers the stage.  
-            % Example: PX=MIC_KCubePiezo('81843229','84842506','X')
-            obj=obj@MIC_LinearStage_Abstract(~nargout);
+        function obj=KCubePiezo(SerialNoKPZ001,SerialNoKSG001,AxisLabel)
+            % Creates a KCubePiezo object and centers the stage.  
+            % Example: PX=mic.linearstage.KCubePiezo('81843229','84842506','X')
+            obj=obj@mic.linearstage.abstract(~nargout);
            
             if nargin<3
-                error('MIC_KCubePiezo::SerialNoKPZ001,SerialNoKSG001,AxisLabel must be defined')
+                error('mic.linearstage.KCubePiezo::SerialNoKPZ001,SerialNoKSG001,AxisLabel must be defined')
             end
             
             obj.SerialNoKPZ001=SerialNoKPZ001;
@@ -228,16 +228,16 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
         methods (Static=true)
             function Success=unitTest(SNP,SNSG,AxisLabel)
                 % Unit test of object functionality
-                % Example: MIC_KCubePiezo.unitTest('81843229','84842506','X')
+                % Example: mic.linearstage.KCubePiezo.unitTest('81843229','84842506','X')
                 
                 if nargin<3
-                    error('MIC_KCubePiezo::SerialNoKPZ001,SerialNoKSG001,AxisLabel must be defined')
+                    error('mic.linearstage.KCubePiezo::SerialNoKPZ001,SerialNoKSG001,AxisLabel must be defined')
                 end
                 
                 try
                     %Creating an Object and Testing setPower, on, off
                     fprintf('Creating Object and testing...\n')
-                    P=MIC_KCubePiezo(SNP,SNSG,AxisLabel);
+                    P=mic.linearstage.KCubePiezo(SNP,SNSG,AxisLabel);
                     P.gui;
                     P.setPosition(P.MaxPosition/8);
                     pause(1);
@@ -251,7 +251,7 @@ classdef MIC_KCubePiezo < MIC_LinearStage_Abstract
                     clear RS;
                     Success=1;
                 catch
-                    warning('MIC_KCubePiezo:: Failed Unit Test');
+                    warning('mic.linearstage.KCubePiezo:: Failed Unit Test');
                     clear RS;
                     Success=0;
                 end

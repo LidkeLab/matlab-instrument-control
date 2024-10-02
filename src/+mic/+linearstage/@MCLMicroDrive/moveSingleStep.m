@@ -13,7 +13,7 @@ function [] = moveSingleStep(obj, Direction)
 
 % Ensure 'Direction' makes sense.
 if (abs(Direction) ~= 1)
-    error(['MIC_MCLMicroDrive.moveSingleStep(): input ''Direction'' ', ...
+    error(['mic.linearstage.MCLMicroDrive.moveSingleStep(): input ''Direction'' ', ...
         'must be either 1 or -1'])
 end
 

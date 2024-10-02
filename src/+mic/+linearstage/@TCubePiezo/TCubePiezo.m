@@ -1,5 +1,5 @@
-classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
-    % MIC_TCubePiezo Matlab Instrument Control Class for ThorLabs TCube Piezo
+classdef TCubePiezo < mic.linearstage.abstract
+    % mic.linearstage.TCubePiezo Matlab Instrument Control Class for ThorLabs TCube Piezo
     %
     % Description
     %   This class controls a linear piezo stage using the Thorlabs TCube Piezo
@@ -8,7 +8,7 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
     %   
     % ## Usage Example:
     % ```matlab
-    %   PX=MIC_TCubePiezo(SerialNoTPZ001,SerialNoTSG001,AxisLabel)
+    %   PX=mic.linearstage.TCubePiezo(SerialNoTPZ001,SerialNoTSG001,AxisLabel)
     %   PX.gui()
     %   PX.setPosition(10);
     % ```
@@ -20,8 +20,8 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
     %   4-check box of "Persist Settings to the Device" (in Settings)
     %
     % ## REQUIRMENT: 
-    %   MIC_Abstract.m
-    %   MIC_LinearStage_Abstract.m
+    %   mic.Abstract.m
+    %   mic.linearstage.abstract.m
     %   Precompiled set of mex files Kinesis_PCC_*.mex64 and Kinesis_SG_*.mex64
     %   The following dll must be in system path or same directory as mex files: 
     %   Thorlabs.MotionControl.TCube.Piezo.dll
@@ -52,13 +52,13 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
     end
     
     methods
-        function obj=MIC_TCubePiezo(SerialNoTPZ001,SerialNoTSG001,AxisLabel)
-            % Creates a MIC_TCubePiezo object and centers the stage.  
-            % Example: PX=MIC_TCubePiezo('81843229','84842506','X')
-            obj=obj@MIC_LinearStage_Abstract(~nargout);
+        function obj=TCubePiezo(SerialNoTPZ001,SerialNoTSG001,AxisLabel)
+            % Creates a TCubePiezo object and centers the stage.  
+            % Example: PX=mic.linearstage.TCubePiezo('81843229','84842506','X')
+            obj=obj@mic.linearstage.abstract(~nargout);
            
             if nargin<3
-                error('MIC_TCubePiezo::SerialNoTPZ001,SerialNoTSG001,AxisLabel must be defined')
+                error('mic.linearstage.TCubePiezo::SerialNoTPZ001,SerialNoTSG001,AxisLabel must be defined')
             end
             
             obj.SerialNoTPZ001=SerialNoTPZ001;
@@ -210,16 +210,16 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
         methods (Static=true)
             function Success=unitTest(SNP,SNSG,AxisLabel)
                 % Unit test of object functionality
-                % Example: MIC_TCubePiezo.unitTest('81843229','84842506','X')
+                % Example: mic.linearstage.TCubePiezo.unitTest('81843229','84842506','X')
                 
                 if nargin<3
-                    error('MIC_TCubePiezo::SerialNoTPZ001,SerialNoTSG001,AxisLabel must be defined')
+                    error('mic.linearstage.TCubePiezo::SerialNoTPZ001,SerialNoTSG001,AxisLabel must be defined')
                 end
                 
                 try
                     %Creating an Object and Testing setPower, on, off
                     fprintf('Creating Object and testing...\n')
-                    P=MIC_TCubePiezo(SNP,SNSG,AxisLabel);
+                    P=mic.linearstage.TCubePiezo(SNP,SNSG,AxisLabel);
                     P.gui;
                     P.setPosition(P.MaxPosition/8);
                     pause(1);
@@ -233,7 +233,7 @@ classdef MIC_TCubePiezo < MIC_LinearStage_Abstract
                     clear RS;
                     Success=1;
                 catch
-                    warning('MIC_TCubePiezo:: Failed Unit Test');
+                    warning('mic.linearstage.TCubePiezo:: Failed Unit Test');
                     clear RS;
                     Success=0;
                 end
