@@ -1,5 +1,5 @@
 function guiFig=gui(obj)
-% MIC_StepperMotor.gui: This gui is written for the Benchtop stepper motor.
+% mic.StepperMotor.gui: This gui is written for the Benchtop stepper motor.
 %
 % gui has three lines of uicontrols to control X, Y and Z axes (from top to
 % the bottom). The Home button moves the stage to the origin. The jog
@@ -21,7 +21,7 @@ function guiFig=gui(obj)
 % REQUIREMENTS:
 %   MATLAB 2014 or higher
 %   Kinesis software from thorlabs
-%   MIC_Abstract class.
+%   Abstract class.
 %   Access to the mexfunctions for this device. (kinesis_SBC_function).
 %
 % CITATION: Mohamadreza Fazel, Lidkelab, 2017.

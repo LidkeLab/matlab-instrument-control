@@ -1,5 +1,5 @@
-classdef MIC_Triggerscope < MIC_Abstract
-    % MIC_Triggerscope contains methods to control a Triggerscope.
+classdef Triggerscope < mic.abstract
+    % mic.Triggerscope contains methods to control a Triggerscope.
     %
     % ## Description
     % This class is designed for the control of a Triggerscope (written for
@@ -7,7 +7,7 @@ classdef MIC_Triggerscope < MIC_Abstract
     % documentation should be included.
     %
     % EXAMPLE USAGE:
-    %   TS = MIC_Triggerscope('COM3', [], true);
+    %   TS = mic.Triggerscope('COM3', [], true);
     %   This will create an instance of the class and automatically
     %   attempt to connect to serial port COM3.
     %
@@ -31,7 +31,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         SerialPort = 'COM3';
         
         % Structure defining signals on each port (struct)
-        % (see MIC_Triggerscope.triggerArrayGUI() for formatting, or to
+        % (see mic.Triggerscope.triggerArrayGUI() for formatting, or to
         % generate this structure in a GUI)
         SignalStruct struct = struct([]);
         
@@ -39,6 +39,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         % NOTE: This should be set to one of the (hidden property) options
         %       obj.TriggerModeOptions.
         TriggerMode = 'Rising';
+PROBLEM!!! A property or event may not use the same name as the name of the class (Triggerscope).
     end
     
     properties (Dependent, Hidden)
@@ -122,16 +123,16 @@ classdef MIC_Triggerscope < MIC_Abstract
     end
     
     methods
-        function obj = MIC_Triggerscope(SerialPort, DeviceTimeout, ...
+        function obj = Triggerscope(SerialPort, DeviceTimeout, ...
                 AutoConnect)
-            %MIC_Triggerscope is the class constructor.
+            %mic.Triggerscope is the class constructor.
             % Setting the optional input 'AutoConnect' to 1 (or true) will
             % lead the this constructor attempting to make a connection to
             % the specified SerialPort.
             
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             
             % Add property listeners to observable properties.
             addlistener(obj, 'ActivityMessage', ...
@@ -301,7 +302,7 @@ classdef MIC_Triggerscope < MIC_Abstract
         end
         
         function delete(obj)
-            % This is the destructor for the MIC_Triggerscope class.
+            % This is the destructor for the mic.Triggerscope class.
             
             % For now, just delete the class instance.
             delete(obj);

@@ -1,4 +1,4 @@
-classdef MIC_Abstract < handle
+classdef abstract < handle
     % MIC_Abstract Matlab Instrumentation Control Abstract Class
     % 
     % ## Description
@@ -10,7 +10,7 @@ classdef MIC_Abstract < handle
     %
     % ## Constructor
     % The constructor inheritting class requires 
-    % 'obj = obj@MIC_Abstract(~nargout)'
+    % 'obj = obj@mic.abstract(~nargout)'
     % as the first line in the constructor. 
     %
     % ## Note
@@ -35,7 +35,7 @@ classdef MIC_Abstract < handle
     end
     
     methods
-        function obj = MIC_Abstract(autoName) 
+        function obj = abstract(autoName) 
             %Constrcutor
             if nargin==0              %checks to see if there is any input
                 autoName = false;
@@ -55,14 +55,14 @@ classdef MIC_Abstract < handle
         end
 
         function autoName(obj) 
-            % if you forget to name your object when you make an instance of a sub-class that inherits from MIC_Abstract,
+            % if you forget to name your object when you make an instance of a sub-class that inherits from mic.abstract,
             % this function will give it a name, so prevents MATLAB from assigning the object with the name "ans" that can be easily 
             % rewritten in the workspace and cause many problems. Technically speaking:  
             % Automatically names this object to a top-level workspace variable with a new unused name based on the
             % obects InstrumentName.
             curVars = evalin('base',sprintf('who(''%s*'');',obj.InstrumentName));
             varPattern = sprintf('%s%%i',obj.InstrumentName);
-            varName = MIC_Abstract.nextUnusedName(curVars,varPattern);
+            varName = mic,abstract.nextUnusedName(curVars,varPattern);
             assignin('base',varName,obj);
             fprintf('Assigned new %s object as variable "%s"\n',obj.InstrumentName, varName);
         end
@@ -77,7 +77,7 @@ classdef MIC_Abstract < handle
                 %Get Attributes and Data
                 [Attributes,Data,Children]=obj.exportState();
                 
-                MIC_Abstract.saveAttAndData(File,Group,Attributes,Data,Children);
+                mic.abstract.saveAttAndData(File,Group,Attributes,Data,Children);
 
                 Err=0;
             catch ME
@@ -122,7 +122,7 @@ classdef MIC_Abstract < handle
     end
     
     methods (Abstract,Static)
-        % each class that inherits from MIC_Abstract has it's own
+        % each class that inherits from mic,abstract has it's own
         % unitTest function which is designed to make an object,
         % test all methods within the object and to make sure they work properly, and to delete the object.
         % if there is need for specific devices to be setup to test all
@@ -132,7 +132,7 @@ classdef MIC_Abstract < handle
     
     methods (Static=true)
         function name=nextUnusedName(currNames,pattern, i) 
-            % if you try to make the same object from a sub-class that inherits from MIC_Abstract multiple times,
+            % if you try to make the same object from a sub-class that inherits from mic.abstract multiple times,
             % this function makes sure that the name of this repetitive object is different each time by adding a number at the end 
             % of it.Technically speaking:
             % Returns a unique name using a '%i' pattern that uses the next integer i which would form a unique name
@@ -162,7 +162,7 @@ classdef MIC_Abstract < handle
             end
 
             %Create group
-            MIC_H5.createGroup(File,Group)
+            mic.H5.createGroup(File,Group)
           
             
             %Save Data
@@ -195,7 +195,7 @@ classdef MIC_Abstract < handle
                     Name=Child_Names{nn};
                     Child=Children.(Child_Names{nn});
                     ChildGroup=[Group '/' Name];
-                    MIC_Abstract.saveAttAndData(File,ChildGroup,Child.Attributes,Child.Data,Child.Children);
+                    mic.abstract.saveAttAndData(File,ChildGroup,Child.Attributes,Child.Data,Child.Children);
                 end
             end    
         end

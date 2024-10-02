@@ -4,7 +4,7 @@ function setTTLState(obj, TTLIndex, State)
 % 'State'.
 %
 % EXAMPLE USAGE:
-%   If 'TS' is a working instance of the MIC_Triggerscope class (i.e., the
+%   If 'TS' is a working instance of the mic.Triggerscope class (i.e., the
 %   Triggerscope has already been connected successfully), you can use this
 %   method to set TTL port 13 HIGH (true, on, hot, ...) with any of 
 %   the following commands:

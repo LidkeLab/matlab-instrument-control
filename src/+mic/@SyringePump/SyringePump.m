@@ -1,19 +1,19 @@
-classdef MIC_SyringePump < MIC_Abstract
-    % MIC_SyringePump Matlab Instrument Class for control of Syringe Pump by kdScientific (Model: LEGATO100)
+classdef SyringePump < mic.abstract
+    % mic.SyringePump Matlab Instrument Class for control of Syringe Pump by kdScientific (Model: LEGATO100)
     %
     % ## Description
     % This class controls the Syring Pump via a USB port. It is required to
     % install the drivers from the given CD drivers
     %
     % ## Constructor
-    % obj=MIC_SyringePump();
+    % obj=mic,SyringePump();
     %
     % ## Key Function: 
     % delete, getForce, getTarget, getTypeSyringe, setForce,
     % setTarget, setSyringe, setRate, run, stop, exportState, unitTest
     %
     % ## REQUIREMENTS:
-    %   MIC_Abstract.m
+    %   mic.abstract.m
     %   MATLAB software version R2016b or later
     %   Instrument Control Toolbox
     %   Syringe Pump driver installed via the CD drivers
@@ -45,7 +45,7 @@ classdef MIC_SyringePump < MIC_Abstract
     end
     
     methods
-        function obj=MIC_SyringePump()
+        function obj=SyringePump()
             
             %delete all open ports
             delete(instrfindall)
@@ -187,7 +187,7 @@ classdef MIC_SyringePump < MIC_Abstract
     methods (Static=true)
         function unitTest()
             fprintf('Creating Syringe Pump object\n');
-            SP=MIC_SyringePump();
+            SP=mic.SyringePump();
             fprintf('Run the pump\n');
             SP.run;
             pause(2);

@@ -1,7 +1,7 @@
 function gui(obj, GUIParent)
-%gui is the GUI method for the MIC_Triggerscope class.
+%gui is the GUI method for the mic.Triggerscope class.
 % This GUI has several elements which can be used to control a Triggerscope
-% (see MIC_Triggerscope.m for details).
+% (see mic.Triggerscope.m for details).
 %
 % INPUTS:
 %   GUIParent: The 'Parent' of this GUI, e.g., a figure handle.

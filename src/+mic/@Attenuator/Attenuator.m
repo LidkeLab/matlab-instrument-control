@@ -1,4 +1,4 @@
-classdef Attenuator < mic.MIC_Abstract
+classdef Attenuator < mic.abstract
 % mic.Attenuator Class
 %
 % ## Description
@@ -96,7 +96,7 @@ classdef Attenuator < mic.MIC_Abstract
             if nargin<2
                 error('mic.Transmission::NIDevice and AOChannel must be defined')
             end
-            obj=obj@mic.MIC_Abstract(~nargout);
+            obj=obj@mic.abstract(~nargout);
             %Set up the NI Daq Object
             obj.DAQ = daq.createSession('ni');
             addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage');

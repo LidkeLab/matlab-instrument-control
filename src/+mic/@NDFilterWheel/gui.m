@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-%gui Graphical User Interface to MIC_NDFilterWheel
+%gui Graphical User Interface to mic.NDFilterWheel
 %   GUI has functionality to change which filter is used
 
 %   Marjolein Meddens, Lidke Lab 2017

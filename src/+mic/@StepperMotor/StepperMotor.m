@@ -1,4 +1,4 @@
-classdef MIC_StepperMotor < MIC_Abstract
+classdef StepperMotor < mic.abstract
     % Class to control Benchtop stepper motor.
     %
     % ## Description
@@ -16,7 +16,7 @@ classdef MIC_StepperMotor < MIC_Abstract
     % HS NanoMax 300 Y Axis or HS NanoMax 300 Z Axis), then OK and Save.
     %
     % ## Constructor
-    % M = MIC_StepperMotor(70850323)
+    % M = mic.StepperMotor(70850323)
     %
     % ## Key Functions:
     % constructor(), goHome(), getPosition(), getStatus(), 
@@ -26,7 +26,7 @@ classdef MIC_StepperMotor < MIC_Abstract
     % ## REQUIREMENTS:
     %   MATLAB 2014 or higher
     %   Kinesis software from thorlabs
-    %   MIC_Abstract class.
+    %   Abstract class.
     %   Access to the mexfunctions for this device. (kinesis_SBC_function).
     %
     % ### CITATION: Mohamadreza Fazel, Lidkelab, 2017.
@@ -41,11 +41,11 @@ classdef MIC_StepperMotor < MIC_Abstract
     end
     
     methods
-        function obj = MIC_StepperMotor(SerialNum)
+        function obj = StepperMotor(SerialNum)
             %constructor start the communications with all three motors and
             %also sets some of the class properties.
             addpath('C:\Users\lidkelab\Documents\MATLAB\matlab-instrument-control\mex64');
-            obj=obj@MIC_Abstract(~nargout);
+            obj=obj@mic.abstract(~nargout);
             obj.SerialN = SerialNum;
             Kinesis_SBC_Open(obj.SerialN);
         end
@@ -112,7 +112,7 @@ classdef MIC_StepperMotor < MIC_Abstract
     methods (Static)
         function unitTest()
             %unittest() function to test the class.
-            TestObj = MIC_StepperMotor('70850323');
+            TestObj = mic.StepperMotor('70850323');
             fprintf('The comunication with the motors have been successfully initialzed.\n');
             TestObj.goHome(1);
             pause(10);

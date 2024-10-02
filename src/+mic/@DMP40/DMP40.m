@@ -1,4 +1,4 @@
-classdef DMP40 < mic.MIC_Abstract
+classdef DMP40 < mic.abstract
 % mic.DMP40 Class Documentation
 % 
 % ## Description
@@ -8,7 +8,7 @@ classdef DMP40 < mic.MIC_Abstract
 % 
 % ## Requirements
 % - MATLAB R2016b or later
-% - mic.MIC_Abstract.m
+% - mic.abstract.m
 % - .NET assemblies installed for Thorlabs DMP40 (.dll files for mirror control)
 % - .NET environment setup for MATLAB
 % 
@@ -54,7 +54,7 @@ classdef DMP40 < mic.MIC_Abstract
         InstrumentName = 'DMP40';
         DAQ=[];
         IsOpen;
-A PROBLEM! property or event may not use the same name as the name of the class (DMP40).
+A PROBLEM!!! property or event may not use the same name as the name of the class (DMP40).
         DMP40   %DMP40 .NET class
     end
     
@@ -63,7 +63,7 @@ A PROBLEM! property or event may not use the same name as the name of the class 
         
         NIDevice  %DAQ card device number at the USB port of the computer
         DOChannel; %included both port and line information
-        StartGUI = 0; %uses MIC_Abstract to bring up the GUI (so, no need for a gui function in ShutterTTL)
+        StartGUI = 0; %uses mic.abstract to bring up the GUI (so, no need for a gui function in ShutterTTL)
         %         Position  %either 1 or 0 (to show open or close respectively)
         NIString  %shows the combination of Device/Port/Line the shutter is using
     end
@@ -71,7 +71,7 @@ A PROBLEM! property or event may not use the same name as the name of the class 
     methods
         function obj = DMP40() % constructor
             
-            obj = obj@mic.MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             
             %setup and make connection to DM
            

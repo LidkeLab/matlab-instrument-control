@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-%gui Graphical User Interface to MIC_DynamixelServo
+%gui Graphical User Interface to mic.DynamixelServo
 %   GUI has functionality to change position and set rotation speed. Also
 %   it lets you turn the LED on and off
 

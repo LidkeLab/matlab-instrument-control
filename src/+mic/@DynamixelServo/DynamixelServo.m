@@ -1,5 +1,5 @@
-classdef MIC_DynamixelServo < MIC_Abstract
-    % MIC_DynamixelServo: Matlab Instrument Class for Dynamixel Servos
+classdef DynamixelServo < mic.abstract
+    % mic.DynamixelServo: Matlab Instrument Class for Dynamixel Servos
     % 
     % ## Description
     %   Dynamixel Servos are used to control the rotation of filter wheels
@@ -8,7 +8,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
     %   Setup.doc
     %
     %   ## Usage Example:
-    %           obj=MIC_DynamixelServo(ServoId,Port,Bps);
+    %           obj=mic.DynamixelServo(ServoId,Port,Bps);
     %           ServoId: Id of servo(is written on servo)
     %           Port: COM port to which servo is connected (Optional)
     %           Bps: Baud setting for port (Optional)
@@ -23,7 +23,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
     %
     %   ## REQUIRES:
     %     Matlab 2014b or higher
-    %     MIC_Abstract.m
+    %     mic.abstract.m
     %     Roboplus software
     %     Driver library for servo
     %     Driver library for USB2Dynamixel
@@ -128,18 +128,18 @@ classdef MIC_DynamixelServo < MIC_Abstract
     end
     
     methods
-        function obj=MIC_DynamixelServo(Id,Port,Bps)
+        function obj=DynamixelServo(Id,Port,Bps)
             % Object constructor
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             if ~exist('Id','var') || Id < 1 || Id > 255
-                error('MIC_DynamixelServo:Id','Invalid servo Id');
+                error('mic.DynamixelServo:Id','Invalid servo Id');
             end
             obj.Id = Id;          
             if ~exist('Bps','var')
-                Bps = MIC_DynamixelServo.DEFAULT_BAUDNUM;
+                Bps = DynamixelServo.DEFAULT_BAUDNUM;
             end
             obj.Bps = Bps;            
-            MIC_DynamixelServo.loadlibrary();
+            mic.DynamixelServo.loadlibrary();
             
             %Try to find correct com port if not inputed
             if exist('Port','var')
@@ -148,7 +148,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
                obj.Port=obj.findport(Id,Bps);
             end
             if obj.ping() ~= obj.COMM_RXSUCCESS
-                error('MIC_DynamixelServo:MissingServo','Could not connect to servo at Id:%d Port:%d Bps:%d',Id,obj.Port,Bps);
+                error('mic.DynamixelServo:MissingServo','Could not connect to servo at Id:%d Port:%d Bps:%d',Id,obj.Port,Bps);
             end
             
             % set Led and MovingSpeed to allowed values
@@ -157,7 +157,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
         end
         
         function delete(obj)
-            %MIC_DynamixelServo destructor
+            %mic.DynamixelServo destructor
             obj.shutdown();
         end
         
@@ -169,10 +169,10 @@ classdef MIC_DynamixelServo < MIC_Abstract
         function checkCommStatus(obj)
             % Checks status of COM port
             CommStatus = int32(obj.callDynamixel('dxl_get_result'));
-            if CommStatus == MIC_DynamixelServo.COMM_RXSUCCESS
-                MIC_DynamixelServo.printErrorCode();
+            if CommStatus == DynamixelServo.COMM_RXSUCCESS
+                mic.DynamixelServo.printErrorCode();
             else
-                MIC_DynamixelServo.printCommStatus(CommStatus);
+                mic.DynamixelServo.printCommStatus(CommStatus);
                 return;
             end            
         end
@@ -185,12 +185,12 @@ classdef MIC_DynamixelServo < MIC_Abstract
         
         function value = get.Firmware(obj)
             % Gets firmware data
-            value = obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.VERSION_OF_FIRMWARE);
+            value = obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.VERSION_OF_FIRMWARE);
         end
         
         function value = get.GoalPosition(obj)
             % Gets position
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.GOAL_POSITION));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.GOAL_POSITION));
             %fprintf('get goal %d\n', value);
             obj.checkCommStatus();
         end
@@ -198,92 +198,92 @@ classdef MIC_DynamixelServo < MIC_Abstract
         function set.GoalPosition(obj,value)
             % Sets position
             if value < 0 || value > 1023
-                error('MIC_DynamixelServo:PosOutofRange','Position must be between 0 and 1023');
+                error('mic.DynamixelServo:PosOutofRange','Position must be between 0 and 1023');
             end
-            obj.callDynamixel('dxl_write_word',obj.Id,MIC_DynamixelServo.GOAL_POSITION,value);
+            obj.callDynamixel('dxl_write_word',obj.Id,DynamixelServo.GOAL_POSITION,value);
             %fprintf('set goal %d\n', value);
             obj.checkCommStatus();
         end
         
         function value = get.Led(obj)
             % Gets LED information
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.LED));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.LED));
             obj.checkCommStatus();
         end
         
         function set.Led(obj,value)
             % Sets LED value
             if value ~= 0 && value ~= 1
-                error('MIC_DynamixelServo:Led', 'Led can only be 0 off or 1 on');
+                error('mic.DynamixelServo:Led', 'Led can only be 0 off or 1 on');
             end
-            obj.callDynamixel('dxl_write_word',obj.Id,MIC_DynamixelServo.LED,value);
+            obj.callDynamixel('dxl_write_word',obj.Id,DynamixelServo.LED,value);
             obj.checkCommStatus();
         end
         
         function value = get.Model(obj)
             % Gets model number
-            value = obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.MODEL_NUMBER);
+            value = obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.MODEL_NUMBER);
             obj.checkCommStatus();
         end
         
         function value = get.Moving(obj)
             % Gets moving information
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.MOVING));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.MOVING));
             obj.checkCommStatus();
         end
         
         function value = get.MovingSpeed(obj)
             % Gets moving speed
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.MOVING_SPEED));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.MOVING_SPEED));
             obj.checkCommStatus();
         end
         
         function set.MovingSpeed(obj,value)
             % Sets moving speed to value
             if value < obj.minSpeed || value > obj.maxSpeed
-                error('MIC_DynamixelServo:speed', 'Moving speed must be between %i and %i',obj.minSpeed, obj.maxSpeed);
+                error('mic.DynamixelServo:speed', 'Moving speed must be between %i and %i',obj.minSpeed, obj.maxSpeed);
             end
-            obj.callDynamixel('dxl_write_word',obj.Id,MIC_DynamixelServo.MOVING_SPEED,value);
+            obj.callDynamixel('dxl_write_word',obj.Id,DynamixelServo.MOVING_SPEED,value);
             obj.checkCommStatus();
         end
         
         function value = get.PresentPosition(obj)
             % Gets current position
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.PRESENT_POSITION));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.PRESENT_POSITION));
             obj.checkCommStatus();
         end
         
         function value = get.PresentSpeed(obj)
             % Gets current speed setting
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.PRESENT_SPEED));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.PRESENT_SPEED));
             obj.checkCommStatus();
         end
         
         function value = get.PresentTemperature(obj)
             % Gets current temperature information
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.PRESENT_TEMPERATURE));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.PRESENT_TEMPERATURE));
             obj.checkCommStatus();
         end
         
         function value = get.PresentVoltage(obj)
             % Gets current voltage information
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,MIC_DynamixelServo.PRESENT_VOLTAGE));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.PRESENT_VOLTAGE));
             obj.checkCommStatus();
         end
         
         function value = get.Rotation(obj)
             % Gets current rotation information
-            value = double(obj.GoalPosition)/1023.0 * MIC_DynamixelServo.MAX_ROTATION;
+            value = double(obj.GoalPosition)/1023.0 * DynamixelServo.MAX_ROTATION;
         end
         
         function set.Rotation(obj,value)
             % Sets rotation to value
-            pos = value/MIC_DynamixelServo.MAX_ROTATION * 1023;
+            pos = value/DynamixelServo.MAX_ROTATION * 1023;
             obj.GoalPosition = round(pos);
         end
         
         function State=exportState(obj)
-            % Exports current state of MIC_DynamixelServo
+            % Exports current state of DynamixelServo
             State.InstrumentName = obj.InstrumentName;
             State.Id = obj.ID;
             State.Bps = obj.Bps;
@@ -311,7 +311,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
             lname = 'dynamixel';
             FuncName=varargin{1};
             varargout = {};
-            MIC_DynamixelServo.loadlibrary();
+            mic.DynamixelServo.loadlibrary();
             %make the function call string
             try
                 funcall = '';
@@ -335,7 +335,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
                 eval(funcall);
                 %process errors
             catch ME
-                fprintf('MIC_DynamixelServo Library Call Function Error calling: %s\n',FuncName);
+                fprintf('mic.DynamixelServo Library Call Function Error calling: %s\n',FuncName);
                 rethrow(ME);
             end
         end        
@@ -343,7 +343,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
         function Port=findport(Id,Bps)
             % Finds to which COM port servo is connected
             if ~exist('Bps','var')
-                Bps = MIC_DynamixelServo.DEFAULT_BAUDNUM;
+                Bps = DynamixelServo.DEFAULT_BAUDNUM;
             end
             Port = 0;
             comports = instrhwinfo('serial');
@@ -352,13 +352,13 @@ classdef MIC_DynamixelServo < MIC_Abstract
                 stext=comports.SerialPorts{nn};
                 Port = str2double(stext(4));
                 try
-                MIC_DynamixelServo.initialize(Port,Bps);
+                mic.DynamixelServo.initialize(Port,Bps);
                 catch
                     %fprintf('Not on Port %d\n',nn)
                     continue
                 end
                 % confirm servo exists
-                if MIC_DynamixelServo.ping_static(Id) ~= MIC_DynamixelServo.COMM_RXSUCCESS
+                if mic.DynamixelServo.ping_static(Id) ~= DynamixelServo.COMM_RXSUCCESS
                     %fprintf('Not on Port %d\n',nn)
                 else
                     Port=nn;
@@ -376,15 +376,15 @@ classdef MIC_DynamixelServo < MIC_Abstract
         
         function result = ping_static(Id)
             % Checks status of connection to servo
-            MIC_DynamixelServo.callDynamixel('dxl_ping',Id);
-            result = MIC_DynamixelServo.callDynamixel('dxl_get_result');
+            mic.DynamixelServo.callDynamixel('dxl_ping',Id);
+            result = mic.DynamixelServo.callDynamixel('dxl_get_result');
         end
         
         function initialize(Port, Bps)
             % Initializes the servo using the library function
             result = calllib('dynamixel', 'dxl_initialize', Port, Bps);
             if result ~= 1
-                error('MIC_DynamixelServo:InitFailed','MIC_DynamixelServo lib failed to initialize.');
+                error('mic.DynamixelServo:InitFailed','mic.DynamixelServo lib failed to initialize.');
             end
         end
         
@@ -404,34 +404,34 @@ classdef MIC_DynamixelServo < MIC_Abstract
                         if exist(p{:},'dir')
                             addpath(p{:});
                         else
-                            warning('MIC_DynamixelServo:LibraryPathNotFound', 'Path %s does not exist', p{:});
+                            warning('DynamixelServo:LibraryPathNotFound', 'Path %s does not exist', p{:});
                         end
                     end
                     %if ~exist([lpath lname '.dll'],'file')
-                    %    warning('MIC_DynamixelServo:LibraryNotFound','Could not find %s.dll!', lname);
+                    %    warning('DynamixelServo:LibraryNotFound','Could not find %s.dll!', lname);
                     %end
                     [~,~]=loadlibrary([lname '.dll'],'dynamixel.h');
                 end
             catch ME
-                error('MIC_DynamixelServo:NoDll',['Failed to load ' lname ' cannot talk to servos.']);
+                error('DynamixelServo:NoDll',['Failed to load ' lname ' cannot talk to servos.']);
             end
         end
 
         function [] = printErrorCode()
             %Prints communication result
-            if int32(calllib('dynamixel','dxl_get_rxpacket_error', MIC_DynamixelServo.ERRBIT_VOLTAGE))==1
+            if int32(calllib('dynamixel','dxl_get_rxpacket_error', DynamixelServo.ERRBIT_VOLTAGE))==1
                 error('Input Voltage Error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',MIC_DynamixelServo.ERRBIT_ANGLE))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_ANGLE))==1
                 error('Angle limit error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',MIC_DynamixelServo.ERRBIT_OVERHEAT))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_OVERHEAT))==1
                 error('Overheat error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',MIC_DynamixelServo.ERRBIT_RANGE))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_RANGE))==1
                 error('Out of range error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',MIC_DynamixelServo.ERRBIT_CHECKSUM))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_CHECKSUM))==1
                 error('Checksum error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',MIC_DynamixelServo.ERRBIT_OVERLOAD))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_OVERLOAD))==1
                 error('Overload error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',MIC_DynamixelServo.ERRBIT_INSTRUCTION))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_INSTRUCTION))==1
                 error('Instruction code error!');
             end
         end
@@ -439,17 +439,17 @@ classdef MIC_DynamixelServo < MIC_Abstract
         function [] = printCommStatus( CommStatus )
             % Prints error bit of status packet
             switch(CommStatus)
-                case MIC_DynamixelServo.COMM_TXFAIL
+                case DynamixelServo.COMM_TXFAIL
                     disp('COMM_TXFAIL : Failed transmit instruction packet!');
-                case MIC_DynamixelServo.COMM_TXERROR
+                case DynamixelServo.COMM_TXERROR
                     disp('COMM_TXERROR: Incorrect instruction packet!');
-                case MIC_DynamixelServo.COMM_RXFAIL
+                case DynamixelServo.COMM_RXFAIL
                     disp('COMM_RXFAIL: Failed get status packet from device!');
-                case MIC_DynamixelServo.COMM_RXWAITING
+                case DynamixelServo.COMM_RXWAITING
                     disp('COMM_RXWAITING: Now recieving status packet!');
-                case MIC_DynamixelServo.COMM_RXTIMEOUT
+                case DynamixelServo.COMM_RXTIMEOUT
                     disp('COMM_RXTIMEOUT: There is no status packet!');
-                case MIC_DynamixelServo.COMM_RXCORRUPT
+                case DynamixelServo.COMM_RXCORRUPT
                     disp('COMM_RXCORRUPT: Incorrect status packet!');
                 otherwise
                     disp('This is unknown error code!');
@@ -462,18 +462,18 @@ classdef MIC_DynamixelServo < MIC_Abstract
         end
         
         function State=unitTest(Id)
-            % Test all functionality of MIC_DynamixelServo class
+            % Test all functionality of DynamixelServo class
             % INPUT
             %   Id    Id of servo, is written on servo
             % OUTPUT
             %   State    exported current state of object
             
-            fprintf('Testing MIC_DynamixelServo class...\n')
+            fprintf('Testing mic.DynamixelServo class...\n')
             % constructing and deleting instances of the class
-            DSobj = MIC_DynamixelServo(Id);
+            DSobj = mic.DynamixelServo(Id);
             delete(DSobj)
             clear DSobj;
-            DSobj = MIC_DynamixelServo(Id);
+            DSobj = mic.DynamixelServo(Id);
             fprintf('* Construction and Destruction of object works\n')
             % loading and closing gui
             GUIfig = DSobj.gui;
@@ -502,7 +502,7 @@ classdef MIC_DynamixelServo < MIC_Abstract
             State = DSobj.exportState;
             disp(State);
             fprintf('* Export of current state works, please check workspace for it\n')
-            fprintf('Finished testing MIC_DynamixelServo class\n');
+            fprintf('Finished testing mic.DynamixelServo class\n');
         end
     end
 end

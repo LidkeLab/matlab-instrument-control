@@ -1,15 +1,15 @@
-classdef MIC_Reg3DTrans < MIC_Abstract
-    % MIC_Reg3DTrans  
+classdef Reg3DTrans < mic.abstract
+    % mic.Reg3DTrans  
     %
     % ## Description
     % This class Register a sample to a stack of transmission images Class that performs 3D registration using transmission images
     % 
     % ## INPUT
-    %    CameraObj - camera object -- tested with MIC_AndorCamera only
-    %    StageObj - stage object -- tested with MIC_MCLNanoDrive only
-    %    LampObj - lamp object -- tested with MIC_IX71Lamp only, will work
+    %    CameraObj - camera object -- tested with mic.AndorCamera only
+    %    StageObj - stage object -- tested with mic.MCLNanoDrive only
+    %    LampObj - lamp object -- tested with mic.IX71Lamp only, will work
     %                             with other lamps that inherit from
-    %                             MIC_LightSource_Abstract
+    %                             LightSource_Abstract
     %    Calibration file (optional)
     %
     % ## SETTING (IMPORTANT!!)
@@ -20,7 +20,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     % 
     % ## REQUIREMENT
     %    Matlab 2014b or higher
-    %    MIC_Abstract
+    %    mic.abstract
     %  
     % ## MICROSCOPE SPECIFIC SETTINGS
     % TIRF: LampPower=2; LampWait=2.5; CamShutter=true; ChangeEMgain=true; 
@@ -97,8 +97,8 @@ classdef MIC_Reg3DTrans < MIC_Abstract
     end
     
     methods
-        function obj=MIC_Reg3DTrans(CameraObj,StageObj,CalFileName)
-            % MIC_Reg3DTrans constructor
+        function obj=Reg3DTrans(CameraObj,StageObj,CalFileName)
+            % mic.Reg3DTrans constructor
             % 
             %  INPUT (required)
             %    CameraObj - camera object
@@ -109,12 +109,12 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             %                  'PixelSize' and 'OrientationMatrix' variable, 
             %                  if file doesn't exist calibration  will be saved here
             
-            % pass in input for autonaming feature MIC_Abstract
-            obj = obj@MIC_Abstract(~nargout);
+            % pass in input for autonaming feature mic.abstract
+            obj = obj@mic.abstract(~nargout);
             
             % check input
             if nargin <2
-                error('MIC_Reg3DTrans:InvInput','You must pass in Camera, Stage and Lamp Objects')
+                error('mic.Reg3DTrans:InvInput','You must pass in Camera, Stage and Lamp Objects')
             end
             obj.CameraObj = CameraObj;
             obj.StageObj = StageObj;
@@ -270,9 +270,9 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             PixelSize=2/(sqrt(a^2+c^2)+sqrt(b^2+d^2));
             
             if isempty(obj.CalibrationFile)
-                warning('MIC_Reg3DTrans:CalPxSz:NotSaving','No CalibrationFile specified in obj.CalibrationFile, not saving calibration')
+                warning('mic.Reg3DTrans:CalPxSz:NotSaving','No CalibrationFile specified in obj.CalibrationFile, not saving calibration')
             elseif exist(obj.CalibrationFile,'file')
-                warning('MIC_Reg3DTrans:CalPxSz:OverwriteFile','Overwriting previous PixelSize and OrientationMatrix calibration file');
+                warning('mic.Reg3DTrans:CalPxSz:OverwriteFile','Overwriting previous PixelSize and OrientationMatrix calibration file');
                 save(obj.CalibrationFile,'PixelSize','OrientMatrix');
             else
                 save(obj.CalibrationFile,'PixelSize','OrientMatrix');
@@ -385,10 +385,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             % check whether images exist
             if isempty(obj.Image_Reference)
-                warning('MIC_Reg3DTrans:showoverlay:NoRef','No reference image saved, not making overlay');
+                warning('mic.Reg3DTrans:showoverlay:NoRef','No reference image saved, not making overlay');
                 return
             elseif isempty(obj.Image_Current)
-                warning('MIC_Reg3DTrans:showoverlay:NoCur','No current image saved, not making overlay');
+                warning('mic.Reg3DTrans:showoverlay:NoCur','No current image saved, not making overlay');
                 return
             end
             a=stretch(obj.Image_Reference(10:end-10,10:end-10));
@@ -638,7 +638,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             if iter==obj.MaxIter
                 obj.MaxIterReached = 1;
-                warning('MIC_Reg3DTrans:MaxIter','Reached max iterations');
+                warning('mic.Reg3DTrans:MaxIter','Reached max iterations');
             end
 
             if obj.ChangeExpTime
@@ -835,10 +835,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             % check pixelsize
             if isempty(obj.PixelSize)
-                error('MIC_Reg3DTrans:noPixelSize', 'no PixelSize given in obj.PixelSize, please calibrate pixelsize first. Run obj.calibratePixelSize')
+                error('mic.Reg3DTrans:noPixelSize', 'no PixelSize given in obj.PixelSize, please calibrate pixelsize first. Run obj.calibratePixelSize')
             end
             if isempty(obj.OrientMatrix)
-                error('MIC_Reg3DTrans:noOrientMatrix', 'no OrientMatrix given in obj.OrientMatrix, please calibrate OrientMatrix first. Run obj.calibrateOrientation')
+                error('mic.Reg3DTrans:noOrientMatrix', 'no OrientMatrix given in obj.OrientMatrix, please calibrate OrientMatrix first. Run obj.calibrateOrientation')
             end
             %cut edges
             Ref=dip_image(obj.Image_Reference(...
@@ -975,10 +975,10 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             
             % check whether images exist
             if isempty(obj.Image_Reference)
-                warning('MIC_Reg3DTrans:NoRef','No reference image saved, not making overlay');
+                warning('mic.Reg3DTrans:NoRef','No reference image saved, not making overlay');
                 return
             elseif isempty(obj.Image_Current)
-                warning('MIC_Reg3DTrans:NoCur','No current image saved, not making overlay');
+                warning('mic.Reg3DTrans:NoCur','No current image saved, not making overlay');
                 return
             end
             [a,b]=uiputfile('*.mat', 'Save Overlay as');
@@ -1098,7 +1098,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
         [Image] = removeBorder(Image, Border, Direction)
     
         function State = unitTest(camObj,stageObj,lampObj)
-            %unitTest Tests all functionality of MIC_Reg3DTrans
+            %unitTest Tests all functionality of mic.Reg3DTrans
             % 
             %  INPUT (required)
             %    CameraObj - camera object
@@ -1109,11 +1109,11 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             %  microscope with some contrast in transmission and that
             %  changes with changing z focus
 
-            fprintf('\nTesting MIC_Reg3DTrans class...\n')
+            fprintf('\nTesting mic.Reg3DTrans class...\n')
             % constructing and deleting instances of the class
-            RegObj = MIC_Reg3DTrans(camObj,stageObj);
+            RegObj = mic.Reg3DTrans(camObj,stageObj);
             delete(RegObj);
-            RegObj = MIC_Reg3DTrans(camObj,stageObj);
+            RegObj = mic.Reg3DTrans(camObj,stageObj);
             fprintf('* Construction and Destruction of object works\n')
             % loading and closing gui
             RegObj.gui;
@@ -1134,7 +1134,7 @@ classdef MIC_Reg3DTrans < MIC_Abstract
             State = RegObj.exportState;
             disp(State);
             fprintf('* Export of current state works, please check workspace for it\n')
-            fprintf('Finished testing MIC_Reg3DTrans class\n');            
+            fprintf('Finished testing mic.Reg3DTrans class\n');            
         end
     end
     

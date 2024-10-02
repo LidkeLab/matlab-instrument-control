@@ -1,12 +1,12 @@
-classdef MIC_NDFilterWheel < MIC_Abstract
-    %  MIC_NDFilterWheel: Matlab Instrument Control for servo operated Filter wheel containing Neutral Density filters
+classdef NDFilterWheel < mic.abstract
+    %  mic.NDFilterWheel: Matlab Instrument Control for servo operated Filter wheel containing Neutral Density filters
     %
     %  ## Description
     % Filter wheel should be controlled by Dynamixel Servos. See "Z:\Lab 
     %  General Info and Documents\TIRF Microscope\Build Instructions for 
     %  Filter Wheel Setup.doc"
     %  This class works with an arbitrary number of filters
-    %  To create a MIC_NDFilterWheel object the position and transmittance
+    %  To create a mic,NDFilterWheel object the position and transmittance
     %  of each filter must be specified. The position must be given in
     %  degrees rotation corresponding to the input of the servo. This 
     %  can be calibrated by setting the servo rotation such that the 
@@ -14,7 +14,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
     %  servo gives the right position value for that filter.
     %
     % ## Usage Example
-    %  Example: obj=MIC_NDFilterWheel(ServoId,FracTransmVals,FilterPos);
+    %  Example: obj=mic.NDFilterWheel(ServoId,FracTransmVals,FilterPos);
     %          ServoId: Id of servo, is written on servo
     %          FracTransmVals: N-element array of Fractional Transmittance
     %                   Values for N filters in wheel, order (linear index)
@@ -23,15 +23,15 @@ classdef MIC_NDFilterWheel < MIC_Abstract
     %                   corresponding to filter positions, order (linear
     %                   index should correspond to order in FracTransmVals
     %  Example for 6 filters:
-    %  FWobj = MIC_NDFilterWheel(1, [1 0.8 0.6 0.4 0.2 0], [0 60 120 180 240 300])
+    %  FWobj = mic.NDFilterWheel(1, [1 0.8 0.6 0.4 0.2 0], [0 60 120 180 240 300])
     %
     %  ## Key Functions: 
     % setFilter, exportState, setTransmittance get.CurrentFilter, get.CurrentTransmittance
     %
     %  ## REQUIRES
     %   Matlab 2014b or higer
-    %   MIC_Abstract.m
-    %   MIC_DynamixelServo.m
+    %   mic.abstract.m
+    %   mic.DynamixelServo.m
     %
     % ### CITATION: Marjolein Meddens, Lidke Lab, 2017.
     
@@ -52,36 +52,36 @@ classdef MIC_NDFilterWheel < MIC_Abstract
     end
     
     methods
-        function obj=MIC_NDFilterWheel(ServoId, FracTransmVals, FilterPos)
+        function obj=NDFilterWheel(ServoId, FracTransmVals, FilterPos)
             % Object constructor
             
             % pass AutoName input into base classes
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             
             % check input
             if nargin <3
-                error('MIC_NDFilterWheel:narginlow','Not enough input arguments, 3 inputs required');
+                error('mic.NDFilterWheel:narginlow','Not enough input arguments, 3 inputs required');
             elseif nargin >3
-                error('MIC_NDFilterWheel:narginhigh','Too many input arguments, 3 inputs required');
+                error('mic.NDFilterWheel:narginhigh','Too many input arguments, 3 inputs required');
             end
             if ServoId < 1 || ServoId > 255
-                error('MIC_NDFilterWheel:id','Invalid servo id');
+                error('mic,NDFilterWheel:id','Invalid servo id');
             end
             if numel(FracTransmVals) ~= numel(FilterPos)
-                error('MIC_NDFilterWheel:InputSizes','FracTransmVals and FilterPos inputs should have the same number of elements');
+                error('mic.NDFilterWheel:InputSizes','FracTransmVals and FilterPos inputs should have the same number of elements');
             elseif ~isnumeric(FracTransmVals)
-                error('MIC_NDFilterWheel:FracTransmValsType','Invalid type of FracTransmVals input, must be numeric');
+                error('mic.NDFilterWheel:FracTransmValsType','Invalid type of FracTransmVals input, must be numeric');
             elseif any(FracTransmVals<0) || any(FracTransmVals>1)
-                error('MIC_NDFilterWheel:FracTransmValsVal','Invalid value(s) in FracTransmVals input, must be between 0 and 1');
+                error('mic.NDFilterWheel:FracTransmValsVal','Invalid value(s) in FracTransmVals input, must be between 0 and 1');
             end
             
             % Initialize Servo
-            obj.Servo = MIC_DynamixelServo(ServoId);
+            obj.Servo = mic.DynamixelServo(ServoId);
             obj.Servo.MovingSpeed = 1023;
             
             % check input
             if any(FilterPos<0) || any(FilterPos>obj.Servo.MAX_ROTATION)
-                error('MIC_NDFilterWheel:FilterPosInput','Invalid FilterPos input, values must be between 0 and %i',obj.Servo.MAX_ROTATION);
+                error('mic.NDFilterWheel:FilterPosInput','Invalid FilterPos input, values must be between 0 and %i',obj.Servo.MAX_ROTATION);
             end
             
             % initialize properties
@@ -99,7 +99,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
             
             % check input
             if ~round(FNum)==(FNum) || FNum>numel(obj.FilterPos)
-                error('MIC_NDFilterWheel:FilterNumInput',...
+                error('mic.NDFilterWheel:FilterNumInput',...
                     'Invalid input, FilterNum should be an integer between 1 and %i, corresponding to a filter position',numel(obj.FilterPos));
             end
             % move filter
@@ -121,7 +121,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
                     transValStringArray(ii) = [transValStringArray{ii} ','];
                 end
                 transValString = strcat(transValStringArray{:});
-                error('MIC_NDFilterWheel:TransmittanceInput',...
+                error('mic.NDFilterWheel:TransmittanceInput',...
                     ['Invalid input, Transmittance should be the same as one of the installed filters, ',...
                 'currently these filters are intstalled: %s'],transValString);
             end
@@ -159,7 +159,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
         end
         
         function [Attributes,Data,Children] = exportState(obj)
-            % Exports current state of MIC_NDFilterWheel object
+            % Exports current state of mic.NDFilterWheel object
             Attributes.InstrumentName = obj.InstrumentName;
             Attributes.CurrentFilter = obj.CurrentFilter;
             Attributes.CurrentTransmittance = obj.CurrentTransmittance;
@@ -173,8 +173,8 @@ classdef MIC_NDFilterWheel < MIC_Abstract
     
     methods(Static)
         function State = unitTest(ServoId,FracTransmVals,FilterPos)
-            % MIC_NDFilterWheel.unitTest(ServoId,FracTransmVals,FilterPos)
-            % performs test of all MIC_NDFilterWheel functionality
+            % mic.NDFilterWheel.unitTest(ServoId,FracTransmVals,FilterPos)
+            % performs test of all mic.NDFilterWheel functionality
             %
             % INPUT (required)
             %  ServoId - Id of servo, is written on servo 
@@ -189,7 +189,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
             %              FracTransmVals
             %              if empty, 6 filter positions are assumed
             
-            fprintf('\nTesting MIC_NDFilterWheel class...\n')
+            fprintf('\nTesting mic.NDFilterWheel class...\n')
             % Check input
             if ~exist('FracTransmVals','var') || isempty(FracTransmVals)
                 FracTransmVals = [1 0.9 0.6 0.3 0.1 0];
@@ -198,10 +198,10 @@ classdef MIC_NDFilterWheel < MIC_Abstract
                 FilterPos = [0 60 120 180 240 300];
             end
             % constructing and deleting instances of the class
-            FWobj = MIC_NDFilterWheel(ServoId,FracTransmVals,FilterPos);
+            FWobj = mic.NDFilterWheel(ServoId,FracTransmVals,FilterPos);
             delete(FWobj);
             clear FWobj;
-            FWobj = MIC_NDFilterWheel(ServoId,FracTransmVals,FilterPos);
+            FWobj = mic.NDFilterWheel(ServoId,FracTransmVals,FilterPos);
             fprintf('* Construction and Destruction of object works\n')
             % loading and closing gui
             GUIfig = FWobj.gui;
@@ -216,7 +216,7 @@ classdef MIC_NDFilterWheel < MIC_Abstract
             % export state
             State = FWobj.exportState;
             fprintf('* Export of current state works, please check workspace for it\n')
-            fprintf('Finished testing MIC_NDFilterWheel class\n');
+            fprintf('Finished testing mic.NDFilterWheel class\n');
         end
     end
 end

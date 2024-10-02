@@ -47,7 +47,7 @@ ImageStackFT = fftshift(fftn(ImageStack));
 
 % Shift the coordinates and then mask signal beyond the Nyquist frequency.
 FNyquist = 0.5;
-[NyquistMask, ~, Ky, Kx, Kz] = MIC_Reg3DTrans.frequencyMask(ImSize, FNyquist);
+[NyquistMask, ~, Ky, Kx, Kz] = mic.Reg3DTrans.frequencyMask(ImSize, FNyquist);
 ShiftedImFT = ImageStackFT .* exp(-2*pi*1i*(Shift(1)*Ky/ImSize(1) ...
     + Shift(2)*Kx/ImSize(2) ...
     + Shift(3)*Kz/ImSize(3)));

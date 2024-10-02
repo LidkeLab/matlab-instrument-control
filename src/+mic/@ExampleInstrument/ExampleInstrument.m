@@ -1,19 +1,19 @@
-classdef MIC_ExampleInstrument<MIC_Abstract 
+classdef ExampleInstrument<mic.abstract 
     %   ExampleInstrument: Example for classes inheriting from
     %  
     % ## Description
     %   This class is written to serve as a template for implementing 
-    %   classes inheriting from MIC_Abstract. This class also serves as a
+    %   classes inheriting from mic,abstract. This class also serves as a
     %   template for the basic functions such as exportState and unitTest.
     %
     % ## Constructor
-    %   Example: obj=MIC_ExampleInstrument()
+    %   Example: obj=mic.ExampleInstrument()
     %   
     % ## Key Functions
     % `exportState` & `unitTest`
     %
     % ## REQUIREMENTS: 
-    %   MIC_Abstract.m
+    %   mic.abstract.m
     %   MATLAB software version R2016b or later
     %
     % ### CITATION: Farzin Farzam, LidkeLab, 2017.
@@ -38,9 +38,9 @@ classdef MIC_ExampleInstrument<MIC_Abstract
     end
     
     methods        
-        function obj = MIC_ExampleInstrument() 
+        function obj = ExampleInstrument() 
             % Constructor
-            obj = obj@MIC_Abstract(~nargout); % if you forget to name the object, this line will name it for you through autoname in MIC_Abstract
+            obj = obj@mic.abstract(~nargout); % if you forget to name the object, this line will name it for you through autoname in mic,Abstract
             gui(obj)  %let's the gui to pop-up as the class constructor runs
         end
         
@@ -59,7 +59,7 @@ classdef MIC_ExampleInstrument<MIC_Abstract
         % delete the object. You need to put code here based on the 
         % instrument and it's specific functions 
             fprintf('Creating Object\n')
-            ExInst=MIC_ExampleInstrument();
+            ExInst=mic.ExampleInstrument();
             fprintf('Export State\n')
             A=ExInst.exportState(); disp(A); pause(1);
         end

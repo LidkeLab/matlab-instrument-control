@@ -1,8 +1,8 @@
-classdef MIC_NanoMax < MIC_Abstract
-%  MIC_NanoMax Class 
+classdef NanoMax < mic.abstract
+%  mic.NanoMax Class 
 % 
 % ## Description
-% The `MIC_NanoMax` class integrates control for the NanoMax stage system, encompassing both piezo elements and stepper motors for precise multi-dimensional positioning. This class allows for seamless integration and control of the stage's complex movements during microscopy experiments.
+% The `mic.NanoMax` class integrates control for the NanoMax stage system, encompassing both piezo elements and stepper motors for precise multi-dimensional positioning. This class allows for seamless integration and control of the stage's complex movements during microscopy experiments.
 % 
 % ## Features
 % - Combined control of piezo and stepper motor stages for fine and coarse positioning.
@@ -10,16 +10,16 @@ classdef MIC_NanoMax < MIC_Abstract
 % - Easy-to-use graphical user interface for real-time control and adjustments.
 % 
 % ## Requirements
-% - MIC_Abstract.m
-% - MIC_TCubePiezo.m
-% - MIC_StepperMotor.m
+% - mic.abstract.m
+% - mic.linearstage.TCubePiezo.m
+% - mic.StepperMotor.m
 % - MATLAB software version R2016b or later
 % 
 % ## Installation Notes
-% Ensure that all required classes (`MIC_TCubePiezo` for piezo control and `MIC_StepperMotor` for stepper motor control) are in the MATLAB path. The system should also be connected to the respective hardware components before initializing this class.
+% Ensure that all required classes (`mic.linearstage.TCubePiezo` for piezo control and `mic.StepperMotor` for stepper motor control) are in the MATLAB path. The system should also be connected to the respective hardware components before initializing this class.
 % 
 % ## Key Methods
-% - **Constructor (`MIC_NanoMax()`):** Instantiates the NanoMax system, setting up both the piezo and stepper stages and initializing the GUI.
+% - **Constructor (`mic,NanoMax()`):** Instantiates the NanoMax system, setting up both the piezo and stepper stages and initializing the GUI.
 % - **`setup_Stage_Piezo()`:** Configures the piezo stages for X, Y, and Z movement, centers them upon setup.
 % - **`setup_Stage_Stepper()`:** Initializes and centers the stepper motors.
 % - **`exportState()`:** Exports the current state of all stages, providing a snapshot of current settings and positions.
@@ -28,7 +28,7 @@ classdef MIC_NanoMax < MIC_Abstract
 % ## Usage Example
 % ```matlab
 % % Instantiate the NanoMax system
-% nanoStage = MIC_NanoMax();
+% nanoStage = mic.NanoMax();
 % 
 % % Move the piezo stage in the X direction
 % nanoStage.Stage_Piezo_X.setPosition(10); % Moves to 10 microns
@@ -63,9 +63,9 @@ classdef MIC_NanoMax < MIC_Abstract
     end
     
     methods
-        function obj = MIC_NanoMax()
-            % Enable autonaming feature of MIC_Abstract
-            obj = obj@MIC_Abstract(~nargout);
+        function obj = NanoMax()
+            % Enable autonaming feature of mic.abstract
+            obj = obj@mic.abstract(~nargout);
             obj.setup_Stage_Piezo();    % Setting up Piezo
             obj.setup_Stage_Stepper();  % Setting up Steppermotor
             obj.gui();  % Creating gui
@@ -74,10 +74,10 @@ classdef MIC_NanoMax < MIC_Abstract
         
         function setup_Stage_Piezo(obj)
             % Sets up Piezo for the stage
-            % PX=MIC_TCubePiezo('TPZserialNo','TSGserialNo','AxisLabel')
-            obj.Stage_Piezo_X=MIC_TCubePiezo('81850186','84850145','X');
-            obj.Stage_Piezo_Y=MIC_TCubePiezo('81850193','84850146','Y');
-            obj.Stage_Piezo_Z=MIC_TCubePiezo('81850176','84850203','Z');
+            % PX=mic.linearstage.TCubePiezo('TPZserialNo','TSGserialNo','AxisLabel')
+            obj.Stage_Piezo_X=mic.linearstage.TCubePiezo('81850186','84850145','X');
+            obj.Stage_Piezo_Y=mic.linearstage.TCubePiezo('81850193','84850146','Y');
+            obj.Stage_Piezo_Z=mic.linearstage.TCubePiezo('81850176','84850203','Z');
             obj.Stage_Piezo_X.center();
             obj.Stage_Piezo_Y.center();
             obj.Stage_Piezo_Z.center();
@@ -86,7 +86,7 @@ classdef MIC_NanoMax < MIC_Abstract
         function setup_Stage_Stepper(obj)
             % Sets up stepper motors for the stage
             % for SEQ microscope Serial No is 70850323
-            obj.Stage_Stepper=MIC_StepperMotor('70850323');
+            obj.Stage_Stepper=mic,StepperMotor('70850323');
             % obj.Stage_Stepper.set_position([2,2,1]);
             % center the stepper motor in XY
             obj.Stage_Stepper.moveToPosition(1,0) %y
@@ -105,10 +105,10 @@ classdef MIC_NanoMax < MIC_Abstract
     methods (Static=true)
         function unitTest()
             % unit test of object functionality
-            % Syntax: MIC_NanoMax.unitTest()
+            % Syntax: mic,NanoMax.unitTest()
 
             fprintf('Creating Object\n')
-            NM=MIC_NanoMax();
+            NM=mic.NanoMax();
             fprintf('State Export\n')
             A=NM.exportState(); disp(A); pause(1);
             fprintf('Delete Object\n')

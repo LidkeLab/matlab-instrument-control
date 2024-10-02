@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-%gui Graphical User Interface to MIC_GalvoAnalog
+%gui Graphical User Interface to mic,GalvoAnalog
 
 %Prevent opening more than one figure for same instrument
 if ishandle(obj.GuiFigure)

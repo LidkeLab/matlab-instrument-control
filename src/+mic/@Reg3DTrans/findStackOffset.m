@@ -95,7 +95,7 @@ DefaultParams.SuppressWarnings = false;
 if (~exist('Params', 'var') || isempty(Params))
     Params = DefaultParams;
 else
-    Params = MIC_Reg3DTrans.padStruct(Params, DefaultParams);
+    Params = mic.Reg3DTrans.padStruct(Params, DefaultParams);
 end
 MaskSize = [size(Params.FTMask, 1), size(Params.FTMask, 2), size(Params.FTMask, 3)];
 if isempty(Params.FTMask)

@@ -4,7 +4,7 @@ function setDACVoltage(obj, DACIndex, Voltage)
 % by 'Voltage'.
 %
 % EXAMPLE USAGE:
-%   If 'TS' is a working instance of the MIC_Triggerscope class (i.e., the
+%   If 'TS' is a working instance of the mic.Triggerscope class (i.e., the
 %   Triggerscope has already been connected successfully), you can use this
 %   method to set DAC port 7 to 1.3 Volts as follows:
 %       TS.setDACVoltage(7, 1.3)

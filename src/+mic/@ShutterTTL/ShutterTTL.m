@@ -1,5 +1,5 @@
-classdef MIC_ShutterTTL < MIC_Abstract 
-    % MIC_ShutterTTL: Matlab Instrument Control Class for the shutter
+classdef ShutterTTL < mic.abstract 
+    % mic.ShutterTTL: Matlab Instrument Control Class for the shutter
     %
     % ## Description
     % This class controls a Thorlabs SH05 shutter via a Thorlabs KSC101 
@@ -8,19 +8,19 @@ classdef MIC_ShutterTTL < MIC_Abstract
     % from the computer to the controller through a NI-DAQ card. 
     % TTL signal lets the shutter to be set open or close.
     % so shutter is regulated by the Digital voltage output of the NI-DAQ card.
-    % Make the object by: obj=MIC_ShutterTTL('Dev#','Port#/Line#')where:
+    % Make the object by: obj=mic.ShutterTTL('Dev#','Port#/Line#')where:
     % Dev# = Device number assigned to DAQ card by computer USB port of the
     % Port# = Port number in use on the DAQ card by your shutter connection
     % Line# = Line number in use on the DAQ card by the Port.
     %
     % ## Constructor
-    % Example: obj=MIC_ShutterTTL('Dev1','Port0','Line1');
+    % Example: obj=mic.ShutterTTL('Dev1','Port0','Line1');
     %
     % Key Functions: 
     % close, open, delete, exportState 
     %
     % ## REQUIRES:
-    %   MIC_Abstract.m
+    %   mic.abstract.m
     %   Data Acquisition Toolbox on MATLAB
     %   MATLAB NI-DAQmx driver in MATLAB installed via the Support Package Installer
     %   type "SupportPackageInstaller" on command line to install the 
@@ -41,20 +41,20 @@ classdef MIC_ShutterTTL < MIC_Abstract
      
         NIDevice  %DAQ card device number at the USB port of the computer
         DOChannel; %included both port and line information 
-        StartGUI = 0; %uses MIC_Abstract to bring up the GUI (so, no need for a gui function in MIC_ShutterTTL)
+        StartGUI = 0; %uses mic.Abstract to bring up the GUI (so, no need for a gui function in mic.ShutterTTL)
 %         Position  %either 1 or 0 (to show open or close respectively)
         NIString  %shows the combination of Device/Port/Line the shutter is using
     end
     
     methods
-        function obj = MIC_ShutterTTL(NIDevice,DOChannel) % constructor
+        function obj = ShutterTTL(NIDevice,DOChannel) % constructor
            % daqreset; %reset any former session that might prevent the DAQ card to be available
             % when you are making an object for this class, you should do it this way: obj= ShutterTTL('Dev1','Port0','Line1')
             % of course you need to put the numbers after Dev,Port and Line
             % based on the physical connections of the shutter to your NI-DAQ card
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             if nargin<2
-                error('MIC_ShutterTTL:NIDevice, Port and Line must be defined')
+                error('mic,ShutterTTL:NIDevice, Port and Line must be defined')
             end
             
             obj.NIDevice=NIDevice;
@@ -143,19 +143,19 @@ classdef MIC_ShutterTTL < MIC_Abstract
     
     
     methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
-        % test this class on command line by: MIC_ShutterTTL.unitTest('Dev1','Port0','Line1')
+        % test this class on command line by: mic.ShutterTTL.unitTest('Dev1','Port0','Line1')
         function State=unitTest(NIDevice,DOChannel)
             % Unit test of object functionality
             
             if nargin<2
-                error('MIC_ShutterTTL:NIDevice, Port and Line must be defined')
+                error('mic.ShutterTTL:NIDevice, Port and Line must be defined')
             end
             
-           % release(MIC_ShutterTTL('Dev1','Port0','Line1'))
+           % release(mic.ShutterTTL('Dev1','Port0','Line1'))
             %Create an Object and Test open, close
             fprintf('Creating Object\n')
             % release()
-            S=MIC_ShutterTTL(NIDevice,DOChannel);
+            S=mic.ShutterTTL(NIDevice,DOChannel);
             S.open;
             fprintf('Shutter Open\n')
             pause(.5);
@@ -166,7 +166,7 @@ classdef MIC_ShutterTTL < MIC_Abstract
             clear S;
             %Create an Object and Repeat Test
             fprintf('Creating Object\n')
-            S=MIC_ShutterTTL(NIDevice,DOChannel);
+            S=mic.ShutterTTL(NIDevice,DOChannel);
             S.open;
             fprintf('Shutter Open\n')
             pause(.5);

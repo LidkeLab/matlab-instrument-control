@@ -1,5 +1,5 @@
-classdef MIC_FlipMountTTL < MIC_Abstract 
-    % MIC_FlipMountTTL: Matlab Instrument Control Class for the flipmount
+classdef FlipMountTTL < mic.abstract 
+    % mic.FlipMountTTL: Matlab Instrument Control Class for the flipmount
     %
     % ## Description
     % This class controls a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M
@@ -9,18 +9,18 @@ classdef MIC_FlipMountTTL < MIC_Abstract
     % the Digital voltage output of the NI-DAQ card.
     %
     % ## Usage Example
-    % Make the object by: obj = MIC_FlipMountTTL('Dev#', 'Port#/Line#') where:
+    % Make the object by: obj = mic.FlipMountTTL('Dev#', 'Port#/Line#') where:
     % Dev#  = Device number assigned to DAQ card by computer USB port of the
     % Port# = Port number in use on the DAQ card by your flipmount connection
     % Line# = Line number in use on the DAQ card by the Port
     %
     % ## Constructor
-    % Example: obj = MIC_FlipMountTTL('Dev1', 'Port0/Line1');
+    % Example: obj = mic,FlipMountTTL('Dev1', 'Port0/Line1');
     %
     % ## Key Functions: FilterIn, FilterOut, gui, exportState
     %
     % ## REQUIREMENTS:
-    %   MIC_Abstract.m
+    %   mic.abstract.m
     %   Data Acquisition Toolbox on MATLAB
     %   MATLAB NI-DAQmx driver in MATLAB installed via the Support Package
     %      Installer
@@ -38,20 +38,20 @@ classdef MIC_FlipMountTTL < MIC_Abstract
     properties
         NIDevice  %DAQ card device number at the USB port of the computer
         DOChannel; %included both port and line information 
-        StartGUI = 0; %uses MIC_Abstract to bring up the GUI (so, no need for a gui function in MIC_ShutterTTL)
+        StartGUI = 0; %uses mic.abstract to bring up the GUI (so, no need for a gui function in mic.ShutterTTL)
 %         Position  %either 1 or 0 (to show open or close respectively)
         NIString  %shows the combination of Device/Port/Line the shutter is using
     end
     
     methods
-        function obj = MIC_FlipMountTTL(NIDevice,DOChannel) % constructor
+        function obj = FlipMountTTL(NIDevice,DOChannel) % constructor
             % when you are making an object for this class, 
-            % you should do it this way: obj= MIC_FlipMountTTL('Dev1','Port0/Line1')
+            % you should do it this way: obj= mic,FlipMountTTL('Dev1','Port0/Line1')
             % of course you need to put the numbers after Dev,Port and Line
             % based on the physical connections of the shutter to your NI-DAQ card
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             if nargin<2
-                error('MIC_FlipMountTTL:NIDevice, Port and Line must be defined')
+                error('mic.FlipMountTTL:NIDevice, Port and Line must be defined')
             end
             
             obj.NIDevice=NIDevice;
@@ -143,16 +143,16 @@ classdef MIC_FlipMountTTL < MIC_Abstract
     end
     
     methods(Static=true)% 
-        % test this class on command line by: MIC_FlipMountTTL.unitTest('Dev1','Port0/Line1')
+        % test this class on command line by: mic.FlipMountTTL.unitTest('Dev1','Port0/Line1')
         function State=unitTest(NIDevice,DOChannel)
             % Unit test of object functionality
             
             if nargin<2
-                error('MIC_FlipMountTTL:NIDevice, Port and Line must be defined')
+                error('mic.FlipMountTTL:NIDevice, Port and Line must be defined')
             end
             
             fprintf('Creating Object\n')
-            S=MIC_FlipMountTTL(NIDevice,DOChannel);
+            S=mic.FlipMountTTL(NIDevice,DOChannel);
 
 %                   h=uicontrol('Style','togglebutton',...
 %                  'String','Filter In','Position',[90 105,80,70],...

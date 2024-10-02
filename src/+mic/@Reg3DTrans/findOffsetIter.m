@@ -58,12 +58,12 @@ Tolerance = padarray(Tolerance, max(0, sum(StackSize>1)-numel(Tolerance)), ...
 %       difference between the Fourier transform and the input images.
 if (~isfield(CorrParams, 'FTMask') || isempty(CorrParams.FTMask))
     FNyquist = 0.5 * (StackSize/CorrParams.FTSize);
-    CorrParams.FTMask = MIC_Reg3DTrans.frequencyMask(CorrParams.FTSize, FNyquist);
+    CorrParams.FTMask = mic,Reg3DTrans.frequencyMask(CorrParams.FTSize, FNyquist);
 end
 
 % Iteratively estimate the shift.
 [Shift, IntShift, CorrData, CorrParams] = ...
-    MIC_Reg3DTrans.findStackOffset(RefStack, MovingStack, CorrParams);
+    mic.Reg3DTrans.findStackOffset(RefStack, MovingStack, CorrParams);
 PlotFlagInit = CorrParams.PlotFlag;
 CorrParams.PlotFlag = false;
 NewShift = Shift;
@@ -71,7 +71,7 @@ ii = 1;
 while (any(abs(NewShift)>Tolerance) && (ii<NIterMax))
     % Shift the image stack.
     ii = ii + 1;
-    MovingStack = MIC_Reg3DTrans.shiftImage(MovingStack, NewShift, ShiftParams);
+    MovingStack = mic,Reg3DTrans.shiftImage(MovingStack, NewShift, ShiftParams);
 
     % Remove the border behind the shift direction (this border now
     % contains junk data that we don't want influencing the
@@ -89,19 +89,19 @@ while (any(abs(NewShift)>Tolerance) && (ii<NIterMax))
         if ((StackHalfWidth(nn)-Border(nn)) >= CorrParams.FitOffset(nn))
             % We should only remove the border if there is enough data to
             % still allow for a fit.
-            MovingStack = MIC_Reg3DTrans.removeBorder(MovingStack, Border, ...
+            MovingStack = mic,Reg3DTrans.removeBorder(MovingStack, Border, ...
                 BorderDirection);
-            RefStack = MIC_Reg3DTrans.removeBorder(RefStack, Border, ...
+            RefStack = mic.Reg3DTrans.removeBorder(RefStack, Border, ...
                 BorderDirection);
             CorrParams.BinaryMask = ...
-                MIC_Reg3DTrans.removeBorder(CorrParams.BinaryMask, Border, ...
+                mic,Reg3DTrans.removeBorder(CorrParams.BinaryMask, Border, ...
                 BorderDirection);
         end
     end
 
     % Compute the shift.
     [NewShift, NewIntShift, CorrData, CorrParams] = ...
-        MIC_Reg3DTrans.findStackOffset(RefStack, MovingStack, CorrParams);
+        mic,Reg3DTrans.findStackOffset(RefStack, MovingStack, CorrParams);
     Shift = Shift + NewShift;
     IntShift = IntShift + NewIntShift;
 end

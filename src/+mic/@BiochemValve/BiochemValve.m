@@ -1,4 +1,4 @@
-classdef BiochemValve < mic.MIC_Abstract
+classdef BiochemValve < mic.abstract
 %  mic.BiochemValve Class 
 %
 % ## Description
@@ -19,7 +19,7 @@ classdef BiochemValve < mic.MIC_Abstract
 % **Note:** Ensure the Arduino is properly set up as MATLAB needs to upload software onto it before using this class.
 % 
 % ## Dependencies
-% - `mic.MIC_Abstract.m` 
+% - `mic.abstract.m` 
 % 
 % ## Key Functions
 % - **delete()**: Deletes the object and closes connection to Arduino.
@@ -75,7 +75,7 @@ classdef BiochemValve < mic.MIC_Abstract
             
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
-            obj = obj@mic.MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             
             % Search for/connect to an Arduino connected via USB.
             if isempty(obj.SerialPort) 

@@ -1,4 +1,4 @@
-classdef CavroSyringePump < mic.MIC_Abstract
+classdef CavroSyringePump < mic.abstract
 % mic.CavroSyringePump Class 
 % 
 % ## Description
@@ -9,7 +9,7 @@ classdef CavroSyringePump < mic.MIC_Abstract
 % ## Installation Requirements
 % - MATLAB R2014b or later (R2017a or later recommended)
 % - Operating System: Windows (modifications required for UNIX systems, particularly in serial port behaviors)
-% - Dependency: `mic.MIC_Abstract.m`
+% - Dependency: `mic.abstract.m`
 % 
 % ##  Functions: 
 % delete, exportState, updateGui, gui, connectSyringePump,
@@ -73,7 +73,7 @@ classdef CavroSyringePump < mic.MIC_Abstract
                        
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
-            obj = obj@mic.MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             
             % Set property listener(s). 
             addlistener(obj, 'StatusByte', 'PostSet', ...

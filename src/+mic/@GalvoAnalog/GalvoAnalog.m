@@ -1,17 +1,17 @@
-classdef MIC_GalvoAnalog < MIC_Abstract
-    % MIC_GalvoAnalog: Matlab Instrument Class for controlling Galvo Mirror
+classdef GalvoAnalog < mic.abstract
+    % miC_GalvoAnalog: Matlab Instrument Class for controlling Galvo Mirror
     %
     % ## Description
     %  Controls the Galvo mirror. The galvo mirror is controlled 
     %  via output voltage of NI card. The operating range is -10:10 Volts
     %
     % ## Constructor
-    %   obj=MIC_GalvoAnalog('Dev1','ao1');
+    %   obj=mic,GalvoAnalog('Dev1','ao1');
     %
     %  ## Key Functions: delete, exportState, setVoltage 
     %
     %  ## REQUIREMENTS:
-    %  MIC_Abstract.m
+    %  mic.abstract.m
     %  MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
     %  ### CITATION: Marjolein Meddens, Lidke Lab 2017
@@ -29,11 +29,11 @@ classdef MIC_GalvoAnalog < MIC_Abstract
     end
             
     methods
-        function obj=MIC_GalvoAnalog(NIDevice,AOChannel)
+        function obj=GalvoAnalog(NIDevice,AOChannel)
             % Object Constructor
             
             % for file naming convention
-            obj=obj@MIC_Abstract(~nargout);
+            obj=obj@mic.abstract(~nargout);
             
             % check input
             if nargin<2
@@ -78,7 +78,7 @@ classdef MIC_GalvoAnalog < MIC_Abstract
         function unitTest(NIDevice,AOChannel)
             % Testing the functionality of the instrument
             fprintf('Creating Object\n')
-            Galvo=MIC_GalvoAnalog(NIDevice,AOChannel);
+            Galvo=mic.GalvoAnalog(NIDevice,AOChannel);
             fprintf('Setting Voltage to -5V\n');
             Galvo.setVoltage(-5);
             fprintf('Setting Voltage to 0V\n');

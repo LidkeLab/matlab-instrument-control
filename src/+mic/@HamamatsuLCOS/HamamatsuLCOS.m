@@ -1,4 +1,4 @@
-classdef MIC_HamamatsuLCOS < MIC_Abstract
+classdef HamamatsuLCOS < mic.abstract
     % MIC_HamamatsuLCOS: Matlab Instrument Control of Hamamatsu LCOS SLM
     %
     % ## Description
@@ -6,7 +6,7 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
     % Pupil diameter is 2*NA*f, f=M/180 for olympus objectives
     %
     % ## Constructor
-    % Example: obj = MIC_HamamatsuLCOS();
+    % Example: obj = mic,HamamatsuLCOS();
     %
     % ## Key Functions: 
     %            delete, gui, exportState, setupImage, displayImage,
@@ -15,7 +15,7 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
     %            displayCheckerboard
     %
     % ## REQUIREMENTS:
-    %   MIC_Abstract.m
+    %   mic.abstract.m
     %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %
@@ -55,9 +55,9 @@ classdef MIC_HamamatsuLCOS < MIC_Abstract
     
     
     methods
-        function obj=MIC_HamamatsuLCOS()
+        function obj=HamamatsuLCOS()
             % Object constructor
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
             
             %Load in correction file
             obj.Image_Correction=double(imread(obj.File_Correction));

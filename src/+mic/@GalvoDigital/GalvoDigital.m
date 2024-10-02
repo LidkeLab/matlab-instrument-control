@@ -1,4 +1,4 @@
-classdef MIC_GalvoDigital < MIC_Abstract
+classdef GalvoDigital < mic.abstract
     % MIC_GalvoDigital: Matlab instrument class to control Galvo Mirror using digital input
     %
     % ## Description
@@ -9,13 +9,13 @@ classdef MIC_GalvoDigital < MIC_Abstract
     %  channels to make the galvo enable to move.
     %
     % ## Constructor
-    %  Example: obj=MIC_GalvoDigital('Dev1','Port0/Line0:31');
+    %  Example: obj=mic.GalvoDigital('Dev1','Port0/Line0:31');
     %
     %  ## Key Funtions: 
     % delete, clearSession, enable, disable, reset, setSequence, angle2word, word2angle, get.Angle, setAngle, exportState, set.Voltage, get.Voltage,G. updateGui
     %
     %  ## REQUIREMENTS:
-    %  MIC_Abstract.m
+    %  mic.abstract.m
     %  MATLAB software version R2016b or later
     %  Data Acquisition Toolbox
     %  MATLAB NI-DAQmx driver installed via the Support Package Installer
@@ -61,9 +61,9 @@ classdef MIC_GalvoDigital < MIC_Abstract
     end
     
     methods
-        function obj=MIC_GalvoDigital(NIDevice,DOChannel)
+        function obj=GalvoDigital(NIDevice,DOChannel)
             % Object constructor
-            obj=obj@MIC_Abstract(~nargout);
+            obj=obj@mic.abstract(~nargout);
             if nargin<2
                 error('NIDevice and DOChannel must be defined')
             end
@@ -317,7 +317,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
         function unitTest(obj)
             % Testing the functionality of the class/instrument
             fprintf('Creating Object\n')
-            G=MIC_GalvoDigital('Dev1','Port0/Line0:31');
+            G=mic.GalvoDigital('Dev1','Port0/Line0:31');
             fprintf('Exporting current sate\n')
             Expt=G.exportState;
             disp(Expt);

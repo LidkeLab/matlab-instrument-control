@@ -1,5 +1,5 @@
-classdef MIC_FlipMountLaser < MIC_Abstract %by FF
-    % MIC_FlipMountTTL: Matlab Instrument Control Class for the flipmount
+classdef FlipMountLaser < mic.abstract %by FF
+    % mic.FlipMountTTL: Matlab Instrument Control Class for the flipmount
     %
     % This class controls a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M
     % controller.  Controller is triggered in via a TTL signal passing from the
@@ -7,16 +7,16 @@ classdef MIC_FlipMountLaser < MIC_Abstract %by FF
     % flipmount to be set in up or down positions, so flipmount is regulated by
     % the Digital voltage output of the NI-DAQ card.
     %
-    % Make the object by: obj = MIC_FlipMountTTL('Dev#', 'Port#/Line#') where:
+    % Make the object by: obj = mic.FlipMountTTL('Dev#', 'Port#/Line#') where:
     % Dev#  = Device number assigned to DAQ card by computer USB port of the
     % Port# = Port number in use on the DAQ card by your flipmount connection
     % Line# = Line number in use on the DAQ card by the Port
     %
-    % Example: obj = MIC_FlipMountTTL('Dev1', 'Port0/Line1');
+    % Example: obj = mic,FlipMountTTL('Dev1', 'Port0/Line1');
     % Functions: FilterIn, FilterOut, gui, exportState
     %
     % REQUIREMENTS:
-    %   MIC_Abstract.m
+    %   mic.abstract.m
     %   Data Acquisition Toolbox on MATLAB
     %   MATLAB NI-DAQmx driver in MATLAB installed via the Support Package
     %      Installer
@@ -34,17 +34,17 @@ classdef MIC_FlipMountLaser < MIC_Abstract %by FF
     
     properties
         Low = 0.1; % 
-        StartGUI = 0; %uses MIC_Abstract to bring up the GUI (so, no need for a gui function in MIC_ShutterTTL)
+        StartGUI = 0; %uses mic.Abstract to bring up the GUI (so, no need for a gui function in ShutterTTL)
 %         Position  %either 1 or 0 (to show open or close respectively)
     end
     
     methods
-        function obj = MIC_FlipMountLaser(laserobj) % constructor
+        function obj = FlipMountLaser(laserobj) % constructor
             % when you are making an object for this class, 
-            % you should do it this way: obj= MIC_FlipMountTTL('Dev1','Port0/Line1')
+            % you should do it this way: obj= mic.FlipMountTTL('Dev1','Port0/Line1')
             % of course you need to put the numbers after Dev,Port and Line
             % based on the physical connections of the shutter to your NI-DAQ card
-            obj = obj@MIC_Abstract(~nargout);
+            obj = obj@mic.abstract(~nargout);
 
             
             obj.Laserobj = laserobj;
@@ -133,14 +133,14 @@ classdef MIC_FlipMountLaser < MIC_Abstract %by FF
     end
     
     methods(Static=true)% 
-        % test this class on command line by: MIC_FlipMountTTL.unitTest('Dev1','Port0/Line1')
+        % test this class on command line by: mic_FlipMountTTL.unitTest('Dev1','Port0/Line1')
         function State=unitTest(laserobj)
             % Unit test of object functionality
             
 
             
             fprintf('Creating Object\n')
-            S=MIC_FlipMountLaser(laserobj);
+            S=mic.FlipMountLaser(laserobj);
 
 %                   h=uicontrol('Style','togglebutton',...
 %                  'String','Filter In','Position',[90 105,80,70],...
