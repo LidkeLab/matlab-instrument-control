@@ -1,5 +1,5 @@
-classdef MIC_3DStage_Abstract < MIC_Abstract
-    % MIC_3DStage_Abstract Matlab Instrument Abstact Class for all stages Matlab Instrument Class 
+classdef abstract < mic.abstract
+    % mic.stage3D.abstract Matlab Instrument Abstact Class for all stages Matlab Instrument Class 
     %
     % ## Description
     % This class defines a set of abstract Properties and methods that must
@@ -9,10 +9,10 @@ classdef MIC_3DStage_Abstract < MIC_Abstract
     % ## Constructor
     % The constructor in each subclass must begin with the following line 
     % inorder to enable the auto-naming functionality:
-    % obj=obj@MIC_3DStage_Abstract(~nargout);
+    % obj=obj@mic.stage3D.abstract(~nargout);
     %
     % ## REQUIREMENTS: 
-    %   MIC_Abstract.m
+    %   mic.abstract.m
     %   MATLAB software version R2016b or later
     %
     % ### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
@@ -24,9 +24,9 @@ classdef MIC_3DStage_Abstract < MIC_Abstract
     
    
     methods
-         function obj=MIC_3DStage_Abstract(AutoName)
-            %set  auto-naming functionality from MIC_Abstract Class 
-            obj=obj@MIC_Abstract(AutoName);
+         function obj=abstract(AutoName)
+            %set  auto-naming functionality from mic.abstract Class 
+            obj=obj@mic.abstract(AutoName);
          end
     end
     

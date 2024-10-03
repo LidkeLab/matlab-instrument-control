@@ -1,5 +1,5 @@
-classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
-    % MIC_MCLNanoDrive controls the Mad City Labs 3D Piezo Stage
+classdef MCLNanoDrive < mic.stage3D.abstract
+    % mic.stage3D.MCLNanoDrive controls the Mad City Labs 3D Piezo Stage
     %
     %   ## Description
     %   This class controls a 3D Peizo stage from Mad City Labs.  The class
@@ -16,8 +16,8 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     % - Simple and intuitive GUI for easy operation.
     %
     % ## Requirements
-    % - MIC_3DStage_Abstract.m
-    % - MIC_Abstract.m
+    % - mic.stage3D.abstract.m
+    % - mic.abstract.m
     % - MATLAB 2014b or higher
     % - Mad City Labs drivers and `madlib.h` installed on the system.
     %
@@ -25,7 +25,7 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     % During the first initialization of this class on a system, users are prompted to direct the class to the `madlib.h` header file, typically located in `C:\Program Files\Mad City Labs\NanoDrive`.
     %
     % ## Key Methods
-    % - **Constructor (`MIC_MCLNanoDrive()`):** Initializes the connection to the Mad City Labs stage and loads necessary libraries.
+    % - **Constructor (`mic.stage3D.MCLNanoDrive()`):** Initializes the connection to the Mad City Labs stage and loads necessary libraries.
     % - **`setPosition([x, y, z])`:** Moves the stage to the specified x, y, z coordinates.
     % - **`getSensorPosition()`:** Retrieves the current sensor position from the stage.
     % - **`center()`:** Centers the stage based on its configured range of motion.
@@ -35,8 +35,8 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     %
     % ## Usage Example
     % ```matlab
-    % % Create an instance of the MIC_MCLNanoDrive
-    % stage = MIC_MCLNanoDrive();
+    % % Create an instance of the mic.stage3D.MCLNanoDrive
+    % stage = mic.stage3D.MCLNanoDrive();
     %
     % % Move the stage to a specific position
     % stage.setPosition([10, 10, 10]);
@@ -83,15 +83,15 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     
     methods
         
-        function obj=MIC_MCLNanoDrive()
+        function obj=MCLNanoDrive()
             % Constructor. Takes no arguments and returns the object. 
-            obj=obj@MIC_3DStage_Abstract(~nargout);
+            obj=obj@mic.stage3D.abstract(~nargout);
             
             obj.set_errorcodes(); % set obj.ErrorCode to static values
             
-            [p,~]=fileparts(which('MIC_MCLNanoDrive'));
-            if exist(fullfile(p,'MIC_MCLNanoDrive_Properties.mat'),'file')
-                a=load(fullfile(p,'MIC_MCLNanoDrive_Properties.mat'));
+            [p,~]=fileparts(which('mic.stage3D.MCLNanoDrive'));
+            if exist(fullfile(p,'MCLNanoDrive_Properties.mat'),'file')
+                a=load(fullfile(p,'MCLNanoDrive_Properties.mat'));
                 obj.DLLPath=a.DLLPath;
                 clear a;
             else
@@ -146,8 +146,8 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
 
         function getdllpath(obj)
             [~,obj.DLLPath]=uigetfile('Select Madlib.h');
-            [p,~]=fileparts(which('MIC_MCLNanoDrive'));
-            f=fullfile(p,'MIC_MCLNanoDrive_Properties.mat');
+            [p,~]=fileparts(which('mic.stage3D.MCLNanoDrive'));
+            f=fullfile(p,'MCLNanoDrive_Properties.mat');
             DLLPath=obj.DLLPath;
             save(f,'DLLPath');
         end
@@ -291,7 +291,7 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
             
             try
                 fprintf('Creating Object\n')
-                M=MIC_MCLNanoDrive()
+                M=mic.stage3D.MCLNanoDrive()
                 fprintf('Setting Position to 10,10,10\n')
                 M.setPosition([10,10,10]);
                 pause(.1)

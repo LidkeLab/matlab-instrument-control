@@ -1,8 +1,8 @@
-classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
-    % MIC_NanoMaxPiezos Class
+classdef NanoMaxPiezos < mic.stage3D.abstract
+    % mic.stage3D.NanoMaxPiezos Class
     %
     % ## Description
-    % The `MIC_NanoMaxPiezos` class provides comprehensive control over the three piezo stages (x, y, z) of a Thorlabs NanoMax stage. It is designed to handle precise positioning necessary in advanced microscopy setups.
+    % The `mic.stage3D.NanoMaxPiezos` class provides comprehensive control over the three piezo stages (x, y, z) of a Thorlabs NanoMax stage. It is designed to handle precise positioning necessary in advanced microscopy setups.
     %
     % ## Key Features
     % - Individual control of x, y, and z piezo stages.
@@ -11,16 +11,16 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     % - Integration with both TCube and KCube piezo systems.
     %
     % ## Requirements
-    % - `MIC_Abstract.m`
-    % - `MIC_3DStage_Abstract.m`
-    % - Piezo control classes (`MIC_TCubePiezo.m` and `MIC_KCubePiezo.m`)
+    % - `mic.abstract.m`
+    % - `mic.stage3D.abstract.m`
+    % - Piezo control classes (`mic.linearstage.TCubePiezo.m` and `mic.linearstage.KCubePiezo.m`)
     % - MATLAB 2016b or later.
     %
     % ## Installation Notes
     % Before using this class, ensure that all dependent classes and required Thorlabs drivers are installed and properly configured on your system.
     %
     % ## Methods
-    % ### `Constructor (MIC_NanoMaxPiezos())`
+    % ### `Constructor (mic.stage3D.NanoMaxPiezos())`
     % Initializes piezo controllers for x, y, and z axes based on provided serial numbers. It attempts to connect to the piezos, with error handling to manage connection issues.
     %
     % ### `center()`
@@ -38,7 +38,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     % ## Usage Example
     % ```matlab
     % % Initialize NanoMax Piezos
-    % nmPiezos = MIC_NanoMaxPiezos('81850186', '84850145', '81850193', '84850146', '81850176', '84850203', 3);
+    % nmPiezos = mic.stage3D.NanoMaxPiezos('81850186', '84850145', '81850193', '84850146', '81850176', '84850203', 3);
     %
     % % Center all piezos
     % nmPiezos.center();
@@ -79,7 +79,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     end
     
     methods
-        function obj = MIC_NanoMaxPiezos(...
+        function obj = NanoMaxPiezos(...
                 ControllerXSerialNum, StrainGaugeXSerialNum, ...
                 ControllerYSerialNum, StrainGaugeYSerialNum, ...
                 ControllerZSerialNum, StrainGaugeZSerialNum, ...
@@ -88,7 +88,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             
             % If needed, automatically assign a name to the instance of
             % this class (i.e. if user forgets to do this).
-            obj = obj@MIC_3DStage_Abstract(~nargout);
+            obj = obj@mic.stage3D.abstract(~nargout);
             
             % Set the object properties based on the appropriate inputs.
             if exist('MaxPiezoConnectAttempts', 'var')
@@ -137,12 +137,12 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                     if strcmp(DeviceVersionTagArray.(cc), '81') ...
                             || strcmp(DeviceVersionTagArray.(cc), '84')
                         % This is a T-Cube piezo pair.
-                        obj.(StagePiezo) = MIC_TCubePiezo(...
+                        obj.(StagePiezo) = mic.linearstage.TCubePiezo(...
                             ControllerSN, StrainGaugeSN, cc);
                     elseif strcmp(DeviceVersionTagArray.(cc), '29') ...
                             || strcmp(DeviceVersionTagArray.(cc), '59')
                         % This is a K-Cube piezo pair.
-                        obj.(StagePiezo) = MIC_KCubePiezo(...
+                        obj.(StagePiezo) = mic.linearstage.KCubePiezo(...
                             ControllerSN, StrainGaugeSN, cc);
                     else
                         warning(['Piezo controller serial number', ...
@@ -281,7 +281,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
                 for jj = 1:obj.MaxPiezoConnectAttempts
                     % Attempt the connection to the piezo, pausing after
                     % the call to allow the piezo setup to complete.
-                    obj.(StagePiezo) = MIC_TCubePiezo(...
+                    obj.(StagePiezo) = mic.linearstage.TCubePiezo(...
                         obj.(ControllerSN), obj.(StrainGaugeSN), cc);
                     pause(2);
                     
@@ -316,7 +316,7 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
     
     methods (Static)
         function unitTest()
-            fprintf('Starting unit test for MIC_NanoMaxPiezos class.\n');
+            fprintf('Starting unit test for mic.stage3D.NanoMaxPiezos class.\n');
             
             % Specify example serial numbers for controllers and strain gauges
             % These serial numbers need to be replaced with actual serial numbers.
@@ -329,11 +329,11 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             
             % Create an instance of the NanoMaxPiezos class
             try
-                nmPiezos = MIC_NanoMaxPiezos(ControllerXSN, StrainGaugeXSN, ...
+                nmPiezos = mic.stage3D.NanoMaxPiezos(ControllerXSN, StrainGaugeXSN, ...
                     ControllerYSN, StrainGaugeYSN, ControllerZSN, StrainGaugeZSN);
-                fprintf('Successfully created MIC_NanoMaxPiezos object.\n');
+                fprintf('Successfully created mic.stage3D.NanoMaxPiezos object.\n');
             catch
-                error('Failed to create MIC_NanoMaxPiezos object.');
+                error('Failed to create mic.stage3D.NanoMaxPiezos object.');
             end
             
             % Test centering function
@@ -365,12 +365,12 @@ classdef MIC_NanoMaxPiezos < MIC_3DStage_Abstract
             % Delete the instance to clean up resources
             try
                 delete(nmPiezos);
-                fprintf('MIC_NanoMaxPiezos object deleted successfully.\n');
+                fprintf('mic.stage3D.NanoMaxPiezos object deleted successfully.\n');
             catch
-                error('Failed to delete MIC_NanoMaxPiezos object.');
+                error('Failed to delete mic.stage3D.NanoMaxPiezos object.');
             end
             
-            fprintf('Unit test for MIC_NanoMaxPiezos completed successfully.\n');
+            fprintf('Unit test for mic.stage3D.NanoMaxPiezos completed successfully.\n');
         end
     end
     

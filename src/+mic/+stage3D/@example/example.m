@@ -1,9 +1,9 @@
-classdef Example_3DStage< MIC_3DStage_Abstract
+classdef example < mic.stage3D.abstract
     % This class is an example implementation of 3D Stage Class.
     % This class simulates a 3D stage that can move along x,y,z axes.
     
     % REQUIRES:
-    % MIC_3DStage_Abstract.m
+    % mic.stage3D.abstract.m
     
     % Documentation: For detailed documentation check Readme.md file.
     
@@ -20,9 +20,9 @@ classdef Example_3DStage< MIC_3DStage_Abstract
     end
     
     methods
-        function obj = Example_3DStage()
+        function obj = example()
             % Constructor
-            obj@MIC_3DStage_Abstract(~nargout);
+            obj@mic.stage3D.abstract(~nargout);
         end
         
         function center(obj)
@@ -49,7 +49,7 @@ classdef Example_3DStage< MIC_3DStage_Abstract
         end
         
         function gui(obj)
-            %gui Graphical User Interface to MIC_3DStage_Abstract
+            %gui Graphical User Interface to mic.stage3D.abstract
             
             h = findall(0,'tag','MIC_3DStage_Abstract_gui');
             %Prevent opening more than one figure for same instrument
@@ -371,7 +371,7 @@ classdef Example_3DStage< MIC_3DStage_Abstract
         function Success = unitTest()
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they work properly
-            obj = Example_3DStage();
+            obj = mic.stage3D.example();
             obj.center();
             obj.setPosition([1, 2, 3]);
             Success = true; % Assume success for simplicity

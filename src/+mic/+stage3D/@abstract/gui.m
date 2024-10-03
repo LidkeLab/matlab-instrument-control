@@ -1,5 +1,5 @@
 function gui(obj)
-%gui Graphical User Interface to MIC_3DStage_Abstract
+%gui Graphical User Interface to mic.stage3D.abstract
 
 h = findall(0,'tag','MIC_3DStage_Abstract_gui');
 %Prevent opening more than one figure for same instrument
