@@ -125,7 +125,7 @@ classdef RAMANLaser785 < mic.lightsource.abstract
         end
         
         function calibrate(obj)
-            [p,~]=fileparts(which('RAMANLaser785'));
+            [p,~]=fileparts(which('mic.lightsource.RAMANLaser785'));
             if exist(fullfile(p,'Calibration.mat'),'file')
                 a=load(fullfile(p,'Calibration.mat'));
 %                 abc=fit(a.Current',a.Power','linearinterp');

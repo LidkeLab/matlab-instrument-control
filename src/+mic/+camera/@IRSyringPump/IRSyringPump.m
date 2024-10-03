@@ -1,23 +1,23 @@
-classdef MIC_IRSyringPump < MIC_ThorlabsIR
-% MIC_IRSyringPump Class 
+classdef IRSyringPump < mic.camera.ThorlabsIR
+% mic.camera.IRSyringPump Class 
 % 
 % ## Description
-% The `MIC_IRSyringPump` class extends the `MIC_ThorlabsIR` class to include control over a syringe pump during IR imaging sessions. This class is specifically designed for simultaneous operation of a syringe pump and an IR camera, enabling precise timing of fluid delivery relative to image acquisition. It is tailored for use in single-particle tracking (SPT) microscopy applications within Lidke's Lab.
+% The `mic.camera.IRSyringPump` class extends the `mic.camera.ThorlabsIR` class to include control over a syringe pump during IR imaging sessions. This class is specifically designed for simultaneous operation of a syringe pump and an IR camera, enabling precise timing of fluid delivery relative to image acquisition. It is tailored for use in single-particle tracking (SPT) microscopy applications within Lidke's Lab.
 % 
 % ## Requirements
 % - MATLAB R2016b or later
-% - MIC_Abstract.m
-% - MIC_ThorlabsIR
-% - MIC_SyringePump
+% - mic.camera.abstract.m
+% - mic.camera.ThorlabsIR
+% - mic.camera.SyringePump
 % 
 % ## Key Functions
-% - **Constructor (`MIC_IRSyringPump()`):** Initializes the syringe pump and sets default parameters for the IR camera and pump synchronization.
+% - **Constructor (`mic.camera.IRSyringPump()`):** Initializes the syringe pump and sets default parameters for the IR camera and pump synchronization.
 % - **`start_sequence()`:** Begins a sequence acquisition with the IR camera and triggers the syringe pump at a specified frame (`SPwaitTime`). This function handles data acquisition, pump activation, and ensures proper timing and synchronization between devices.
 % 
 % ## Usage Example
 % ```matlab
 % % Create an instance of the IRSyringe Pump system
-% irSyringePump = MIC_IRSyringPump();
+% irSyringePump = mic.camera.IRSyringPump();
 % 
 % % Set the number of frames to acquire
 % irSyringePump.SequenceLength = 100;
@@ -35,14 +35,14 @@ classdef MIC_IRSyringPump < MIC_ThorlabsIR
 % ### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.
 
     properties
-        SP          % an obj for MIC_SyringePump to control Syringe pump
+        SP          % an obj for mic.camera.SyringePump to control Syringe pump
         SPwaitTime  % wait time for Syrineg Pump to start after starting IRCamera
         tIR_end     % to check if all devices work in right time order (Andor,IRCamera,Pump)
     end
     
     methods
-        function obj=MIC_IRSyringPump()
-            obj.SP=MIC_SyringePump();
+        function obj=IRSyringPump()
+            obj.SP=mic.camera.SyringePump();
         end
         
         function start_sequence(obj)

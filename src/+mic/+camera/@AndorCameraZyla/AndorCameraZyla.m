@@ -1,8 +1,8 @@
-classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
-% MIC_AndorCameraZyla Class
+classdef AndorCameraZyla < mic.camera.abstract
+% mic.camera.AndorCameraZyla Class
 % 
 % ## Description
-% The `MIC_AndorCameraZyla` class interfaces with Andor Zyla cameras via the Andor SDK3, providing comprehensive control over camera operations in MATLAB. This class enables precise manipulation of camera settings and acquisition modes, tailored specifically for the Zyla model.
+% The `mic.camera.AndorCameraZyla` class interfaces with Andor Zyla cameras via the Andor SDK3, providing comprehensive control over camera operations in MATLAB. This class enables precise manipulation of camera settings and acquisition modes, tailored specifically for the Zyla model.
 % 
 % ## Features
 % - Direct integration with Andor SDK3.
@@ -41,7 +41,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
 % 
 % ```matlab
 % % Instantiate the camera
-% camera = MIC_AndorCameraZyla();
+% camera = mic.camera.AndorCameraZyla();
 % 
 % % Configure the camera for a sequence acquisition
 % camera.setup_acquisition('sequence');
@@ -125,8 +125,8 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
     
     methods
         
-        function obj=MIC_AndorCameraZyla()
-            obj = obj@MIC_Camera_Abstract(~nargout);
+        function obj=AndorCameraZyla()
+            obj = obj@mic.camera.abstract(~nargout);
         end
         
         function start(obj)  %  I might put this in initialize later, need to test it out first...
@@ -135,7 +135,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
         end
         
         function initialize(obj)
-            [p,~]=fileparts(which('MIC_AndorCameraZyla'));
+            [p,~]=fileparts(which('mic.camera.AndorCameraZyla'));
             if exist(fullfile(p,'AndorCameraZyla_Properties.mat'),'file')
                 a=load(fullfile(p,'AndorCameraZyla_Properties.mat'));
                 if exist(a.SDKPath,'dir')
@@ -737,7 +737,7 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
             Success=0;
             %Create object
             try
-                A=MIC_AndorCameraZyla();
+                A=mic.camera.AndorCameraZyla();
                 A.ExpTime_Focus=.1;
                 A.KeepData=1;
                 A.setup_acquisition()

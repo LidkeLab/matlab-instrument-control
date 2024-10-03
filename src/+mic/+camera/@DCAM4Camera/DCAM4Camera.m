@@ -1,6 +1,6 @@
-classdef MIC_DCAM4Camera < MIC_Camera_Abstract
-    %MIC_DCAM4Camera contains methods to control Hamamatsu cameras.
-    % This class is a modified version of MIC_HamamatsuCamera that uses the
+classdef DCAM4Camera < mic.camera.abstract
+    %mic.camera.DCAM4Camera contains methods to control Hamamatsu cameras.
+    % This class is a modified version of mic.camera.HamamatsuCamera that uses the
     % DCAM4 API.
     
     properties(Access = protected)
@@ -60,8 +60,8 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
     
     methods
         
-        function obj=MIC_DCAM4Camera() %constructor
-            obj = obj@MIC_Camera_Abstract(~nargout);
+        function obj=DCAM4Camera() %constructor
+            obj = obj@mic.camera.abstract(~nargout);
         end
         
         function errorcheck(obj)
@@ -134,7 +134,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.CameraSetting.TRIGGER_SOURCE.Ind = 1;
             obj.setCamProperties(obj.CameraSetting);
             obj.ROI = [1,obj.XPixels,1,obj.YPixels];
-            GuiCurSel = MIC_DCAM4Camera.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = mic.camera.DCAM4Camera.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
             %obj.gui();
             obj.abort();
@@ -750,7 +750,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             obj.CameraSetting.SUBARRAY_VSIZE.Value = VWidth;
             obj.CameraSetting.SUBARRAY_MODE.Ind = 2;
 
-            GuiCurSel = MIC_DCAM4Camera.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = mic.camera.DCAM4Camera.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
 
             obj.ROI=[Hoffset+1,Hoffset+HWidth,Voffset+1,Voffset+VWidth];
@@ -820,7 +820,7 @@ classdef MIC_DCAM4Camera < MIC_Camera_Abstract
             Success=0;
             %Create object
             try
-                A=MIC_HamamatsuCamera();
+                A=mic.camera.HamamatsuCamera();
                 A.ExpTime_Focus=.1;
                 A.KeepData=1;
                 A.setup_acquisition()

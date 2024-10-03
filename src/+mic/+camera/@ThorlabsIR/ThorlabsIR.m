@@ -1,5 +1,5 @@
-classdef MIC_ThorlabsIR < MIC_Camera_Abstract
-    % MIC_ThorlabsIR Matlab Instrument Class for control of Thorlabs IR Camera (Model:DCC1545M)
+classdef ThorlabsIR < mic.camera.abstract
+    % mic.camera.ThorlabsIR Matlab Instrument Class for control of Thorlabs IR Camera (Model:DCC1545M)
     %
     % ## Description
     % This class controls the DCxCamera via a USB port. It is required to
@@ -12,14 +12,14 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
     % from Program Files.    
     %
     % ## Constructor
-    % obj=MIC_ThorlabsIR()
+    % obj=mic.camera.ThorlabsIR()
     %
     % ## Key Function 
     % initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_Properties, exportState, unitTest  
     %     
     % ## REQUIREMENTS 
-    %   MIC_Abstract.m
-    %   MIC_Camera_Abstract.m
+    %   mic.abstract.m
+    %   mic.camera.abstract.m
     %   MATLAB software version R2016b or later
     %   uc480DotNet.dll file downloaded from the Thorlabs website for DCx cameras
     % 
@@ -67,16 +67,16 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
     end
     
     methods
-        function obj=MIC_ThorlabsIR()
+        function obj=ThorlabsIR()
             % Set up from Camera Abstract class
-            % Example: IRCamera=MIC_ThorlabsIR();
-            obj = obj@MIC_Camera_Abstract(~nargout);
+            % Example: IRCamera=mic.camera.ThorlabsIR();
+            obj = obj@mic.camera.abstract(~nargout);
         end
         
         function initialize(obj)
             % Initialize the camera
             % Load .dll file 
-            [p,~]=fileparts(which('MIC_ThorlabsIR'));
+            [p,~]=fileparts(which('mic.camera.ThorlabsIR'));
             if exist(fullfile(p,'ThorlabsIRCamera_Properties.mat'),'file')
                 a=load(fullfile(p,'ThorlabsIRCamera_Properties.mat'));
                 if exist(a.dllPath,'dir')
@@ -306,14 +306,14 @@ classdef MIC_ThorlabsIR < MIC_Camera_Abstract
     methods (Static=true)
         function Success=unitTest()
             % unit test of object functionality
-            % Syntax: MIC_ThorlabsIR.unitTest();
+            % Syntax: mic.camera.ThorlabsIR.unitTest();
             % Example:
-            % MIC_ThorlabsIR.unitTest();
+            % mic.camera.ThorlabsIR.unitTest();
             
             Success=0;
             %Create object
             try
-                CamIR=MIC_ThorlabsIR();
+                CamIR=mic.camera.ThorlabsIR();
                 CamIR.ExpTime_Focus=.1;
                 CamIR.KeepData=1;
                 CamIR.setup_acquisition()

@@ -1,8 +1,8 @@
-classdef MIC_PyDcam < MIC_Camera_Abstract
-% MIC_PyDcam Class Documentation
+classdef PyDcam < mic.camera.abstract
+% mic.camera.PyDcam Class Documentation
 % 
 % ## Overview
-% `MIC_PyDcam` is a MATLAB class designed for controlling a camera through a Python interface. It extends the `MIC_Camera_Abstract` class and includes methods for camera setup, acquisition control, and image retrieval.
+% `mic.camera.PyDcam` is a MATLAB class designed for controlling a camera through a Python interface. It extends the `mic.camera.abstract` class and includes methods for camera setup, acquisition control, and image retrieval.
 % 
 % ## Methods
 % - **Constructor**: Initializes the camera settings.
@@ -38,7 +38,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
 % - `camSet2GuiSel(CameraSetting)`: Converts current camera settings into GUI selections.
 % 
 % ## Usage
-% To use `MIC_PyDcam`, create an instance of the class and call its methods to interact with the camera. Ensure Python and required libraries are properly set up and accessible to MATLAB.
+% To use `mic.camera.PyDcam`, create an instance of the class and call its methods to interact with the camera. Ensure Python and required libraries are properly set up and accessible to MATLAB.
 %
 % ### CITATION: Sheng Liu, Lidkelab, 2024.
 
@@ -83,9 +83,9 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
 
 
     methods
-        function obj=MIC_PyDcam(envpath) 
+        function obj=PyDcam(envpath) 
             % Object constructor
-            obj = obj@MIC_Camera_Abstract(~nargout);
+            obj = obj@mic.camera.abstract(~nargout);
             obj.initializeDcam(envpath)
         end
         
@@ -118,7 +118,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             
             pyenv('Version',envpath)
             
-            [filepath,~,~] = fileparts(which('MIC_PyDcam'));
+            [filepath,~,~] = fileparts(which('mic.camera.PyDcam'));
             cd([filepath,'/private'])
             py.importlib.import_module('dcam');
             py.importlib.import_module('dcamapi4');
@@ -144,7 +144,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             obj.CameraSetting.TRIGGER_SOURCE.Ind = 1;
             obj.setCamProperties(obj.CameraSetting);
             obj.ROI = [1,obj.XPixels,1,obj.YPixels];
-            GuiCurSel = MIC_PyDcam.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = mic.camera.PyDcam.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
             obj.gui;
             err = obj.CameraHandle.buf_release();
@@ -616,7 +616,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             obj.CameraSetting.SUBARRAY_VPOS.Value = Voffset;
             obj.CameraSetting.SUBARRAY_VSIZE.Value = VWidth;
 
-            GuiCurSel = MIC_PyDcam.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = mic.camera.PyDcam.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
             
             obj.ROI=[Hoffset+1,Hoffset+HWidth,Voffset+1,Voffset+VWidth];
@@ -664,7 +664,7 @@ classdef MIC_PyDcam < MIC_Camera_Abstract
             Success=0;
             %Create object
             try
-                A=MIC_IMGSourceCamera();
+                A=mic.camera.IMGSourceCamera();
                 A.ExpTime_Focus=.1;
                 A.KeepData=1;
                 A.setup_acquisition()

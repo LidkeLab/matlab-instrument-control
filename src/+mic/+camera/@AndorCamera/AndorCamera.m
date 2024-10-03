@@ -1,8 +1,8 @@
-classdef MIC_AndorCamera < MIC_Camera_Abstract
- % MIC_AndorCamera class 
+classdef AndorCamera < mic.camera.abstract
+ % mic.camera.AndorCamera class 
 % 
 % ## Description
-% The `MIC_AndorCamera` class in MATLAB is designed for controlling Andor cameras using the Andor SDK. This class handles camera operations such as initialization, capturing images, adjusting settings, and more.
+% The `mic.camera.AndorCamera` class in MATLAB is designed for controlling Andor cameras using the Andor SDK. This class handles camera operations such as initialization, capturing images, adjusting settings, and more.
 % 
 % ## Features
 % - Full control over Andor camera settings including exposure time, ROI, and binning.
@@ -46,8 +46,8 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
 % ## Usage Example
 % 
 % ```matlab
-% % Create an instance of the MIC_AndorCamera
-% camera = MIC_AndorCamera();
+% % Create an instance of the mic.camera.AndorCamera
+% camera = mic.camera.AndorCamera();
 % 
 % % Set exposure time for focus mode
 % camera.ExpTime_Focus = 0.1;
@@ -128,8 +128,8 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
     
     methods
         
-        function obj=MIC_AndorCamera()
-            obj = obj@MIC_Camera_Abstract(~nargout);
+        function obj=AndorCamera()
+            obj = obj@mic.camera.abstract(~nargout);
         end
         
         function delete(obj)
@@ -175,7 +175,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
         function initialize(obj)
             obj.set_errorcodes; 
             
-            [p,~]=fileparts(which('MIC_AndorCamera'));
+            [p,~]=fileparts(which('mic.camera.AndorCamera'));
             if exist(fullfile(p,'AndorCamera_Properties.mat'),'file')
                 a=load(fullfile(p,'AndorCamera_Properties.mat'));
                 if exist(a.SDKPath,'dir')
@@ -1030,7 +1030,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             obj.CameraSetting.Trigger.Desc = Trigger.Desc{1};
             
             % initialize current selection of parameters
-            GuiCurSel = MIC_AndorCamera.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = mic.camera.AndorCamera.camSet2GuiSel(obj.CameraSetting);
             % build GuiDialog
             obj.build_guiDialog(GuiCurSel);
         
@@ -1091,7 +1091,7 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
             Success=0;
             %Create object
             try 
-                A=MIC_AndorCamera();
+                A=mic.camera.AndorCamera();
                 A.ExpTime_Focus=.1;
                 A.KeepData=1;
                 A.setup_acquisition()

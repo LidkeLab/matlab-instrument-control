@@ -1,8 +1,8 @@
-classdef MIC_Imaq < MIC_Camera_Abstract
-% MIC_Imaq Class Documentation
+classdef Imaq < mic.camera.abstract
+% mic.camera.Imaq Class Documentation
 % 
 % ## Overview
-% `MIC_Imaq` is a MATLAB class designed for camera control using the Image Acquisition Toolbox. It extends the `MIC_Camera_Abstract` class and includes methods for initializing the camera, managing acquisitions, and retrieving images.
+% `mic.camera.Imaq` is a MATLAB class designed for camera control using the Image Acquisition Toolbox. It extends the `mic.camera.abstract` class and includes methods for initializing the camera, managing acquisitions, and retrieving images.
 % 
 % ## Methods
 % - **Constructor**: Initializes the camera with optional parameters for adaptor name, format, and device ID.
@@ -28,7 +28,7 @@ classdef MIC_Imaq < MIC_Camera_Abstract
 % - `camSet2GuiSel(CameraSetting)`: Converts camera settings into GUI selections.
 % 
 % ## Usage
-% To utilize `MIC_Imaq`, create an instance of the class specifying the adaptor name, format, and device ID as needed. Use the class methods to control the camera and manage image acquisition within MATLAB.
+% To utilize `mic.camera.Imaq`, create an instance of the class specifying the adaptor name, format, and device ID as needed. Use the class methods to control the camera and manage image acquisition within MATLAB.
 % 
 % ### CITATION: Sheng Liu, Lidkelab, 2024.
 
@@ -73,9 +73,9 @@ classdef MIC_Imaq < MIC_Camera_Abstract
 
 
     methods
-        function obj=MIC_Imaq(AdaptorName,Format,DevID) 
+        function obj=Imaq(AdaptorName,Format,DevID) 
             % Object constructor
-            obj = obj@MIC_Camera_Abstract(~nargout);
+            obj = obj@mic.camera.abstract(~nargout);
             if nargin>2
                 obj.initializeImaq(AdaptorName,Format,DevID)
             elseif nargin>1
@@ -143,7 +143,7 @@ classdef MIC_Imaq < MIC_Camera_Abstract
             obj.ImageSize=CCDsize;
             obj.ROI=[1,obj.XPixels,1,obj.YPixels];
             obj.setCamProperties(obj.CameraSetting);
-            GuiCurSel = MIC_Imaq.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = mic.camera.Imaq.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
             %obj.gui;
             
@@ -524,7 +524,7 @@ classdef MIC_Imaq < MIC_Camera_Abstract
             Success=0;
             %Create object
             try
-                A=MIC_IMGSourceCamera();
+                A=mic.camera.IMGSourceCamera();
                 A.ExpTime_Focus=.1;
                 A.KeepData=1;
                 A.setup_acquisition()

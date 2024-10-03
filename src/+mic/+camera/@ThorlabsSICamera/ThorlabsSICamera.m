@@ -1,5 +1,5 @@
-classdef MIC_ThorlabsSICamera < MIC_Camera_Abstract
-    % MIC_ThorlabsIR Matlab Instrument Class for control of
+classdef ThorlabsSICamera < mic.camera.abstract
+    % mic.camera.ThorlabsIR Matlab Instrument Class for control of
     % Thorlabs Scientific Camera (Model:CS165MU)
     % 
     % This class controls the Thorlabs Scientific Camera via a USB port. It is required to
@@ -15,14 +15,14 @@ classdef MIC_ThorlabsSICamera < MIC_Camera_Abstract
     % For the first time it is required to load the directory of .dll file 
     % from Program Files.    
     %
-    % Example: obj=MIC_ThorlabsSICamera();
+    % Example: obj=mic.camera.ThorlabsSICamera();
     % Function: initialize, abort, delete, shutdown, getlastimage, getdata,
     % setup_acquisition, start_focus, start_capture, start_sequence, set.ROI,
     % get_properties, exportState, unitTest  
     %     
     % REQUIREMENTS: 
-    %   MIC_Abstract.m
-    %   MIC_Camera_Abstract.m
+    %   mic.abstract.m
+    %   mic.camera.abstract.m
     %   MATLAB software version R2016b or later
     % 
     % CITATION: Sheng Liu  Lidkelab, 2024.
@@ -70,16 +70,16 @@ classdef MIC_ThorlabsSICamera < MIC_Camera_Abstract
     end
     
     methods
-        function obj=MIC_ThorlabsSICamera()
+        function obj=ThorlabsSICamera()
             % Set up from Camera Abstract class
-            % Example: IRCamera=MIC_ThorlabsIR();
-            obj = obj@MIC_Camera_Abstract(~nargout);
+            % Example: IRCamera=mic.camera.ThorlabsIR();
+            obj = obj@mic.camera.abstract(~nargout);
         end
         
         function initialize(obj)
             % Initialize the camera
             % Load .dll file 
-            [p,~]=fileparts(which('MIC_ThorlabsSICamera'));
+            [p,~]=fileparts(which('mic.camera.ThorlabsSICamera'));
             if exist(fullfile(p,'ThorlabsSICamera_Properties.mat'),'file')
                 a=load(fullfile(p,'ThorlabsSICamera_Properties.mat'));
                 if exist(a.dllPath,'dir')
@@ -329,14 +329,14 @@ classdef MIC_ThorlabsSICamera < MIC_Camera_Abstract
     methods (Static=true)
         function Success=unitTest()
             % unit test of object functionality
-            % Syntax: MIC_ThorlabsIR.unitTest();
+            % Syntax: mic.camera.ThorlabsIR.unitTest();
             % Example:
-            % MIC_ThorlabsIR.unitTest();
+            % mic.camera.ThorlabsIR.unitTest();
             
             Success=0;
             %Create object
             try
-                Cam=MIC_ThorlabsSCamera();
+                Cam=mic.camera.ThorlabsSCamera();
                 Cam.ExpTime_Focus=.1;
                 Cam.KeepData=1;
                 Cam.setup_acquisition()

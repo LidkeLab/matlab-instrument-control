@@ -1,14 +1,14 @@
-classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
-% MIC_HamamatsuCamera Class 
+classdef HamamatsuCamera < mic.camera.abstract
+% mic.camera.HamamatsuCamera Class 
 % 
 % ## Description
-% The `MIC_HamamatsuCamera` class inherits from `MIC_Camera_Abstract` and is specifically tailored for 
+% The `mic.camera.HamamatsuCamera` class inherits from `mic.camera.abstract` and is specifically tailored for 
 % controlling Hamamatsu cameras in MATLAB. It offers comprehensive control over camera settings such as exposure time, 
 % binning, ROI (Region of Interest), and acquisition modes (focus, capture, sequence). This class also supports 
 % asynchronous data acquisition, status checks, and advanced configuration through a graphical user interface.
 % 
 % ## Key Functions
-% - **Constructor (`MIC_HamamatsuCamera()`):** Initializes the camera, setting up default values and configuring the camera for initial use.
+% - **Constructor (`mic.camera.HamamatsuCamera()`):** Initializes the camera, setting up default values and configuring the camera for initial use.
 % - **`delete()`:** Cleans up resources, ensuring proper shutdown of the camera connection.
 % - **`initialize()`:** Sets up camera parameters and GUI based on current settings. Required before starting any acquisition.
 % - **`setup_acquisition()`:** Prepares the camera for data acquisition based on the selected mode (focus, capture, sequence).
@@ -22,7 +22,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
 % ## Usage Example
 % ```matlab
 % % Create an instance of the Hamamatsu camera
-% cam = MIC_HamamatsuCamera();
+% cam = mic.camera.HamamatsuCamera();
 % 
 % % Initialize camera with default settings
 % cam.initialize();
@@ -101,8 +101,8 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
     
     methods
         
-        function obj=MIC_HamamatsuCamera() %constructor
-            obj = obj@MIC_Camera_Abstract(~nargout);
+        function obj=HamamatsuCamera() %constructor
+            obj = obj@mic.camera.abstract(~nargout);
         end
         
         function delete(obj) %destructor
@@ -171,7 +171,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             
             obj.setCamProperties(obj.CameraSetting);
             %GuiCurSel = HamamatsuCamera.camSet2GuiSel(obj.CameraSetting); % FF 
-            GuiCurSel = MIC_HamamatsuCamera.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = mic.camera.HamamatsuCamera.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
            % obj.gui;
         end
@@ -714,7 +714,7 @@ classdef MIC_HamamatsuCamera < MIC_Camera_Abstract
             Success=0;
             %Create object
             try 
-                A=MIC_HamamatsuCamera();
+                A=mic.camera.HamamatsuCamera();
                 A.ExpTime_Focus=.1;
                 A.KeepData=1;
                 A.setup_acquisition()

@@ -1,5 +1,5 @@
-classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
-    % MIC_IMGSourceCamera: Matlab instument class for ImagingSource camera.
+classdef IMGSourceCamera <  mic.camera.abstract
+    % mic.camera.IMGSourceCamera: Matlab instument class for ImagingSource camera.
     %
     % ## Description 
     % It requires dll to be registered in MATLAB.
@@ -17,14 +17,14 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
     % This was done with imaqtool using Tools menu.
     %
     % ## Contructor
-    % Example: obj=MIC_IMGSourceCamera();
+    % Example: obj=mic.camera.IMGSourceCamera();
     %
     % ## Key Functions:
     % delete, shutdown, exportState
     %
     % ## REQUIREMENTS: 
-    %   MIC_Abstract.m
-    %   MIC_Camera_Abstract.m
+    %   mic.Abstract.m
+    %   mic.camera.abstract.m
     %   MATLAB software version R2013a or later
     %
     % ### CITATION: , Lidkelab, 2017.
@@ -74,9 +74,9 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
     
     methods
         
-        function obj=MIC_IMGSourceCamera() 
+        function obj=IMGSourceCamera() 
             % Object constructor
-            obj = obj@MIC_Camera_Abstract(~nargout);
+            obj = obj@mic.camera.abstract(~nargout);
         end
         
         function abort(obj)
@@ -124,7 +124,7 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
             obj.ImageSize=CCDsize;
             obj.ROI=[1,obj.XPixels,1,obj.YPixels];
             obj.setCamProperties(obj.CameraSetting);
-            GuiCurSel = MIC_IMGSourceCamera.camSet2GuiSel(obj.CameraSetting);
+            GuiCurSel = mic.camera.IMGSourceCamera.camSet2GuiSel(obj.CameraSetting);
             obj.build_guiDialog(GuiCurSel);
             %obj.gui;
             
@@ -401,7 +401,7 @@ classdef MIC_IMGSourceCamera <  MIC_Camera_Abstract
             Success=0;
             %Create object
             try 
-                A=MIC_IMGSourceCamera();
+                A=mic.camera.IMGSourceCamera();
                 A.ExpTime_Focus=.1;
                 A.KeepData=1;
                 A.setup_acquisition()
