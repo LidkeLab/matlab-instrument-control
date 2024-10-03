@@ -1,5 +1,5 @@
-classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
-    % MIC_DHOMLaser532: Matlab Instrument Class for DHOM Laser 532.
+classdef DHOMLaser532 < mic.lightsource.abstract
+    % mic.lightsource.DHOMLaser532: Matlab Instrument Class for DHOM Laser 532.
     %
     % ## Description 
     % This class controls DHOM laser module, setting power within the range of 0 to
@@ -9,14 +9,14 @@ classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
     % Needs input of NI Device and AO Channel.
     %
     % ## Constructor
-    % Example: obj=MIC_DHOMLaser532('Dev2','ao1');
+    % Example: obj=mic.lightsource.DHOMLaser532('Dev2','ao1');
     %
     % ## Key Functions
     % on, off, State, setPower, delete, shutdown, exportState
     %
     % ## REQUIREMENTS: 
-    %   MIC_Abstract.m
-    %   MIC_LightSource_Abstract.m
+    %   mic.abstract.m
+    %   mic.lightsource.abstract.m
     %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
@@ -44,12 +44,12 @@ classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_DHOMLaser532(NIDevice,AOChannel)
+        function obj=DHOMLaser532(NIDevice,AOChannel)
             % Set up object
             if nargin<2
                 error('NIDevice and AOChannel must be defined')
             end
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             obj.DAQ = daq.createSession('ni'); %Set up the NI Daq object
             addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage'); % Adding analog channel for power control
             obj.Power=obj.MinPower; % sets laser power to min_Power
@@ -105,9 +105,9 @@ classdef MIC_DHOMLaser532 < MIC_LightSource_Abstract
             methods (Static=true)
             function unitTest(NIDevice,AOChannel)
                 % unit test of object functionality
-                % Example: DL=MIC_DHOMLaser532.unitTest('Dev2','ao1')
+                % Example: DL=mic.lightsource.DHOMLaser532.unitTest('Dev2','ao1')
                 fprintf('Creating Object\n')
-                DL=MIC_DHOMLaser532(NIDevice,AOChannel);
+                DL=mic.lightsource.DHOMLaser532(NIDevice,AOChannel);
                 fprintf('Setting to Max Output\n')
                 DL.setPower(250); pause(1);
                 fprintf('Turn On\n')

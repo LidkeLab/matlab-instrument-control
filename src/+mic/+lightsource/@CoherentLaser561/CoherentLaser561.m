@@ -1,22 +1,22 @@
-classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
-%  MIC_CoherentLaser561 Class 
+classdef CoherentLaser561 < mic.lightsource.abstract
+%  mic.lightsource.oherentLaser561 Class 
 % 
 % ## Description
-% The `MIC_CoherentLaser561` class is a MATLAB Instrument Class for controlling the Coherent Sapphire Laser 561 via a USB connection. It integrates with additional classes like `FilterWheel` and `Shutter` to manage laser power output continuously from 0 to 100 mW, despite the laser controller's minimum power setting of 10 mW.
+% The `mic.lightsource.oherentLaser561` class is a MATLAB Instrument Class for controlling the Coherent Sapphire Laser 561 via a USB connection. It integrates with additional classes like `NDFilterWheel` and `Shutter` to manage laser power output continuously from 0 to 100 mW, despite the laser controller's minimum power setting of 10 mW.
 % 
 % ## Requirements
 % - MATLAB 2016b or later
-% - MIC_Abstract
-% - MIC_LightSource_Abstract
-% - MIC_FilterWheel
-% - MIC_DynamixelServo
-% - MIC_ShutterTTL
+% - mic.abstract
+% - mic.lightsource.abstract
+% - mic.NDFilterWheel
+% - mic.DynamixelServo
+% - mic.ShutterTTL
 % 
 % ## Installation
-% Ensure that all required classes (`MIC_Abstract`, `MIC_LightSource_Abstract`, `MIC_FilterWheel`, `MIC_DynamixelServo`, `MIC_ShutterTTL`) are in your MATLAB path. The laser connects via a specified COM port (e.g., 'COM3').
+% Ensure that all required classes (`mic.abstract`, `mic.lightsource,abstract`, `mic.NDFilterWheel`, `mic.DynamixelServo`, `mic.ShutterTTL`) are in your MATLAB path. The laser connects via a specified COM port (e.g., 'COM3').
 % 
 % ## Key Functions
-% - **Constructor (`MIC_CoherentLaser561(SerialPort)`):** Initializes the laser on a specified COM port, sets up the filter wheel and shutter, and establishes serial communication.
+% - **Constructor (`mic.lightsource.oherentLaser561(SerialPort)`):** Initializes the laser on a specified COM port, sets up the filter wheel and shutter, and establishes serial communication.
 % - **`on()`:** Activates the laser, opening the shutter and setting the laser state to on.
 % - **`off()`:** Deactivates the laser, closing the shutter and turning the laser off.
 % - **`setPower(Power_in)`:** Adjusts the laser's output power. This method selects the appropriate filter based on the desired power setting and modifies the laser's power output accordingly.
@@ -28,7 +28,7 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
 % ## Usage Example
 % ```matlab
 % % Create an instance of the Coherent Laser 561 on COM3
-% CL561 = MIC_CoherentLaser561('COM3');
+% CL561 = mic.lightsource.oherentLaser561('COM3');
 % % Set power to 50 mW
 % CL561.setPower(50);
 % % Turn on the laser
@@ -43,8 +43,8 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
     properties (SetAccess=protected)
         InstrumentName='CoherentLaser561' % Descriptive Instrument Name
         Serial;                           % Serial number of COM port
-        FilterWheel;                      % an obj for MIC_NDFilterWheel to change Filter
-        Shutter;                          % an obj for MIC_ShutterTTL to control Shutter
+        FilterWheel;                      % an obj for mic.NDFilterWheel to change Filter
+        Shutter;                          % an obj for mic.ShutterTTL to control Shutter
     end
     
     properties (SetAccess=protected, GetAccess = public)
@@ -64,10 +64,10 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
     
     methods
         
-        function obj=MIC_CoherentLaser561(SerialPort)
-            % MIC_CoherentLaser561 contructor
+        function obj=CoherentLaser561(SerialPort)
+            % mic.CoherentLaser561 contructor
             % Check the name for subclass from Abtract class
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             
             % INPUT: SerialPort    COM port number like 'COM4'
             s=instrfind('Type','serial','name',['Serial-',SerialPort]);
@@ -99,10 +99,10 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
             % Initialize FilterWheel
             % measured the power after the FilterWheel to calibrate
             % transmission Factor. For Laser561 is = [1 0.51 0.20 0.09 0.035 0.0125]
-            obj.FilterWheel=MIC_NDFilterWheel(3,[1 0.51 0.20 0.09 0.035 0.0125],[300 0 60 120 180 240]);
+            obj.FilterWheel=mic.NDFilterWheel(3,[1 0.51 0.20 0.09 0.035 0.0125],[300 0 60 120 180 240]);
             
             % Initialize Shutter
-            obj.Shutter=MIC_ShutterTTL('Dev1','Port1/Line1');
+            obj.Shutter=mic.ShutterTTL('Dev1','Port1/Line1');
             
             % put initial value for Power=MinPower
             obj.GetStatus();
@@ -143,11 +143,11 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
             
             % Check if power_in is in the proper range
             if Power_in<obj.MinPower
-                error('MIC_CoherentLaser561: Set_Power: Requested Power Below Minimum')
+                error('mic.lightsource.CoherentLaser561: Set_Power: Requested Power Below Minimum')
             end
             
             if Power_in>obj.MaxPower
-                error('MIC_CoherentLaser561: Set_Power: Requested Power Above Maximum')
+                error('mic.lightsource.CoherentLaser561: Set_Power: Requested Power Above Maximum')
             end
             
             %Choose the FilterID
@@ -230,12 +230,12 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
             % Unit test of object functionality
             
             if nargin<1
-                error('MIC_CoherentLaser561::SerialPort must be defined')
+                error('mic.lightsource.CoherentLaser561::SerialPort must be defined')
             end
             
             %Creating an Object and Testing setPower, on, off
             fprintf('Creating Object\n')
-            L561=MIC_CoherentLaser561(SerialPort);
+            L561=mic.lightsource.CoherentLaser561(SerialPort);
             fprintf('Setting to Max Output\n')
             L561.setPower(100);
             fprintf('Turn On\n')
@@ -255,7 +255,7 @@ classdef MIC_CoherentLaser561 < MIC_LightSource_Abstract
             
             %Creating an Object and Repeat Test
             fprintf('Creating Object\n')
-            L561=MIC_CoherentLaser561(SerialPort);
+            L561=mic.lightsource.CoherentLaser561(SerialPort);
             fprintf('Setting to Max Output\n')
             L561.setPower(100);
             fprintf('Turn On\n')

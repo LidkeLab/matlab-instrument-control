@@ -1,5 +1,5 @@
-classdef MIC_CrystaLaser405 < MIC_LightSource_Abstract
-    % MIC_CrystaLaser405: Matlab Instrument Class for CrystaLaser 405 nm.
+classdef CrystaLaser405 < mic.lightsource.abstract
+    % mic.lightsource.CrystaLaser405: Matlab Instrument Class for CrystaLaser 405 nm.
     %
     % ## Description
     % Controls CrystaLaser module; setting power within the range of 0 to
@@ -19,14 +19,14 @@ classdef MIC_CrystaLaser405 < MIC_LightSource_Abstract
     % this class
     %
     % ## Usage Example
-    % Example: obj=MIC_CrystaLaser405('Dev1','ao1','Port0/Line3');
+    % Example: obj=mic.lightsource.CrystaLaser405('Dev1','ao1','Port0/Line3');
     %
     % ## Key Functions: 
     % on, off, State, setPower, delete, shutdown, unitTest
     %
     % ## REQUIREMENTS: 
-    %   MIC_Abstract.m
-    %   MIC_LightSource_Abstract.m
+    %   mic.abstract.m
+    %   mic.lightsource.abstract.m
     %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
@@ -51,12 +51,12 @@ classdef MIC_CrystaLaser405 < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_CrystaLaser405(NIDevice,AOChannel,DOChannel)
+        function obj=CrystaLaser405(NIDevice,AOChannel,DOChannel)
             %Set up the NI Daq Object
             if nargin<3
                 error('NIDevice, AOChannel and DOChannel must be defined')
             end % checking for inputs
-            obj = obj@MIC_LightSource_Abstract(~nargout); 
+            obj = obj@mic.lightsource.abstract(~nargout); 
             obj.DAQ = daq.createSession('ni');
             addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage'); %Adds analog chennal for NI session
             addDigitalChannel(obj.DAQ,NIDevice,DOChannel, 'OutputOnly'); % Adds digital channel for NI session
@@ -121,12 +121,12 @@ classdef MIC_CrystaLaser405 < MIC_LightSource_Abstract
             methods (Static=true)
             function unitTest(NIDevice,AOChannel,DOChannel)
                 % unit test of object functionality. 
-                % This function cannot be called while the MIC_CrystaLaser405 class is being run.
+                % This function cannot be called while the mic.lightsource.CrystaLaser405 class is being run.
                 % Please use delete(obj) and then run unitTest.
                 % Example:
-                % MIC_CrystaLaser405.unitTest('Dev1','ao1','Port0/Line3')
+                % mic.lightsource.CrystaLaser405.unitTest('Dev1','ao1','Port0/Line3')
                 fprintf('Creating Object\n')
-                CL=MIC_CrystaLaser405(NIDevice,AOChannel,DOChannel);
+                CL=mic.lightsource.CrystaLaser405(NIDevice,AOChannel,DOChannel);
                 fprintf('Turn On\n')
                 CL.on();pause(1);
                 fprintf('Setting to Max Output\n')

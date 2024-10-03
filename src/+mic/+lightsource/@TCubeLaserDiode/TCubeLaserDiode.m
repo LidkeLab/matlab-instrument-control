@@ -1,5 +1,5 @@
-classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
-    % MIC_TCubeLaserDiode: Matlab Instrument Control Class for the ThorLabs TCube Laser Diode
+classdef TCubeLaserDiode < mic.lightsource.abstract
+    % mic.lightsource.TCubeLaserDiode: Matlab Instrument Control Class for the ThorLabs TCube Laser Diode
     %
     % ## Description
     %   This class controls a Laser Diode through us USB connected ThorLabs TCube Laser
@@ -15,14 +15,14 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
     %  'delete' or 'clear'. 
     %
     %   ## constructor
-    % TLD=MIC_TCubeLaserDiode('64864827','Power',10,100,1)
+    % TLD=mic.lightsource.TCubeLaserDiode('64864827','Power',10,100,1)
     %
     % ## Key Functions: 
     % on, off, delete, shutdown, setPower, exportState, unitTest
     %
     % ## REQUIREMENT:
-    %   MIC_Abstract.m
-    %   MIC_LightSource_Abstract.m
+    %   mic.abstract.m
+    %   mic.lightsource.abstract.m
     %   Kinesis Control Software Intalled: https://www.thorlabs.com/software_pages/ViewSoftwarePage.cfm?Code=Motion_Control
     %   Pre-compiled Kinesis_LD_*.mex64 files in path (typically in ../../mex64);
     %   Thorlabs.MotionControl.DeviceManager.dll and Thorlabs.MotionControl.TCube.LaserDiode
@@ -61,14 +61,14 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_TCubeLaserDiode(SerialNo,Mode,MaxPower,WperA,TIARange)
-            % Creates a MIC_TCubeLaserDiode object and sets output to minimum and turns off LED.
+        function obj=TCubeLaserDiode(SerialNo,Mode,MaxPower,WperA,TIARange)
+            % Creates a mic.lightsource.TCubeLaserDiode object and sets output to minimum and turns off LED.
             
             if nargin<5
-                error('MIC_TCubeLaserDiode::SerialNo,Mode,MaxPower,WperA,TIARange must be defined')
+                error('mic.lightsource.TCubeLaserDiode::SerialNo,Mode,MaxPower,WperA,TIARange must be defined')
             end
             
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             
             %Save properties to object
             
@@ -77,7 +77,7 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
             
             Err=Kinesis_LD_Open(SerialNo);
             if Err
-                error('MIC_TCubeLaserDiode:: Could not open device')
+                error('mic.lightsource.TCubeLaserDiode:: Could not open device')
             end
             switch Mode
                 case 'Current'
@@ -90,7 +90,7 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
                     Kinesis_LD_SetClosedLoopMode(SerialNo);
                     obj.PowerUnit='mW';
                 otherwise
-                    error('MIC_RebelStarLED::Unknown Mode')
+                    error('mic.lightsource.RebelStarLED::Unknown Mode')
             end
             
             obj.MaxPower=MaxPower;
@@ -171,15 +171,15 @@ classdef MIC_TCubeLaserDiode < MIC_LightSource_Abstract
         function Success=unitTest(SerialNo,Mode,MaxPower,WperA,TIARange)
             % Unit test of object functionality
             % Example:
-            %   Success=MIC_TCubeLaserDiode.unitTest('64864827','Power',10,100,1)
+            %   Success=mic.lightsource.TCubeLaserDiode.unitTest('64864827','Power',10,100,1)
             
             Success=0;
             if nargin<5
-                error('MIC_TCubeLaserDiode::unitTest: SerialNo,Mode,MaxPower,WperA,TIARange must be defined')
+                error('mic.lightsource.TCubeLaserDiode::unitTest: SerialNo,Mode,MaxPower,WperA,TIARange must be defined')
             end
             
             fprintf('Creating Object\n')
-            TLD=MIC_TCubeLaserDiode(SerialNo,Mode,MaxPower,WperA,TIARange);
+            TLD=mic.lightsource.TCubeLaserDiode(SerialNo,Mode,MaxPower,WperA,TIARange);
             fprintf('Setting to 50 Percent Max Output\n')
             TLD.setPower(MaxPower/2);
             fprintf('Turn On\n')

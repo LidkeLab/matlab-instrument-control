@@ -1,8 +1,8 @@
-classdef MIC_HSMLaser488<MIC_LightSource_Abstract
-% MIC_HSMLaser488 Class 
+classdef HSMLaser488<mic.lightsource.abstract
+% mic.lightsource.HSMLaser488 Class 
 % 
 % ## Description
-% The `MIC_HSMLaser488` class is used for controlling a 488 nm laser mounted on the HSM microscope. 
+% The `mic.lightsource.HSMLaser488` class is used for controlling a 488 nm laser mounted on the HSM microscope. 
 % This class facilitates the operation of the laser through a MATLAB interface, leveraging both a shutter and a 
 % liquid crystal controller (LCC). The use of a specific filter (No: 2) in front of the laser is critical to prevent damage to the LCC.
 % 
@@ -10,13 +10,13 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
 % - MATLAB R2016b or later
 % - Data Acquisition Toolbox
 % - MATLAB NI-DAQmx driver (installed via the Support Package Installer)
-% - MIC_Abstract.m
-% - MIC_LightSource_Abstract.m
-% - MIC_Attenuator
-% - MIC_ShutterTTL
+% - mic.abstract.m
+% - mic.lightsource.abstract.m
+% - mic.Attenuator
+% - mic.ShutterTTL
 % 
 % ## Key Functions
-% - **Constructor (`MIC_HSMLaser488()`):** Sets up the laser controls, initializing the shutter and attenuator, and calculates power limits based on the attenuator's transmission and laser filter settings.
+% - **Constructor (`mic.lightsource.HSMLaser488()`):** Sets up the laser controls, initializing the shutter and attenuator, and calculates power limits based on the attenuator's transmission and laser filter settings.
 % - **`on()`:** Activates the laser by opening the shutter.
 % - **`off()`:** Deactivates the laser by closing the shutter.
 % - **`setPower(Power_in)`:** Sets the output power of the laser, ensuring it falls within the allowable range adjusted for the filter and attenuator settings.
@@ -26,8 +26,8 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
 % 
 % ## Usage Example
 % ```matlab
-% % Initialize the MIC_HSMLaser488 object
-% laser = MIC_HSMLaser488();
+% % Initialize the mic.lightsource.HSMLaser488 object
+% laser = mic.lightsource.HSMLaser488();
 % 
 % % Set the laser to its maximum allowable power and turn it on
 % laser.setPower(laser.MaxPower);
@@ -45,8 +45,8 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
 
     properties (SetAccess=protected)
         InstrumentName='HSM488Laser' % Descriptive Instrument Name
-        Shutter;                          % an obj for MIC_ShutterTTL to control Shutter
-        Attenuator;                       % an obj for MIC_Attenuator to control Attenuator(Liquid Crystal Controller)
+        Shutter;                          % an obj for mic.ShutterTTL to control Shutter
+        Attenuator;                       % an obj for mic.Attenuator to control Attenuator(Liquid Crystal Controller)
         %         FilterPos=[1 2 3 4 5 6];
         %         FracTransmVals=[0 0.0998 0 0.0283 0 0.0098];                     
         % I measured FracTransmVals for this Filter: Filter(1) & Filter(2) are purposly 
@@ -70,16 +70,16 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
       
     methods
         
-        function obj=MIC_HSMLaser488()
-            % MIC_HSM488Laser contructor
+        function obj=HSMLaser488()
+            % HSM488Laser contructor
             % Check the name for subclass from Abtract class
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             
             % Initialize Shutter
-            obj.Shutter=MIC_ShutterTTL('Dev1','Port1/Line1');
+            obj.Shutter=mic.ShutterTTL('Dev1','Port1/Line1');
             
             % Initialize Attenuator
-            obj.Attenuator=MIC_Attenuator('Dev1','ao0');
+            obj.Attenuator=mic.Attenuator('Dev1','ao0');
             
             % Obtain MaxPower and MinPower for gui
             obj.Attenuator.loadCalibration('LaserCalib');
@@ -91,8 +91,8 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
         function delete(obj)
             % Object Destructor
             shutdown(obj);
-            delete(obj.MIC_ShutterTTL);
-            delete(obj.MIC_Attenuator);
+            delete(obj.mic.ShutterTTL);
+            delete(obj.mic.Attenuator);
         end
         function on(obj)
             % Turns ON the laser
@@ -110,11 +110,11 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
             % Sets power of laser to Power_in
             % Check if power_in is in the proper range
             if Power_in<obj.MinPower
-                error('MIC_CoherentLaser561: Set_Power: Requested Power Below Minimum')
+                error('mic.lightsource.CoherentLaser561: Set_Power: Requested Power Below Minimum')
             end
             
             if Power_in>obj.MaxPower
-                error('MIC_CoherentLaser561: Set_Power: Requested Power Above Maximum')
+                error('mic.lightsource.CoherentLaser561: Set_Power: Requested Power Above Maximum')
             end
             
 %             if obj.IsOn
@@ -154,7 +154,7 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
             % Testing the funcionality of the class/instrument          
             %Creating an Object and Testing setPower, on, off
             fprintf('Creating Object\n')
-            L488=MIC_HSMLaser488();
+            L488=mic.lightsource.HSMLaser488();
             fprintf('Setting to Max Output\n')
             L488.setPower(L488.MaxPower);
             fprintf('Turn On\n')
@@ -171,7 +171,7 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
             
             %Creating an Object and Repeat Test
             fprintf('Creating Object\n')
-            L488=MIC_HSMLaser488();
+            L488=mic.lightsource.HSMLaser488();
             fprintf('Setting to Max Output\n')
             L488.setPower(L488.MaxPower);
             fprintf('Turn On\n')

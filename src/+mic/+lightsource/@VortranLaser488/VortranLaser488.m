@@ -1,5 +1,5 @@
-classdef MIC_VortranLaser488 < MIC_LightSource_Abstract
-    % MIC_VortranLaser488: Matlab Instrument Class for Vortran Laser 488.
+classdef VortranLaser488 < mic.lightsource.abstract
+    % mic.lightsource.VortranLaser488: Matlab Instrument Class for Vortran Laser 488.
     %
     % ## Description
     % Controls Vortran laser module, setting power within the range of 0 to
@@ -12,13 +12,13 @@ classdef MIC_VortranLaser488 < MIC_LightSource_Abstract
     % (CD located in second draw of filing cabinet in room 118).
     %
     % ## Constructor
-    % obj=MIC_VortranLaser488('Dev1','ao1');
+    % obj=mic.lightsource.VortranLaser488('Dev1','ao1');
     % ## Key Functions: 
     % on, off, exportState, setPower, delete, shutdown
     %
     % ## REQUIREMENTS: 
-    %   MIC_Abstract.m
-    %   MIC_LightSource_Abstract.m
+    %   mic.Abstract.m
+    %   mic.lightsource.abstract.m
     %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
@@ -43,13 +43,13 @@ classdef MIC_VortranLaser488 < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_VortranLaser488(NIDevice,AOChannel)
+        function obj=VortranLaser488(NIDevice,AOChannel)
             % Object constructor
             % Set up the NI Daq Object
             if nargin<2
                 error('NIDevice and AOChannel must be defined')
             end
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             obj.DAQ = daq.createSession('ni');
             addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage');
             obj.Power=obj.MinPower; % sets laser power to min_Power
@@ -104,9 +104,9 @@ classdef MIC_VortranLaser488 < MIC_LightSource_Abstract
             methods (Static=true)
             function unitTest(NIDevice,AOChannel)
                 % unit test of object functionality
-                % Example: VL=MIC_Vortranlaser488.unitTest('Dev1','ao1')
+                % Example: VL=mic.lightsource.Vortranlaser488.unitTest('Dev1','ao1')
                 fprintf('Creating Object\n')
-                VL=MIC_VortranLaser488(NIDevice,AOChannel);
+                VL=mic.lightsource.VortranLaser488(NIDevice,AOChannel);
                 fprintf('Setting to Max Output\n')
                 VL.setPower(70); pause(1);
                 fprintf('Turn Off\n')

@@ -1,24 +1,24 @@
-classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
-% MIC_RAMANLaser785
+classdef RAMANLaser785 < mic.lightsource.abstract
+% mic.lightsource.RAMANLaser785
 % 
 % ## Description
-% `MIC_RAMANLaser785` is a MATLAB class designed to control the 785 nm ONDAX laser used in RAMAN Lightsheet microscopes. This class manages the connection via an RS232-USB interface and provides functionalities such as setting the laser power, reading the current status, and integrating with a calibration file for accurate power settings.
+% `mic.lightsource.RAMANLaser785` is a MATLAB class designed to control the 785 nm ONDAX laser used in RAMAN Lightsheet microscopes. This class manages the connection via an RS232-USB interface and provides functionalities such as setting the laser power, reading the current status, and integrating with a calibration file for accurate power settings.
 % 
 % ## Requirements
 % - MATLAB 2016b or later.
-% - [MIC_Abstract](#) and [MIC_LightSource_Abstract](#) parent classes.
+% - [mic.Abstract](#) and [mic.lightsource.abstract](#) parent classes.
 % - A calibration file named `Calibration.mat` containing `CurrInterpol` and `PowerInterpol` arrays for current to power conversion.
 % 
 % ## Installation
 % 1. Ensure MATLAB 2016b or later is installed on your system.
-% 2. Place the `MIC_RAMANLaser785.m` file and its parent classes `MIC_Abstract` and `MIC_LightSource_Abstract` in your MATLAB path.
-% 3. Ensure that the `Calibration.mat` file is in the same directory as the `MIC_RAMANLaser785.m` file or adjust the path in the constructor accordingly.
+% 2. Place the `mic.lightsource.RAMANLaser785.m` file and its parent classes `mic.abstract` and `mic.lightsource.abstract` in your MATLAB path.
+% 3. Ensure that the `Calibration.mat` file is in the same directory as the `mic.lightsource.RAMANLaser785.m` file or adjust the path in the constructor accordingly.
 % 
 % ## Usage
-% To use the `MIC_RAMANLaser785`, instantiate an object of the class with the appropriate COM port.
+% To use the `mic.lightsource.RAMANLaser785`, instantiate an object of the class with the appropriate COM port.
 % ```matlab
 % % Replace 'COM3' with the actual COM port connected to the laser.
-% RL785 = MIC_RAMANLaser785('COM3');
+% RL785 = mic.lightsource.RAMANLaser785('COM3');
 % % Set the laser power to a specific value in milliwatts.
 % RL785.setPower(20);  % Set power to 20 mW
 % % Get and print the current power setting from the laser.
@@ -55,13 +55,13 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
     
     methods
         
-        function obj=MIC_RAMANLaser785(SerialPort)
-            % MIC_RAMANLaser785 contructor
+        function obj=RAMANLaser785(SerialPort)
+            % mic.lightsource.RAMANLaser785 contructor
             % Check the name for subclass from Abtract class
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             
             if nargin<1
-                error('MIC_RAMANLaser785::SerialPort must be defined')
+                error('mic.lightsource.RAMANLaser785::SerialPort must be defined')
             end
             
             % INPUT: SerialPort    COM port number like 'COM3'
@@ -91,13 +91,13 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
                 if obj.LaserStatus==8
                     idx=0;
                     if warn8==0
-                        warning('MIC_RAMANLaser785: Waiting 30 seconds ...');
+                        warning('mic.lightsource.RAMANLaser785: Waiting 30 seconds ...');
                         warn8=1;
                     end
                 elseif obj.LaserStatus==7
                     idx=0;
                     if warn7==0
-                        warning('MIC_RAMANLaser785: Waiting for temp to stabilize');
+                        warning('mic.lightsource.RAMANLaser785: Waiting for temp to stabilize');
                         warn7=1;
                     end
                 elseif obj.LaserStatus==1
@@ -125,7 +125,7 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
         end
         
         function calibrate(obj)
-            [p,~]=fileparts(which('MIC_RAMANLaser785'));
+            [p,~]=fileparts(which('RAMANLaser785'));
             if exist(fullfile(p,'Calibration.mat'),'file')
                 a=load(fullfile(p,'Calibration.mat'));
 %                 abc=fit(a.Current',a.Power','linearinterp');
@@ -134,7 +134,7 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
                 obj.CurrInterpol=a.CurrInterpol;
                 obj.PowerInterpol=a.PowerInterpol;
             else
-                error('MIC_RAMANLaser785: No laser calibration file detected. For the Raman Microscope, go to Y:\Projects\DOE Raman HSM\Equipment\Lasers and Lamps\785 nm Laser and run the LaserPowerCalibration code. This will generate the needed file. ')
+                error('mic.lightsource.RAMANLaser785: No laser calibration file detected. For the Raman Microscope, go to Y:\Projects\DOE Raman HSM\Equipment\Lasers and Lamps\785 nm Laser and run the LaserPowerCalibration code. This will generate the needed file. ')
             end            
         end
         
@@ -145,11 +145,11 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
            
             % Check if power_in is in the proper range
             if Power_in<obj.MinPower
-                error('MIC_RAMANLaser785: Set_Power: Requested Power Below Minimum')
+                error('mic.lightsource.RAMANLaser785: Set_Power: Requested Power Below Minimum')
             end
             
             if Power_in>obj.MaxPower
-                error('MIC_RAMANLaser785: Set_Power: Requested Power Above Maximum')
+                error('mic.lightsource.RAMANLaser785: Set_Power: Requested Power Above Maximum')
             end
             
             %Choose the appropriate current value
@@ -163,7 +163,7 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
             if eq(out(1:2),'OK')
                 obj.Power=Power_in;
             else
-                error('MIC_RAMANLaser785: Set_Power: Unable to set power')
+                error('mic.lightsource.RAMANLaser785: Set_Power: Unable to set power')
             end
         end
               
@@ -212,15 +212,15 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
         function statusErrorCheck(obj)
             switch obj.LaserStatus
                 case 4
-                    error('MIC_RAMANLaser785: Waiting for calibrate laser power')
+                    error('mic.lightsource.RAMANLaser785: Waiting for calibrate laser power')
                 case 5
-                    error('MIC_RAMANLaser785: Over laser current shutdown')
+                    error('mic.lightsource.RAMANLaser785: Over laser current shutdown')
                 case 6
-                    error('MIC_RAMANLaser785: TEC over temp shutdown')
+                    error('mic.lightsource.RAMANLaser785: TEC over temp shutdown')
                 case 7
-                    warning('MIC_RAMANLaser785: Waiting for temp to stabilize')
+                    warning('mic.lightsource.RAMANLaser785: Waiting for temp to stabilize')
                 case 8
-                    warning('MIC_RAMANLaser785: Waiting 30 seconds ...')
+                    warning('mic.lightsource.RAMANLaser785: Waiting 30 seconds ...')
             end
         end
     end
@@ -231,12 +231,12 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
             % Unit test of object functionality
             
             if nargin<1
-                error('MIC_RAMANLaser785::SerialPort must be defined')
+                error('mic.lightsource.RAMANLaser785::SerialPort must be defined')
             end
             
             %Creating an Object and Testing setPower, on, off
             fprintf('Creating Object\n')
-            L785=MIC_RAMANLaser785(SerialPort);
+            L785=mic.lightsource.RAMANLaser785(SerialPort);
             fprintf('Show power on the screen\n')
             L785.getCurrentPower;
             fprintf('Setting to Max Output\n')
@@ -255,7 +255,7 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
             
             %Creating an Object and Repeat Test
             fprintf('Creating Object\n')
-            L785=MIC_RAMANLaser785(SerialPort);
+            L785=mic.lightsource.RAMANLaser785(SerialPort);
             fprintf('Setting to Max Output\n')
             L785.setPower(70);
             pause(.5);

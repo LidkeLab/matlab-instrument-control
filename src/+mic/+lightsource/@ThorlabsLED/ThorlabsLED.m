@@ -1,5 +1,5 @@
-classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
-    % MIC_ThorlabsLED Matlab Instrument Class for control of the Thorlabs LED
+classdef ThorlabsLED < mic.lightsource.abstract
+    % mic.lightsource.ThorlabsLED Matlab Instrument Class for control of the Thorlabs LED
     %
     %  ## Description
     % This class controls a LED lamp with different wavelength from Thorlabs.
@@ -10,8 +10,8 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     % more than zero to control from computer.
     %
     % ## Requirements
-    % - `MIC_Abstract.m`
-    % - `MIC_LightSource_Abstract.m`
+    % - `mic.abstract.m`
+    % - `mic.lightsource.abstract.m`
     % - MATLAB (R2016b or later)
     % - Data Acquisition Toolbox
     % - MATLAB NI-DAQmx driver (installed via the Support Package Installer)
@@ -47,11 +47,11 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
         %       - Usage: obj.shutdown();
         %
     % ## Usage Example
-    % To create an instance of the `MIC_ThorlabsLED` class:
+    % To create an instance of the `mic.lightsource.ThorlabsLED` class:
     % ```matlab
-    % obj = MIC_ThorlabsLED('Dev1', 'ao1');
+    % obj = mic.lightsource.ThorlabsLED('Dev1', 'ao1');
     % Create an object
-    % led = MIC_ThorlabsLED('Dev1', 'ao1');
+    % led = mic.lightsource.ThorlabsLED('Dev1', 'ao1');
     
     % Set power to maximum
     % led.setPower(100);
@@ -90,11 +90,11 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_ThorlabsLED(NIDevice,AOChannel)
+        function obj=ThorlabsLED(NIDevice,AOChannel)
             % Example, NIDevice= 'Dev1', AOChannel='ao0'
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             if nargin<2
-                error('MIC_ThorlabsLED::NIDevice and AOChannel must be defined')
+                error('mic.lightsource.ThorlabsLED::NIDevice and AOChannel must be defined')
             end
             %Set up the NI Daq Object
             obj.DAQ = daq.createSession('ni');
@@ -168,16 +168,16 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
     methods (Static=true)
         function unitTest(NIDevice,AOChannel)
             % Unit test of object functionality
-            % Syntax: MIC_ThorlabsLED.unitTest(NIDevice,DOChannel)
+            % Syntax: mic.lightsource.ThorlabsLED.unitTest(NIDevice,DOChannel)
             % Example:
-            % MIC_ThorlabsLED.unitTest('Dev1','ao1');
+            % mic.lightsource.ThorlabsLED.unitTest('Dev1','ao1');
             if nargin<2
-                error('MIC_RebelStarLED::NIDevice and AOChannel must be defined')
+                error('mic.lightsource.RebelStarLED::NIDevice and AOChannel must be defined')
             end
             
             %Creating an Object and Testing setPower, on, off
             fprintf('Creating Object\n')
-            T_LED=MIC_ThorlabsLED(NIDevice,AOChannel);
+            T_LED=mic.lightsource.ThorlabsLED(NIDevice,AOChannel);
             fprintf('Setting to Max Output\n')
             T_LED.setPower(100);
             fprintf('Turn On\n')
@@ -197,7 +197,7 @@ classdef MIC_ThorlabsLED < MIC_LightSource_Abstract
             
             %Creating an Object and Repeat Test (to check if the port is clear completely)
             fprintf('Creating Object\n')
-            T_LED=MIC_ThorlabsLED(NIDevice,AOChannel);
+            T_LED=mic.lightsource.ThorlabsLED(NIDevice,AOChannel);
             fprintf('Setting to Max Output\n')
             T_LED.setPower(100);
             fprintf('Turn On\n')

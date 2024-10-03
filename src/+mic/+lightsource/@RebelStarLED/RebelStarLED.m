@@ -1,5 +1,5 @@
-classdef MIC_RebelStarLED < MIC_LightSource_Abstract
-    % MIC_RebelStarLED: Matlab Instrument Control Class for the Rebel Star LED
+classdef RebelStarLED < mic.lightsource.abstract
+    % mic.lightsource.RebelStarLED: Matlab Instrument Control Class for the Rebel Star LED
     %
     % ## Description
     % This class controls a Luxeon Rebel Star LED via a 700 mA 'BUCKPUCK'
@@ -19,14 +19,14 @@ classdef MIC_RebelStarLED < MIC_LightSource_Abstract
     % http://www.luxeonstar.com/700ma-external-dimming-buckpuck-dc-driver-leaded
     %
     % ## Constructor
-    % Example: RS = MIC_RebelStarLED('Dev1', 'ao1');
+    % Example: RS = mic.lightsource.RebelStarLED('Dev1', 'ao1');
     %
     % ## Key Functions: 
     % delete, setPower, on, off, exportState, shutdown
     %
     % ## REQUIREMENTS:
-    %   MIC_Abstract.m
-    %   MIC_LightSource_Abstract.m
+    %   mic.abstract.m
+    %   mic.lightsource.abstract.m
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
     %
@@ -54,16 +54,16 @@ classdef MIC_RebelStarLED < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_RebelStarLED(NIDevice,AOChannel)
-            % Creates a MIC_RebelStarLED object and sets output to minimum and turns off LED. 
-            % Example: RS=MIC_RebelStarLED('Dev1','ao1')
+        function obj=RebelStarLED(NIDevice,AOChannel)
+            % Creates a mic.lightsource.RebelStarLED object and sets output to minimum and turns off LED. 
+            % Example: RS=mic.lightsource.RebelStarLED('Dev1','ao1')
             
-            obj=obj@MIC_LightSource_Abstract(~nargout);
-            %obj = obj@MIC_LightSource_Abstract();
-            %obj = obj@MIC_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
+            %obj = obj@mic.lightsource.abstract();
+            %obj = obj@mic.abstract(~nargout);
            
             if nargin<2
-                error('MIC_RebelStarLED::NIDevice and AOChannel must be defined')
+                error('mic.lightsource.RebelStarLED::NIDevice and AOChannel must be defined')
             end
             %Set up the NI Daq Object
            
@@ -126,12 +126,12 @@ classdef MIC_RebelStarLED < MIC_LightSource_Abstract
                 % Unit test of object functionality
                 
                 if nargin<2
-                    error('MIC_RebelStarLED::NIDevice and AOChannel must be defined')
+                    error('mic.lightsource.RebelStarLED::NIDevice and AOChannel must be defined')
                 end
             
                 %Creating an Object and Testing setPower, on, off
                 fprintf('Creating Object\n')
-                RS=MIC_RebelStarLED(NIDevice,AOChannel);
+                RS=mic.lightsource.RebelStarLED(NIDevice,AOChannel);
                 fprintf('Setting to Max Output\n')
                 RS.setPower(100);
                 fprintf('Turn On\n')
@@ -149,7 +149,7 @@ classdef MIC_RebelStarLED < MIC_LightSource_Abstract
                 
                 %Creating an Object and Repeat Test
                 fprintf('Creating Object\n')
-                RS=MIC_RebelStarLED(NIDevice,AOChannel);
+                RS=mic.lightsource.RebelStarLED(NIDevice,AOChannel);
                 fprintf('Setting to Max Output\n')
                 RS.setPower(100);
                 fprintf('Turn On\n')

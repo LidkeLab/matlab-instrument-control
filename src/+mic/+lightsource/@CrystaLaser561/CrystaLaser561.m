@@ -1,5 +1,5 @@
-classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
-    % MIC_CrystaLaser561: Matlab Instrument Class for control of CrystaLaser 561 nm.
+classdef CrystaLaser561 < mic.lightsource.abstract
+    % mic.lightsource.CrystaLaser561: Matlab Instrument Class for control of CrystaLaser 561 nm.
     % 
     % ## Description: 
     % This class Controls CrystaLaser module; can switch the laser ON/OFF, but cannot  
@@ -12,14 +12,14 @@ classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
     % Pin6: GND.
     %
     % ## Constructor
-    % Example: obj=MIC_CrystaLaser561('Dev1','Port0/Line0:1');
+    % Example: obj=mic.lightsource.CrystaLaser561('Dev1','Port0/Line0:1');
     % 
     % ## Key Functions
     % on, off, delete, shutdown, exportState, setPower 
     %
     % ## REQUIREMENTS: 
-    %   MIC_Abstract.m
-    %   MIC_LightSource_Abstract.m
+    %   mic.Abstract.m
+    %   mic.lightsource.abstract.m
     %   MATLAB software version R2016b or later
     %   Data Acquisition Toolbox
     %   MATLAB NI-DAQmx driver installed via the Support Package Installer
@@ -44,13 +44,13 @@ classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_CrystaLaser561(NIDevice,DOChannel)
+        function obj=CrystaLaser561(NIDevice,DOChannel)
             % Set up the NI Daq Object
-            % Example: CL=MIC_CrystaLaser561('Dev1','Port0/Line0:1');
+            % Example: CL=mic.lightsource.CrystaLaser561('Dev1','Port0/Line0:1');
             if nargin<2
                 error('NIDevice and DOChannel must be defined')
             end
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             obj.DAQ = daq.createSession('ni');
             addDigitalChannel(obj.DAQ,NIDevice,DOChannel, 'OutputOnly');
             DS1='This Laser does not provide software control of power. Please use the knob on front panel of controller';
@@ -104,12 +104,12 @@ classdef MIC_CrystaLaser561 < MIC_LightSource_Abstract
     methods (Static=true)
         function unitTest(NIDevice,DOChannel)
             % unit test of object functionality
-            % Syntax: MIC_CrystaLaser561.unitTest(NIDevice,DOChannel)
+            % Syntax: mic.lightsource.CrystaLaser561.unitTest(NIDevice,DOChannel)
             % Example:
-            % MIC_CrystaLaser561.unitTest('Dev1','Port0/Line0:1')
+            % mic.lightsource.CrystaLaser561.unitTest('Dev1','Port0/Line0:1')
 
             fprintf('Creating Object\n')
-            CL=MIC_CrystaLaser561(NIDevice,DOChannel);
+            CL=mic.lightsource.CrystaLaser561(NIDevice,DOChannel);
             fprintf('Turn On\n')
             CL.on();pause(1);
             fprintf('State Export\n')

@@ -1,17 +1,17 @@
-classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
-    % MIC_NewportLaser488: Matlab Instrument Class for Newport Cyan Laser 488 on TIRF microscope.
+classdef TIRFLaser488 < mic.lightsource.abstract
+    % mic.lightsource.NewportLaser488: Matlab Instrument Class for Newport Cyan Laser 488 on TIRF microscope.
     %
     % ## Description
-    %      The `MIC_TIRFLaser488` is a MATLAB instrument class for controlling the Newport Cyan Laser 488 used in
+    %      The `mic.lightsource.TIRFLaser488` is a MATLAB instrument class for controlling the Newport Cyan Laser 488 used in
     %      TIRF (Total Internal Reflection Fluorescence) microscopy setups. It integrates functionalities for managing
     %      laser power through ND (Neutral Density) filter wheels and a shutter for toggling the laser ON and OFF.
     %
     % ## Requirements
-    % - `MIC_Abstract.m`
-    % - `MIC_LightSource_Abstract.m`
-    % - `MIC_FilterWheel.m`
-    % - `MIC_DynamixelServo.m`
-    % - `MIC_ShutterTTL.m`
+    % - `mic.abstract.m`
+    % - `mic.lightsource.abstract.m`
+    % - `mic.NDFilterWheel.m`
+    % - `mic.DynamixelServo.m`
+    % - `mic.ShutterTTL.m`
     % - MATLAB (R2016b or later)
     % - Data Acquisition Toolbox
     %
@@ -40,11 +40,11 @@ classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
     %       - Usage: obj.shutdown();
     % 
     % ## Usage
-    % To create an instance of the `MIC_TIRFLaser488` class:
+    % To create an instance of the `mic.lightsource.TIRFLaser488` class:
     % ```matlab
-    % obj = MIC_TIRFLaser488();
+    % obj = mic.lightsource.TIRFLaser488();
     % % Create an object
-    % laser = MIC_TIRFLaser488();
+    % laser = mic.lightsource.TIRFLaser488();
     %
     % % Set power to 70 mW
     % laser.setPower(70);
@@ -99,17 +99,17 @@ classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
     end
     
     methods
-        function obj=MIC_TIRFLaser488() %Constructor
+        function obj=TIRFLaser488() %Constructor
             % inheritance:
-            obj=obj@MIC_LightSource_Abstract(~nargout);
+            obj=obj@mic.lightsource.abstract(~nargout);
             % setup the shutter
-            obj.ShutterObj=MIC_ShutterTTL('Dev1','Port0/Line4');
+            obj.ShutterObj=mic.ShutterTTL('Dev1','Port0/Line4');
             % setup the filterWheels
             obj.FracTransmVals=[1 0.51 0.28 0.11 0.065 0.017]; %transmission
             obj.Transmission=obj.FracTransmVals.*obj.FracTransmVals;
             obj.FilterPos=[0 60 120 180 240 300];
-            obj.FilterWheelObj1=MIC_NDFilterWheel(1, obj.FracTransmVals, [0 60 120 180 240 300]); 
-            obj.FilterWheelObj2=MIC_NDFilterWheel(2, obj.FracTransmVals, [0 60 120 180 240 300]); 
+            obj.FilterWheelObj1=mic.NDFilterWheel(1, obj.FracTransmVals, [0 60 120 180 240 300]); 
+            obj.FilterWheelObj2=mic.NDFilterWheel(2, obj.FracTransmVals, [0 60 120 180 240 300]); 
             % ND transmission calculation
             A=obj.FracTransmVals;
             indexCounter=1;
@@ -195,7 +195,7 @@ classdef MIC_TIRFLaser488 < MIC_LightSource_Abstract
         function unitTest()
             %test of functionality 
             fprintf('Creating Object\n')
-            NL=MIC_TIRFLaser488();
+            NL=mic.lightsource.TIRFLaser488();
             fprintf('Setting to Max Output\n')
             NL.setPower(70); pause(1);
             fprintf('Turn Off\n')

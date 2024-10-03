@@ -1,5 +1,5 @@
-classdef MIC_MPBLaser < MIC_LightSource_Abstract
-    %   MIC_MPBLaser Matlab Instrument Control Class for the MPB-laser.
+classdef MPBLaser < mic.lightsource.abstract
+    %   mic.lightsource.MPBLaser Matlab Instrument Control Class for the MPB-laser.
     %
     %   ## Description
     % This class controls the PMB-laser.
@@ -19,8 +19,8 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
     % - Retrieves and sets various laser parameters such as power limits and serial number.
     %
     % ## Requirements
-    % - MIC_Abstract.m
-    % - MIC_LightSource_Abstract.m
+    % - mic.abstract.m
+    % - mic.lightsource_Abstract.m
     % - MATLAB 2014 or higher
     % - Proper installation of the laser's accompanying software.
     %
@@ -30,7 +30,7 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
     % incorrect ports do not respond and can be safely ignored.
     %
     % ## Key Methods
-    % - **Constructor (`MIC_MPBLaser()`):** Initializes the laser control by automatically finding the available communication port and setting up the laser parameters.
+    % - **Constructor (`mic.lightsource.MPBLaser()`):** Initializes the laser control by automatically finding the available communication port and setting up the laser parameters.
     % - **`setPower(Power_mW)`:** Sets the laser's power to a specified value in milliwatts.
     % - **`on()`:** Turns the laser on.
     % - **`off()`:** Turns the laser off.
@@ -41,8 +41,8 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
     %
     % ## Usage Example
     % ```matlab
-    % % Create an instance of the MIC_MPBLaser
-    % laser = MIC_MPBLaser();
+    % % Create an instance of the mic.lightsource.MPBLaser
+    % laser = mic.lightsource.MPBLaser();
     %
     % % Set the laser power
     % laser.setPower(50);  % Set power to 50 mW
@@ -82,12 +82,12 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
 
     methods (Static) 
         
-        function obj=MIC_MPBLaser
+        function obj=MPBLaser
             %This is the constructor. It iteratively go through all the ports, opens them and then
             %sends a message to them to see if we get any responce. Furthermore, it makes an object of the
             %class and sets some of the properties.
             
-            obj@MIC_LightSource_Abstract(~nargout);
+            obj@mic.lightsource.abstract(~nargout);
             
             for ii = 1:10
                 %This for-loop goes through all the ports, open them and
@@ -128,9 +128,9 @@ classdef MIC_MPBLaser < MIC_LightSource_Abstract
          function unitTest()
              %unitTest() goes through each method of the class and see if they work properly. 
              %To run this method and test the class just type
-             %"MIC_MPBLaser.unitTest()" in the command line.
+             %"mic.lightsource.MPBLaser.unitTest()" in the command line.
            try
-               TestObj=MIC_MPBLaser();
+               TestObj=mic.lightsource.MPBLaser();
                fprintf('The object was successfully created.\n');
                on(TestObj);
                fprintf('The laser is on.\n');
