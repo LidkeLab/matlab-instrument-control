@@ -11,8 +11,8 @@ function reset(obj)
 %   David J. Schodt (Lidke Lab, 2020)
 
 
-% Create a new instance of the MIC_Triggerscope class.
-TS = MIC_Triggerscope;
+% Create a new instance of the mic.Triggerscope class.
+TS = mic.Triggerscope;
 
 % Overwrite class properties in obj with those in TS.
 DefaultFields = fieldnames(TS);

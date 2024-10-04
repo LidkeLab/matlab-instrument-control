@@ -1,37 +1,37 @@
 % Run various tests on the example implementation of the Abstract 
 % classes of Matlab-Instrument-Control (MIC).  
 
-% ExampleLinearStage
+% mic.linearstage.example
 
-fprintf('ExampleLinearStage.unitTest\n');
+fprintf('mic.linearstage.example.unitTest\n');
 try
-   Example_LinearStage.unitTest()
+   mic.linearstage.example.unitTest()
 end
 
-% Example3DStage
+% mic.stage3D.example
 
-fprintf('Example3DStage.unitTest\n');
+fprintf('mic.stage3D.example.unitTest\n');
 try
-   Example_3DStage.unitTest()
+   mic.stage3D.example.unitTest()
 end
 
-% ExamplePowerMeter
+% mic.powermeter.example
 
-fprintf('ExamplePowerMeter.unitTest\n');
+fprintf('mic.powermeter.example.unitTest\n');
 try
-   Example_PowerMeter.unitTest()
+   mic.powermeter.example.unitTest()
 end
 
-% ExampleLightSource
+% mic.lightsource.example
 
-fprintf('ExampleLightSource.unitTest\n');
+fprintf('mic.lightsource.example.unitTest\n');
 try
-   Example_LightSource.unitTest()
+   mic.lightsource.example.unitTest()
 end
 
-% ExampleCameraModel
+% mic.camera.example
 
-fprintf('ExampleCamera.unitTest\n');
+fprintf('mic.camera,example.unitTest\n');
 try
-   Example_Camera.unitTest();
+   mic.camera.example.unitTest();
 end
