@@ -16,7 +16,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.PyDcam](../src/+mic/+camera/@PyDcam/Readme.md) | control a camera through a Python interface
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.ThorlabsIR](../src/+mic/+camera/@ThorlabsIR/Readme.md) | control a Thorlabs IR camera
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.ThorlabsSICamera](../src/+mic/+camera/@ThorlabsSICamera/Readme.md) | control a Thorlabs Scientific Camera via a USB port
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.IRSyringPump](../src/+mic/@IRSyringPump/Readme.md) | use the Syringe Pump at the same time data is taken with IRCamera
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.IRSyringPump](../src/+mic/+camera/@IRSyringPump/Readme.md) | use the Syringe Pump at the same time data is taken with IRCamera
 &nbsp;&nbsp;&nbsp;[mic.lightsource.abstract](../src/+mic/+lightsource/@abstract/Readme.md) | abstract class for all light source devices
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.CoherentLaser561](../src/+mic/+lightsource/@CoherentLaser561/Readme.md) | coherent Sapphire laser 561
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.CrystaLaser405](../src/+mic/+lightsource/@CrystaLaser405/Readme.md) | CrystaLaser 405 nm
@@ -36,9 +36,11 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.linearstage.KCubePiezo](../src/+mic/+linearstage/@KCubePiezo/Readme.md) | control a Thorlabs KCube Piezo stage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.linearstage.MCLMicroDrive](../src/+mic/+linearstage/@MCLMicroDrive/Readme.md) | control a Mad City Labs Micro Stage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.linearstage.TCubePiezo](../src/+mic/+linearstage/@TCubePiezo/Readme.md) | control a Thorlabs TCube Piezo stage
-&nbsp;&nbsp;&nbsp;[mic.powermeter.abstract](../src/+mic/+powermeter.@abstract/Readme.md) |  control a power meter (PM100D)
+&nbsp;&nbsp;&nbsp;[mic.powermeter.abstract](../src/+mic/+powermeter/@abstract/Readme.md) |  control a power meter (PM100D)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.powermeter.PM100D](../src/+mic/+powermeter/@PM100D/Readme.md) | control the power meter PM100D
-&nbsp;&nbsp;&nbsp;[mic.APTPiezo](../src/+mic/@APTPiezo/Readme.md) | control the Thorlabs APT piezo
+&nbsp;&nbsp;&nbsp;[mic.stage3D.abstract](../src/+mic/+stage3D/@abstract/Readme.md) | abstract class for all stages
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.stage3D.MCLNanoDrive](../src/+mic/+stage3D/@MCLNanoDrive/Readme.md) | control a 3D Peizo stage from Mad City Labs
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.stage3D.NanoMaxPiezos](../src/+mic/+stage3D/@NanoMaxPiezos/Readme.md) | in a Thorlabs NanoMax stage
 &nbsp;&nbsp;&nbsp;[mic.Attenuator](../src/+mic/@Attenuator/Readme.md) | control the Attenuator
 &nbsp;&nbsp;&nbsp;[mic.BiochemValve](../src/+mic/@BiochemValve/Readme.md) | control the BIOCHEM flow selection valves
 &nbsp;&nbsp;&nbsp;[mic.CavroSyringePump](../src/+mic/@CavroSyringePump/Readme.md) | control the Cavro syringe pump PN 20740556 -D
@@ -56,9 +58,6 @@
 &nbsp;&nbsp;&nbsp;[mic.Reg3DTrans](../src/+mic/@Reg3DTrans/Readme.md) | register a sample to a stack of transmission images
 &nbsp;&nbsp;&nbsp;[mic.ShutterELL6](../src/+mic/@ShutterELL6/Readme.md) | control slider ELL6, which can be used as a shutter (or filter slider)
 &nbsp;&nbsp;&nbsp;[mic.ShutterTTL](../src/+mic/@ShutterTTL/Readme.md) | control a Thorlabs SH05 shutter via a Thorlabs KSC101 solenoid controller
-&nbsp;&nbsp;&nbsp;[mic.stage3D.abstract](../src/+mic/+stage3D/@abstract/Readme.md) | abstract class for all stages
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.stage3D.MCLNanoDrive](../src/+mic/+stage3D/@MCLNanoDrive/Readme.md) | control a 3D Peizo stage from Mad City Labs
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.stage3D.NanoMaxPiezos](../src/+mic/+stage3D/@NanoMaxPiezos/Readme.md) | in a Thorlabs NanoMax stage
 &nbsp;&nbsp;&nbsp;[mic.StepperMotor](../src/+mic/@StepperMotor/Readme.md) | control Benchtop stepper motor
 &nbsp;&nbsp;&nbsp;[mic.SyringePump](../src/+mic/@SyringePump/Readme.md) | control Syringe Pump by kdScientific (Model: LEGATO100)
 &nbsp;&nbsp;&nbsp;[mic.Triggerscope](../src/+mic/@Triggerscope/Readme.md) | control a Triggerscope (written for 3B and 4)
