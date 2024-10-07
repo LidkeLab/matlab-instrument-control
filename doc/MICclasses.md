@@ -14,8 +14,11 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_AndorCameraZyla](../@MIC_AndorCameraZyla/Readme.md) | control an Andor camera
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_DCAM4Camera](../@MIC_DCAM4Camera/Readme.md) | control a Hamamatsu camera using the DCAM4 API
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_HamamatsuCamera](../@MIC_HamamatsuCamera/Readme.md) | control a Hamamatsu camera
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_Imaq](../@MIC_Imaq/Readme.md) | class designed for camera control using the Image Acquisition Toolbox
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_IMGSourceCamera](../@MIC_IMGSourceCamera/Readme.md) | control an ImagingSource camera
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_PyDcam](../@MIC_PyDcam/Readme.md) | control a camera through a Python interface
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_ThorlabsIR](../@MIC_ThorlabsIR/Readme.md) | control a Thorlabs IR camera
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_ThorlabsSICamera](../@MIC_ThorlabsSICamera/Readme.md) | control a Thorlabs Scientific Camera via a USB port
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_IRSyringPump](../@MIC_IRSyringPump/Readme.md) | use the Syringe Pump at the same time data is taken with IRCamera
 &nbsp;&nbsp;&nbsp;[@MIC_LightSource_Abstract](../@MIC_LightSource_Abstract/Readme.md) | abstract class for all light source devices
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[@MIC_CoherentLaser561](../@MIC_CoherentLaser561/Readme.md) | coherent Sapphire laser 561
@@ -45,6 +48,7 @@
 &nbsp;&nbsp;&nbsp;[@MIC_DMP40](../@MIC_DMP40/Readme.md) | control the Deformable Mirror
 &nbsp;&nbsp;&nbsp;[@MIC_DynamixelServo](../@MIC_DynamixelServo/Readme.md) | Dynamixel Servos are used to control the rotation of filter wheels
 &nbsp;&nbsp;&nbsp;[@MIC_ExampleInstrument](../@MIC_ExampleInstrument/Readme.md) | template for implementing classes inheriting from MIC_Abstract
+&nbsp;&nbsp;&nbsp;[@MIC_FlipMountLaser](../@MIC_FlipMountLaser/Readme.md) | control a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M controller
 &nbsp;&nbsp;&nbsp;[@MIC_FlipMountTTL](../@MIC_FlipMountTTL/Readme.md) | control a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M controller
 &nbsp;&nbsp;&nbsp;[@MIC_GalvoAnalog](../@MIC_GalvoAnalog/Readme.md) | control the Galvo mirror
 &nbsp;&nbsp;&nbsp;[@MIC_GalvoDigital](../@MIC_GalvoDigital/Readme.md) | control the Cambridge Technology galvo mirror on the HSM microscope
