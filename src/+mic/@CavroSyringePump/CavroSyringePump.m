@@ -2,7 +2,7 @@ classdef CavroSyringePump < mic.abstract
 % mic.CavroSyringePump Class 
 % 
 % ## Description
-% The `MIC_CavroSyringePump` class controls a Cavro syringe pump via USB, specifically designed for 
+% The `mic.CavroSyringePump` class controls a Cavro syringe pump via USB, specifically designed for 
 % pump PN 20740556 -D. This class may work with other Cavro brand syringe pumps but has only been tested with the 
 % specified model. It can perform any operation described in the Cavro XP3000 operators manual (e.g. in Appendix G - Command Quick Reference). 
 % 

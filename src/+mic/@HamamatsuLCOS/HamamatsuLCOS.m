@@ -1,5 +1,5 @@
 classdef HamamatsuLCOS < mic.abstract
-    % MIC_HamamatsuLCOS: Matlab Instrument Control of Hamamatsu LCOS SLM
+    % mic.HamamatsuLCOS: Matlab Instrument Control of Hamamatsu LCOS SLM
     %
     % ## Description
     % This class controls a phase SLM connected through a DVI interface.

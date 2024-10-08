@@ -1,13 +1,13 @@
-classdef MIC_ShutterELL6 < MIC_Abstract 
-    %  MIC_ShutterELL6
+classdef ShutterELL6 < mic.abstract 
+    %  mic.ShutterELL6
     %
     % ## Overview
-    % MIC_ShutterELL6 Matlab Instrument Control Class for the 2-position
+    % mic.ShutterELL6 Matlab Instrument Control Class for the 2-position
     % slider ELL6, which can be used as a shutter (or filter slider).
     % This class controls an Elliptec ELL6 shutter, which is USB
     % connected via a rs232-to-USB2.0 board.  The shutter and the board are
     % delivered as a package, see the Thorlabs catalog, # ELL6K.
-    % Make the object by: obj=MIC_ShutterELL6('COM#',Shutter#)where:
+    % Make the object by: obj=mic.ShutterELL6('COM#',Shutter#)where:
     % COM# = the number string of the RS232 com port reserved for the shutter;
     % Shutter# = the address string of the shutter motor, default '0', it
     % can be between 0 and F.
@@ -20,17 +20,17 @@ classdef MIC_ShutterELL6 < MIC_Abstract
     % - Comprehensive unit testing to ensure functionality.
     %
     % ## Requirements
-    % - MIC_Abstract.m
+    % - mic.abstract.m
     % - Data Acquisition Toolbox on MATLAB
     % - MATLAB 2014b or higher
     %
     % ## Note
-    % To use the `MIC_ShutterELL6` class, ensure that the required files are in your MATLAB path.
+    % To use the `mic.ShutterELL6` class, ensure that the required files are in your MATLAB path.
     %
     % ## Usage
-    % To create an instance of the `MIC_ShutterELL6` class, specify the COM port and shutter address as arguments:
+    % To create an instance of the `mic.ShutterELL6` class, specify the COM port and shutter address as arguments:
     % ```matlab
-    % shutter = MIC_ShutterELL6('COM3', '0');
+    % shutter = mic.ShutterELL6('COM3', '0');
     % shutter.open();  % Opens the shutter
     % shutter.close(); % Closes the shutter
     % shutter.gui();
@@ -51,15 +51,15 @@ classdef MIC_ShutterELL6 < MIC_Abstract
         RS232=[];
         openstr;
         closestr;
-        StartGUI = 0; %uses MIC_Abstract to bring up the GUI (so, no need for a gui function in MIC_ShutterTTL)
+        StartGUI = 0; %uses mic.abstract to bring up the GUI (so, no need for a gui function in mic.ShutterTTL)
 %         Position  %either 1 or 0 (to show open or close respectively)
     end
     
     methods
-        function obj = MIC_ShutterELL6(Comport,ShutterAddress) % constructor
-            obj = obj@MIC_Abstract(~nargout);
+        function obj = ShutterELL6(Comport,ShutterAddress) % constructor
+            obj = obj@mic.abstract(~nargout);
             if nargin<2
-                error('MIC_ShutterELL6:COMPORT# and Shutter# must be defined')
+                error('mic.ShutterELL6:COMPORT# and Shutter# must be defined')
             end
             
             
@@ -148,19 +148,19 @@ classdef MIC_ShutterELL6 < MIC_Abstract
     
     
     methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
-        % test this class on command line by: MIC_ShutterELL6.funcTest('Comport','ShutterAddress')
+        % test this class on command line by: mic.ShutterELL6.funcTest('Comport','ShutterAddress')
         function State=funcTest(Comport,ShutterAddress)
             % Unit test of object functionality
             
             if nargin<2
-                error('MIC_ShutterELL6: COMPORT# and Shutter# must be defined')
+                error('mic.ShutterELL6: COMPORT# and Shutter# must be defined')
             end
             
-           % release(MIC_ShutterELL6('Comport', 'ShutterAddress'))
+           % release(mic.ShutterELL6('Comport', 'ShutterAddress'))
             %Create an Object and Test open, close
             fprintf('Creating Object\n')
             % release()
-            S=MIC_ShutterELL6(Comport,ShutterAddress);
+            S=mic.ShutterELL6(Comport,ShutterAddress);
             S.open;
             fprintf('Shutter Open\n')
             pause(.5);
@@ -171,7 +171,7 @@ classdef MIC_ShutterELL6 < MIC_Abstract
             clear S;
             %Create an Object and Repeat Test
             fprintf('Creating Object\n')
-            S=MIC_ShutterELL6(Comport,ShutterAddress);
+            S=mic.ShutterELL6(Comport,ShutterAddress);
             S.open;
             fprintf('Shutter Open\n')
             pause(.5);

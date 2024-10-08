@@ -1,5 +1,5 @@
 classdef OptotuneLens < mic.abstract
-% MIC_OptotuneLens
+% mic.OptotuneLens
 % 
 % ## Description
 % The `mic.OptotuneLens` MATLAB class facilitates control over an Optotune Electrical Lens via serial communication. The class interfaces with the lens using an embedded Atmel ATmega32U4 microcontroller, allowing for precise adjustments of focal power and monitoring of the lens temperature.

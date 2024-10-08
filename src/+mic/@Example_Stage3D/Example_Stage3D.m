@@ -51,7 +51,7 @@ classdef Example_Stage3D < mic.stage3D.abstract
         function gui(obj)
             %gui Graphical User Interface to mic.stage.abstract
             
-            h = findall(0,'tag','MIC_3DStage_Abstract_gui');
+            h = findall(0,'tag','mic.stage3D.abstract_gui');
             %Prevent opening more than one figure for same instrument
             if ~(isempty(h))
                 figure(h);
@@ -75,7 +75,7 @@ classdef Example_Stage3D < mic.stage3D.abstract
             guiFig = figure('Units','pixels','Position',[xst yst xsz ysz],...
                 'MenuBar','none','ToolBar','none','Visible','on',...
                 'NumberTitle','off','UserData',0,...
-                'Tag','MIC_3DStage_Abstract_gui','HandleVisibility','off');
+                'Tag','mic.stage3D.abstract_gui','HandleVisibility','off');
             defaultBackground = get(0,'defaultUicontrolBackgroundColor');
             set(guiFig,'Color',defaultBackground)
             

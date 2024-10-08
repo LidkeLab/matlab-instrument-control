@@ -1,37 +1,37 @@
 % Run various tests on the example implementation of the Abstract 
 % classes of Matlab-Instrument-Control (MIC).  
 
-% mic.linearstage.example
+% mic.camera.example
 
-fprintf('mic.linearstage.example.unitTest\n');
+fprintf('mic.camera,example.funcTest ...\n');
 try
-   mic.linearstage.example.unitTest()
-end
-
-% mic.stage3D.example
-
-fprintf('mic.stage3D.example.unitTest\n');
-try
-   mic.stage3D.example.unitTest()
-end
-
-% mic.powermeter.example
-
-fprintf('mic.powermeter.example.unitTest\n');
-try
-   mic.powermeter.example.unitTest()
+   mic.camera.example.funcTest();
 end
 
 % mic.lightsource.example
 
-fprintf('mic.lightsource.example.unitTest\n');
+fprintf('mic.lightsource.example.funcTest ...\n');
 try
-   mic.lightsource.example.unitTest()
+   mic.lightsource.example.funcTest()
 end
 
-% mic.camera.example
+% mic.linearstage.example
 
-fprintf('mic.camera,example.unitTest\n');
+fprintf('mic.linearstage.example.funcTest ...\n');
 try
-   mic.camera.example.unitTest();
+   mic.linearstage.example.funcTest()
+end
+
+% mic.powermeter.example
+
+fprintf('mic.powermeter.example.funcTest ...\n');
+try
+   mic.powermeter.example.funcTest()
+end
+
+% mic.stage3D.example
+
+fprintf('mic.stage3D.example.funcTest ...\n');
+try
+   mic.stage3D.example.funcTest()
 end

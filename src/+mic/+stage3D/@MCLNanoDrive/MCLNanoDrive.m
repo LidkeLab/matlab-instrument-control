@@ -175,7 +175,7 @@ classdef MCLNanoDrive < mic.stage3D.abstract
             obj.LastError = obj.callNano('MCL_SingleWriteN',z,3,obj.handle);
             obj.errorcheck('MCL_SingleWriteN',z,3);            
             %This updates the gui if it exists
-            h = findall(0,'tag','MIC_MCLNanoDrive_gui');
+            h = findall(0,'tag','mic.powermeter.MCLNanoDrive_gui');
             if ~(isempty(h))
                 handles=guidata(h);
                 X=obj.Position;

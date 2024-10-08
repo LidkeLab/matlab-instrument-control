@@ -1,5 +1,5 @@
 classdef GalvoDigital < mic.abstract
-    % MIC_GalvoDigital: Matlab instrument class to control Galvo Mirror using digital input
+    % mic.GalvoDigital: Matlab instrument class to control Galvo Mirror using digital input
     %
     % ## Description
     %  This class controls the galvo mirror (Cambridge Technology)on the  

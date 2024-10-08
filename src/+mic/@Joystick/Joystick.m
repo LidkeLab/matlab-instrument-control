@@ -16,12 +16,12 @@ classdef Joystick < handle
     % You use the up and down yellow buttons (buttons(1,1) and buttons(1,3)) to 
     % move in z. Press the blue A button(buttons(1,7)) to center the Stage.
     %                Stg.gui
-    %                JS=MIC_Joystick()
+    %                JS=mic.Joystick()
     %                JS.StageObj=Stg
     %                JS.gui
     %
     % ## REQUIRES:
-    % MIC_MCLNanoDrive
+    % mic.stage3D.MCLNanoDrive
     % HebiJoystick: https://www.mathworks.com/matlabcentral/fileexchange/61306-hebirobotics-matlabinput
     
     % ###Citation: Sajjad Khan, Lidkelab, 2024.

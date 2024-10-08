@@ -1,8 +1,8 @@
 classdef H5 
-% MIC_H5 Class: MIC_H5 A collection of static methods for working with HDF5 files 
+% mic.H5 Class: mic.H5 A collection of static methods for working with HDF5 files 
 % 
 % ## Description
-% The `MIC_H5` class is designed for handling HDF5 file operations in MATLAB. 
+% The `mic.H5` class is designed for handling HDF5 file operations in MATLAB. 
 %  It includes static methods to create files, write data asynchronously, and manage data groups within HDF5 files. 
 %  This class leverages MATLAB's capabilities to interact with large datasets efficiently.
 % 
@@ -18,13 +18,13 @@ classdef H5
 % data = uint16(2^16 * rand(256, 512, 10));
 % 
 % % Create a new HDF5 file
-% MIC_H5.createFile(File);
+% mic.H5.createFile(File);
 % 
 % % Create a new group within the file
-% MIC_H5.createGroup(File, 'Data');
+% mic.H5.createGroup(File, 'Data');
 % 
 % % Write data asynchronously to the 'Data' group
-% MIC_H5.writeAsync_uint16(File, 'Data', 'data1', data);
+% mic.H5.writeAsync_uint16(File, 'Data', 'data1', data);
 % 
 % % Display the structure of the HDF5 file
 % h5disp(File);

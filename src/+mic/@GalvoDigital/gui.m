@@ -10,7 +10,7 @@
 % CITATION: Hanieh Mazloom-Farsibaf, Lidlelab, 2017.
 
 function guiFig = gui(obj)
-%gui Graphical User Interface to MIC_LightSource_Abstract
+%gui Graphical User Interface to mic.lightsource.abstract
 
 %Prevent opening more than one figure for same instrument
 if ishandle(obj.GuiFigure)

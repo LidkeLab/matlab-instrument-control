@@ -220,7 +220,7 @@ for ii = 1:numel(DesiredGroups)
         for jj = 1:numel(SubgroupNames)
             % Iteratively explore subgroups of the desired
             % group to store their attributes and data.
-            SubgroupStructure = MIC_H5.readH5File(FilePath, ...
+            SubgroupStructure = mic.H5.readH5File(FilePath, ...
                 SubgroupNames{jj});
             
             % Remove the path information from the subgroup name, e.g. 

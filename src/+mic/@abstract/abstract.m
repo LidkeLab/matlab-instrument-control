@@ -1,5 +1,5 @@
 classdef abstract < handle
-    % MIC_Abstract Matlab Instrumentation Control Abstract Class
+    % mic.abstract Matlab Instrumentation Control Abstract Class
     % 
     % ## Description
     % This abstract class defines a set of Properties and methods that must
