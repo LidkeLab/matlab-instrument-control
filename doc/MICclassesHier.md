@@ -7,7 +7,7 @@
 [mic.Joystick](../src/+mic/@Joystick/Readme.md) | control the TIRF stage with a joystick
 [mic.abstract](../src/+mic/@abstract/Readme.md) | Matlab Instrument Control abstract class
 &nbsp;&nbsp;&nbsp;[mic.camera.abstract](../src/+mic/+camera/@abstract/Readme.md) | common interface for all cameras
-&nbsp;&nbsp;&nbsp;&nbsp;&bnsp;&bnsp;[mic.camera.example](../src/+mic/+camera/@example/Readme.md) | template for implementing classes inheriting from mic.camera.abstract
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.example](../src/+mic/+camera/@example/Readme.md) | template for implementing classes inheriting from mic.camera.abstract
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.AndorCamera](../src/+mic/+camera/@AndorCamera/Readme.md) | control an Andor camera
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.AndorCameraZyla](../src/+mic/+camera/@AndorCameraZyla/Readme.md) | control an Andor camera
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.DCAM4Camera](../src/+mic/+camera/@DCAM4Camera/Readme.md) | control a Hamamatsu camera using the DCAM4 API
@@ -19,7 +19,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.ThorlabsSICamera](../src/+mic/+camera/@ThorlabsSICamera/Readme.md) | control a Thorlabs Scientific Camera via a USB port
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.camera.IRSyringPump](../src/+mic/+camera/@IRSyringPump/Readme.md) | use the Syringe Pump at the same time data is taken with IRCamera
 &nbsp;&nbsp;&nbsp;[mic.lightsource.abstract](../src/+mic/+lightsource/@abstract/Readme.md) | abstract class for all light source devices
-&nbsp;&bnsp;&bnsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.example](../src/+mic/+lightsource/@example/Readme.md) | template for implementing classes inheriting from mic.lightsource.abstract
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.example](../src/+mic/+lightsource/@example/Readme.md) | template for implementing classes inheriting from mic.lightsource.abstract
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.CoherentLaser561](../src/+mic/+lightsource/@CoherentLaser561/Readme.md) | coherent Sapphire laser 561
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.CrystaLaser405](../src/+mic/+lightsource/@CrystaLaser405/Readme.md) | CrystaLaser 405 nm
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.CrystaLaser561](../src/+mic/+lightsource/@CrystaLaser561/Readme.md) | CrystaLaser 561 nm
@@ -35,15 +35,15 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.TIRFLaser488](../src/+mic/+lightsource/@TIRFLaser488/Readme.md) | control Newport Cyan Laser 488 on the TIRF microscope
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.lightsource.VortranLaser488](../src/+mic/+lightsource/@VortranLaser488/Readme.md) | control Vortran Laser 488
 &nbsp;&nbsp;&nbsp;[mic.linearstage.abstract](../src/+mic/+linearstage/@abstract/Readme.md) | abstract class for linear stages
-&nbsp;&bnsp;&bnsp;&nbsp;&nbsp;&nbsp;[mic.linearstage.example](../src/+mic/+linearstage/@example/Readme.md) | template for implementing classes inheriting from mic.linearstage.abstract
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.linearstage.example](../src/+mic/+linearstage/@example/Readme.md) | template for implementing classes inheriting from mic.linearstage.abstract
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.linearstage.KCubePiezo](../src/+mic/+linearstage/@KCubePiezo/Readme.md) | control a Thorlabs KCube Piezo stage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.linearstage.MCLMicroDrive](../src/+mic/+linearstage/@MCLMicroDrive/Readme.md) | control a Mad City Labs Micro Stage
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.linearstage.TCubePiezo](../src/+mic/+linearstage/@TCubePiezo/Readme.md) | control a Thorlabs TCube Piezo stage
 &nbsp;&nbsp;&nbsp;[mic.powermeter.abstract](../src/+mic/+powermeter/@abstract/Readme.md) | control a power meter (PM100D)
-&nbsp;&bnsp;&bnsp;&nbsp;&nbsp;&nbsp;[mic.powermeter.example](../src/+mic/+powermeter/@example/Readme.md) | template for implementing classes inheriting from mic.powermeter.abstract
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.powermeter.example](../src/+mic/+powermeter/@example/Readme.md) | template for implementing classes inheriting from mic.powermeter.abstract
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.powermeter.PM100D](../src/+mic/+powermeter/@PM100D/Readme.md) | control the power meter PM100D
 &nbsp;&nbsp;&nbsp;[mic.stage3D.abstract](../src/+mic/+stage3D/@abstract/Readme.md) | abstract class for all stages
-&nbsp;&bnsp;&bnsp;&nbsp;&nbsp;&nbsp;[mic.stage3D.example](../src/+mic/+stage3D/@example/Readme.md) | template for implementing classes inheriting from mic.stage3D.abstract
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.stage3D.example](../src/+mic/+stage3D/@example/Readme.md) | template for implementing classes inheriting from mic.stage3D.abstract
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.stage3D.MCLNanoDrive](../src/+mic/+stage3D/@MCLNanoDrive/Readme.md) | control a 3D Peizo stage from Mad City Labs
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[mic.stage3D.NanoMaxPiezos](../src/+mic/+stage3D/@NanoMaxPiezos/Readme.md) | in a Thorlabs NanoMax stage
 &nbsp;&nbsp;&nbsp;[mic.Attenuator](../src/+mic/@Attenuator/Readme.md) | control the Attenuator
