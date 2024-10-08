@@ -1097,8 +1097,8 @@ classdef Reg3DTrans < mic.abstract
         [Struct] = padStruct(Struct, DefaultStruct)
         [Image] = removeBorder(Image, Border, Direction)
     
-        function State = unitTest(camObj,stageObj,lampObj)
-            %unitTest Tests all functionality of mic.Reg3DTrans
+        function State = funcTest(camObj,stageObj,lampObj)
+            %funcTest Tests all functionality of mic.Reg3DTrans
             % 
             %  INPUT (required)
             %    CameraObj - camera object

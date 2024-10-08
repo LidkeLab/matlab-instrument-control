@@ -3,14 +3,14 @@ classdef ExampleInstrument<mic.abstract
     %  
     % ## Description
     %   This class is written to serve as a template for implementing 
-    %   classes inheriting from mic,abstract. This class also serves as a
-    %   template for the basic functions such as exportState and unitTest.
+    %   classes inheriting from mic.abstract. This class also serves as a
+    %   template for the basic functions such as exportState and funcTest.
     %
     % ## Constructor
     %   Example: obj=mic.ExampleInstrument()
     %   
     % ## Key Functions
-    % `exportState` & `unitTest`
+    % `exportState` & `funcTest`
     %
     % ## REQUIREMENTS: 
     %   mic.abstract.m
@@ -40,7 +40,7 @@ classdef ExampleInstrument<mic.abstract
     methods        
         function obj = ExampleInstrument() 
             % Constructor
-            obj = obj@mic.abstract(~nargout); % if you forget to name the object, this line will name it for you through autoname in mic,Abstract
+            obj = obj@mic.abstract(~nargout); % if you forget to name the object, this line will name it for you through autoname in mic.abstract
             gui(obj)  %let's the gui to pop-up as the class constructor runs
         end
         
@@ -54,7 +54,7 @@ classdef ExampleInstrument<mic.abstract
     end 
         
     methods (Static=true)
-        function unitTest()
+        function funcTest()
         % Tests all functionality of your methods and the ability to 
         % delete the object. You need to put code here based on the 
         % instrument and it's specific functions 

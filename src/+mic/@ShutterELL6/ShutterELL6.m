@@ -148,8 +148,8 @@ classdef MIC_ShutterELL6 < MIC_Abstract
     
     
     methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
-        % test this class on command line by: MIC_ShutterELL6.unitTest('Comport','ShutterAddress')
-        function State=unitTest(Comport,ShutterAddress)
+        % test this class on command line by: MIC_ShutterELL6.funcTest('Comport','ShutterAddress')
+        function State=funcTest(Comport,ShutterAddress)
             % Unit test of object functionality
             
             if nargin<2

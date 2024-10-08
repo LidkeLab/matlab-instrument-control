@@ -29,7 +29,7 @@ classdef BiochemValve < mic.abstract
 % - **powerSwitch24V()**: Toggles power on the 24V line that powers both the syringe pump and the BIOCHEM valves after stepping down to 12V.
 % - **openValve(ValveNumber)**: Opens the specified valve.
 % - **closeValve(ValveNumber)**: Closes the specified valve.
-% - **unitTest(SerialPort)**: Performs a unit test of the valve controller on a specified serial port.
+% - **funcTest(SerialPort)**: Performs a unit test of the valve controller on a specified serial port.
 % 
 % ## Usage
 % ```matlab
@@ -151,6 +151,6 @@ classdef BiochemValve < mic.abstract
     
     
     methods (Static)
-        unitTest(SerialPort); % READ WARNING IN unitTest.m BEFORE USE!!!!
+        funcTest(SerialPort); % READ WARNING IN funcTest.m BEFORE USE!!!!
     end
 end

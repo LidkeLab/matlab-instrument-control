@@ -179,8 +179,8 @@ A PROBLEM!!! property or event may not use the same name as the name of the clas
     
     
     methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
-        % test this class on command line by: mic.ShutterTTL.unitTest('Dev1','Port0','Line1')
-        function State=unitTest(NIDevice,DOChannel)
+        % test this class on command line by: mic.ShutterTTL.funcTest('Dev1','Port0','Line1')
+        function State=funcTest(NIDevice,DOChannel)
             % Unit test of object functionality
             
             if nargin<2

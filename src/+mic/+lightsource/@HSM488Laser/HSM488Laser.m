@@ -124,7 +124,7 @@ classdef HSM488Laser<mic.lightsource.abstract
     end
     
     methods (Static=true)
-        function unitTest()
+        function funcTest()
             % Unit test of object functionality
             if nargin<1
                 error('mic.lightsource.HSM488Laser::SerialPort must be defined')

@@ -50,7 +50,7 @@ classdef PM100D < mic.powermeter.abstract
             % Measure the limits of the wavelength.
             obj.Limits=minMaxWavelength(obj);
         end 
-      function unitTest()
+      function funcTest()
           %testing the class.
           try
           TestObj=mic.powermeter.PM100D();

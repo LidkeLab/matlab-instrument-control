@@ -6,7 +6,7 @@ classdef NDFilterWheel < mic.abstract
     %  General Info and Documents\TIRF Microscope\Build Instructions for 
     %  Filter Wheel Setup.doc"
     %  This class works with an arbitrary number of filters
-    %  To create a mic,NDFilterWheel object the position and transmittance
+    %  To create a mic.NDFilterWheel object the position and transmittance
     %  of each filter must be specified. The position must be given in
     %  degrees rotation corresponding to the input of the servo. This 
     %  can be calibrated by setting the servo rotation such that the 
@@ -65,7 +65,7 @@ classdef NDFilterWheel < mic.abstract
                 error('mic.NDFilterWheel:narginhigh','Too many input arguments, 3 inputs required');
             end
             if ServoId < 1 || ServoId > 255
-                error('mic,NDFilterWheel:id','Invalid servo id');
+                error('mic.NDFilterWheel:id','Invalid servo id');
             end
             if numel(FracTransmVals) ~= numel(FilterPos)
                 error('mic.NDFilterWheel:InputSizes','FracTransmVals and FilterPos inputs should have the same number of elements');
@@ -172,8 +172,8 @@ classdef NDFilterWheel < mic.abstract
     end
     
     methods(Static)
-        function State = unitTest(ServoId,FracTransmVals,FilterPos)
-            % mic.NDFilterWheel.unitTest(ServoId,FracTransmVals,FilterPos)
+        function State = funcTest(ServoId,FracTransmVals,FilterPos)
+            % mic.NDFilterWheel.funcTest(ServoId,FracTransmVals,FilterPos)
             % performs test of all mic.NDFilterWheel functionality
             %
             % INPUT (required)

@@ -1,4 +1,4 @@
-% gui: Graphical User Interface to mic,GalvoDigital
+% gui: Graphical User Interface to mic.GalvoDigital
 %
 % Functions: gui2properties, properties2gui, closeFigure, CalAngle,
 %            setAngle_Button, setParameters_Button, ToggleGalvo

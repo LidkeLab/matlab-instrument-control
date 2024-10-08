@@ -322,7 +322,7 @@ PROBLEM!!! A property or event may not use the same name as the name of the clas
         gui(obj, GUIParent)
         triggerArrayGUI(obj, GUIParent)
         reset(obj)
-        unitTest(obj)
+        funcTest(obj)
         
     end
     

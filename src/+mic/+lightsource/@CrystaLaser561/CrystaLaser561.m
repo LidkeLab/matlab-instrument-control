@@ -102,11 +102,11 @@ classdef CrystaLaser561 < mic.lightsource.abstract
         end
     end
     methods (Static=true)
-        function unitTest(NIDevice,DOChannel)
+        function funcTest(NIDevice,DOChannel)
             % unit test of object functionality
-            % Syntax: mic.lightsource.CrystaLaser561.unitTest(NIDevice,DOChannel)
+            % Syntax: mic.lightsource.CrystaLaser561.funcTest(NIDevice,DOChannel)
             % Example:
-            % mic.lightsource.CrystaLaser561.unitTest('Dev1','Port0/Line0:1')
+            % mic.lightsource.CrystaLaser561.funcTest('Dev1','Port0/Line0:1')
 
             fprintf('Creating Object\n')
             CL=mic.lightsource.CrystaLaser561(NIDevice,DOChannel);

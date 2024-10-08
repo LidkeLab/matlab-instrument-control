@@ -287,7 +287,7 @@ classdef MCLNanoDrive < mic.stage3D.abstract
     
     methods (Static)
         
-        function Success=unitTest()
+        function Success=funcTest()
             
             try
                 fprintf('Creating Object\n')

@@ -187,9 +187,9 @@ classdef Attenuator < mic.abstract
         
     end
         methods (Static=true)
-            function unitTest(NIDevice,AOChannel)
+            function funcTest(NIDevice,AOChannel)
                 % Unit test of object functionality
-                % Example: mic.Attenuator.unitTest('Dev1','ao1')
+                % Example: mic.Attenuator.funcTest('Dev1','ao1')
                 try
                    TestObj=mic.Attenuator(NIDevice,AOChannel);
                    fprintf('The object was successfully created.\n');

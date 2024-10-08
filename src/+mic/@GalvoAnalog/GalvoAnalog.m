@@ -6,7 +6,7 @@ classdef GalvoAnalog < mic.abstract
     %  via output voltage of NI card. The operating range is -10:10 Volts
     %
     % ## Constructor
-    %   obj=mic,GalvoAnalog('Dev1','ao1');
+    %   obj=mic.GalvoAnalog('Dev1','ao1');
     %
     %  ## Key Functions: delete, exportState, setVoltage 
     %
@@ -75,7 +75,7 @@ classdef GalvoAnalog < mic.abstract
     
     methods (Static=true)
         
-        function unitTest(NIDevice,AOChannel)
+        function funcTest(NIDevice,AOChannel)
             % Testing the functionality of the instrument
             fprintf('Creating Object\n')
             Galvo=mic.GalvoAnalog(NIDevice,AOChannel);

@@ -102,9 +102,9 @@ classdef VortranLaser488 < mic.lightsource.abstract
         end
     end
             methods (Static=true)
-            function unitTest(NIDevice,AOChannel)
+            function funcTest(NIDevice,AOChannel)
                 % unit test of object functionality
-                % Example: VL=mic.lightsource.Vortranlaser488.unitTest('Dev1','ao1')
+                % Example: VL=mic.lightsource.Vortranlaser488.funcTest('Dev1','ao1')
                 fprintf('Creating Object\n')
                 VL=mic.lightsource.VortranLaser488(NIDevice,AOChannel);
                 fprintf('Setting to Max Output\n')

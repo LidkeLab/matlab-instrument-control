@@ -208,9 +208,9 @@ classdef TCubePiezo < mic.linearstage.abstract
         
     end
         methods (Static=true)
-            function Success=unitTest(SNP,SNSG,AxisLabel)
+            function Success=funcTest(SNP,SNSG,AxisLabel)
                 % Unit test of object functionality
-                % Example: mic.linearstage.TCubePiezo.unitTest('81843229','84842506','X')
+                % Example: mic.linearstage.TCubePiezo.funcTest('81843229','84842506','X')
                 
                 if nargin<3
                     error('mic.linearstage.TCubePiezo::SerialNoTPZ001,SerialNoTSG001,AxisLabel must be defined')

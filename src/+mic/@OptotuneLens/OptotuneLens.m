@@ -58,7 +58,7 @@ classdef OptotuneLens < mic.abstract
         function obj = OptotuneLens(ComPort)
             % mic.OptotuneLens
             % Example:
-            %   ETL = mic,OptotuneLens('COM3')
+            %   ETL = mic.OptotuneLens('COM3')
             
             % enable autonaming feature of mic.abstract
             obj = obj@mic.abstract(~nargout);
@@ -75,7 +75,7 @@ classdef OptotuneLens < mic.abstract
             fread(obj.SPO,6);
             % check answer
             if ~strfind(Answer,'Ready')
-                error('mic,OptotuneLens:HardwareCommErr','Error in communication with Optotune Lens');
+                error('mic.OptotuneLens:HardwareCommErr','Error in communication with Optotune Lens');
             end
             
             % get the firmware type
@@ -172,7 +172,7 @@ classdef OptotuneLens < mic.abstract
         end
         
         function [Attributes,Data,Children]=exportState(obj)
-            % Exports current state of mic,OptotuneLens object
+            % Exports current state of mic.OptotuneLens object
             Attributes.InstrumentName = obj.InstrumentName;
             Attributes.MinFocalPower = obj.MinFocalPower;
             Attributes.MaxFocalPower = obj.MaxFocalPower;
@@ -369,19 +369,19 @@ classdef OptotuneLens < mic.abstract
             end
             StatusBin = dec2bin(Status(1),8);
             if StatusBin(1)
-                warning('mic,OptotuneLens:StatusByte',...
+                warning('mic.OptotuneLens:StatusByte',...
                     'Temperature out of range specified by user')
             end
             if StatusBin(2)
-                warning('mic,OptotuneLens:StatusByte',...
+                warning('mic.OptotuneLens:StatusByte',...
                     'Focal power out of guaranteed range (defined by user set temperature range) ')
             end
             if StatusBin(3)
-                warning('mic,OptotuneLens:StatusByte',...
+                warning('mic.OptotuneLens:StatusByte',...
                     'Temperature is outside product specifications')
             end
             if StatusBin(4)
-                warning('mic,OptotuneLens:StatusByte',...
+                warning('mic.OptotuneLens:StatusByte',...
                     'Focal power inversion (defined by user set temperature range)')
             end
             if StatusBin(5)
@@ -389,7 +389,7 @@ classdef OptotuneLens < mic.abstract
                     'Cannot reach lens focal power (Focal Power Controlled)/position (Position Controlled)')
             end
             if StatusBin(6)
-                warning('mic,OptotuneLens:StatusByte',...
+                warning('mic.OptotuneLens:StatusByte',...
                     'No temperature limits received (for controlled mode)')
             end
             if StatusBin(7)
@@ -397,13 +397,13 @@ classdef OptotuneLens < mic.abstract
                     'Bit 1 equal 1: No or faulty EEPROM')
             end
             if StatusBin(8)
-                warning('mic,OptotuneLens:StatusByte',...
+                warning('mic.OptotuneLens:StatusByte',...
                     'Not all hardware available')
             end
             if numel(Status)>1
                 StatusBin = dec2bin(Status(2),8);
                 if StatusBin(1)
-                    warning('mic,OptotuneLens:StatusByte',...
+                    warning('mic.OptotuneLens:StatusByte',...
                         'The connected lens is not compatible with the firmware on the lensdriver.')
                 end
             end
@@ -467,18 +467,18 @@ classdef OptotuneLens < mic.abstract
     end
     
 methods (Static)
-    function unitTest()
-        fprintf('Starting unit test for mic,OptotuneLens class.\n');
+    function funcTest()
+        fprintf('Starting unit test for mic.OptotuneLens class.\n');
         
         % Example COM port, change this as needed
         ComPort = 'COM3'; 
         
         % Create an instance of the OptotuneLens class
         try
-            optoLens = mic,OptotuneLens(ComPort);
-            fprintf('Successfully created mic,OptotuneLens object on %s.\n', ComPort);
+            optoLens = mic.OptotuneLens(ComPort);
+            fprintf('Successfully created mic.OptotuneLens object on %s.\n', ComPort);
         catch
-            error('Failed to create mic,OptotuneLens object.');
+            error('Failed to create mic.OptotuneLens object.');
         end
         
         % Test setting a specific focal power
@@ -510,12 +510,12 @@ methods (Static)
         % Clean up by deleting the instance
         try
             delete(optoLens);
-            fprintf('mic,OptotuneLens object deleted successfully.\n');
+            fprintf('mic.OptotuneLens object deleted successfully.\n');
         catch
-            error('Failed to delete mic,OptotuneLens object.');
+            error('Failed to delete mic.OptotuneLens object.');
         end
         
-        fprintf('Unit test for mic,OptotuneLens completed successfully.\n');
+        fprintf('Unit test for mic.OptotuneLens completed successfully.\n');
     end
 end
 

@@ -192,7 +192,7 @@ classdef TIRFLaser488 < mic.lightsource.abstract
     end
 
     methods (Static=true)
-        function unitTest()
+        function funcTest()
             %test of functionality 
             fprintf('Creating Object\n')
             NL=mic.lightsource.TIRFLaser488();

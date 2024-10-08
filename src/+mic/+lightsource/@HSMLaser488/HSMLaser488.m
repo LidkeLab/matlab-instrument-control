@@ -150,7 +150,7 @@ classdef HSMLaser488<mic.lightsource.abstract
     end
     
     methods (Static=true)
-        function unitTest()
+        function funcTest()
             % Testing the funcionality of the class/instrument          
             %Creating an Object and Testing setPower, on, off
             fprintf('Creating Object\n')

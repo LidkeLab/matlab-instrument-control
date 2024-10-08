@@ -110,8 +110,8 @@ classdef StepperMotor < mic.abstract
         end
     end
     methods (Static)
-        function unitTest()
-            %unittest() function to test the class.
+        function funcTest()
+            %functest() function to test the class.
             TestObj = mic.StepperMotor('70850323');
             fprintf('The comunication with the motors have been successfully initialzed.\n');
             TestObj.goHome(1);

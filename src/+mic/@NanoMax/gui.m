@@ -1,5 +1,5 @@
 function gui=gui(obj)
-%gui_NanoMax: is the graphical user interface (GUI) for mic,NanoMax.m
+%gui_NanoMax: is the graphical user interface (GUI) for mic.NanoMax.m
 
 %Prevent opening more than one figure for same instrument
 % if ishandle(obj.GuiFigureStage)

@@ -255,7 +255,7 @@ classdef example < mic.camera.abstract
     end
     
     methods(Static=true)
-        function Success = unitTest()
+        function Success = funcTest()
             disp('Starting unit test...');
             obj = mic.camera.example();
             obj.initialize();

@@ -203,7 +203,7 @@ classdef Example_LightSource < mic.lightsource.abstract
     end
     
     methods (Static=true)
-        function Success = unitTest()
+        function Success = funcTest()
             obj = mic.Example_LightSource();
             fprintf('Starting unit test for %s\n', class(obj));
             obj.setPower(50);

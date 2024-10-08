@@ -122,7 +122,7 @@ classdef RebelStarLED < mic.lightsource.abstract
         
     end
         methods (Static=true)
-            function unitTest(NIDevice,AOChannel)
+            function funcTest(NIDevice,AOChannel)
                 % Unit test of object functionality
                 
                 if nargin<2

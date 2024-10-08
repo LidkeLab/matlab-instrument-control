@@ -14,7 +14,7 @@ classdef CavroSyringePump < mic.abstract
 % ##  Functions: 
 % delete, exportState, updateGui, gui, connectSyringePump,
 % readAnswerBlock, executeCommand, reportCommand,
-% querySyringePump, cleanAnswerBlock, decodeStatusByte, unitTest
+% querySyringePump, cleanAnswerBlock, decodeStatusByte, funcTest
 % 
 % ## Usage
 % ```matlab
@@ -174,6 +174,6 @@ classdef CavroSyringePump < mic.abstract
     methods (Static)
         [ASCIIMessage, IsValid] = cleanAnswerBlock(RawASCIIMessage);
         [PumpStatus, ErrorString] = decodeStatusByte(StatusByte);
-        unitTest(SerialPort); % READ WARNING IN unitTest.m BEFORE USE!!!!
+        funcTest(SerialPort); % READ WARNING IN funcTest.m BEFORE USE!!!!
     end
 end

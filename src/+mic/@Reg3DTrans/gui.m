@@ -1,5 +1,5 @@
 function gui(obj)
-%gui Graphical User Interface to mic,Reg3DTrans
+%gui Graphical User Interface to mic.Reg3DTrans
 %   Description
 
 %   Marjolein Meddens, Lidke Lab 2017

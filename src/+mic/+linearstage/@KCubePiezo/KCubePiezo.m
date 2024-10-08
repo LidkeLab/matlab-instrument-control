@@ -30,7 +30,7 @@ classdef KCubePiezo < mic.linearstage.abstract
     %   4-check box of "Persist Settings to the Device" (in Settings)
     %
     % ## REQUIRES: 
-    %   mic,Abstract.m
+    %   mic.Abstract.m
     %   mic.linearstage,abstract.m
     %   Precompiled set of mex files Kinesis_KCube_PCC_*.mex64 and Kinesis_KCube_SG_*.mex64
     %   The following dll must be in system path or same directory as mex files: 
@@ -226,9 +226,9 @@ classdef KCubePiezo < mic.linearstage.abstract
         
     end
         methods (Static=true)
-            function Success=unitTest(SNP,SNSG,AxisLabel)
+            function Success=funcTest(SNP,SNSG,AxisLabel)
                 % Unit test of object functionality
-                % Example: mic.linearstage.KCubePiezo.unitTest('81843229','84842506','X')
+                % Example: mic.linearstage.KCubePiezo.funcTest('81843229','84842506','X')
                 
                 if nargin<3
                     error('mic.linearstage.KCubePiezo::SerialNoKPZ001,SerialNoKSG001,AxisLabel must be defined')

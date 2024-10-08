@@ -273,7 +273,7 @@ classdef Example_PowerMeter < mic.powermeter.abstract
     end
     
     methods (Static)
-        function Success = unitTest(testMode)
+        function Success = funcTest(testMode)
             if nargin < 1
                 testMode = true;  % Default to test mode
             end

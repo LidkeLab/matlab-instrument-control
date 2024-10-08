@@ -15,7 +15,7 @@ classdef FlipMountTTL < mic.abstract
     % Line# = Line number in use on the DAQ card by the Port
     %
     % ## Constructor
-    % Example: obj = mic,FlipMountTTL('Dev1', 'Port0/Line1');
+    % Example: obj = mic.FlipMountTTL('Dev1', 'Port0/Line1');
     %
     % ## Key Functions: FilterIn, FilterOut, gui, exportState
     %
@@ -46,7 +46,7 @@ classdef FlipMountTTL < mic.abstract
     methods
         function obj = FlipMountTTL(NIDevice,DOChannel) % constructor
             % when you are making an object for this class, 
-            % you should do it this way: obj= mic,FlipMountTTL('Dev1','Port0/Line1')
+            % you should do it this way: obj= mic.FlipMountTTL('Dev1','Port0/Line1')
             % of course you need to put the numbers after Dev,Port and Line
             % based on the physical connections of the shutter to your NI-DAQ card
             obj = obj@mic.abstract(~nargout);
@@ -143,8 +143,8 @@ classdef FlipMountTTL < mic.abstract
     end
     
     methods(Static=true)% 
-        % test this class on command line by: mic.FlipMountTTL.unitTest('Dev1','Port0/Line1')
-        function State=unitTest(NIDevice,DOChannel)
+        % test this class on command line by: mic.FlipMountTTL.funcTest('Dev1','Port0/Line1')
+        function State=funcTest(NIDevice,DOChannel)
             % Unit test of object functionality
             
             if nargin<2

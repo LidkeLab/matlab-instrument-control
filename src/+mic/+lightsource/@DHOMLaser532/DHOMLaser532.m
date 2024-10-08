@@ -103,9 +103,9 @@ classdef DHOMLaser532 < mic.lightsource.abstract
         end
     end
             methods (Static=true)
-            function unitTest(NIDevice,AOChannel)
+            function funcTest(NIDevice,AOChannel)
                 % unit test of object functionality
-                % Example: DL=mic.lightsource.DHOMLaser532.unitTest('Dev2','ao1')
+                % Example: DL=mic.lightsource.DHOMLaser532.funcTest('Dev2','ao1')
                 fprintf('Creating Object\n')
                 DL=mic.lightsource.DHOMLaser532(NIDevice,AOChannel);
                 fprintf('Setting to Max Output\n')

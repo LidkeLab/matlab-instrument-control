@@ -3,7 +3,7 @@ classdef ShutterLaser < mic.abstract
     %
     % This class controls on/off of a laser object
     %
-    % Example: obj=mic,ShutterLaser(laserobj);
+    % Example: obj=mic.ShutterLaser(laserobj);
     % Functions: close, open, delete, exportState 
     %
     % REQUIRES:
@@ -108,8 +108,8 @@ classdef ShutterLaser < mic.abstract
     
     
     methods(Static=true)% Static: means it can be used stand alone, without the need to make an object
-        % test this class on command line by: mic.ShutterTTL.unitTest('Dev1','Port0','Line1')
-        function State=unitTest(laserobj)
+        % test this class on command line by: mic.ShutterTTL.funcTest('Dev1','Port0','Line1')
+        function State=funcTest(laserobj)
             % Unit test of object functionality
             
 

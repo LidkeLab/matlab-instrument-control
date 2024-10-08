@@ -12,7 +12,7 @@ classdef FlipMountLaser < mic.abstract %by FF
     % Port# = Port number in use on the DAQ card by your flipmount connection
     % Line# = Line number in use on the DAQ card by the Port
     %
-    % Example: obj = mic,FlipMountTTL('Dev1', 'Port0/Line1');
+    % Example: obj = mic.FlipMountTTL('Dev1', 'Port0/Line1');
     % Functions: FilterIn, FilterOut, gui, exportState
     %
     % REQUIREMENTS:
@@ -133,8 +133,8 @@ classdef FlipMountLaser < mic.abstract %by FF
     end
     
     methods(Static=true)% 
-        % test this class on command line by: mic_FlipMountTTL.unitTest('Dev1','Port0/Line1')
-        function State=unitTest(laserobj)
+        % test this class on command line by: mic_FlipMountTTL.funcTest('Dev1','Port0/Line1')
+        function State=funcTest(laserobj)
             % Unit test of object functionality
             
 

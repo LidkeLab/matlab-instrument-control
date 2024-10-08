@@ -6,11 +6,11 @@ classdef SyringePump < mic.abstract
     % install the drivers from the given CD drivers
     %
     % ## Constructor
-    % obj=mic,SyringePump();
+    % obj=mic.SyringePump();
     %
     % ## Key Function: 
     % delete, getForce, getTarget, getTypeSyringe, setForce,
-    % setTarget, setSyringe, setRate, run, stop, exportState, unitTest
+    % setTarget, setSyringe, setRate, run, stop, exportState, funcTest
     %
     % ## REQUIREMENTS:
     %   mic.abstract.m
@@ -185,7 +185,7 @@ classdef SyringePump < mic.abstract
         end
     end
     methods (Static=true)
-        function unitTest()
+        function funcTest()
             fprintf('Creating Syringe Pump object\n');
             SP=mic.SyringePump();
             fprintf('Run the pump\n');

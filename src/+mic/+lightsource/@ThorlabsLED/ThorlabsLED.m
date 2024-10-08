@@ -166,11 +166,11 @@ classdef ThorlabsLED < mic.lightsource.abstract
         end
     end
     methods (Static=true)
-        function unitTest(NIDevice,AOChannel)
+        function funcTest(NIDevice,AOChannel)
             % Unit test of object functionality
-            % Syntax: mic.lightsource.ThorlabsLED.unitTest(NIDevice,DOChannel)
+            % Syntax: mic.lightsource.ThorlabsLED.funcTest(NIDevice,DOChannel)
             % Example:
-            % mic.lightsource.ThorlabsLED.unitTest('Dev1','ao1');
+            % mic.lightsource.ThorlabsLED.funcTest('Dev1','ao1');
             if nargin<2
                 error('mic.lightsource.RebelStarLED::NIDevice and AOChannel must be defined')
             end

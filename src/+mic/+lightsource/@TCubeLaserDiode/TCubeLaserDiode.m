@@ -18,7 +18,7 @@ classdef TCubeLaserDiode < mic.lightsource.abstract
     % TLD=mic.lightsource.TCubeLaserDiode('64864827','Power',10,100,1)
     %
     % ## Key Functions: 
-    % on, off, delete, shutdown, setPower, exportState, unitTest
+    % on, off, delete, shutdown, setPower, exportState, funcTest
     %
     % ## REQUIREMENT:
     %   mic.abstract.m
@@ -168,14 +168,14 @@ classdef TCubeLaserDiode < mic.lightsource.abstract
         
     end
     methods (Static=true)
-        function Success=unitTest(SerialNo,Mode,MaxPower,WperA,TIARange)
+        function Success=funcTest(SerialNo,Mode,MaxPower,WperA,TIARange)
             % Unit test of object functionality
             % Example:
-            %   Success=mic.lightsource.TCubeLaserDiode.unitTest('64864827','Power',10,100,1)
+            %   Success=mic.lightsource.TCubeLaserDiode.funcTest('64864827','Power',10,100,1)
             
             Success=0;
             if nargin<5
-                error('mic.lightsource.TCubeLaserDiode::unitTest: SerialNo,Mode,MaxPower,WperA,TIARange must be defined')
+                error('mic.lightsource.TCubeLaserDiode::funcTest: SerialNo,Mode,MaxPower,WperA,TIARange must be defined')
             end
             
             fprintf('Creating Object\n')

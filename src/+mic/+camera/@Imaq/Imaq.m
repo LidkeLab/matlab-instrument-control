@@ -24,7 +24,7 @@ classdef Imaq < mic.camera.abstract
 % - `valuecheck(prop, val)`: Checks and adjusts the value based on camera constraints.
 % 
 % ## Static Methods
-% - `unitTest()`: Tests the functionality of the class.
+% - `funcTest()`: Tests the functionality of the class.
 % - `camSet2GuiSel(CameraSetting)`: Converts camera settings into GUI selections.
 % 
 % ## Usage
@@ -519,7 +519,7 @@ classdef Imaq < mic.camera.abstract
 
     methods (Static)
         
-        function Success=unitTest()
+        function Success=funcTest()
             % Test fucntionality of class/instrument
             Success=0;
             %Create object

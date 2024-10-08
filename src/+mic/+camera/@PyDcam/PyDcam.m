@@ -34,7 +34,7 @@ classdef PyDcam < mic.camera.abstract
 % - `exportParameters()`: Exports current camera parameters.
 % 
 % ## Static Methods
-% - `unitTest()`: Tests the functionality of the class.
+% - `funcTest()`: Tests the functionality of the class.
 % - `camSet2GuiSel(CameraSetting)`: Converts current camera settings into GUI selections.
 % 
 % ## Usage
@@ -659,7 +659,7 @@ classdef PyDcam < mic.camera.abstract
 
     methods(Static)
         
-        function Success=unitTest()
+        function Success=funcTest()
             % Test fucntionality of class/instrument
             Success=0;
             %Create object

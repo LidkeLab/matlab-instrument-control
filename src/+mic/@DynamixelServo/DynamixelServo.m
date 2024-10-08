@@ -461,7 +461,7 @@ classdef DynamixelServo < mic.abstract
             calllib('dynamixel','dxl_terminate');
         end
         
-        function State=unitTest(Id)
+        function State=funcTest(Id)
             % Test all functionality of DynamixelServo class
             % INPUT
             %   Id    Id of servo, is written on servo

@@ -368,7 +368,7 @@ classdef Example_Stage3D < mic.stage3D.abstract
     end
     
     methods (Static=true)
-        function Success = unitTest()
+        function Success = funcTest()
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they work properly
             obj = mic.Example_Stage3D();

@@ -315,7 +315,7 @@ classdef NanoMaxPiezos < mic.stage3D.abstract
     end
     
     methods (Static)
-        function unitTest()
+        function funcTest()
             fprintf('Starting unit test for mic.stage3D.NanoMaxPiezos class.\n');
             
             % Specify example serial numbers for controllers and strain gauges

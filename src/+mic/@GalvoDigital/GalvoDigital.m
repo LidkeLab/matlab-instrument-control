@@ -314,7 +314,7 @@ classdef GalvoDigital < mic.abstract
     end
     
     methods (Static=true)
-        function unitTest(obj)
+        function funcTest(obj)
             % Testing the functionality of the class/instrument
             fprintf('Creating Object\n')
             G=mic.GalvoDigital('Dev1','Port0/Line0:31');

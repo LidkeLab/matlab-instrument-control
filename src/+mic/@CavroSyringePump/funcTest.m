@@ -1,5 +1,5 @@
-function unitTest(SerialPort)
-%WARNING!!! This unitTest should only be run in two scenarios:
+function funcTest(SerialPort)
+%WARNING!!! This funcTest should only be run in two scenarios:
 % 1) The syringe has been removed from the syringe pump.
 % 2) The In, BP, and Out ports of the syringe pump are fed to/from fluid
 %    reservoirs containing test fluid, e.g. the ports are fed to/from
@@ -61,7 +61,7 @@ Pump.reportCommand('?'); Pump.waitForReadyStatus()
 Pump.executeCommand('IA3000OA0'); Pump.waitForReadyStatus()
 Pump.executeCommand('I'); Pump.waitForReadyStatus()
 
-% Perform the destructor method to clean up after the unitTest.
+% Perform the destructor method to clean up after the funcTest.
 Pump.delete()
 
 end

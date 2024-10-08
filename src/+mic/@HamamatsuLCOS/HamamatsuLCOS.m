@@ -6,7 +6,7 @@ classdef HamamatsuLCOS < mic.abstract
     % Pupil diameter is 2*NA*f, f=M/180 for olympus objectives
     %
     % ## Constructor
-    % Example: obj = mic,HamamatsuLCOS();
+    % Example: obj = mic.HamamatsuLCOS();
     %
     % ## Key Functions: 
     %            delete, gui, exportState, setupImage, displayImage,
@@ -273,7 +273,7 @@ classdef HamamatsuLCOS < mic.abstract
     end
     
     methods (Static=true)
-        function unitTest()
+        function funcTest()
             % Tests the functionality of the class/instrument
         end        
     end

@@ -269,7 +269,7 @@ classdef example < mic.linearstage.abstract
     end
     
     methods (Static=true)
-        function Success = unitTest()
+        function Success = funcTest()
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they
             % work properly

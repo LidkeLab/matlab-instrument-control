@@ -816,7 +816,7 @@ classdef DCAM4Camera < mic.camera.abstract
     
     methods (Static)
         
-        function Success=unitTest()
+        function Success=funcTest()
             Success=0;
             %Create object
             try

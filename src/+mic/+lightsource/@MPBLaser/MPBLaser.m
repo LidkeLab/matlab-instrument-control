@@ -125,10 +125,10 @@ classdef MPBLaser < mic.lightsource.abstract
             obj.send('POWERENABLE 1'); %Sets APC Mode
         end
         
-         function unitTest()
-             %unitTest() goes through each method of the class and see if they work properly. 
+         function funcTest()
+             %funcTest() goes through each method of the class and see if they work properly. 
              %To run this method and test the class just type
-             %"mic.lightsource.MPBLaser.unitTest()" in the command line.
+             %"mic.lightsource.MPBLaser.funcTest()" in the command line.
            try
                TestObj=mic.lightsource.MPBLaser();
                fprintf('The object was successfully created.\n');

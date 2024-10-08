@@ -22,7 +22,7 @@ classdef CrystaLaser405 < mic.lightsource.abstract
     % Example: obj=mic.lightsource.CrystaLaser405('Dev1','ao1','Port0/Line3');
     %
     % ## Key Functions: 
-    % on, off, State, setPower, delete, shutdown, unitTest
+    % on, off, State, setPower, delete, shutdown, funcTest
     %
     % ## REQUIREMENTS: 
     %   mic.abstract.m
@@ -119,12 +119,12 @@ classdef CrystaLaser405 < mic.lightsource.abstract
         end
     end
             methods (Static=true)
-            function unitTest(NIDevice,AOChannel,DOChannel)
+            function funcTest(NIDevice,AOChannel,DOChannel)
                 % unit test of object functionality. 
                 % This function cannot be called while the mic.lightsource.CrystaLaser405 class is being run.
-                % Please use delete(obj) and then run unitTest.
+                % Please use delete(obj) and then run funcTest.
                 % Example:
-                % mic.lightsource.CrystaLaser405.unitTest('Dev1','ao1','Port0/Line3')
+                % mic.lightsource.CrystaLaser405.funcTest('Dev1','ao1','Port0/Line3')
                 fprintf('Creating Object\n')
                 CL=mic.lightsource.CrystaLaser405(NIDevice,AOChannel,DOChannel);
                 fprintf('Turn On\n')

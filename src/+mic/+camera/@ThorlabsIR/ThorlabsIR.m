@@ -15,7 +15,7 @@ classdef ThorlabsIR < mic.camera.abstract
     % obj=mic.camera.ThorlabsIR()
     %
     % ## Key Function 
-    % initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_Properties, exportState, unitTest  
+    % initialize, abort, delete, shutdown, getlastimage, getdata, setup_acquisition, start_focus, start_capture, start_sequence, set.ROI, get_Properties, exportState, funcTest  
     %     
     % ## REQUIREMENTS 
     %   mic.abstract.m
@@ -304,11 +304,11 @@ classdef ThorlabsIR < mic.camera.abstract
     end
     
     methods (Static=true)
-        function Success=unitTest()
+        function Success=funcTest()
             % unit test of object functionality
-            % Syntax: mic.camera.ThorlabsIR.unitTest();
+            % Syntax: mic.camera.ThorlabsIR.funcTest();
             % Example:
-            % mic.camera.ThorlabsIR.unitTest();
+            % mic.camera.ThorlabsIR.funcTest();
             
             Success=0;
             %Create object

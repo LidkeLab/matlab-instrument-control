@@ -226,7 +226,7 @@ classdef CoherentLaser561 < mic.lightsource.abstract
     
     
     methods (Static=true)
-        function unitTest(SerialPort)
+        function funcTest(SerialPort)
             % Unit test of object functionality
             
             if nargin<1

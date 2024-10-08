@@ -19,11 +19,11 @@ classdef NanoMax < mic.abstract
 % Ensure that all required classes (`mic.linearstage.TCubePiezo` for piezo control and `mic.StepperMotor` for stepper motor control) are in the MATLAB path. The system should also be connected to the respective hardware components before initializing this class.
 % 
 % ## Key Methods
-% - **Constructor (`mic,NanoMax()`):** Instantiates the NanoMax system, setting up both the piezo and stepper stages and initializing the GUI.
+% - **Constructor (`mic.NanoMax()`):** Instantiates the NanoMax system, setting up both the piezo and stepper stages and initializing the GUI.
 % - **`setup_Stage_Piezo()`:** Configures the piezo stages for X, Y, and Z movement, centers them upon setup.
 % - **`setup_Stage_Stepper()`:** Initializes and centers the stepper motors.
 % - **`exportState()`:** Exports the current state of all stages, providing a snapshot of current settings and positions.
-% - **`unitTest()`:** Tests the functionality of the class methods to ensure correct operation and communication with the hardware.
+% - **`funcTest()`:** Tests the functionality of the class methods to ensure correct operation and communication with the hardware.
 % 
 % ## Usage Example
 % ```matlab
@@ -86,7 +86,7 @@ classdef NanoMax < mic.abstract
         function setup_Stage_Stepper(obj)
             % Sets up stepper motors for the stage
             % for SEQ microscope Serial No is 70850323
-            obj.Stage_Stepper=mic,StepperMotor('70850323');
+            obj.Stage_Stepper=mic.StepperMotor('70850323');
             % obj.Stage_Stepper.set_position([2,2,1]);
             % center the stepper motor in XY
             obj.Stage_Stepper.moveToPosition(1,0) %y
@@ -103,9 +103,9 @@ classdef NanoMax < mic.abstract
     end
     
     methods (Static=true)
-        function unitTest()
+        function funcTest()
             % unit test of object functionality
-            % Syntax: mic,NanoMax.unitTest()
+            % Syntax: mic.NanoMax.funcTest()
 
             fprintf('Creating Object\n')
             NM=mic.NanoMax();

@@ -268,7 +268,7 @@ classdef MCLMicroDrive < mic.linearstage.abstract
     
     methods (Static)
         
-        function Success = unitTest()
+        function Success = funcTest()
             
         end
         

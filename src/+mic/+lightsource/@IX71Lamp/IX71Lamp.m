@@ -135,7 +135,7 @@ classdef IX71Lamp < mic.lightsource.abstract
         
     end
         methods (Static=true)
-            function unitTest(NIDevice,AOChannel,DOChannel)
+            function funcTest(NIDevice,AOChannel,DOChannel)
                 % Unit test of object functionality
                 
                 try
