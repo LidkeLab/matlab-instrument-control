@@ -123,11 +123,11 @@ classdef MIC_Abstract < handle
     
     methods (Abstract,Static)
         % each class that inherits from MIC_Abstract has it's own
-        % unitTest function which is designed to make an object,
+        % funcTest function which is designed to make an object,
         % test all methods within the object and to make sure they work properly, and to delete the object.
         % if there is need for specific devices to be setup to test all
         % methods of the class, this should be done here.
-        Success=unitTest() %force to have output variable for unitTest
+        Success=funcTest() %force to have output variable for funcTest
     end
     
     methods (Static=true)

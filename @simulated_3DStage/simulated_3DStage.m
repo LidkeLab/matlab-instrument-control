@@ -1,4 +1,4 @@
-classdef Example_3DStage< MIC_3DStage_Abstract
+classdef simulated_3DStage< MIC_3DStage_Abstract
     % This class is an example implementation of 3D Stage Class.
     % This class simulates a 3D stage that can move along x,y,z axes.
     
@@ -20,7 +20,7 @@ classdef Example_3DStage< MIC_3DStage_Abstract
     end
     
     methods
-        function obj = Example_3DStage()
+        function obj = simulated_3DStage()
             % Constructor
             obj@MIC_3DStage_Abstract(~nargout);
         end
@@ -368,10 +368,10 @@ classdef Example_3DStage< MIC_3DStage_Abstract
     end
     
     methods (Static=true)
-        function Success = unitTest()
+        function Success = funcTest()
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they work properly
-            obj = Example_3DStage();
+            obj = simulated_3DStage();
             obj.center();
             obj.setPosition([1, 2, 3]);
             Success = true; % Assume success for simplicity

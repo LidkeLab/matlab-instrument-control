@@ -1,4 +1,4 @@
-classdef Example_LinearStage < MIC_LinearStage_Abstract
+classdef simulated_LinearStage < MIC_LinearStage_Abstract
     % This class is an example implementation of MIC_LinearStage_Abstract.
     % This class simulates a linear stage that can move along one axis.
     
@@ -23,7 +23,7 @@ classdef Example_LinearStage < MIC_LinearStage_Abstract
     end
     
     methods
-        function obj = Example_LinearStage()
+        function obj = simulated_LinearStage()
             % Call superclass constructor
             obj = obj@MIC_LinearStage_Abstract(~nargout);
         end
@@ -269,11 +269,11 @@ classdef Example_LinearStage < MIC_LinearStage_Abstract
     end
     
     methods (Static=true)
-        function Success = unitTest()
+        function Success = funcTest()
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they
             % work properly
-            obj = Example_LinearStage();
+            obj = simulated_LinearStage();
             obj.center();
             obj.setPosition([15]);
             Success = true; % Assume success for simplicity

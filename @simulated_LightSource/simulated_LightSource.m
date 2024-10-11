@@ -1,4 +1,4 @@
-classdef Example_LightSource < MIC_LightSource_Abstract
+classdef simulated_LightSource < MIC_LightSource_Abstract
     % This class is an example implementation of MIC_LightSource_Abstract.
     % This class provides full functionalities for a simulated light source such as Laser.
     
@@ -10,7 +10,7 @@ classdef Example_LightSource < MIC_LightSource_Abstract
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     
     properties (SetAccess = protected)
-        InstrumentName = 'ExampleLightSource'; % Name of the instrument
+        InstrumentName = 'SimulatedLightSource'; % Name of the instrument
         PowerUnit = 'Watts';
         Power = 0;  % Initialize Power to a valid scalar within the range
         IsOn = 0;
@@ -24,7 +24,7 @@ classdef Example_LightSource < MIC_LightSource_Abstract
     end
     
     methods
-        function obj = Example_LightSource()
+        function obj = simulated_LightSource()
             obj = obj@MIC_LightSource_Abstract(~nargout);
         end
         
@@ -203,8 +203,8 @@ classdef Example_LightSource < MIC_LightSource_Abstract
     end
     
     methods (Static=true)
-        function Success = unitTest()
-            obj = Example_LightSource();
+        function Success = funcTest()
+            obj = simulated_LightSource();
             fprintf('Starting unit test for %s\n', class(obj));
             obj.setPower(50);
             obj.on();

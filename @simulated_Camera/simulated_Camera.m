@@ -1,4 +1,4 @@
-classdef Example_Camera < MIC_Camera_Abstract
+classdef simulated_Camera < MIC_Camera_Abstract
     % This is an example implementation of MIC_Camera_Abstract 
     % Matlab Instrument Control Camera Class. 
     
@@ -48,7 +48,7 @@ classdef Example_Camera < MIC_Camera_Abstract
     end
 
     methods
-        function obj = Example_Camera()
+        function obj = simulated_Camera()
             obj = obj@MIC_Camera_Abstract(~nargout);
         end
 
@@ -255,9 +255,9 @@ classdef Example_Camera < MIC_Camera_Abstract
     end
     
     methods(Static=true)
-        function Success = unitTest()
+        function Success = funcTest()
             disp('Starting unit test...');
-            obj = Example_Camera();
+            obj = simulated_Camera();
             obj.initialize();
             obj.setup_acquisition();
             obj.start_focus();
