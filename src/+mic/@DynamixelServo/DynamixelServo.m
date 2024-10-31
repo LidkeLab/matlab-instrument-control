@@ -136,7 +136,7 @@ classdef DynamixelServo < mic.abstract
             end
             obj.Id = Id;          
             if ~exist('Bps','var')
-                Bps = DynamixelServo.DEFAULT_BAUDNUM;
+                Bps = mic.DynamixelServo.DEFAULT_BAUDNUM;
             end
             obj.Bps = Bps;            
             mic.DynamixelServo.loadlibrary();
@@ -169,7 +169,7 @@ classdef DynamixelServo < mic.abstract
         function checkCommStatus(obj)
             % Checks status of COM port
             CommStatus = int32(obj.callDynamixel('dxl_get_result'));
-            if CommStatus == DynamixelServo.COMM_RXSUCCESS
+            if CommStatus == mic.DynamixelServo.COMM_RXSUCCESS
                 mic.DynamixelServo.printErrorCode();
             else
                 mic.DynamixelServo.printCommStatus(CommStatus);
@@ -190,7 +190,7 @@ classdef DynamixelServo < mic.abstract
         
         function value = get.GoalPosition(obj)
             % Gets position
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.GOAL_POSITION));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.GOAL_POSITION));
             %fprintf('get goal %d\n', value);
             obj.checkCommStatus();
         end
@@ -200,14 +200,14 @@ classdef DynamixelServo < mic.abstract
             if value < 0 || value > 1023
                 error('mic.DynamixelServo:PosOutofRange','Position must be between 0 and 1023');
             end
-            obj.callDynamixel('dxl_write_word',obj.Id,DynamixelServo.GOAL_POSITION,value);
+            obj.callDynamixel('dxl_write_word',obj.Id,mic.DynamixelServo.GOAL_POSITION,value);
             %fprintf('set goal %d\n', value);
             obj.checkCommStatus();
         end
         
         function value = get.Led(obj)
             % Gets LED information
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.LED));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.LED));
             obj.checkCommStatus();
         end
         
@@ -216,25 +216,25 @@ classdef DynamixelServo < mic.abstract
             if value ~= 0 && value ~= 1
                 error('mic.DynamixelServo:Led', 'Led can only be 0 off or 1 on');
             end
-            obj.callDynamixel('dxl_write_word',obj.Id,DynamixelServo.LED,value);
+            obj.callDynamixel('dxl_write_word',obj.Id,mic.DynamixelServo.LED,value);
             obj.checkCommStatus();
         end
         
         function value = get.Model(obj)
             % Gets model number
-            value = obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.MODEL_NUMBER);
+            value = obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.MODEL_NUMBER);
             obj.checkCommStatus();
         end
         
         function value = get.Moving(obj)
             % Gets moving information
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.MOVING));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.MOVING));
             obj.checkCommStatus();
         end
         
         function value = get.MovingSpeed(obj)
             % Gets moving speed
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.MOVING_SPEED));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.MOVING_SPEED));
             obj.checkCommStatus();
         end
         
@@ -243,42 +243,42 @@ classdef DynamixelServo < mic.abstract
             if value < obj.minSpeed || value > obj.maxSpeed
                 error('mic.DynamixelServo:speed', 'Moving speed must be between %i and %i',obj.minSpeed, obj.maxSpeed);
             end
-            obj.callDynamixel('dxl_write_word',obj.Id,DynamixelServo.MOVING_SPEED,value);
+            obj.callDynamixel('dxl_write_word',obj.Id,mic.DynamixelServo.MOVING_SPEED,value);
             obj.checkCommStatus();
         end
         
         function value = get.PresentPosition(obj)
             % Gets current position
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.PRESENT_POSITION));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.PRESENT_POSITION));
             obj.checkCommStatus();
         end
         
         function value = get.PresentSpeed(obj)
             % Gets current speed setting
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.PRESENT_SPEED));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.PRESENT_SPEED));
             obj.checkCommStatus();
         end
         
         function value = get.PresentTemperature(obj)
             % Gets current temperature information
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.PRESENT_TEMPERATURE));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.PRESENT_TEMPERATURE));
             obj.checkCommStatus();
         end
         
         function value = get.PresentVoltage(obj)
             % Gets current voltage information
-            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,DynamixelServo.PRESENT_VOLTAGE));
+            value = int32(obj.callDynamixel('dxl_read_word',obj.Id,mic.DynamixelServo.PRESENT_VOLTAGE));
             obj.checkCommStatus();
         end
         
         function value = get.Rotation(obj)
             % Gets current rotation information
-            value = double(obj.GoalPosition)/1023.0 * DynamixelServo.MAX_ROTATION;
+            value = double(obj.GoalPosition)/1023.0 * mic.DynamixelServo.MAX_ROTATION;
         end
         
         function set.Rotation(obj,value)
             % Sets rotation to value
-            pos = value/DynamixelServo.MAX_ROTATION * 1023;
+            pos = value/mic.DynamixelServo.MAX_ROTATION * 1023;
             obj.GoalPosition = round(pos);
         end
         
@@ -343,7 +343,7 @@ classdef DynamixelServo < mic.abstract
         function Port=findport(Id,Bps)
             % Finds to which COM port servo is connected
             if ~exist('Bps','var')
-                Bps = DynamixelServo.DEFAULT_BAUDNUM;
+                Bps = mic.DynamixelServo.DEFAULT_BAUDNUM;
             end
             Port = 0;
             comports = instrhwinfo('serial');
@@ -358,7 +358,7 @@ classdef DynamixelServo < mic.abstract
                     continue
                 end
                 % confirm servo exists
-                if mic.DynamixelServo.ping_static(Id) ~= DynamixelServo.COMM_RXSUCCESS
+                if mic.DynamixelServo.ping_static(Id) ~= mic.DynamixelServo.COMM_RXSUCCESS
                     %fprintf('Not on Port %d\n',nn)
                 else
                     Port=nn;
@@ -419,19 +419,19 @@ classdef DynamixelServo < mic.abstract
 
         function [] = printErrorCode()
             %Prints communication result
-            if int32(calllib('dynamixel','dxl_get_rxpacket_error', DynamixelServo.ERRBIT_VOLTAGE))==1
+            if int32(calllib('dynamixel','dxl_get_rxpacket_error', mic.DynamixelServo.ERRBIT_VOLTAGE))==1
                 error('Input Voltage Error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_ANGLE))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',mic.DynamixelServo.ERRBIT_ANGLE))==1
                 error('Angle limit error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_OVERHEAT))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',mic.DynamixelServo.ERRBIT_OVERHEAT))==1
                 error('Overheat error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_RANGE))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',mic.DynamixelServo.ERRBIT_RANGE))==1
                 error('Out of range error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_CHECKSUM))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',mic.DynamixelServo.ERRBIT_CHECKSUM))==1
                 error('Checksum error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_OVERLOAD))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',mic.DynamixelServo.ERRBIT_OVERLOAD))==1
                 error('Overload error!');
-            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',DynamixelServo.ERRBIT_INSTRUCTION))==1
+            elseif int32(calllib('dynamixel','dxl_get_rxpacket_error',mic.DynamixelServo.ERRBIT_INSTRUCTION))==1
                 error('Instruction code error!');
             end
         end
@@ -439,17 +439,17 @@ classdef DynamixelServo < mic.abstract
         function [] = printCommStatus( CommStatus )
             % Prints error bit of status packet
             switch(CommStatus)
-                case DynamixelServo.COMM_TXFAIL
+                case mic.DynamixelServo.COMM_TXFAIL
                     disp('COMM_TXFAIL : Failed transmit instruction packet!');
-                case DynamixelServo.COMM_TXERROR
+                case mic.DynamixelServo.COMM_TXERROR
                     disp('COMM_TXERROR: Incorrect instruction packet!');
-                case DynamixelServo.COMM_RXFAIL
+                case mic.DynamixelServo.COMM_RXFAIL
                     disp('COMM_RXFAIL: Failed get status packet from device!');
-                case DynamixelServo.COMM_RXWAITING
+                case mic.DynamixelServo.COMM_RXWAITING
                     disp('COMM_RXWAITING: Now recieving status packet!');
-                case DynamixelServo.COMM_RXTIMEOUT
+                case mic.DynamixelServo.COMM_RXTIMEOUT
                     disp('COMM_RXTIMEOUT: There is no status packet!');
-                case DynamixelServo.COMM_RXCORRUPT
+                case mic.DynamixelServo.COMM_RXCORRUPT
                     disp('COMM_RXCORRUPT: Incorrect status packet!');
                 otherwise
                     disp('This is unknown error code!');
