@@ -8,7 +8,7 @@ function [Response] = readResponse(obj)
 
 
 % Read the response from the Triggerscope.
-[Response] = readline(obj.Triggerscope);
+[Response] = readline(obj.TriggerscopeSerialPortDev);
 
 
 end

@@ -12,16 +12,16 @@ obj.ActivityMessage = sprintf('Connecting to serial port ''%s''...', ...
     obj.SerialPort);
 
 % Connect to the COM port given in obj.SerialPort
-obj.Triggerscope = serialport(obj.SerialPort, obj.BaudRate);
+obj.TriggerscopeSerialPortDev = serialport(obj.SerialPort, obj.BaudRate);
 
 % Set some serial communication parameters.
-obj.Triggerscope.Timeout = obj.DeviceTimeout;
-obj.Triggerscope.DataBits = obj.DataBits;
-configureTerminator(obj.Triggerscope, obj.Terminator);
+obj.TriggerscopeSerialPortDev.Timeout = obj.DeviceTimeout;
+obj.TriggerscopeSerialPortDev.DataBits = obj.DataBits;
+configureTerminator(obj.TriggerscopeSerialPortDev, obj.Terminator);
 
 % Flush the input and output buffers (maybe not necessary but always seems
 % to be a good idea).
-flush(obj.Triggerscope);
+flush(obj.TriggerscopeSerialPortDe;
 
 % Update obj.ActivityMessage and obj.IsConnected (we'll assume the
 % connection was successful).

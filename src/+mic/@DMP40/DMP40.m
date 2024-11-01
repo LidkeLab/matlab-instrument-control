@@ -54,8 +54,7 @@ classdef DMP40 < mic.abstract
         InstrumentName = 'DMP40';
         DAQ=[];
         IsOpen;
-A PROBLEM!!! property or event may not use the same name as the name of the class (DMP40).
-        DMP40   %DMP40 .NET class
+        DMP40mirror   %DMP40 .NET class
     end
     
     
@@ -102,12 +101,12 @@ A PROBLEM!!! property or event may not use the same name as the name of the clas
                 deviceindex,manufacturer,instrumentName,serialNumber,resourceName)
 
             % Create DM Object
-            obj.DMP40=Thorlabs.TLDFM_64.Interop.TLDFM(resourceName.ToString,true,true)
+            obj.DMP40mirror=Thorlabs.TLDFM_64.Interop.TLDFM(resourceName.ToString,true,true)
 
         end
         
         function delete(obj)
-            obj.DMP40.Dispose %close com to mirror
+            obj.DMP40mirror.Dispose %close com to mirror
             delete(obj.GuiFigure);
         end
         

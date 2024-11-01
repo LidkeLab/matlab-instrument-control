@@ -13,7 +13,7 @@ obj.ActivityMessage = ...
     obj.SerialPort);
 
 % Delete obj.Triggerscope.
-delete(obj.Triggerscope)
+delete(obj.TriggerscopeSerialPortDev)
 
 % Reset the class instance obj (even if the user doesn't want this, it's
 % probably best that we do so to avoid misleading information/behavior of

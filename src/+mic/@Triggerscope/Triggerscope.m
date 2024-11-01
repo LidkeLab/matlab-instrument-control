@@ -39,7 +39,6 @@ classdef Triggerscope < mic.abstract
         % NOTE: This should be set to one of the (hidden property) options
         %       obj.TriggerModeOptions.
         TriggerMode = 'Rising';
-PROBLEM!!! A property or event may not use the same name as the name of the class (Triggerscope).
     end
     
     properties (Dependent, Hidden)
@@ -58,7 +57,7 @@ PROBLEM!!! A property or event may not use the same name as the name of the clas
         InstrumentName = 'Triggerscope';
         
         % Serial port device for the Triggerscope.
-        Triggerscope
+        TriggerscopeSerialPortDev
         
         % Brief pause made after sending a command. (seconds)
         ActionPause = 0.1;

@@ -12,7 +12,7 @@ function [] = writeCommand(obj, Command)
 
 
 % Send the command to the Triggerscope.
-writeline(obj.Triggerscope, Command);
+writeline(obj.TriggerscopeSerialPortDev, Command);
 
 
 end
