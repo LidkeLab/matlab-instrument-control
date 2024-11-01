@@ -51,12 +51,12 @@
 &nbsp;&nbsp;&nbsp;[mic.CavroSyringePump](../src/+mic/@CavroSyringePump/Readme.md) | control the Cavro syringe pump PN 20740556 -D
 &nbsp;&nbsp;&nbsp;[mic.DMP40](../src/+mic/@DMP40/Readme.md) | control the Deformable Mirror
 &nbsp;&nbsp;&nbsp;[mic.DynamixelServo](../src/+mic/@DynamixelServo/Readme.md) | Dynamixel Servos are used to control the rotation of filter wheels
-&nbsp;&nbsp;&nbsp;[mic.ExampleInstrument](../src/+mic/@ExampleInstrument/Readme.md) | template for implementing classes inheriting from mic.abstract
-&nbsp;&nbsp;&nbsp;[mic..Example_Camera](../src/+mic/@Example_Camera/Readme.md) | template for implementing classes inheriting from mic.camera.abstract
-&nbsp;&nbsp;&nbsp;[mic..Example_LightSource](../src/+mic/@Example_LightSource/Readme.md) | template for implementing classes inheriting from mic.lightsource.abstract
-&nbsp;&nbsp;&nbsp;[mic..Example_LinearStage](../src/+mic/@Example_LinearStage/Readme.md) | template for implementing classes inheriting from mic.linearstage.abstract
-&nbsp;&nbsp;&nbsp;[mic..Example_PowerMeter](../src/+mic/@Example_PowerMeter/Readme.md) | template for implementing classes inheriting from mic.powermeter.abstract
-&nbsp;&nbsp;&nbsp;[mic..Example_Stage3D](../src/+mic/@Example_Stage3D/Readme.md) | template for implementing classes inheriting from mic_stage3D.abstract
+&nbsp;&nbsp;&nbsp;[mic.simulated_Instrument](../src/+mic/@simulated_Instrument/Readme.md) | template for implementing classes inheriting from mic.abstract
+&nbsp;&nbsp;&nbsp;[mic..simulated_Camera](../src/+mic/@simulated_Camera/Readme.md) | template for implementing classes inheriting from mic.camera.abstract
+&nbsp;&nbsp;&nbsp;[mic..simulated_LightSource](../src/+mic/@simulated_LightSource/Readme.md) | template for implementing classes inheriting from mic.lightsource.abstract
+&nbsp;&nbsp;&nbsp;[mic..simulated_LinearStage](../src/+mic/@simulated_LinearStage/Readme.md) | template for implementing classes inheriting from mic.linearstage.abstract
+&nbsp;&nbsp;&nbsp;[mic..simulated_PowerMeter](../src/+mic/@simulated_PowerMeter/Readme.md) | template for implementing classes inheriting from mic.powermeter.abstract
+&nbsp;&nbsp;&nbsp;[mic..simulated_Stage3D](../src/+mic/@simulated_Stage3D/Readme.md) | template for implementing classes inheriting from mic_stage3D.abstract
 &nbsp;&nbsp;&nbsp;[mic.FlipMountLaser](../src/+mic/@FlipMountLaser/Readme.md) | control a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M controller
 &nbsp;&nbsp;&nbsp;[mic.FlipMountTTL](../src/+mic/@FlipMountTTL/Readme.md) | control a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M controller
 &nbsp;&nbsp;&nbsp;[mic.GalvoAnalog](../src/+mic/@GalvoAnalog/Readme.md) | control the Galvo mirror

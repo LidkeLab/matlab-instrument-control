@@ -1,5 +1,5 @@
-classdef Example_Stage3D < mic.stage3D.abstract
-    % This class is an example implementation of 3D Stage Class.
+classdef simulated_Stage3D < mic.stage3D.abstract
+    % This class is an simulated implementation of 3D Stage Class.
     % This class simulates a 3D stage that can move along x,y,z axes.
     
     % REQUIRES:
@@ -10,7 +10,7 @@ classdef Example_Stage3D < mic.stage3D.abstract
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     
     properties (SetAccess = protected)
-        InstrumentName = 'Simulated 3D Stage'; % Name of the instrument
+        InstrumentName = 'SimulatedStage3D'; % Name of the instrument
         Position = [0, 0, 0];   % Example position [x, y, z]
         PositionUnit = 'mm';    % Example position unit (millimeters)
     end
@@ -20,7 +20,7 @@ classdef Example_Stage3D < mic.stage3D.abstract
     end
     
     methods
-        function obj = Example_Stage3D()
+        function obj = simulated_Stage3D()
             % Constructor
             obj@mic.stage3D.abstract(~nargout);
         end
@@ -371,7 +371,7 @@ classdef Example_Stage3D < mic.stage3D.abstract
         function Success = funcTest()
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they work properly
-            obj = mic.Example_Stage3D();
+            obj = mic.simulated_Stage3D();
             obj.center();
             obj.setPosition([1, 2, 3]);
             Success = true; % Assume success for simplicity

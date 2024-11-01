@@ -1,5 +1,5 @@
-classdef ExampleInstrument<mic.abstract 
-    %   ExampleInstrument: Example for classes inheriting from
+classdef simulated_Instrument<mic.abstract 
+    %   simulated_Instrument: Example for classes inheriting from mic.abstract
     %  
     % ## Description
     %   This class is written to serve as a template for implementing 
@@ -7,7 +7,7 @@ classdef ExampleInstrument<mic.abstract
     %   template for the basic functions such as exportState and funcTest.
     %
     % ## Constructor
-    %   Example: obj=mic.ExampleInstrument()
+    %   Example: obj=mic.simulated_Instrument()
     %   
     % ## Key Functions
     % `exportState` & `funcTest`
@@ -19,7 +19,7 @@ classdef ExampleInstrument<mic.abstract
     % ### CITATION: Farzin Farzam, LidkeLab, 2017.
     
     properties (SetAccess=protected)  
-        InstrumentName = 'ExampleInst' %your instrument name comes here
+        InstrumentName = 'SimulatedInst' %your instrument name comes here
     end
     
     properties
@@ -38,7 +38,7 @@ classdef ExampleInstrument<mic.abstract
     end
     
     methods        
-        function obj = ExampleInstrument() 
+        function obj = simulated_Instrument() 
             % Constructor
             obj = obj@mic.abstract(~nargout); % if you forget to name the object, this line will name it for you through autoname in mic.abstract
             gui(obj)  %let's the gui to pop-up as the class constructor runs
@@ -59,7 +59,7 @@ classdef ExampleInstrument<mic.abstract
         % delete the object. You need to put code here based on the 
         % instrument and it's specific functions 
             fprintf('Creating Object\n')
-            ExInst=mic.ExampleInstrument();
+            ExInst=mic.simulated_Instrument();
             fprintf('Export State\n')
             A=ExInst.exportState(); disp(A); pause(1);
         end

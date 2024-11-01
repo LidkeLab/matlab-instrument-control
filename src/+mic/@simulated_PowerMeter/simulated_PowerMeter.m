@@ -1,6 +1,6 @@
-classdef Example_PowerMeter < mic.powermeter.abstract
-    % ExamplePowerMeter Class for controlling Example Power Meter.
-    % This class provides an interface to the example power meter,
+classdef simulated_PowerMeter < mic.powermeter.abstract
+    % simulated_PowerMeter Class for controlling simulated Power Meter.
+    % This class provides an interface to the simulated power meter,
     % implementing all necessary methods to operate the device and manage
     % data acquisition and GUI representation.
     
@@ -11,11 +11,11 @@ classdef Example_PowerMeter < mic.powermeter.abstract
     
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     properties (SetAccess = protected)
-        InstrumentName = 'ExamplePowerMeter';
+        InstrumentName = 'SimulatedPowerMeter';
     end
     methods
-        function obj = Example_PowerMeter()
-            % Constructor for ExamplePowerMeter
+        function obj = simulated_PowerMeter()
+            % Constructor for simulated_PowerMeter
             obj = obj@mic.powermeter.abstract(~nargout);
             
             obj.StartGUI = true;  % Automatically start the GUI
@@ -253,7 +253,7 @@ classdef Example_PowerMeter < mic.powermeter.abstract
             end
             
             if testMode
-                disp('Test Mode: Simulated connection to Example power meter.');
+                disp('Test Mode: Simulated connection to simulated power meter.');
                 obj.VisaObj = 'Simulated'; % Assign a dummy string to represent a connected state
             else
                 try
@@ -265,7 +265,7 @@ classdef Example_PowerMeter < mic.powermeter.abstract
                         error('Failed to open connection to PM100D power meter.');
                     end
                 catch ME
-                    error('Failed to connect to Example power meter: %s', ME.message);
+                    error('Failed to connect to simulated power meter: %s', ME.message);
                 end
             end
         end
@@ -278,12 +278,12 @@ classdef Example_PowerMeter < mic.powermeter.abstract
                 testMode = true;  % Default to test mode
             end
             
-            fprintf('Creating instance of ExamplePowerMeter...\n');
-            pm = mic.Example_PowerMeter();  % Create instance
+            fprintf('Creating instance of simulated_PowerMeter...\n');
+            pm = mic.simulated__PowerMeter();  % Create instance
             Success = true;
             
             try
-                fprintf('Connecting to the Example power meter...\n');
+                fprintf('Connecting to the simulated power meter...\n');
                 pm.connect(testMode);
                 fprintf('Connection successful.\n');
                 

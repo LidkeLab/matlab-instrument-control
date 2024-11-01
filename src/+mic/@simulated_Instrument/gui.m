@@ -1,5 +1,5 @@
 function guiFig = gui(obj)
-%gui Graphical User Interface to ExampleInstrument
+%gui Graphical User Interface to simulated_Instrument
 %   Must contain gui2properties() and properties2gui() functions
 
 %% This will be the same for all gui functions

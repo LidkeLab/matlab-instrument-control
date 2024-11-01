@@ -1,4 +1,4 @@
-classdef Example_LinearStage < mic.linearstage.abstract
+classdef simulated_LinearStage < mic.linearstage.abstract
     % This class is an example implementation of mic.linearstage.abstract.
     % This class simulates a linear stage that can move along one axis.
     
@@ -10,7 +10,7 @@ classdef Example_LinearStage < mic.linearstage.abstract
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     
     properties (SetAccess = protected)
-        InstrumentName = 'Simulated Linear Stage'; % Name of the instrument
+        InstrumentName = 'SimulatedLinearStage';  % Name of the instrument
         PositionUnit = 'mm';                      % Units of position parameter (e.g., mm)
         CurrentPosition = 0;                      % Current position of the device
         MinPosition = 0;                          % Lower limit position
@@ -23,7 +23,7 @@ classdef Example_LinearStage < mic.linearstage.abstract
     end
     
     methods
-        function obj = Example_LinearStage()
+        function obj = simulated_LinearStage()
             % Call superclass constructor
             obj = obj@mic.linearstage.abstract(~nargout);
         end
@@ -273,7 +273,7 @@ classdef Example_LinearStage < mic.linearstage.abstract
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they
             % work properly
-            obj = mic.Example_LinearStage();
+            obj = mic.simulated_LinearStage();
             obj.center();
             obj.setPosition([15]);
             Success = true; % Assume success for simplicity

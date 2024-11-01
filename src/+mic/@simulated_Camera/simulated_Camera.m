@@ -1,4 +1,4 @@
-classdef Example_Camera < mic.camera.abstract
+classdef simulated_Camera < mic.camera.abstract
     % This is an example implementation of mic.camera.abstract 
     % Matlab Instrument Control Camera Class. 
     
@@ -10,7 +10,7 @@ classdef Example_Camera < mic.camera.abstract
     % CITATION: Sajjad Khan, Lidkelab, 2024.
 
     properties(SetAccess=protected)
-        InstrumentName = 'Simulated Camera';
+        InstrumentName = 'SimulatedCamera';
         CameraIndex = 1;
         ImageSize = [1024, 768];
         LastError = '';
@@ -48,7 +48,7 @@ classdef Example_Camera < mic.camera.abstract
     end
 
     methods
-        function obj = Example_Camera()
+        function obj = simulated_Camera()
             obj = obj@mic.camera.abstract(~nargout);
         end
 
@@ -257,7 +257,7 @@ classdef Example_Camera < mic.camera.abstract
     methods(Static=true)
         function Success = funcTest()
             disp('Starting unit test...');
-            obj = mic.Example_Camera();
+            obj = mic.simulated_Camera();
             obj.initialize();
             obj.setup_acquisition();
             obj.start_focus();
@@ -268,5 +268,5 @@ classdef Example_Camera < mic.camera.abstract
         end
     end
 end
-% To open GUI, create obj = Example_Camera() then call obj.gui()
+% To open GUI, create obj = simulated_Camera() then call obj.gui()
 % To close GUI properly, press Abort -> Exit -> Confirm.
