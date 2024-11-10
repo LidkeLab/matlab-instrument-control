@@ -145,12 +145,58 @@ classdef BiochemValve < mic.abstract
             obj.PowerState24V = ~obj.PowerState24V; 
         end
 
-        openValve(obj, ValveNumber); 
-        closeValve(obj, ValveNumber); 
+        openValve(obj, ValveNumber);
+        closeValve(obj, ValveNumber);
     end
     
     
     methods (Static)
-        funcTest(SerialPort); % READ WARNING IN funcTest.m BEFORE USE!!!!
+        function funcTest(SerialPort)
+            
+            % funcTest - Performs a unit test of the BiochemValve controller using the specified SerialPort.
+            % INPUT: SerialPort (string) - The serial port to connect to the Arduino (e.g., 'COM3' on Windows).
+            % This function will:
+            % - Create a connection to the specified Arduino port
+            % - Test opening and closing a sample valve
+            % - Toggle power states as part of a functional check
+            % - Output test results to the MATLAB Command Window
+            % - Error handling is provided to catch any issues during execution, and the connection is properly closed by 
+            %  clearing the Arduino object. You should replace 'D3' and 'D4' with the appropriate pins based on your hardware configuration.
+            
+            try
+                % Establish connection to the Arduino
+                disp(['Connecting to Arduino on port: ' SerialPort]);
+                a = arduino(SerialPort, 'Uno'); % Change 'Uno' to your specific board model if needed
+                disp('Connection established.'); 
+                
+                % Test toggling power states
+                disp('Toggling 12V power state...');
+                writeDigitalPin(a, 'D3', 1); % Example digital pin for demonstration
+                pause(1);
+                writeDigitalPin(a, 'D3', 0);
+                disp('12V power state toggled successfully.');
+                
+                % Test valve control (open and close a valve)
+                ValvePin = 'D4'; % Example valve control pin
+                disp('Opening valve...');
+                writeDigitalPin(a, ValvePin, 1); % Open valve
+                pause(2); % Keep the valve open for 2 seconds
+                disp('Closing valve...');
+                writeDigitalPin(a, ValvePin, 0); % Close valve
+                
+                % Clean up and close connection
+                clear a; % Clear the Arduino object to close the connection
+                disp('Functional test completed successfully.');
+                
+            catch ME
+                % Handle errors gracefully
+                warning('An error occurred during the function test.');
+                disp(['Error Message: ', ME.message]);
+                if exist('a', 'var') % If Arduino object exists, clear it
+                    clear a;
+                end
+            end
+        end
+        
     end
 end

@@ -48,7 +48,7 @@ classdef abstract < mic.abstract
         LUTScale=[0 16000];         %   [min max] live view stretch
         RangeDisplay=1;             %   display [min max] on live image
         ReturnType='dipimage';      %   'matlab','dipimage','none'
-        SaveType='mat';             %   'mat','ics'
+        SaveType='mat';            
         ShowLive=1;                 %   show data on screen during acquisision
     end
     
@@ -134,6 +134,24 @@ classdef abstract < mic.abstract
                 case 'ics'
                     writeim(obj.Data,filename,'ics');
             end
+            
+%           switch obj.SaveType
+%                case 'mat'
+%                     eval([obj.AcquisitionType ' = data;']);
+%                     params = obj.exportparameters();
+%                     params.FileName = filename;
+%                     save(filename, obj.AcquisitionType, 'params');
+%             end
+
+% OR: if elseif statement?
+
+%             if strcmp(obj.SaveType, 'mat')
+%                 eval([obj.AcquisitionType ' = data;']);
+%                 params = obj.exportparameters();
+%                 params.FileName = filename;
+%                 save(filename, obj.AcquisitionType, 'params');
+%             end
+
         end
         
         function params = exportParameters(obj)
@@ -251,6 +269,14 @@ classdef abstract < mic.abstract
                     warning('SaveType must be mat or ics. Not changed')
             end
         end
+        
+%         function set.SaveType(obj, in)
+%             if strcmp(in, 'mat')
+%                 obj.SaveType = 'mat';
+%             else
+%                 warning('SaveType must be "mat". Not changed');
+%             end
+%         end
         
         function set.ShowLive(obj,in)
             switch in

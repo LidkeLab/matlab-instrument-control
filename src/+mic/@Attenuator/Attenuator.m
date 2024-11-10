@@ -135,7 +135,7 @@ classdef Attenuator < mic.abstract
         
         function setTransmission(obj,Transmission_in)
             % Sets output attenuation in percentage of maximum
-            if Transmission_in >obj.MaxTransmission+0.001
+            if Transmission_in >obj.MaxTransmission+0.001 % to introduce a margin of tolerance for comparisons
                error('The input transmission is too large, setting to %d\n',obj.MaxTransmission); 
             end
             if Transmission_in<obj.MinTransmission-0.001
@@ -167,6 +167,41 @@ classdef Attenuator < mic.abstract
             end
             obj.Transmission=Transmission_in;
         end
+        
+%         function setTransmission(obj, Transmission_in)
+%             % Sets output attenuation in percentage of maximum
+%             if Transmission_in >= obj.MaxTransmission % directly checking the input
+%                 error('The input transmission is too large, setting to %d\n', obj.MaxTransmission);
+%             end
+%             if Transmission_in <= obj.MinTransmission
+%                 error('The input transmission is too small, setting to %d\n', obj.MinTransmission);
+%             end
+%             if isempty(obj.Input_Voltage)
+%                 error('The suitable calibration file should be loaded. Please call loadCalibration().');
+%             end
+%             
+%             obj.updateGui(Transmission_in);
+%             
+%             % Interpolation
+%             DiffTrans = obj.NormOutTransmission - Transmission_in;
+%             Ind2 = find(DiffTrans <= 0, 1);
+%             Ind1 = Ind2 - 1;
+%             
+%             % Voltage Calculation
+%             if Ind1 > 0
+%                 V_out = (obj.Input_Voltage(Ind1) * (Transmission_in - obj.NormOutTransmission(Ind2)) + ...
+%                     obj.Input_Voltage(Ind2) * (obj.NormOutTransmission(Ind1) - Transmission_in)) / ...
+%                     (obj.NormOutTransmission(Ind1) - obj.NormOutTransmission(Ind2));
+%             else
+%                 V_out = obj.V_100;
+%             end
+%             
+%             if ~isempty(obj.DAQ)
+%                 outputSingleScan(obj.DAQ, V_out);
+%             end
+%             obj.Transmission = Transmission_in;
+%         end
+
         function State=exportState(obj)
             % Export the object current state
             State.instrumentName=obj.InstrumentName;
