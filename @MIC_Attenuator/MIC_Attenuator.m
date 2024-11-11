@@ -245,7 +245,7 @@ classdef MIC_Attenuator < MIC_Abstract
                     outputSingleScan(DAQQ,Voltage(ii));
                     pause(1)
                     OutTransmission(ii) = Pm.measure;
-                    pause(0.1)
+                    pause(0.2)
                 end
                 NormTransmission = OutTransmission*100/BeforeAttenuator;
                 figure; plot(Voltage,NormTransmission,'o')
