@@ -8,10 +8,47 @@ classdef NDFilterWheel < mic.abstract
     %  This class works with an arbitrary number of filters
     %  To create a mic.NDFilterWheel object the position and transmittance
     %  of each filter must be specified. The position must be given in
-    %  degrees rotation corresponding to the input of the servo. This 
-    %  can be calibrated by setting the servo rotation such that the 
+    %  degrees rotation corresponding to the input of the servo. This
+    %  can be calibrated by setting the servo rotation such that the
     %  specific filter is in the optical path. The Rotation property of the
     %  servo gives the right position value for that filter.
+    %
+    % ## Class Properties
+    %
+    % ### Protected Properties
+    % - **`InstrumentName`**:
+    %   - **Description**: Descriptive name of the instrument.
+    %   - **Type**: String
+    %   - **Default**: `'NDFilterWheel'`
+    %
+    % - **`Servo`**:
+    %   - **Description**: Servo object responsible for rotating the filter wheel.
+    %   - **Type**: Object
+    %
+    % - **`FilterPos`**:
+    %   - **Description**: Array representing the rotation angles (in degrees) of the servo corresponding to filter positions.
+    %   - **Type**: Numeric Array
+    %
+    % - **`TransmissionValues`**:
+    %   - **Description**: Array containing fractional transmission values (0 to 1) for each filter position.
+    %   - **Type**: Numeric Array
+    %
+    % ### Dependent Properties
+    % - **`CurrentFilter`**:
+    %   - **Description**: Represents the current filter number in use.
+    %   - **Type**: Numeric
+    %   - **Access**: Dependent (computed based on other properties)
+    %
+    % - **`CurrentTransmittance`**:
+    %   - **Description**: Fractional transmittance value (0 to 1) of the currently selected filter.
+    %   - **Type**: Numeric
+    %   - **Access**: Dependent (computed based on `CurrentFilter` and `TransmissionValues`)
+    %
+    % ### Hidden Properties
+    % - **`StartGUI`**:
+    %   - **Description**: Flag indicating whether the GUI should start when an object of the class is created.
+    %   - **Type**: Boolean
+    %   - **Default**: `0`
     %
     % ## Usage Example
     %  Example: obj=mic.NDFilterWheel(ServoId,FracTransmVals,FilterPos);

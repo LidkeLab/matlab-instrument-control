@@ -19,6 +19,38 @@ classdef ShutterELL6 < mic.abstract
     % - Export of current shutter state.
     % - Comprehensive unit testing to ensure functionality.
     %
+    % ## Properties
+    %
+    % ### Protected Properties
+    %
+    % #### `InstrumentName`
+    % - **Description:** Name of the instrument.
+    %   - **Default Value:** `'ShutterELL6'`
+    %
+    % #### `IsOpen`
+    % - **Description:** Indicates whether the shutter is currently open.
+    %
+    % ### Public Properties
+    %
+    % #### `Comport`
+    % - **Description:** Communication port used for the shutter connection.
+    %
+    % #### `ShutterAddress`
+    % - **Description:** Address of the shutter for communication purposes.
+    %
+    % #### `RS232`
+    % - **Description:** RS232 communication object used to interface with the shutter.
+    %
+    % #### `openstr`
+    % - **Description:** Command string used to open the shutter.
+    %
+    % #### `closestr`
+    % - **Description:** Command string used to close the shutter.
+    %
+    % #### `StartGUI`
+    % - **Description:** Determines whether to use `mic.abstract` to bring up the GUI (no need for a separate GUI function in `mic.ShutterTTL`).
+    %   - **Default Value:** `0`
+    %
     % ## Requirements
     % - mic.abstract.m
     % - Data Acquisition Toolbox on MATLAB

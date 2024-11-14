@@ -15,6 +15,23 @@ classdef StepperMotor < mic.abstract
     % that you wish to control (it could be either HS NanoMax 300 X Axis, 
     % HS NanoMax 300 Y Axis or HS NanoMax 300 Z Axis), then OK and Save.
     %
+    % ## Properties
+    %
+    % ### Protected Properties
+    %
+    % #### `InstrumentName`
+    % - **Description:** Name of the instrument.
+    % - **Default Value:** `'StepperMotor'`
+    %
+    % ### Public Properties
+    %
+    % #### `StartGUI`
+    % - **Description:** Indicates if the GUI should be started.
+    %
+    % #### `SerialN`
+    % - **Description:** Serial number of the stepper motor controller. This number can be found on the back of the controller.
+    % - **Example Value:** For SEQ controller, `70850323`.
+    %
     % ## Constructor
     % M = mic.StepperMotor(70850323)
     %

@@ -18,6 +18,58 @@ classdef NanoMax < mic.abstract
 % ## Installation Notes
 % Ensure that all required classes (`mic.linearstage.TCubePiezo` for piezo control and `mic.StepperMotor` for stepper motor control) are in the MATLAB path. The system should also be connected to the respective hardware components before initializing this class.
 % 
+% ## Class Properties
+% 
+% ### Public Properties
+% - **`StartGUI`**: 
+%   - **Description**: Flag to control the start of the graphical user interface (GUI).
+%   - **Type**: Variable
+% 
+% - **`SerialN`**: 
+%   - **Description**: Serial number of the SEQ controller for identification. Example serial: `70850323`.
+%   - **Type**: Variable
+% 
+% - **`GuiFigureStage`**: 
+%   - **Description**: Handle for the stage's GUI figure.
+%   - **Type**: Variable
+% 
+% ### Protected Properties
+% - **`InstrumentName`**: 
+%   - **Description**: The name of the instrument.
+%   - **Type**: String
+%   - **Default**: `'NanoMax'`
+% 
+% - **`Stage_Piezo_X`**: 
+%   - **Description**: Linear piezo stage object for controlling movement in the X direction.
+%   - **Type**: Object
+% 
+% - **`Stage_Piezo_Y`**: 
+%   - **Description**: Linear piezo stage object for controlling movement in the Y direction.
+%   - **Type**: Object
+% 
+% - **`Stage_Piezo_Z`**: 
+%   - **Description**: Linear piezo stage object for controlling movement in the Z direction.
+%   - **Type**: Object
+% 
+% - **`Stage_Stepper`**: 
+%   - **Description**: Represents the state of the stepper motor stage.
+%   - **Type**: Object or State
+% 
+% - **`StepperLargeStep`**: 
+%   - **Description**: Step size for large movements of the stepper motor in millimeters.
+%   - **Type**: Numeric
+%   - **Default**: `0.05 mm`
+% 
+% - **`StepperSmallStep`**: 
+%   - **Description**: Step size for small movements of the stepper motor in millimeters.
+%   - **Type**: Numeric
+%   - **Default**: `0.002 mm`
+% 
+% - **`PiezoStep`**: 
+%   - **Description**: Step size for piezo movements in microns.
+%   - **Type**: Numeric
+%   - **Default**: `0.1 µm`
+%
 % ## Key Methods
 % - **Constructor (`mic.NanoMax()`):** Instantiates the NanoMax system, setting up both the piezo and stepper stages and initializing the GUI.
 % - **`setup_Stage_Piezo()`:** Configures the piezo stages for X, Y, and Z movement, centers them upon setup.

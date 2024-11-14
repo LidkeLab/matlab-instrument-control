@@ -29,6 +29,50 @@ classdef MPBLaser < mic.lightsource.abstract
     % to potential ports and listening for valid responses. Timeout warnings during this process are expected when
     % incorrect ports do not respond and can be safely ignored.
     %
+    % ## Protected Properties
+    %
+    % ### `InstrumentName`
+    % Name of the instrument.
+    % **Default:** `'MPBLaser647'`.
+    %
+    % ### `Power`
+    % Power reading from the instrument.
+    %
+    % ### `PowerUnit`
+    % Unit of the power measurement.
+    % **Default:** `'mW'`.
+    %
+    % ### `MinPower`
+    % Minimum power for the laser.
+    %
+    % ### `MaxPower`
+    % Maximum power for the laser.
+    %
+    % ### `IsOn`
+    % Indicates the on/off state of the laser.
+    % - `1` = ON
+    % - `0` = OFF
+    % **Default:** `0`.
+    %
+    % ## Public Properties
+    %
+    % ### `SerialObj`
+    % Information about the port associated with this instrument.
+    %
+    % ### `SerialNumber`
+    % Serial number of the laser.
+    %
+    % ### `WaveLength`
+    % Wavelength of the laser.
+    % **Default:** `647`.
+    %
+    % ### `Port`
+    % Name of the port used to communicate with the laser.
+    %
+    % ### `StartGUI`
+    % Indicates whether the GUI pops up automatically (`true`) or requires manual opening (`false`).
+    % **Default:** `false`.
+    %
     % ## Key Methods
     % - **Constructor (`mic.lightsource.MPBLaser()`):** Initializes the laser control by automatically finding the available communication port and setting up the laser parameters.
     % - **`setPower(Power_mW)`:** Sets the laser's power to a specified value in milliwatts.
@@ -59,6 +103,7 @@ classdef MPBLaser < mic.lightsource.abstract
     % delete(laser);
     % ```
     % ### Citation: Sajjad Khan, Lidkelab, 2024.
+    
     properties (SetAccess=protected)
         InstrumentName='MPBLaser647'; %Name of the instrument.
     end

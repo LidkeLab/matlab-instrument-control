@@ -18,10 +18,48 @@ classdef CrystaLaser405 < mic.lightsource.abstract
     % Please check the laser is turned on at the controller before calling funtions in 
     % this class
     %
+    % ## Protected Properties
+    %
+    % ### `InstrumentName`
+    % Name of the instrument.
+    % **Default:** `'CrystaLaser405'`.
+    %
+    % ### `NIVolts`
+    % Analog voltage from the NI card.
+    % **Default:** `0`.
+    %
+    % ### `MinPower`
+    % Minimum power setting.
+    % **Default:** `0.25`.
+    %
+    % ### `MaxPower`
+    % Maximum power setting.
+    % **Default:** `8.5`.
+    %
+    % ### `PowerUnit`
+    % Units of power measurement.
+    % **Default:** `'mW'`.
+    %
+    % ### `IsOn`
+    % ON/OFF state of the laser (`1` for ON, `0` for OFF).
+    % **Default:** `0`.
+    %
+    % ### `Power`
+    % Current set power.
+    % **Default:** `0`.
+    %
+    % ### `DAQ`
+    % NI session.
+    %
+    % ## Public Properties
+    %
+    % ### `StartGUI`
+    % Starts the GUI.
+    %
     % ## Usage Example
     % Example: obj=mic.lightsource.CrystaLaser405('Dev1','ao1','Port0/Line3');
     %
-    % ## Key Functions: 
+    % ## Key Functions:
     % on, off, State, setPower, delete, shutdown, funcTest
     %
     % ## REQUIREMENTS: 
