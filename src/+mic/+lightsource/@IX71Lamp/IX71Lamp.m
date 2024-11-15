@@ -13,6 +13,57 @@ classdef IX71Lamp < mic.lightsource.abstract
 % - mic.Abstract.m
 % - mic.lightsource.abstract.m
 % 
+% ## Protected Properties
+% 
+% ### `InstrumentName`  
+% Descriptive name of the instrument.  
+% **Default:** `'MIC_IX71Lamp'`.
+% 
+% ### `Power`  
+% Currently set output power.  
+% **Default:** `0`.
+% 
+% ### `PowerUnit`  
+% Unit of power measurement.  
+% **Default:** `'Percent'`.
+% 
+% ### `MinPower`  
+% Minimum power setting.  
+% **Default:** `0`.
+% 
+% ### `MaxPower`  
+% Maximum power setting.  
+% **Default:** `100`.
+% 
+% ### `IsOn`  
+% On or off state of the lamp (`0` for OFF, `1` for ON).  
+% **Default:** `0`.
+% 
+% ### `LampWait`  
+% Wait time (in seconds) used in the on function.  
+% **Default:** `2`.
+% 
+% ### `V_100`  
+% Voltage at which current begins to drop from 100%.  
+% **Default:** `5`.
+% 
+% ### `V_0`  
+% Voltage to completely turn off the lamp.  
+% **Default:** `0`.
+% 
+% ### `DAQ_AC`  
+% NI DAQ session for the analog channel.  
+% **Default:** `[]`.
+% 
+% ### `DAQ_DC`  
+% NI DAQ session for the digital channel.  
+% **Default:** `[]`.
+% 
+% ## Public Properties
+% 
+% ### `StartGUI`  
+% Indicates whether the GUI should start.
+%
 % ## Key Functions
 % - **Constructor (`mic.lightsource.IX71Lamp(NIDevice, AOChannel, DOChannel)`):** Initializes the lamp control with specified NI DAQ channels. It sets the output to the minimum and ensures the lamp is off initially.
 % - **`setPower(Power_in)`:** Sets the lamp's output power as a percentage of its maximum, with adjustments made through the DAQ device.

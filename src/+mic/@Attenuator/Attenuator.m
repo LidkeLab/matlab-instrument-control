@@ -24,11 +24,38 @@ classdef Attenuator < mic.abstract
 % - MATLAB NI-DAQmx driver installed via the Support Package Installer.
 % - An NI DAQ device.
 % 
-% ## Properties
+% ## Class Properties
 % - `Transmission`: The current transmission setting (% of maximum).
 % - `MinTransmission`, `MaxTransmission`: Minimum and maximum transmission settings.
 % - `PowerBeforeAttenuator`: Power measured before the attenuator, useful for calibration.
 % 
+% ### Protected Properties
+% - **`InstrumentName`**:
+%   - **Description**: Descriptive name of the instrument.
+%   - **Type**: String
+%   - **Default**: `'Attenuator'`
+% - **`TransmissionUnit`**:
+%   - **Description**: The unit for representing transmission values.
+%   - **Type**: String
+%   - **Default**: `'Percent'`
+% - **`V_100`**:
+%   - **Description**: Voltage at which the current starts to drop from 100% transmission.
+%   - **Type**: Numeric
+%   - **Default**: `0`
+% - **`V_0`**:
+%   - **Description**: Voltage to set for completely on (full transmission).
+%   - **Type**: Numeric
+%   - **Default**: `5`
+% - **`DAQ`**:
+%   - **Description**: National Instruments Data Acquisition (NI DAQ) session object used for controlling the attenuator.
+%   - **Type**: Object
+%   - **Default**: `[]` (empty)
+% 
+% ### Public Properties
+% - **`StartGUI`**:
+%   - **Description**: Flag for starting a graphical user interface (GUI) when an object of this class is created.
+%   - **Type**: Boolean or other indicator type
+%
 % ## Methods
 % ### `mic.Attenuator(NIDevice, AOChannel)`
 % Constructor for creating an instance of `mic.Attenuator`. Requires NI device and analog output channel specifications.

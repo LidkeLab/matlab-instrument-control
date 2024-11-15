@@ -14,6 +14,58 @@ classdef RAMANLaser785 < mic.lightsource.abstract
 % 2. Place the `mic.lightsource.RAMANLaser785.m` file and its parent classes `mic.abstract` and `mic.lightsource.abstract` in your MATLAB path.
 % 3. Ensure that the `Calibration.mat` file is in the same directory as the `mic.lightsource.RAMANLaser785.m` file or adjust the path in the constructor accordingly.
 % 
+% ## Protected Properties
+% 
+% ### `InstrumentName`  
+% Descriptive name of the instrument.  
+% **Default:** `'RAMANLaser785'`.
+% 
+% ### `Serial`  
+% Serial number of the COM port.
+% 
+% ## Protected Properties (Public Get Access)
+% 
+% ### `Power`  
+% Currently set output power.
+% 
+% ### `PowerUnit`  
+% Unit for measuring power.  
+% **Default:** `'mW'`.
+% 
+% ### `MinPower`  
+% Minimum power setting.  
+% **Default:** `0.00`.
+% 
+% ### `MaxPower`  
+% Maximum power setting.  
+% **Default:** `70`.
+% 
+% ### `IsOn`  
+% On or off state of the device (`0` for OFF, `1` for ON).  
+% **Default:** `0`.
+% 
+% ### `LaserStatus`  
+% Status of the laser with various operational states:
+% - `1` = Normal
+% - `2` = TTL modulation
+% - `3` = Laser Power Scan
+% - `4` = Waiting for calibrate laser power
+% - `5` = Over laser current shutdown
+% - `6` = TEC over temp shutdown
+% - `7` = Waiting for temperature stability
+% - `8` = Waiting 30 seconds
+% 
+% ### `CurrInterpol`  
+% Interpolated current values from calibration.
+% 
+% ### `PowerInterpol`  
+% Interpolated power values from calibration.
+% 
+% ## Public Properties
+% 
+% ### `StartGUI`  
+% Flag to indicate GUI control.
+%
 % ## Usage
 % To use the `mic.lightsource.RAMANLaser785`, instantiate an object of the class with the appropriate COM port.
 % ```matlab

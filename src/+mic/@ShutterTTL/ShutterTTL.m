@@ -13,6 +13,35 @@ classdef ShutterTTL < mic.abstract
     % Port# = Port number in use on the DAQ card by your shutter connection
     % Line# = Line number in use on the DAQ card by the Port.
     %
+    % ## Properties
+    %
+    % ### Protected Properties
+    %
+    % #### `InstrumentName`
+    % - **Description:** Name of the instrument.
+    %   - **Default Value:** `'ShutterTTL'`
+    %
+    % #### `DAQ`
+    % - **Description:** Data acquisition (DAQ) card used for controlling the shutter.
+    %
+    % #### `IsOpen`
+    % - **Description:** Indicates the current state of the shutter (open or closed).
+    %
+    % ### Public Properties
+    %
+    % #### `NIDevice`
+    % - **Description:** Device number of the DAQ card connected to the USB port.
+    %
+    % #### `DOChannel`
+    % - **Description:** Specifies the digital output channel, including port and line information.
+    %
+    % #### `StartGUI`
+    % - **Description:** Determines whether to use `mic.Abstract` to bring up the GUI.
+    %   - **Default Value:** `0`
+    %
+    % #### `NIString`
+    % - **Description:** String representing the combination of Device/Port/Line used by the shutter.
+    %
     % ## Constructor
     % Example: obj=mic.ShutterTTL('Dev1','Port0','Line1');
     %
@@ -27,7 +56,6 @@ classdef ShutterTTL < mic.abstract
     %   support package for NI-DAQmx use MATLAB 2014b and higher 
     %   
     % ### CITATION: Farzin Farzam, Lidkelab, 2017.
-    
     
     properties(SetAccess=protected)
         

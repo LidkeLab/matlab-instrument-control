@@ -16,13 +16,216 @@ classdef IMGSourceCamera <  mic.camera.abstract
     % http://www.theimagingsource.com/support/downloads-for-windows/extensions/icmatlabr2013b/
     % This was done with imaqtool using Tools menu.
     %
+    % ## Protected Properties
+    %
+    % ### `AbortNow`
+    % Flag to stop acquisition.
+    %
+    % ### `FigurePos`
+    % Position of the figure window.
+    %
+    % ### `FigureHandle`
+    % Handle for the figure window.
+    %
+    % ### `ImageHandle`
+    % Handle for the image display.
+    %
+    % ### `ReadyForAcq`
+    % Indicates if the camera is ready for acquisition.
+    % **Default:** `0` (call `setup_acquisition` if not ready).
+    %
+    % ### `TextHandle`
+    % Handle for text display.
+    %
+    % ### `CameraHandle`
+    % Handle for the camera object.
+    %
+    % ### `CameraCap`
+    % Camera capabilities.
+    %
+    % ## Hidden Properties
+    %
+    % ### `StartGUI`
+    % Defines whether the GUI starts automatically on object creation.
+    % **Default:** `false`.
+    %
+    % ## Protected Properties (with Set Access)
+    %
+    % ### `CameraIndex`
+    % Index used when more than one camera is present.
+    %
+    % ### `ImageSize`
+    % Size of the current ROI (Region of Interest).
+    %
+    % ### `LastError`
+    % Last error code encountered.
+    %
+    % ### `Manufacturer`
+    % Camera manufacturer.
+    %
+    % ### `Model`
+    % Camera model.
+    %
+    % ### `CameraParameters`
+    % Camera-specific parameters.
+    %
+    % ### `CameraSetting`
+    % Specific settings for the camera.
+    %
+    % ### `XPixels`
+    % Number of pixels in the first dimension.
+    %
+    % ### `YPixels`
+    % Number of pixels in the second dimension.
+    %
+    % ### `InstrumentName`
+    % Name of the instrument.
+    % **Default:** `'IMGSourceCamera'`.
+    %
+    % ## Public Properties
+    %
+    % ### `Binning`
+    % Binning settings in the format `[binX binY]`.
+    %
+    % ### `Data`
+    % Last acquired data.
+    %
+    % ### `ExpTime_Focus`
+    % Exposure time for focus mode.
+    %
+    % ### `ExpTime_Capture`
+    % Exposure time for capture mode.
+    %
+    % ### `ExpTime_Sequence`
+    % Exposure time for sequence mode.
+    %
+    % ### `ROI`
+    % Region of interest in the format `[Xstart Xend Ystart Yend]`.
+    %
+    % ### `SequenceLength`
+    % Length of the kinetic series.
+    % **Default:** `1`.
+    %
+    % ### `SequenceCycleTime`
+    % Cycle time for the kinetic series (equivalent to `1/frame rate`).
+    %
+    % ### `ScanMode`
+    % Scan mode for the Hamamatsu sCMOS camera.
+    %
+    % ### `TriggerMode`
+    % Trigger mode for the Hamamatsu sCMOS camera.
+    %
+    % ### `DefectCorrection`
+    % Defect correction setting for the Hamamatsu sCMOS camera.
+    %
+    % ### `GuiDialog`
+    % GUI dialog object.
+    %
     % ## Contructor
     % Example: obj=mic.camera.IMGSourceCamera();
     %
-    % ## Key Functions:
-    % delete, shutdown, exportState
+    % ## Methods
     %
-    % ## REQUIREMENTS: 
+    % ### `abort()`
+    % Aborts the current acquisition process.
+    % - Stops the camera handle.
+    % - Sets `ReadyForAcq` to `0`.
+    %
+    % ### `shutdown()`
+    % Shuts down the object and releases resources.
+    % - Deletes and clears the `CameraHandle`.
+    %
+    % ### `errorcheck(funcname)`
+    % Performs error checking for the specified function name.
+    %
+    % ### `initialize()`
+    % Initializes the camera settings and properties.
+    % - Retrieves the camera if `CameraIndex` is empty.
+    % - Sets up camera settings, ROI, and GUI dialog.
+    %
+    % ### `setup_acquisition()`
+    % Configures the acquisition parameters based on the acquisition type (`focus`, `capture`, or `sequence`).
+    %
+    % ### `getlastimage()`
+    % Retrieves the last captured image from the camera handle.
+    % - Adjusts the image based on the specified ROI.
+    %
+    % ### `getdata()`
+    % Retrieves data based on the acquisition type (`focus`, `capture`, or `sequence`).
+    % - Adjusts the output based on the specified ROI.
+    %
+    % ### `start_focus()`
+    % Starts the focus mode acquisition.
+    % - Configures acquisition settings.
+    % - Handles data acquisition and displays the last image.
+    %
+    % ### `start_capture()`
+    % Starts the image capture mode.
+    % - Configures acquisition settings and captures a single image.
+    %
+    % ### `start_sequence()`
+    % Starts sequence acquisition.
+    % - Configures acquisition settings and captures a sequence of images.
+    %
+    % ### `getstatus()`
+    % Retrieves the current status of the camera.
+    % **Returns:**
+    % - `status` (double): Indicates if the camera is running.
+    %
+    % ### `start_sequence_fast()`
+    % Starts fast sequence capture.
+    % - Configures acquisition settings and starts the sequence.
+    %
+    % ### `build_guiDialog(GuiCurSel)`
+    % Builds the GUI dialog for camera settings based on the provided `GuiCurSel`.
+    %
+    % ### `apply_camSetting()`
+    % Applies the camera settings from the GUI dialog.
+    %
+    % ### `exportState()`
+    % Exports the current state of the camera.
+    %
+    % ### `setCamProperties(Infield)`
+    % Sets up camera properties based on input fields.
+    %
+    % ### `set.ROI(in)`
+    % Sets up the ROI (Region of Interest).
+    %
+    % ### `set.ExpTime_Focus(in)`
+    % Sets the exposure time for focus mode.
+    %
+    % ### `set.ExpTime_Capture(in)`
+    % Sets the exposure time for image capture.
+    %
+    % ### `set.ExpTime_Sequence(in)`
+    % Sets the exposure time for sequence capture.
+    %
+    % ### `set.SequenceLength(in)`
+    % Sets the length of the sequence.
+    %
+    % ## Protected Methods
+    %
+    % ### `get_properties()`
+    % Retrieves properties of the object.
+    %
+    % ### `gettemperature()`
+    % Retrieves the temperature and status of the camera.
+    % **Returns:**
+    % - `temp` (double): Temperature value.
+    % - `status` (double): Status code.
+    %
+    % ## Static Methods
+    %
+    % ### `funcTest()`
+    % Tests the functionality of the class/instrument.
+    % - Creates an instance of `IMGSourceCamera`.
+    % - Configures and performs various acquisitions.
+    % - Deletes the instance and returns a success flag.
+    %
+    % ### `camSet2GuiSel(CameraSetting)`
+    % Converts camera settings to GUI selection values.
+    %
+    % ## REQUIREMENTS:
     %   mic.Abstract.m
     %   mic.camera.abstract.m
     %   MATLAB software version R2013a or later

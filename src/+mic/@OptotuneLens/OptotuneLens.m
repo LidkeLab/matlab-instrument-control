@@ -10,6 +10,45 @@ classdef OptotuneLens < mic.abstract
 % - **Drift Compensation**: Enable drift compensation to maintain focal stability.
 % - **Firmware Interaction**: Retrieve and interact with the lens firmware, accommodating different firmware versions for command compatibility.
 % 
+%## Class Properties
+% 
+% ### Protected Properties
+% - **`InstrumentName`**: 
+%   - **Description**: Descriptive name of the instrument.
+%   - **Type**: String
+%   - **Default**: `'OptotuneLens'`
+% 
+% - **`MinFocalPower`**: 
+%   - **Description**: Minimum focal power of the lens in diopters (dpt).
+%   - **Type**: Numeric
+% 
+% - **`MaxFocalPower`**: 
+%   - **Description**: Maximum focal power of the lens in diopters (dpt).
+%   - **Type**: Numeric
+% 
+% - **`FocalPower`**: 
+%   - **Description**: Current focal power of the lens in diopters (dpt).
+%   - **Type**: Numeric
+% 
+% - **`SPO`**: 
+%   - **Description**: Serial port object used for communication with the lens.
+%   - **Type**: Object
+% 
+% ### Hidden Properties
+% - **`StartGUI`**: 
+%   - **Description**: Flag indicating whether the GUI should start during object construction.
+%   - **Type**: Boolean
+%   - **Default**: `false`
+% 
+% - **`Data2Temp`**: 
+%   - **Description**: Conversion factor for reading the temperature from the device.
+%   - **Type**: Numeric
+%   - **Default**: `0.0625`
+% 
+% - **`Firmware`**: 
+%   - **Description**: Firmware type used by the lens device.
+%   - **Type**: String or Object (specific type not provided)
+%
 % ## Requirements
 % - MATLAB 2016b or later.
 % - Instrument Control Toolbox for MATLAB for serial port communication.

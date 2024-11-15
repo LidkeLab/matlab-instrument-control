@@ -1,7 +1,7 @@
-# MIC_AndorCameraZyla Class
+# mic.camera.AndorCameraZyla Class
 
 ## Description
-The `MIC_AndorCameraZyla` class interfaces with Andor Zyla cameras via the Andor SDK3, providing comprehensive control over camera operations in MATLAB. This class enables precise manipulation of camera settings and acquisition modes, tailored specifically for the Zyla model.
+The `mic.camera.AndorCameraZyla` class interfaces with Andor Zyla cameras via the Andor SDK3, providing comprehensive control over camera operations in MATLAB. This class enables precise manipulation of camera settings and acquisition modes, tailored specifically for the Zyla model.
 
 ## Features
 - Direct integration with Andor SDK3.
@@ -40,7 +40,7 @@ Properly closes the camera connection and cleans up resources to ensure a safe s
 
 ```matlab
 Instantiate the camera
-camera = MIC_AndorCameraZyla();
+camera = mic.camera.AndorCameraZyla();
 
 Configure the camera for a sequence acquisition
 camera.setup_acquisition('sequence');

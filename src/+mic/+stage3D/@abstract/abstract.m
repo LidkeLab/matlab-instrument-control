@@ -4,10 +4,18 @@ classdef abstract < mic.abstract
     % ## Description
     % This class defines a set of abstract Properties and methods that must
     % implemented in inheritting classes for all stages devices.  
-    % This also provides a simple and intuitive GUI interface.   
-    % 
+    % This also provides a simple and intuitive GUI interface.
+    %
+    % ## Abstract Protected Properties
+    %
+    % ### `Position`
+    % Represents the current position.
+    %
+    % ### `PositionUnit`
+    % Units of the position parameter (e.g., `um`/`mm`).
+    
     % ## Constructor
-    % The constructor in each subclass must begin with the following line 
+    % The constructor in each subclass must begin with the following line
     % inorder to enable the auto-naming functionality:
     % obj=obj@mic.stage3D.abstract(~nargout);
     %

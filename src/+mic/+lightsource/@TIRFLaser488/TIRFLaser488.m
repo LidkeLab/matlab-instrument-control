@@ -18,6 +18,92 @@ classdef TIRFLaser488 < mic.lightsource.abstract
     % ## Installation
     % Ensure all required files are in the MATLAB path and that your system is properly configured to interface with the hardware components.
     %
+    % ## Protected Properties
+    %
+    % ### `InstrumentName`
+    % Instrument name.
+    % **Default:** `'TIRFLaser488'`.
+    %
+    % ### `PowerUnit`
+    % Power unit based on each device.
+    % **Default:** `'mW'`.
+    %
+    % ### `Power`
+    % Currently set power based on the power limit.
+    %
+    % ### `IsOn`
+    % Laser status (`1` for ON, `0` for OFF).
+    % **Default:** `0`.
+    %
+    % ### `MinPower`
+    % Lower limit for power.
+    % **Default:** `0`.
+    %
+    % ### `MaxPower`
+    % Upper limit for power.
+    % **Default:** `100`.
+    %
+    % ## Private Properties (with Public Get Access)
+    %
+    % ### `LaserState`
+    % State of the laser (`0` for OFF, other values for ON).
+    % **Default:** `0`.
+    %
+    % ### `LaserStatus`
+    % Status of the laser.
+    %
+    % ## Public Properties
+    %
+    % ### `VecIndex`
+    % Finds the filter wheels combination closest to the user input power.
+    %
+    % ### `ShutterObj`
+    % Shutter object.
+    %
+    % ### `FilterWheelObj1`
+    % First filter wheel object.
+    %
+    % ### `FilterWheelObj2`
+    % Second filter wheel object.
+    %
+    % ### `FilterPos`
+    % Angle vector showing the position of all ND filters in a wheel.
+    %
+    % ### `FracTransmVals`
+    % Transmission percentage vector for a set of ND filters.
+    %
+    % ### `Transmission`
+    % Transmission percentage of both filter wheels.
+    %
+    % ### `StartGUI`
+    % GUI control for the laser.
+    % **Default:** `0`.
+    %
+    % ### `Laser488`
+    % Laser object for the 488nm laser.
+    %
+    % ### `LaserPower`
+    % Power of the laser.
+    %
+    % ### `LaserTag`
+    % Tag identifier for the laser.
+    %
+    % ### `Serial`
+    % Serial number of the 488 Laser COM port.
+    %
+    % ### `DOChannel`
+    % Digital Output channel.
+    %
+    % ### `PowerIn`
+    % User input for power.
+    %
+    % ### `PowerVector`
+    % Vector showing different combinations of ND filters in two filter wheels.
+    %
+    % ### `DAQ`
+    % Data acquisition (DAQ) object.
+    % **Default:** `[]`.
+    %
     % ## Key Functions:
     %       - on(obj): Opens the shutter to turn the laser ON.
     %       - Usage: obj.on();

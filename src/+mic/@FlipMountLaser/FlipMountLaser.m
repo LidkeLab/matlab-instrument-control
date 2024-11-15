@@ -7,6 +7,40 @@ classdef FlipMountLaser < mic.abstract %by FF
     % flipmount to be set in up or down positions, so flipmount is regulated by
     % the Digital voltage output of the NI-DAQ card.
     %
+    % ## Class Properties
+    %
+    % ### Protected Properties
+    %
+    % - **`InstrumentName`**
+    %   - **Description**: Descriptive name for the instrument.
+    %   - **Type**: String
+    %   - **Default**: `'FlipMountLaser'`
+    %
+    % - **`Laserobj`**
+    %   - **Description**: Object representing the laser that is integrated with the flip mount system.
+    %   - **Type**: Laser Object (type unspecified)
+    %
+    % - **`LaserPower`**
+    %   - **Description**: Power of the laser controlled through the flip mount system.
+    %   - **Type**: Numeric (Power level)
+    %
+    % - **`IsOpen`**
+    %   - **Description**: Indicates whether the flip mount is currently open. The default value indicates that the mount starts open.
+    %   - **Type**: Boolean
+    %   - **Default**: `1` (open)
+    %
+    % ### Public Properties
+    %
+    % - **`Low`**
+    %   - **Description**: Represents the lower threshold or minimum operational setting (e.g., for laser power).
+    %   - **Type**: Numeric
+    %   - **Default**: `0.1`
+    %
+    % - **`StartGUI`**
+    %   - **Description**: Determines if the graphical user interface (GUI) will be launched upon object creation using the `mic.Abstract` interface.
+    %   - **Type**: Boolean
+    %   - **Default**: `0` (disabled)
+    %
     % Make the object by: obj = mic.FlipMountTTL('Dev#', 'Port#/Line#') where:
     % Dev#  = Device number assigned to DAQ card by computer USB port of the
     % Port# = Port number in use on the DAQ card by your flipmount connection

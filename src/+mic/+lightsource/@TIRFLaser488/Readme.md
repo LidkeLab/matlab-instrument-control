@@ -1,21 +1,107 @@
-# MIC_NewportLaser488: Matlab Instrument Class for Newport Cyan Laser 488 on TIRF microscope.
+# mic.lightsource.NewportLaser488: Matlab Instrument Class for Newport Cyan Laser 488 on TIRF microscope.
 
 ## Description
-The `MIC_TIRFLaser488` is a MATLAB instrument class for controlling the Newport Cyan Laser 488 used in
+The `mic.lightsource.TIRFLaser488` is a MATLAB instrument class for controlling the Newport Cyan Laser 488 used in
 TIRF (Total Internal Reflection Fluorescence) microscopy setups. It integrates functionalities for managing
 laser power through ND (Neutral Density) filter wheels and a shutter for toggling the laser ON and OFF.
 
 ## Requirements
-- `MIC_Abstract.m`
-- `MIC_LightSource_Abstract.m`
-- `MIC_FilterWheel.m`
-- `MIC_DynamixelServo.m`
-- `MIC_ShutterTTL.m`
+- `mic.abstract.m`
+- `mic.lightsource.abstract.m`
+- `mic.NDFilterWheel.m`
+- `mic.DynamixelServo.m`
+- `mic.ShutterTTL.m`
 - MATLAB (R2016b or later)
 - Data Acquisition Toolbox
 
 ## Installation
 Ensure all required files are in the MATLAB path and that your system is properly configured to interface with the hardware components.
+
+## Protected Properties
+
+### `InstrumentName`
+Instrument name.
+**Default:** `'TIRFLaser488'`.
+
+### `PowerUnit`
+Power unit based on each device.
+**Default:** `'mW'`.
+
+### `Power`
+Currently set power based on the power limit.
+
+### `IsOn`
+Laser status (`1` for ON, `0` for OFF).
+**Default:** `0`.
+
+### `MinPower`
+Lower limit for power.
+**Default:** `0`.
+
+### `MaxPower`
+Upper limit for power.
+**Default:** `100`.
+
+## Private Properties (with Public Get Access)
+
+### `LaserState`
+State of the laser (`0` for OFF, other values for ON).
+**Default:** `0`.
+
+### `LaserStatus`
+Status of the laser.
+
+## Public Properties
+
+### `VecIndex`
+Finds the filter wheels combination closest to the user input power.
+
+### `ShutterObj`
+Shutter object.
+
+### `FilterWheelObj1`
+First filter wheel object.
+
+### `FilterWheelObj2`
+Second filter wheel object.
+
+### `FilterPos`
+Angle vector showing the position of all ND filters in a wheel.
+
+### `FracTransmVals`
+Transmission percentage vector for a set of ND filters.
+
+### `Transmission`
+Transmission percentage of both filter wheels.
+
+### `StartGUI`
+GUI control for the laser.
+**Default:** `0`.
+
+### `Laser488`
+Laser object for the 488nm laser.
+
+### `LaserPower`
+Power of the laser.
+
+### `LaserTag`
+Tag identifier for the laser.
+
+### `Serial`
+Serial number of the 488 Laser COM port.
+
+### `DOChannel`
+Digital Output channel.
+
+### `PowerIn`
+User input for power.
+
+### `PowerVector`
+Vector showing different combinations of ND filters in two filter wheels.
+
+### `DAQ`
+Data acquisition (DAQ) object.
+**Default:** `[]`.
 
 ## Key Functions:
 - on(obj): Opens the shutter to turn the laser ON.
@@ -35,11 +121,11 @@ Ensure all required files are in the MATLAB path and that your system is properl
 - Usage: obj.shutdown();
 
 ## Usage
-To create an instance of the `MIC_TIRFLaser488` class:
+To create an instance of the `mic.lightsource.TIRFLaser488` class:
 ```matlab
-obj = MIC_TIRFLaser488();
+obj = mic.lightsource.TIRFLaser488();
 % Create an object
-laser = MIC_TIRFLaser488();
+laser = mic.lightsource.TIRFLaser488();
 
 % Set power to 70 mW
 laser.setPower(70);

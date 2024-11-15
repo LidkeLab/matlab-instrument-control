@@ -20,6 +20,34 @@ classdef abstract < mic.abstract
 % 3. Ensure that VISA software is installed for proper communication with the device.
 % 4. Clone this repository or download the `mic.powermeter.abstract.m` file into your MATLAB working directory.
 % 
+% ## Properties
+% 
+% ### `VisaObj`  
+% Visa Object (Virtual Instrument Standard Architecture = VISA).
+% 
+% ### `Power`  
+% Current power.
+% 
+% ### `Ask`  
+% The query sent to the instrument. Possible values are `'power'` or `'temp'`.
+% 
+% ### `Limits`  
+% Minimum and maximum values of wavelength.
+% 
+% ### `Lambda`  
+% Wavelength.
+% 
+% ### `T`  
+% Period of time shown on the figure in the GUI.
+% 
+% ### `Stop`  
+% Controls plotting behavior. Value `0` stops the plot, while `1` starts the plot (default: `0`).
+% 
+% ## Abstract Properties
+% 
+% ### `StartGUI`  
+% Represents a property for starting the GUI.
+
 % ## Usage Example
 % ```matlab
 % pm = mic.powermeter.abstract('AutoNameHere');

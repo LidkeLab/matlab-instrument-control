@@ -10,6 +10,17 @@ classdef IRSyringPump < mic.camera.ThorlabsIR
 % - mic.camera.ThorlabsIR
 % - mic.camera.SyringePump
 % 
+% ## Public Properties
+% 
+% ### `SP`  
+% Object for `mic.camera.SyringePump` to control the syringe pump.
+% 
+% ### `SPwaitTime`  
+% Wait time for the syringe pump to start after the IR camera starts.
+% 
+% ### `tIR_end`  
+% Property to check if all devices (Andor, IRCamera, Syringe Pump) work in the correct time order.
+%
 % ## Key Functions
 % - **Constructor (`mic.camera.IRSyringPump()`):** Initializes the syringe pump and sets default parameters for the IR camera and pump synchronization.
 % - **`start_sequence()`:** Begins a sequence acquisition with the IR camera and triggers the syringe pump at a specified frame (`SPwaitTime`). This function handles data acquisition, pump activation, and ensures proper timing and synchronization between devices.

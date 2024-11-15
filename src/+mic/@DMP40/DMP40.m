@@ -21,6 +21,39 @@ classdef DMP40 < mic.abstract
 %    NET.addAssembly(fullfile(p,'Thorlabs.TLDFMX_64.Interop.dll'));
 %    NET.addAssembly(fullfile(p,'Thorlabs.TLDFM_64.Interop.dll'));
 % ```
+% 
+% ## Class Properties
+% 
+% ### Protected Properties
+% - **`InstrumentName`**:
+%   - **Description**: Descriptive instrument name.
+%   - **Type**: String
+%   - **Default**: `'DMP40'`
+% - **`DAQ`**:
+%   - **Description**: National Instruments DAQ session object used for communication.
+%   - **Type**: Object
+% - **`IsOpen`**:
+%   - **Description**: Status indicator for the connection to the device.
+%   - **Type**: Boolean
+% - **`DMP40mirror`**:
+%   - **Description**: Instance of the .NET `DMP40mirror` class used to interact with the deformable mirror.
+%   - **Type**: Object
+% 
+% ### Public Properties
+% - **`NIDevice`**:
+%   - **Description**: Device number assigned to the NI DAQ card connected via USB.
+%   - **Type**: String or Integer
+% - **`DOChannel`**:
+%   - **Description**: Digital Output (DO) channel configuration, including both port and line information.
+%   - **Type**: String
+% - **`StartGUI`**:
+%   - **Description**: Flag indicating whether a GUI should be launched when an instance of the class is created. Utilizes the `mic.abstract` framework for GUI functionality.
+%   - **Type**: Boolean
+%   - **Default**: `0` (false)
+% - **`NIString`**:
+%   - **Description**: String representation of the NI DAQ device, including port and line configuration used by the shutter.
+%   - **Type**: String
+%
 % ## Key Functions
 % - **Constructor (`DMP40()`):** Sets up the initial connection to the deformable mirror using specified .NET libraries and verifies device availability.
 % - **`setMirrorVoltages(VoltageArray)`:** Applies specific voltages to control the overall shape and curvature of the deformable mirror.

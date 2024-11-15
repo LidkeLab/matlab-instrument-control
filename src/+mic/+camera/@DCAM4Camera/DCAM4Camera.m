@@ -3,6 +3,284 @@ classdef DCAM4Camera < mic.camera.abstract
     % This class is a modified version of mic.camera.HamamatsuCamera that uses the
     % DCAM4 API.
     
+    %## Protected Properties
+    %
+    % ### `AbortNow`
+    % Flag for stopping the acquisition process.
+    %
+    % ### `ErrorCode`
+    % Stores the error code.
+    %
+    % ### `FigurePos`
+    % Position of the figure window.
+    %
+    % ### `FigureHandle`
+    % Handle for the figure window.
+    %
+    % ### `ImageHandle`
+    % Handle for the image display.
+    %
+    % ### `ReadyForAcq`
+    % Indicates if the camera is ready for acquisition. If not, `setup_acquisition` should be called.
+    % **Default:** `0`.
+    %
+    % ### `TextHandle`
+    % Handle for text display.
+    %
+    % ## Protected Properties (Set Access)
+    %
+    % ### `CameraHandle`
+    % Handle for the camera object.
+    %
+    % ### `CameraIndex`
+    % Index used when more than one camera is present.
+    %
+    % ### `ImageSize`
+    % Size of the current ROI (Region of Interest).
+    %
+    % ### `LastError`
+    % Last error code encountered.
+    %
+    % ### `Manufacturer`
+    % Camera manufacturer.
+    %
+    % ### `Model`
+    % Camera model.
+    %
+    % ### `CameraParameters`
+    % Camera-specific parameters.
+    %
+    % ### `CameraCap`
+    % Capability (all options) of camera parameters.
+    %
+    % ### `CameraSetting`
+    % Camera-specific settings.
+    %
+    % ### `Capabilities`
+    % Capabilities structure from the camera.
+    %
+    % ### `XPixels`
+    % Number of pixels in the first dimension.
+    %
+    % ### `YPixels`
+    % Number of pixels in the second dimension.
+    %
+    % ### `InstrumentName`
+    % Name of the instrument.
+    % **Default:** `'HamamatsuCamera'`.
+    %
+    % ### `TriggerPause`
+    % Pause duration (in seconds) after firing a trigger in `fireTrigger()`.
+    %
+    % ### `IsRunning`
+    % Indicates if the camera is currently running.
+    % **Default:** `0`.
+    %
+    % ### `CameraFrameIndex`
+    % Index for the camera frames.
+    %
+    % ## Hidden Properties
+    %
+    % ### `StartGUI`
+    % Defines whether the GUI starts automatically on object creation.
+    % **Default:** `false`.
+    %
+    % ## Public Properties
+    %
+    % ### `Binning`
+    % Binning mode, see `DCAM_IDPROP_BINNING`.
+    %
+    % ### `Data`
+    % Last acquired data.
+    % **Default:** `[]`.
+    %
+    % ### `ExpTime_Focus`
+    % Exposure time for focus mode.
+    %
+    % ### `ExpTime_Capture`
+    % Exposure time for capture mode.
+    %
+    % ### `ExpTime_Sequence`
+    % Exposure time for sequence mode.
+    %
+    % ### `ROI`
+    % Region of interest specified as `[Xstart Xend Ystart Yend]`.
+    %
+    % ### `SequenceLength`
+    % Length of the kinetic series.
+    % **Default:** `1`.
+    %
+    % ### `SequenceCycleTime`
+    % Cycle time for the kinetic series (in seconds).
+    %
+    % ### `FrameRate`
+    % Frame rate of the camera.
+    %
+    % ### `TriggerMode`
+    % Trigger mode for the Hamamatsu sCMOS camera.
+    %
+    % ### `GuiDialog`
+    % GUI dialog object.
+    %
+    % ### `Timeout`
+    % Timeout duration for several DCAM functions (in milliseconds).
+    % **Default:** `10000`.
+    %
+    % ### `Abortnow`
+    % Flag for stopping the acquisition process (duplicated with `AbortNow`).
+    %
+    % ## Methods
+    %
+    % ### `DCAM4Camera()`
+    % Constructor for creating an instance of `DCAM4Camera`.
+    %
+    % ### `errorcheck()`
+    % Performs error checking.
+    %
+    % ### `getcamera()`
+    % Method to retrieve camera settings (implementation not shown).
+    %
+    % ### `abort()`
+    % Aborts the current capture.
+    % - Stops capture with `DCAM4StopCapture`.
+    % - Releases memory with `DCAM4ReleaseMemory`.
+    %
+    % ### `getlastimage()`
+    % Returns the last image captured by the camera.
+    % - Reshapes and returns the image data.
+    %
+    % ### `getoneframe()`
+    % Returns a specific frame from the camera.
+    % - Retrieves and reshapes a specified frame.
+    %
+    % ### `getdata()`
+    % Grabs data from the camera based on acquisition type (`focus`, `capture`, `sequence`).
+    %
+    % ### `initialize()`
+    % Initializes the camera and sets up default properties.
+    % - Retrieves camera information.
+    % - Sets default exposure times, pixel size, and properties.
+    %
+    % ### `setup_acquisition()`
+    % Configures the acquisition settings for different acquisition types (`focus`, `capture`, `sequence`).
+    %
+    % ### `setup_fast_acquisition()`
+    % Sets up fast acquisition mode with software triggering.
+    %
+    % ### `shutdown()`
+    % Closes the camera and releases resources.
+    % - Calls `DCAM4Close` and `DCAM4UnInit`.
+    %
+    % ### `prepareForCapture(NImages)`
+    % Prepares the camera for capturing `NImages`.
+    % - Releases and allocates memory buffers.
+    %
+    % ### `start_capture()`
+    % Starts image capture mode.
+    %
+    % ### `start_focus()`
+    % Starts focus mode acquisition.
+    %
+    % ### `start_focusWithFeedback()`
+    % Starts focus mode with feedback display.
+    %
+    % ### `start_sequence(CaptureMode)`
+    % Starts sequence acquisition mode.
+    % - CaptureMode can be either `0` (snap) or `-1` (sequence).
+    %
+    % ### `start_scan()`
+    % Begins a scanning acquisition sequence.
+    %
+    % ### `getlastframebundle(Nframe)`
+    % Retrieves a bundle of frames during acquisition.
+    %
+    % ### `triggeredCapture()`
+    % Performs a capture triggered by an external signal.
+    %
+    % ### `fireTrigger()`
+    % Fires a trigger signal.
+    %
+    % ### `finishTriggeredCapture(numFrames)`
+    % Finishes a triggered capture and retrieves the captured frames.
+    %
+    % ### `take_sequence()`
+    % Performs a sequence capture.
+    %
+    % ### `reset()`
+    % Resets the camera properties and reopens the camera handle.
+    %
+    % ### `HtsuGetStatus()`
+    % Retrieves the current status of the camera.
+    % - Returns a status string (`'Error'`, `'Busy'`, `'Ready'`, etc.).
+    %
+    % ### `call_temperature()`
+    % Calls the temperature measurement function.
+    %
+    % ### `get_propertiesDcam()`
+    % Retrieves properties and attributes from the camera.
+    %
+    % ### `get_propAttr(idprop)`
+    % Retrieves the attributes of a specified property.
+    %
+    % ### `getProperty(idprop)`
+    % Retrieves the value of a specified property.
+    %
+    % ### `setProperty(idprop, value)`
+    % Sets the value of a specified property.
+    %
+    % ### `setgetProperty(idprop, value)`
+    % Sets and retrieves the value of a specified property.
+    %
+    % ### `setCamProperties(Infield)`
+    % Applies camera properties from an input field.
+    %
+    % ### `build_guiDialog(GuiCurSel)`
+    % Builds a GUI dialog based on camera settings.
+    %
+    % ### `apply_camSetting()`
+    % Applies the settings from the GUI dialog.
+    %
+    % ### `exportState()`
+    % Exports the current state of the camera object.
+    %
+    % ### `set.ROI(ROI)`
+    % Sets the Region of Interest (ROI).
+    %
+    % ### `valuecheck(propname, val)`
+    % Checks and adjusts the value of a property to fit within specified bounds.
+    %
+    % ### `set.ExpTime_Focus(in)`
+    % Sets the focus mode exposure time.
+    %
+    % ### `set.ExpTime_Capture(in)`
+    % Sets the capture mode exposure time.
+    %
+    % ### `set.ExpTime_Sequence(in)`
+    % Sets the sequence mode exposure time.
+    %
+    % ### `set.Binning(in)`
+    % Sets the binning mode.
+    %
+    % ### `set.SequenceLength(in)`
+    % Sets the sequence length.
+    %
+    % ## Protected Methods
+    %
+    % ### `get_properties()`
+    % Retrieves properties of the object.
+    %
+    % ### `gettemperature()`
+    % Retrieves the temperature of the camera.
+    %
+    % ## Static Methods
+    %
+    % ### `funcTest()`
+    % Performs a unit test of the camera class.
+    %
+    % ### `camSet2GuiSel(CameraSetting)`
+    % Converts current camera settings to GUI selections.
+    %
+    
     properties(Access = protected)
         AbortNow;
         ErrorCode;

@@ -4,6 +4,101 @@ classdef Imaq < mic.camera.abstract
 % ## Overview
 % `mic.camera.Imaq` is a MATLAB class designed for camera control using the Image Acquisition Toolbox. It extends the `mic.camera.abstract` class and includes methods for initializing the camera, managing acquisitions, and retrieving images.
 % 
+% ## Protected Properties
+% 
+% ### `AbortNow`
+% Stop acquisition flag.
+% 
+% ### `FigurePos`
+% Position of the figure window.
+% 
+% ### `FigureHandle`
+% Handle for the figure window.
+% 
+% ### `ImageHandle`
+% Handle for the image display.
+% 
+% ### `ReadyForAcq`
+% Indicates if the camera is ready for acquisition. If not, `setup_acquisition` should be called.
+% 
+% ### `TextHandle`
+% Handle for text display.
+% 
+% ### `CameraHandle`
+% Handle for the camera object.
+% 
+% ### `CameraCap`
+% Camera capabilities.
+% 
+% ### `CameraIndex`
+% Index used when more than one camera is present.
+% 
+% ### `ImageSize`
+% Size of the current ROI (Region of Interest).
+% 
+% ### `LastError`
+% Last error code encountered.
+% 
+% ### `Manufacturer`
+% Camera manufacturer.
+% 
+% ### `Model`
+% Camera model.
+% 
+% ### `CameraParameters`
+% Camera-specific parameters.
+% 
+% ### `CameraSetting`
+% Camera-specific settings.
+% 
+% ### `XPixels`
+% Number of pixels in the first dimension.
+% 
+% ### `YPixels`
+% Number of pixels in the second dimension.
+% 
+% ### `InstrumentName`
+% Name of the instrument.  
+% **Default:** `''` (empty string).
+% 
+% ### `Expfield`
+% Field for experiment settings.
+% 
+% ## Public Properties
+% 
+% ### `Binning`
+% Binning settings in the format `[binX binY]`.
+% 
+% ### `Data`
+% Last acquired data.
+% 
+% ### `ExpTime_Focus`
+% Exposure time for focus mode.
+% 
+% ### `ExpTime_Capture`
+% Exposure time for capture mode.
+% 
+% ### `ExpTime_Sequence`
+% Exposure time for sequence mode.
+% 
+% ### `ROI`
+% Region of interest in the format `[Xstart Xend Ystart Yend]`.
+% 
+% ### `SequenceLength`
+% Length of the kinetic series.
+% 
+% ### `SequenceCycleTime`
+% Cycle time for the kinetic series (equivalent to `1/frame rate`).
+% 
+% ### `GuiDialog`
+% GUI dialog object.
+% 
+% ## Hidden Properties
+% 
+% ### `StartGUI`
+% Defines whether the GUI starts automatically on object creation.  
+% **Default:** `false`.
+%
 % ## Methods
 % - **Constructor**: Initializes the camera with optional parameters for adaptor name, format, and device ID.
 % - `abort()`: Aborts the ongoing acquisition.

@@ -1,13 +1,88 @@
-# MIC_HamamatsuCamera Class
+# mic.camera.HamamatsuCamera Class
 
 ## Description
-The `MIC_HamamatsuCamera` class inherits from `MIC_Camera_Abstract` and is specifically tailored for
+The `mic.camera.HamamatsuCamera` class inherits from `mic.camera.abstract` and is specifically tailored for
 controlling Hamamatsu cameras in MATLAB. It offers comprehensive control over camera settings such as exposure time,
 binning, ROI (Region of Interest), and acquisition modes (focus, capture, sequence). This class also supports
 asynchronous data acquisition, status checks, and advanced configuration through a graphical user interface.
 
+## Protected Properties
+
+### `AbortNow`
+Stop acquisition flag.
+
+### `ErrorCode`
+Error code encountered during operation.
+
+### `FigurePos`
+Position of the figure window.
+
+### `FigureHandle`
+Handle for the figure window.
+
+### `ImageHandle`
+Handle for the image display.
+
+### `ReadyForAcq`
+Indicates if the camera is ready for acquisition. If not, `setup_acquisition` should be called.
+**Default:** `0`.
+
+### `TextHandle`
+Handle for text display.
+
+### `SDKPath`
+Path to the camera SDK.
+
+## Protected Properties (Set Access)
+
+### `CameraHandle`
+Handle for the camera object.
+
+### `CameraIndex`
+Index used when more than one camera is present.
+
+### `ImageSize`
+Size of the current ROI (Region of Interest).
+
+### `LastError`
+Last error code encountered.
+
+### `Manufacturer`
+Camera manufacturer.
+
+### `Model`
+Camera model.
+
+### `CameraParameters`
+Camera-specific parameters.
+
+### `CameraCap`
+Capability (all options) of camera parameters.
+
+### `CameraSetting`
+Camera-specific settings.
+
+### `Capabilities`
+Capabilities structure from the camera.
+
+### `XPixels`
+Number of pixels in the first dimension.
+
+### `YPixels`
+Number of pixels in the second dimension.
+
+### `InstrumentName`
+Name of the instrument.
+**Default:** `'HamamatsuCamera'`.
+
+## Hidden Properties
+
+### `StartGUI`
+Defines whether the GUI starts automatically on object creation.
+**Default:** `false`.
+
 ## Key Functions
-- **Constructor (`MIC_HamamatsuCamera()`):** Initializes the camera, setting up default values and configuring the camera for initial use.
+- **Constructor (`mic.camera.HamamatsuCamera()`):** Initializes the camera, setting up default values and configuring the camera for initial use.
 - **`delete()`:** Cleans up resources, ensuring proper shutdown of the camera connection.
 - **`initialize()`:** Sets up camera parameters and GUI based on current settings. Required before starting any acquisition.
 - **`setup_acquisition()`:** Prepares the camera for data acquisition based on the selected mode (focus, capture, sequence).
@@ -21,7 +96,7 @@ asynchronous data acquisition, status checks, and advanced configuration through
 ## Usage Example
 ```matlab
 Create an instance of the Hamamatsu camera
-cam = MIC_HamamatsuCamera();
+cam = mic.camera.HamamatsuCamera();
 
 Initialize camera with default settings
 cam.initialize();

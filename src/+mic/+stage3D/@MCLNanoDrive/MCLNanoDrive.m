@@ -24,6 +24,62 @@ classdef MCLNanoDrive < mic.stage3D.abstract
     % ## Installation Notes
     % During the first initialization of this class on a system, users are prompted to direct the class to the `madlib.h` header file, typically located in `C:\Program Files\Mad City Labs\NanoDrive`.
     %
+    % ## Protected Properties
+    %
+    % ### `InstrumentName`
+    % Default: `'MCLNanoDrive'`. Represents the name of the instrument being controlled.
+    %
+    % ### `ErrorCode`
+    % Fixed structure listing all error codes, loaded by `set_errorcodes()`.
+    %
+    % ### `Max_X`
+    % Maximum X Position (in microns).
+    %
+    % ### `Max_Y`
+    % Maximum Y Position (in microns).
+    %
+    % ### `Max_Z`
+    % Maximum Z Position (in microns).
+    %
+    % ### `DLLversion`
+    % Major version of the DLL.
+    %
+    % ### `DLLrevision`
+    % Minor version of the DLL.
+    %
+    % ### `ProductInfo`
+    % Stage controller model number.
+    %
+    % ### `Serial`
+    % Stage serial number.
+    %
+    % ### `DLLPath`
+    % Path to `madlib.h`.
+    %
+    % ### `LastError`
+    % The last recorded error code.
+    %
+    % ## Transient Protected Properties
+    %
+    % ### `Position`
+    % Current position in microns (default: `[0 0 0]`).
+    %
+    % ### `SensorPosition`
+    % Results of a `get Position` call, representing position in microns.
+    %
+    % ### `PositionUnit`
+    % Units of the position parameter (default: `um`).
+    %
+    % ## Private Properties
+    %
+    % ### `handle`
+    % Handle to control this specific stage. Only one DLL instance can control a stage at a time.
+    %
+    % ## Hidden Properties
+    %
+    % ### `StartGUI`
+    % Boolean flag indicating whether the GUI starts on object creation (default: `false`).
+    
     % ## Key Methods
     % - **Constructor (`mic.stage3D.MCLNanoDrive()`):** Initializes the connection to the Mad City Labs stage and loads necessary libraries.
     % - **`setPosition([x, y, z])`:** Moves the stage to the specified x, y, z coordinates.

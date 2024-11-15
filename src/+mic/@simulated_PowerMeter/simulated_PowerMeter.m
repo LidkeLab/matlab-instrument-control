@@ -7,8 +7,55 @@ classdef simulated_PowerMeter < mic.powermeter.abstract
     % REQUIRES:
     % mic.powermeter.abstract.m
     
-    % Documentation: For detailed documentation check Readme.md file.
-    
+    % ## Properties
+    %
+    % ### Protected Properties
+    %
+    % #### InstrumentName
+    % - **Description:** Name of the instrument.
+    % - **Default Value:** 'SimulatedPowerMeter'
+    %
+    % ## Methods
+    %
+    % ### `simulated_PowerMeter()`
+    % - **Description:** Constructor for `simulated_PowerMeter` class.
+    %   - Initializes the object as a subclass of `mic.powermeter.abstract`.
+    %   - Automatically starts the GUI and calls `initializeProperties()` to set default values.
+    %
+    % ### `initializeProperties()`
+    % - **Description:** Method to initialize or reset the properties of the power meter.
+    %   - Sets default values such as `VisaObj`, `Power`, `Ask`, `Limits`, `Lambda`, `T`, and `Stop`.
+    %
+    % ### `gui()`
+    % - **Description:** Constructs and displays the Graphical User Interface (GUI) for the `simulated_PowerMeter`.
+    %   - Prevents opening multiple GUIs for the same object.
+    %   - Provides controls for setting the wavelength, starting and stopping plots, measuring power, and more.
+    %   - Includes callbacks for buttons and user interactions.
+    %
+    % ### `measure()`
+    % - **Description:** Measures power or temperature depending on the `Ask` property value.
+    %   - Simulates output in test mode or reads data from the device.
+    %
+    % ### `exportState()`
+    % - **Description:** Exports the current state of the power meter as attributes, data, and child components.
+    %   - **Attributes:** Includes properties like `InstrumentName`, `Lambda`, and `Limits`.
+    %   - **Data:** Includes measured power and update period `T`.
+    %   - **Children:** Assumes no children components by default.
+    %
+    % ### `Shutdown()`
+    % - **Description:** Cleanly shuts down the connection to the power meter.
+    %   - Handles both simulated and real device connections.
+    %
+    % ### `connect(testMode)`
+    % - **Description:** Connects to the power meter.
+    %   - Can simulate a connection in test mode or establish a real connection.
+    %
+    % ### Static Method: `funcTest(testMode)`
+    % - **Description:** Tests the functionality of the `simulated_PowerMeter` class.
+    %   - Creates an instance of the class, establishes a connection, sets the wavelength, measures power, and shuts down.
+    %   - Assumes success unless an error occurs.
+    %   - **Default Test Mode:** `true` (simulated mode).
+    %
     % CITATION: Sajjad Khan, Lidkelab, 2024.
     properties (SetAccess = protected)
         InstrumentName = 'SimulatedPowerMeter';

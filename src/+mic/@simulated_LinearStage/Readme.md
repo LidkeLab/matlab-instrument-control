@@ -1,93 +1,59 @@
-# Example_LinearStage Class Documentation
+# This class is an example implementation of mic.linearstage.abstract.
+This class simulates a linear stage that can move along one axis.
 
-## Class Description
-The `Example_LinearStage` class is an example implementation of the `MIC_LinearStage_Abstract` class. It simulates a linear stage that can move along one axis.
-
-### Requirements
-- `MIC_LinearStage_Abstract.m`
+REQUIRES:
+mic.linearstage.abstract.m
 
 ## Properties
+
 ### Protected Properties
-- `InstrumentName`: Name of the instrument (`'Simulated Linear Stage'`)
-- `PositionUnit`: Units of position parameter (e.g., `'mm'`)
-- `CurrentPosition`: Current position of the device (initially `0`)
-- `MinPosition`: Lower limit position (`0`)
-- `MaxPosition`: Upper limit position (`100`)
-- `Axis`: Stage axis (`'X'`)
+
+#### `InstrumentName`
+- **Description:** Name of the instrument.
+- **Default Value:** `'SimulatedLinearStage'`
+
+#### `PositionUnit`
+- **Description:** Units of the position parameter (e.g., mm).
+- **Default Value:** `'mm'`
+
+#### `CurrentPosition`
+- **Description:** Current position of the device.
+- **Default Value:** `0`
+
+#### `MinPosition`
+- **Description:** Lower limit position.
+- **Default Value:** `0`
+
+#### `MaxPosition`
+- **Description:** Upper limit position.
+- **Default Value:** `100`
+
+#### `Axis`
+- **Description:** Stage axis (X, Y, or Z).
+- **Default Value:** `'X'`
 
 ### Hidden Properties
-- `StartGUI`: Boolean indicating if GUI starts automatically (initially `false`)
+
+#### `StartGUI`
+- **Description:** Indicates if the GUI should be started automatically.
+- **Default Value:** `false`
 
 ## Methods
 
-### Constructor
-#### `Example_LinearStage()`
-Constructs an instance of the `Example_LinearStage` class.
+### `simulated_LinearStage()`
+- **Description:** Constructor for the `simulated_LinearStage` class.
+- Calls the superclass constructor.
 
-### Set Position
-#### `setPosition(obj, position)`
-Sets the position of the stage to the specified position.
-- **Parameters**: 
-  - `position`: Desired position within the range `[MinPosition, MaxPosition]`.
-- **Error Handling**: 
-  - Throws an error if `position` is outside the bounds of `MinPosition` and `MaxPosition`.
+### `setPosition(position)`
+- **Description:** Sets the stage position to the specified value.
+- Validates that the `position` is within the range `[MinPosition, MaxPosition]`.
 
-### Get Position
-#### `getPosition(obj)`
-Returns the current position of the stage.
-- **Returns**: `pos` (current position)
+### `getPosition()`
+- **Description:** Retrieves and prints the current position of the stage.
 
-### Graphical User Interface
-#### `gui(obj)`
-Creates and manages the graphical user interface for the `Example_LinearStage` class.
+### `gui()`
+- **Description:** Constructs and displays a graphical user interface (GUI) for the `simulated_LinearStage`.
+- Allows control of the stage position using sliders, jog buttons, and text inputs.
 
-#### Callback Functions for GUI
-- `positionSlider(~,~)`: Callback function for the slider.
-- `setFineStepSize(~,~)`: Callback function to set fine step size.
-- `setPos(~,~)`: Callback function to set the position.
-- `wheel(~,Event)`: Callback function for mouse wheel scroll.
-- `wheelToggle(~,~)`: Callback function to toggle between fine and coarse mouse wheel steps.
-- `jogUp(~,~)`: Callback function to jog the stage up.
-- `jogDown(~,~)`: Callback function to jog the stage down.
-
-#### Internal Functions for GUI
-- `closeFigure(~,~)`: Closes the figure.
-- `properties2gui()`: Updates the GUI from the properties.
-
-### Export State
-#### `exportState(obj)`
-Exports the current state of the linear stage.
-- **Returns**:
-  - `Attributes`: Struct containing `PositionUnit`, `CurrentPosition`, `MinPosition`, `MaxPosition`, and `Axis`.
-  - `Data`: Empty struct (no additional data in this example).
-  - `Children`: Empty struct (no children objects in this example).
-
-### Static Methods
-#### `unitTest()`
-Tests the functionality of the class.
-- **Returns**: `Success` (Boolean indicating if the test was successful).
-
-```matlab
-% Example usage of the Example_LinearStage class
-
-% Create an instance of Example_LinearStage
-linearStage = Example_LinearStage();
-
-% Set the position
-linearStage.setPosition(50);
-
-% Get the current position
-position = linearStage.getPosition();
-
-% Export the state of the linear stage
-[Attributes, Data, Children] = linearStage.exportState();
-
-% Launch the GUI
-linearStage.gui();
-
-% Run the unit test
-Success = Example_LinearStage.unitTest();
-```
-
-### Citation: Sajjad Khan, Lidkelab, 2024.
+### `exportState()`
 

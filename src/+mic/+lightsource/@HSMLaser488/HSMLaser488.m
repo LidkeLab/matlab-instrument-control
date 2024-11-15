@@ -15,6 +15,52 @@ classdef HSMLaser488<mic.lightsource.abstract
 % - mic.Attenuator
 % - mic.ShutterTTL
 % 
+% ## Protected Properties
+% 
+% ### `InstrumentName`  
+% Descriptive name of the instrument.  
+% **Default:** `'HSM488Laser'`.
+% 
+% ### `Shutter`  
+% Object for `mic.ShutterTTL` to control the shutter.
+% 
+% ### `Attenuator`  
+% Object for `mic.Attenuator` to control the attenuator (Liquid Crystal Controller).
+% 
+% ## Protected Properties (Public Get Access)
+% 
+% ### `Power`  
+% Currently set output power.
+% 
+% ### `PowerUnit`  
+% Unit for measuring power.  
+% **Default:** `'mW'`.
+% 
+% ### `MinPower`  
+% Minimum power setting.  
+% **Note:** `0.0125` is the least transmission factor for the filter wheel.
+% 
+% ### `MaxPower`  
+% Maximum power setting.
+% 
+% ### `IsOn`  
+% On or off state of the device (`0` for OFF, `1` for ON).  
+% **Default:** `0`.
+% 
+% ### `MaxPower_Laser`  
+% Maximum power produced by the laser instrument (without attenuator and filter).  
+% **Default:** `45`.
+% 
+% ### `MaxPower_LaserFilter`  
+% Maximum power setting after passing through Filter 2.  
+% **Default:** `1.8`.
+% 
+% ### `Max_Attenuator`  
+% Maximum attenuation value.
+% 
+% ### `StartGUI`  
+% Indicates whether the GUI should start.
+
 % ## Key Functions
 % - **Constructor (`mic.lightsource.HSMLaser488()`):** Sets up the laser controls, initializing the shutter and attenuator, and calculates power limits based on the attenuator's transmission and laser filter settings.
 % - **`on()`:** Activates the laser by opening the shutter.

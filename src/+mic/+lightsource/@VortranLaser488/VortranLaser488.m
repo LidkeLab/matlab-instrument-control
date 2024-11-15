@@ -11,9 +11,47 @@ classdef VortranLaser488 < mic.lightsource.abstract
     % and using the Vortran_Stradus Laser Control Software Version 4.0.0
     % (CD located in second draw of filing cabinet in room 118).
     %
+    % ## Protected Properties
+    %
+    % ### `InstrumentName`
+    % Name of the instrument.
+    % **Default:** `'VortranLaser488'`.
+    %
+    % ### `NIVolts`
+    % NI Analog Voltage Initialization.
+    % **Default:** `0`.
+    %
+    % ### `MinPower`
+    % Minimum power of the laser.
+    % **Default:** `0`.
+    %
+    % ### `MaxPower`
+    % Maximum power of the laser.
+    % **Default:** `50`.
+    %
+    % ### `PowerUnit`
+    % Units of laser power.
+    % **Default:** `'mW'`.
+    %
+    % ### `IsOn`
+    % ON/OFF state of the laser (`1` for ON, `0` for OFF).
+    % **Default:** `0`.
+    %
+    % ### `Power`
+    % Current power of the laser.
+    % **Default:** `0`.
+    %
+    % ### `DAQ`
+    % NI card session.
+    %
+    % ## Public Properties
+    %
+    % ### `StartGUI`
+    % Laser GUI.
+    
     % ## Constructor
     % obj=mic.lightsource.VortranLaser488('Dev1','ao1');
-    % ## Key Functions: 
+    % ## Key Functions:
     % on, off, exportState, setPower, delete, shutdown
     %
     % ## REQUIREMENTS: 
