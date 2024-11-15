@@ -1,22 +1,33 @@
-# MIC_IRSyringPump Class
+# mic.camera.IRSyringPump Class
 
 ## Description
-The `MIC_IRSyringPump` class extends the `MIC_ThorlabsIR` class to include control over a syringe pump during IR imaging sessions. This class is specifically designed for simultaneous operation of a syringe pump and an IR camera, enabling precise timing of fluid delivery relative to image acquisition. It is tailored for use in single-particle tracking (SPT) microscopy applications within Lidke's Lab.
+The `mic.camera.IRSyringPump` class extends the `mic.camera.ThorlabsIR` class to include control over a syringe pump during IR imaging sessions. This class is specifically designed for simultaneous operation of a syringe pump and an IR camera, enabling precise timing of fluid delivery relative to image acquisition. It is tailored for use in single-particle tracking (SPT) microscopy applications within Lidke's Lab.
 
 ## Requirements
 - MATLAB R2016b or later
-- MIC_Abstract.m
-- MIC_ThorlabsIR
-- MIC_SyringePump
+- mic.camera.abstract.m
+- mic.camera.ThorlabsIR
+- mic.camera.SyringePump
+
+## Public Properties
+
+### `SP`
+Object for `mic.camera.SyringePump` to control the syringe pump.
+
+### `SPwaitTime`
+Wait time for the syringe pump to start after the IR camera starts.
+
+### `tIR_end`
+Property to check if all devices (Andor, IRCamera, Syringe Pump) work in the correct time order.
 
 ## Key Functions
-- **Constructor (`MIC_IRSyringPump()`):** Initializes the syringe pump and sets default parameters for the IR camera and pump synchronization.
+- **Constructor (`mic.camera.IRSyringPump()`):** Initializes the syringe pump and sets default parameters for the IR camera and pump synchronization.
 - **`start_sequence()`:** Begins a sequence acquisition with the IR camera and triggers the syringe pump at a specified frame (`SPwaitTime`). This function handles data acquisition, pump activation, and ensures proper timing and synchronization between devices.
 
 ## Usage Example
 ```matlab
 Create an instance of the IRSyringe Pump system
-irSyringePump = MIC_IRSyringPump();
+irSyringePump = mic.camera.IRSyringPump();
 
 Set the number of frames to acquire
 irSyringePump.SequenceLength = 100;

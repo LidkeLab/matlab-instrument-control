@@ -1,4 +1,4 @@
-# MIC_RebelStarLED: Matlab Instrument Control Class for the Rebel Star LED
+# mic.lightsource.RebelStarLED: Matlab Instrument Control Class for the Rebel Star LED
 
 ## Description
 This class controls a Luxeon Rebel Star LED via a 700 mA 'BUCKPUCK'
@@ -17,15 +17,62 @@ measured and set in the class.
 ## Link to Driver:
 http://www.luxeonstar.com/700ma-external-dimming-buckpuck-dc-driver-leaded
 
+## Protected Properties
+
+### `InstrumentName`
+Descriptive name of the instrument.
+**Default:** `'RebelStarLED'`.
+
+### `Power`
+Currently set output power.
+**Default:** `0`.
+
+### `PowerUnit`
+Unit for measuring power.
+**Default:** `'Percent'`.
+
+### `MinPower`
+Minimum power setting.
+**Default:** `0`.
+
+### `MaxPower`
+Maximum power setting.
+**Default:** `100`.
+
+### `IsOn`
+On or off state of the device (`0` for OFF, `1` for ON).
+**Default:** `0`.
+
+### `V_off`
+Voltage at which output current drops to zero.
+**Default:** `4.2`.
+
+### `V_100`
+Voltage at which current begins to drop from 100%.
+**Default:** `3.5`.
+
+### `V_0`
+Voltage setting to completely turn off the device.
+**Default:** `5`.
+
+### `DAQ`
+NI DAQ session object.
+**Default:** `[]`.
+
+## Hidden Properties
+
+### `StartGUI`
+Indicates whether the GUI should start when creating an instance of the class.
+**Default:** `false`.
 ## Constructor
-Example: RS = MIC_RebelStarLED('Dev1', 'ao1');
+Example: RS = mic.lightsource.RebelStarLED('Dev1', 'ao1');
 
 ## Key Functions:
 delete, setPower, on, off, exportState, shutdown
 
 ## REQUIREMENTS:
-MIC_Abstract.m
-MIC_LightSource_Abstract.m
+mic.abstract.m
+mic.lightsource.abstract.m
 Data Acquisition Toolbox
 MATLAB NI-DAQmx driver installed via the Support Package Installer
 

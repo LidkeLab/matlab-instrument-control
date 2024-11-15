@@ -1,4 +1,4 @@
-# MIC_MPBLaser Matlab Instrument Control Class for the MPB-laser.
+# mic.lightsource.MPBLaser Matlab Instrument Control Class for the MPB-laser.
 
 ## Description
 This class controls the PMB-laser.
@@ -18,8 +18,8 @@ neglected.
 - Retrieves and sets various laser parameters such as power limits and serial number.
 
 ## Requirements
-- MIC_Abstract.m
-- MIC_LightSource_Abstract.m
+- mic.abstract.m
+- mic.lightsource_Abstract.m
 - MATLAB 2014 or higher
 - Proper installation of the laser's accompanying software.
 
@@ -28,8 +28,52 @@ During the initial setup, the class attempts to identify the correct communicati
 to potential ports and listening for valid responses. Timeout warnings during this process are expected when
 incorrect ports do not respond and can be safely ignored.
 
+## Protected Properties
+
+### `InstrumentName`
+Name of the instrument.
+**Default:** `'MPBLaser647'`.
+
+### `Power`
+Power reading from the instrument.
+
+### `PowerUnit`
+Unit of the power measurement.
+**Default:** `'mW'`.
+
+### `MinPower`
+Minimum power for the laser.
+
+### `MaxPower`
+Maximum power for the laser.
+
+### `IsOn`
+Indicates the on/off state of the laser.
+- `1` = ON
+- `0` = OFF
+**Default:** `0`.
+
+## Public Properties
+
+### `SerialObj`
+Information about the port associated with this instrument.
+
+### `SerialNumber`
+Serial number of the laser.
+
+### `WaveLength`
+Wavelength of the laser.
+**Default:** `647`.
+
+### `Port`
+Name of the port used to communicate with the laser.
+
+### `StartGUI`
+Indicates whether the GUI pops up automatically (`true`) or requires manual opening (`false`).
+**Default:** `false`.
+
 ## Key Methods
-- **Constructor (`MIC_MPBLaser()`):** Initializes the laser control by automatically finding the available communication port and setting up the laser parameters.
+- **Constructor (`mic.lightsource.MPBLaser()`):** Initializes the laser control by automatically finding the available communication port and setting up the laser parameters.
 - **`setPower(Power_mW)`:** Sets the laser's power to a specified value in milliwatts.
 - **`on()`:** Turns the laser on.
 - **`off()`:** Turns the laser off.
@@ -40,8 +84,8 @@ incorrect ports do not respond and can be safely ignored.
 
 ## Usage Example
 ```matlab
-% Create an instance of the MIC_MPBLaser
-laser = MIC_MPBLaser();
+% Create an instance of the mic.lightsource.MPBLaser
+laser = mic.lightsource.MPBLaser();
 
 % Set the laser power
 laser.setPower(50);  % Set power to 50 mW

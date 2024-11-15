@@ -1,190 +1,191 @@
-# Example_Camera Class Documentation
+# This is an example implementation of mic.camera.abstract
+Matlab Instrument Control Camera Class.
 
-## Class Description
-The `Example_Camera` class is an example implementation of the `MIC_Camera_Abstract` class, simulating a camera with various functionalities.
+REQUIRES:
+mic.camera.abstract.m
 
-### Requirements
-- `MIC_Abstract.m`
+## Protected Properties (Set Access)
 
-## Properties
-### Protected Properties
-- `InstrumentName`: Name of the instrument (`'Simulated Camera'`)
-- `CameraIndex`: Index of the camera (`1`)
-- `ImageSize`: Size of the image (`[1024, 768]`)
-- `LastError`: Last error encountered (initially `''`)
-- `Manufacturer`: Manufacturer of the camera (`'MyCam'`)
-- `Model`: Model of the camera (`'CamModelX100'`)
-- `CameraParameters`: Struct containing camera parameters (`Gain`, `FrameRate`)
-- `XPixels`: Number of pixels in the x-dimension (`1024`)
-- `YPixels`: Number of pixels in the y-dimension (`768`)
+### `InstrumentName`
+Name of the instrument.
+**Default:** `'Simulated Camera'`.
 
-### Public Properties
-- `Binning`: Binning setting (`[1 1]`)
-- `Data`: Captured data (initially `[]`)
-- `ExpTime_Focus`: Exposure time for focus mode (`0.01`)
-- `ExpTime_Capture`: Exposure time for capture mode (`0.02`)
-- `ExpTime_Sequence`: Exposure time for sequence mode (`0.05`)
-- `ROI`: Region of interest (`[1 1024 1 768]`)
-- `SequenceLength`: Length of the sequence (`10`)
-- `SequenceCycleTime`: Cycle time of the sequence (`0.1`)
+### `CameraIndex`
+Index of the camera.
+**Default:** `1`.
 
-### Protected Properties
-- `AbortNow`: Flag to indicate abortion (`false`)
-- `FigurePos`: Position of the figure
-- `FigureHandle`: Handle for the figure
-- `ImageHandle`: Handle for the image
-- `ReadyForAcq`: Flag to indicate readiness for acquisition (`false`)
-- `TextHandle`: Handle for the text
-- `TimerHandle`: Handle for the timer object
+### `ImageSize`
+Size of the image in pixels `[width, height]`.
+**Default:** `[1024, 768]`.
 
-### Hidden Properties
-- `StartGUI`: Boolean indicating if GUI starts automatically (initially `false`)
+### `LastError`
+String storing the last error encountered.
+**Default:** `''` (empty string).
+
+### `Manufacturer`
+Name of the manufacturer.
+**Default:** `'MyCam'`.
+
+### `Model`
+Model name of the camera.
+**Default:** `'CamModelX100'`.
+
+### `CameraParameters`
+Structure containing camera-specific parameters.
+**Default:** `struct('Gain', 1, 'FrameRate', 30)`.
+
+### `XPixels`
+Number of pixels in the first dimension (width).
+**Default:** `1024`.
+
+### `YPixels`
+Number of pixels in the second dimension (height).
+**Default:** `768`.
+
+## Public Properties
+
+### `Binning`
+Binning settings in the format `[binX binY]`.
+**Default:** `[1 1]`.
+
+### `Data`
+Last acquired data.
+**Default:** `[]` (empty array).
+
+### `ExpTime_Focus`
+Exposure time for focus mode.
+**Default:** `0.01`.
+
+### `ExpTime_Capture`
+Exposure time for capture mode.
+**Default:** `0.02`.
+
+### `ExpTime_Sequence`
+Exposure time for sequence mode.
+**Default:** `0.05`.
+
+### `ROI`
+Region of interest specified as `[Xstart Xend Ystart Yend]`.
+**Default:** `[1 1024 1 768]`.
+
+### `SequenceLength`
+Length of the kinetic series.
+**Default:** `10`.
+
+### `SequenceCycleTime`
+Cycle time for the kinetic series (in seconds).
+**Default:** `0.1`.
+
+### `TriggerMode`
+Trigger mode for the camera.
+**Default:** `'internal'`.
+
+## Protected Properties
+
+### `AbortNow`
+Flag to stop acquisition.
+**Default:** `false`.
+
+### `FigurePos`
+Position of the figure window.
+
+### `FigureHandle`
+Handle for the figure window.
+
+### `ImageHandle`
+Handle for the image display.
+
+### `ReadyForAcq`
+Indicates if the camera is ready for acquisition.
+**Default:** `false`.
+
+### `TextHandle`
+Handle for text display.
+
+### `TimerHandle`
+Handle for the timer object.
+
+## Hidden Properties
+
+### `StartGUI`
+Indicates whether the GUI starts automatically.
+**Default:** `false`.
 
 ## Methods
 
-### Constructor
-#### `Example_Camera()`
-Constructs an instance of the `Example_Camera` class.
+### `example()`
+Constructor for creating an instance of `example`.
 
-### Export State
-#### `exportState(obj)`
-Exports the state of the camera.
-- **Returns**:
-  - `state`: Struct containing camera parameters, image size, exposure times, ROI, and binning.
+### `exportState()`
+Exports the current state of the camera object.
+- Returns a state structure containing camera parameters, image size, exposure times, ROI, and binning.
 
-### Abort
-#### `abort(obj)`
-Sets the `AbortNow` flag to `true` and displays an abortion message.
+### `abort()`
+Stops the acquisition process.
+- Sets `AbortNow` to `true`.
 
-### Error Check
-#### `errorcheck(obj, funcname)`
-Checks for errors in the specified function.
-- **Parameters**: 
-  - `funcname`: Name of the function to check for errors.
+### `errorcheck(funcname)`
+Performs error checking for the specified function.
 
-### Get Last Image
-#### `getlastimage(obj)`
+### `getlastimage()`
 Retrieves the last captured image.
-- **Returns**:
-  - `out`: Randomly generated image of size `ImageSize`.
+- Simulates and returns a random image based on `ImageSize`.
 
-### Get Data
-#### `getdata(obj)`
-Gets the captured data.
-- **Returns**:
-  - `out`: Randomly generated image of size `ImageSize`.
+### `getdata()`
+Retrieves data from the camera.
+- Simulates data acquisition by generating a random image.
 
-### Initialize
-#### `initialize(obj)`
-Initializes the camera settings and sets the `ReadyForAcq` flag to `true`.
+### `initialize()`
+Initializes the camera settings.
+- Sets `ReadyForAcq` to `true`.
 
-### Setup Acquisition
-#### `setup_acquisition(obj)`
-Sets up acquisition parameters. Initializes the camera if not ready.
+### `setup_acquisition()`
+Configures acquisition parameters for the camera.
+- Calls `initialize()` if the camera is not ready.
 
-### Shutdown
-#### `shutdown(obj)`
-Shuts down the camera, aborts ongoing processes, stops and deletes the timer, and closes the figure if it is valid.
+### `shutdown()`
+Shuts down the camera and releases resources.
+- Stops and deletes any timer objects.
+- Closes and deletes figure handles.
 
-### Start Capture
-#### `start_capture(obj)`
-Starts capture mode and returns a dummy image if the camera is ready.
-- **Returns**:
-  - `img`: Randomly generated image of size `ImageSize` or empty array if not ready.
+### `start_capture()`
+Starts capture mode.
+- Returns a simulated image if the camera is ready.
 
-### Start Focus
-#### `start_focus(obj)`
-Starts focus mode and returns a dummy image if the camera is ready.
-- **Returns**:
-  - `img`: Randomly generated image of size `ImageSize` or empty array if not ready.
+### `start_focus()`
+Starts focus mode.
+- Returns a simulated image if the camera is ready.
 
-### Start Sequence
-#### `start_sequence(obj)`
-Starts sequence acquisition mode and returns a dummy sequence if the camera is ready.
-- **Returns**:
-  - `seq`: Repeated randomly generated images of size `ImageSize` and `SequenceLength` or empty array if not ready.
+### `start_sequence()`
+Starts sequence acquisition mode.
+- Returns a simulated image sequence if the camera is ready.
 
-### Setup GUI
-#### `setupGUI(obj)`
-Sets up the graphical user interface with buttons for focus, capture, and sequence acquisition.
+### `fireTrigger()`
+Simulates firing a trigger.
 
-#### `onButtonClicked(obj, src)`
-Handles button click events, changes button color, and performs corresponding actions (focus, capture, or sequence).
+### `setupGUI()`
+Creates a GUI for controlling the camera.
+- Includes buttons for `Focus`, `Capture`, and `Sequence` modes.
 
-### Close GUI
-#### `closeGui(obj)`
-Closes the GUI and cleans up resources.
+### `onButtonClicked(src)`
+Handles button clicks in the GUI.
 
-### Setup Temperature Timer
-#### `setupTemperatureTimer(obj, displayHandle)`
-Sets up a timer to update the temperature display periodically.
+### `closeGui()`
+Handles closing the GUI and cleaning up resources.
 
-### Update Temperature Display
-#### `updateTemperatureDisplay(obj, displayHandle)`
-Updates the temperature display with the current temperature and status.
+### `setupTemperatureTimer(displayHandle)`
+Sets up a timer to periodically update the temperature display.
 
-### Stop and Cleanup Timer
-#### `stopAndCleanupTimer(obj)`
+### `updateTemperatureDisplay(displayHandle)`
+Updates the temperature display based on current readings.
+
+### `stopAndCleanupTimer()`
 Stops and deletes the timer.
 
-### Call Temperature
-#### `call_temperature(obj)`
-Calls and returns the temperature and status.
-- **Returns**:
-  - `temp`: Example temperature in Celsius (`22`)
-  - `status`: Temperature status (`1` for stabilized)
+### `call_temperature()`
+Simulates a call to get temperature.
+- Returns a sample temperature and status.
 
 ## Protected Methods
-### Get Properties
-#### `get_properties(obj)`
-Displays the camera properties.
 
-### Get Temperature
-#### `gettemperature(obj)`
-Gets the camera temperature.
-- **Returns**:
-  - `temp`: Example temperature (`25`)
-  - `status`: Temperature status (`1` for stabilized)
-
-## Static Methods
-### Unit Test
-#### `unitTest()`
-Tests the functionality of the class.
-- **Returns**: `Success` (Boolean indicating if the test was successful).
-
-```matlab
-% Example usage of the Example_Camera class
-
-% Create an instance of Example_Camera
-camera = Example_Camera();
-
-% Initialize the camera
-camera.initialize();
-
-% Setup acquisition parameters
-camera.setup_acquisition();
-
-% Start focus mode
-img_focus = camera.start_focus();
-
-% Start capture mode
-img_capture = camera.start_capture();
-
-% Start sequence acquisition mode
-seq_acquisition = camera.start_sequence();
-
-% Export the state of the camera
-state = camera.exportState();
-
-% Launch the GUI
-camera.setupGUI();
-
-% Close the GUI
-camera.closeGui();
-
-% Run the unit test
-Success = Example_Camera.unitTest();
-```
-
-### Citation: Sajjad Khan, Lidkelab, 2024.
 

@@ -1,4 +1,4 @@
-# MIC_LightSource_Abstract: Matlab Instrument Abstact Class for all light source Matlab Instrument Class.
+# mic.lightsource.abstract: Matlab Instrument Abstact Class for all light source Matlab Instrument Class.
 
 ## Description
 This class defines a set of abstract Properties and methods that must
@@ -13,7 +13,7 @@ This also provides a simple and intuitive GUI interface.
 - **MaxPower:** Maximum allowable power setting.
 
 ## Key Methods
-- **Constructor (`MIC_LightSource_Abstract(AutoName)`):** Initializes the auto-naming functionality from `MIC_Abstract` class. This constructor must be called from the constructor of all inheriting classes.
+- **Constructor (`mic.lightsource.abstract(AutoName)`):** Initializes the auto-naming functionality from `mic.abstract` class. This constructor must be called from the constructor of all inheriting classes.
 - **`setPower(obj, power)`:** Abstract method to set the power of the light source. Must be implemented by subclasses.
 - **`on(obj)`:** Abstract method to turn on the light source. Must be implemented by subclasses.
 - **`off(obj)`:** Abstract method to turn off the light source. Must be implemented by subclasses.
@@ -23,10 +23,10 @@ This also provides a simple and intuitive GUI interface.
 ## Note:
 The constructor in each subclass must begin with the following line
 inorder to enable the auto-naming functionality:
-obj=obj@MIC_LightSource_Abstract(~nargout);
+obj=obj@mic.lightsource.abstract(~nargout);
 
 ## REQUIREMENTS:
-MIC_Abstract.m
+mic.abstract.m
 MATLAB software version R2016b or later
 
 ### CITATION: Hanieh Mazloom-Farsibaf  Lidkelab, 2017.

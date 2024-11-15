@@ -1,4 +1,4 @@
-# MIC_TCubeLaserDiode: Matlab Instrument Control Class for the ThorLabs TCube Laser Diode
+# mic.lightsource.TCubeLaserDiode: Matlab Instrument Control Class for the ThorLabs TCube Laser Diode
 
 ## Description
 This class controls a Laser Diode through us USB connected ThorLabs TCube Laser
@@ -13,15 +13,61 @@ photodiode current in Kinesis.
 The object should never be cleared with 'clear all'.  Use
 'delete' or 'clear'.
 
+## Protected Properties
+
+### `InstrumentName`
+Descriptive name of the instrument.
+**Default:** `'TCubeLaserDiode'`.
+
+### `Power`
+Currently set output power.
+**Default:** `0`.
+
+### `PowerUnit`
+Unit for measuring power.
+**Default:** `'mW'` (could be `mA` or `mW` depending on mode).
+
+### `MinPower`
+Minimum power setting.
+**Default:** `0`.
+
+### `MaxPower`
+Maximum power setting.
+
+### `IsOn`
+On or off state of the device (`0` for OFF, `1` for ON).
+**Default:** `0`.
+
+### `SerialNo`
+TCube serial number.
+
+### `Mode`
+Current or power mode.
+
+### `WperA`
+Laser diode (LD) power per ampere of photodiode (PD) current.
+
+### `TIARange`
+Photodiode current range (in mA).
+
+## Hidden Properties
+
+### `StartGUI`
+Indicates whether the GUI should start when creating an instance of the class.
+**Default:** `false`.
+
+### `PowerSet`
+Indicates if power was changed while the laser is off.
+**Default:** `0`.
 ## constructor
-TLD=MIC_TCubeLaserDiode('64864827','Power',10,100,1)
+TLD=mic.lightsource.TCubeLaserDiode('64864827','Power',10,100,1)
 
 ## Key Functions:
-on, off, delete, shutdown, setPower, exportState, unitTest
+on, off, delete, shutdown, setPower, exportState, funcTest
 
 ## REQUIREMENT:
-MIC_Abstract.m
-MIC_LightSource_Abstract.m
+mic.abstract.m
+mic.lightsource.abstract.m
 Kinesis Control Software Intalled: https://www.thorlabs.com/software_pages/ViewSoftwarePage.cfm?Code=Motion_Control
 Pre-compiled Kinesis_LD_*.mex64 files in path (typically in ../../mex64);
 Thorlabs.MotionControl.DeviceManager.dll and Thorlabs.MotionControl.TCube.LaserDiode

@@ -1,104 +1,65 @@
-# Example_LightSource Class Documentation
-
-## Class Description
-The `Example_LightSource` class is an example implementation of the `MIC_LightSource_Abstract` class. It simulates a light source, such as a laser, with various functionalities.
-
-### Requirements
-- `MIC_LightSource_Abstract.m`
+# This class is an example implementation of mic.lightsource.abstract.
+This class provides full functionalities for a simulated light source such as Laser.
+REQUIRES:
+mic.lightsource.abstract.m
 
 ## Properties
+
 ### Protected Properties
-- `InstrumentName`: Name of the instrument (`'ExampleLightSource'`)
-- `PowerUnit`: Unit of power (`'Watts'`)
-- `Power`: Current power setting (initially `0`)
-- `IsOn`: Status of the light source (`0` for off, `1` for on)
-- `MinPower`: Minimum power setting (`0`)
-- `MaxPower`: Maximum power setting (`100`)
+
+#### `InstrumentName`
+- **Description:** Name of the instrument.
+- **Default Value:** `'SimulatedLightSource'`
+
+#### `PowerUnit`
+- **Description:** Unit of measurement for power.
+- **Default Value:** `'Watts'`
+
+#### `Power`
+- **Description:** Current power level.
+- **Default Value:** `0`
+
+#### `IsOn`
+- **Description:** State of the light source (on/off).
+- **Default Value:** `0`
+
+#### `MinPower`
+- **Description:** Minimum allowable power.
+- **Default Value:** `0`
+
+#### `MaxPower`
+- **Description:** Maximum allowable power.
+- **Default Value:** `100`
 
 ### Hidden Properties
-- `StartGUI`: Boolean indicating if GUI starts automatically (initially `false`)
+
+#### `StartGUI`
+- **Description:** Determines if the GUI should start automatically.
+- **Default Value:** `false`
 
 ## Methods
 
-### Constructor
-#### `Example_LightSource()`
-Constructs an instance of the `Example_LightSource` class.
+### `simulated_LightSource()`
+- **Description:** Constructor for the `simulated_LightSource` class.
+- Calls the superclass constructor.
 
-### Set Power
-#### `setPower(obj, power)`
-Sets the power of the light source.
-- **Parameters**: 
-  - `power`: Desired power setting.
-- **Error Handling**: 
-  - Throws an error if `power` is outside the range of `MinPower` and `MaxPower`.
+### `setPower(power)`
+- **Description:** Sets the power of the light source to a specified value.
+- Validates that the input `power` is within the bounds `[MinPower, MaxPower]`.
 
-### Turn On
-#### `on(obj)`
-Turns on the light source.
-- **Error Handling**: 
-  - Throws an error if `Power` is not set above `MinPower`.
+### `on()`
+- **Description:** Turns on the light source if the power is set above the minimum.
 
-### Turn Off
-#### `off(obj)`
-Turns off the light source.
+### `off()`
+- **Description:** Turns off the light source.
 
-### Shutdown
-#### `shutdown(obj)`
-Shuts down the light source by turning it off.
+### `shutdown()`
+- **Description:** Turns off the light source and performs any necessary cleanup.
 
-### Graphical User Interface
-#### `gui(obj)`
-Creates and manages the graphical user interface for the `Example_LightSource` class.
+### `gui()`
+- **Description:** Creates and displays a graphical user interface (GUI) for controlling the simulated light source.
+- Allows setting power and turning the light source on/off using sliders and toggle buttons.
 
-#### Callback Functions for GUI
-- `sliderfn(~,~)`: Callback function for the slider.
-- `setPower(~,~)`: Callback function to set the power.
-- `ToggleLight(~,~)`: Callback function for the toggle button.
+### `exportState()`
+- **Description:** Exports the current state of the light source.
 
-#### Internal Functions for GUI
-- `closeFigure(~,~)`: Closes the figure.
-- `gui2properties()`: Updates properties from the GUI.
-- `properties2gui()`: Updates the GUI from the properties.
-
-### Export State
-#### `exportState(obj)`
-Exports the current state of the light source.
-- **Returns**:
-  - `Attributes`: Struct containing `PowerUnit` and `IsOn`.
-  - `Data`: Struct containing `Power`, `MinPower`, and `MaxPower`.
-  - `Children`: Empty cell array (no children objects in this example).
-
-### Static Methods
-#### `unitTest()`
-Tests the functionality of the class.
-- **Returns**: `Success` (Boolean indicating if the test was successful).
-
-```matlab
-% Example usage of the Example_LightSource class
-
-% Create an instance of Example_LightSource
-lightSource = Example_LightSource();
-
-% Set the power
-lightSource.setPower(50);
-
-% Turn on the light source
-lightSource.on();
-
-% Turn off the light source
-lightSource.off();
-
-% Shutdown the light source
-lightSource.shutdown();
-
-% Export the state of the light source
-[Attributes, Data, Children] = lightSource.exportState();
-
-% Launch the GUI
-lightSource.gui();
-
-% Run the unit test
-Success = Example_LightSource.unitTest();
-```
-
-### Citation: Sajjad Khan, Lidkelab, 2024.

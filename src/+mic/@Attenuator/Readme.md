@@ -1,12 +1,13 @@
-# MIC_Attenuator Class
+# mic.Attenuator Class
 
 ## Description
-The `MIC_Attenuator` class in MATLAB is designed for controlling optical attenuators through an
+The `mic.Attenuator` class in MATLAB is designed for controlling Liquid Crystal Optical Beam Shutters / Variable Attenuators
+optical attenuators (example: Thorlabs LCC1620A, Liquid Crystal Optical Shutter, 420 - 700 nm ) through a
 NI DAQ card, providing precise adjustments to the attenuation level. This class integrates
 seamlessly with MATLAB's Data Acquisition Toolbox and is part of a broader suite of instrument control classes.
-You can also use the power meter to callibrate the attenuator for a new setup and then use it.
+The power meter can be used to callibrate the attenuator.
 Note that the attenuator does not block the beam completely. The laser damage threshold for this
-attenuator is 1 W/cm2. The operation wavelength is 420-700 nm. The current from the LED driver
+attenuator is 1 W/cm2. The current from the LED driver
 is regulated by the analog voltage output (0 to 5 V) of a NI DAQ card. The Constructor requires the Device and Channel details.
 
 ## Features
@@ -22,14 +23,41 @@ is regulated by the analog voltage output (0 to 5 V) of a NI DAQ card. The Const
 - MATLAB NI-DAQmx driver installed via the Support Package Installer.
 - An NI DAQ device.
 
-## Properties
+## Class Properties
 - `Transmission`: The current transmission setting (% of maximum).
 - `MinTransmission`, `MaxTransmission`: Minimum and maximum transmission settings.
 - `PowerBeforeAttenuator`: Power measured before the attenuator, useful for calibration.
 
+### Protected Properties
+- **`InstrumentName`**:
+- **Description**: Descriptive name of the instrument.
+- **Type**: String
+- **Default**: `'Attenuator'`
+- **`TransmissionUnit`**:
+- **Description**: The unit for representing transmission values.
+- **Type**: String
+- **Default**: `'Percent'`
+- **`V_100`**:
+- **Description**: Voltage at which the current starts to drop from 100% transmission.
+- **Type**: Numeric
+- **Default**: `0`
+- **`V_0`**:
+- **Description**: Voltage to set for completely on (full transmission).
+- **Type**: Numeric
+- **Default**: `5`
+- **`DAQ`**:
+- **Description**: National Instruments Data Acquisition (NI DAQ) session object used for controlling the attenuator.
+- **Type**: Object
+- **Default**: `[]` (empty)
+
+### Public Properties
+- **`StartGUI`**:
+- **Description**: Flag for starting a graphical user interface (GUI) when an object of this class is created.
+- **Type**: Boolean or other indicator type
+
 ## Methods
-### `MIC_Attenuator(NIDevice, AOChannel)`
-Constructor for creating an instance of `MIC_Attenuator`. Requires NI device and analog output channel specifications.
+### `mic.Attenuator(NIDevice, AOChannel)`
+Constructor for creating an instance of `mic.Attenuator`. Requires NI device and analog output channel specifications.
 
 ### `loadCalibration(Name)`
 Loads a calibration file specified by `Name`, which adjusts the attenuation curve based on previously gathered data.
@@ -46,7 +74,7 @@ Safely shuts down the attenuator, setting the transmission to zero.
 ## Usage Example
 ```matlab
 Initialize the attenuator with specific NI DAQ settings
-attenuator = MIC_Attenuator('Dev1', 'ao1');
+attenuator = mic.Attenuator('Dev1', 'ao1');
 
 Load calibration data
 attenuator.loadCalibration('CalibrationFile.mat');

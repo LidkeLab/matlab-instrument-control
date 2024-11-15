@@ -1,7 +1,7 @@
-# MIC_NanoMax Class
+# mic.NanoMax Class
 
 ## Description
-The `MIC_NanoMax` class integrates control for the NanoMax stage system, encompassing both piezo elements and stepper motors for precise multi-dimensional positioning. This class allows for seamless integration and control of the stage's complex movements during microscopy experiments.
+The `mic.NanoMax` class integrates control for the NanoMax stage system, encompassing both piezo elements and stepper motors for precise multi-dimensional positioning. This class allows for seamless integration and control of the stage's complex movements during microscopy experiments.
 
 ## Features
 - Combined control of piezo and stepper motor stages for fine and coarse positioning.
@@ -9,25 +9,77 @@ The `MIC_NanoMax` class integrates control for the NanoMax stage system, encompa
 - Easy-to-use graphical user interface for real-time control and adjustments.
 
 ## Requirements
-- MIC_Abstract.m
-- MIC_TCubePiezo.m
-- MIC_StepperMotor.m
+- mic.abstract.m
+- mic.linearstage.TCubePiezo.m
+- mic.StepperMotor.m
 - MATLAB software version R2016b or later
 
 ## Installation Notes
-Ensure that all required classes (`MIC_TCubePiezo` for piezo control and `MIC_StepperMotor` for stepper motor control) are in the MATLAB path. The system should also be connected to the respective hardware components before initializing this class.
+Ensure that all required classes (`mic.linearstage.TCubePiezo` for piezo control and `mic.StepperMotor` for stepper motor control) are in the MATLAB path. The system should also be connected to the respective hardware components before initializing this class.
+
+## Class Properties
+
+### Public Properties
+- **`StartGUI`**:
+- **Description**: Flag to control the start of the graphical user interface (GUI).
+- **Type**: Variable
+
+- **`SerialN`**:
+- **Description**: Serial number of the SEQ controller for identification. Example serial: `70850323`.
+- **Type**: Variable
+
+- **`GuiFigureStage`**:
+- **Description**: Handle for the stage's GUI figure.
+- **Type**: Variable
+
+### Protected Properties
+- **`InstrumentName`**:
+- **Description**: The name of the instrument.
+- **Type**: String
+- **Default**: `'NanoMax'`
+
+- **`Stage_Piezo_X`**:
+- **Description**: Linear piezo stage object for controlling movement in the X direction.
+- **Type**: Object
+
+- **`Stage_Piezo_Y`**:
+- **Description**: Linear piezo stage object for controlling movement in the Y direction.
+- **Type**: Object
+
+- **`Stage_Piezo_Z`**:
+- **Description**: Linear piezo stage object for controlling movement in the Z direction.
+- **Type**: Object
+
+- **`Stage_Stepper`**:
+- **Description**: Represents the state of the stepper motor stage.
+- **Type**: Object or State
+
+- **`StepperLargeStep`**:
+- **Description**: Step size for large movements of the stepper motor in millimeters.
+- **Type**: Numeric
+- **Default**: `0.05 mm`
+
+- **`StepperSmallStep`**:
+- **Description**: Step size for small movements of the stepper motor in millimeters.
+- **Type**: Numeric
+- **Default**: `0.002 mm`
+
+- **`PiezoStep`**:
+- **Description**: Step size for piezo movements in microns.
+- **Type**: Numeric
+- **Default**: `0.1 µm`
 
 ## Key Methods
-- **Constructor (`MIC_NanoMax()`):** Instantiates the NanoMax system, setting up both the piezo and stepper stages and initializing the GUI.
+- **Constructor (`mic.NanoMax()`):** Instantiates the NanoMax system, setting up both the piezo and stepper stages and initializing the GUI.
 - **`setup_Stage_Piezo()`:** Configures the piezo stages for X, Y, and Z movement, centers them upon setup.
 - **`setup_Stage_Stepper()`:** Initializes and centers the stepper motors.
 - **`exportState()`:** Exports the current state of all stages, providing a snapshot of current settings and positions.
-- **`unitTest()`:** Tests the functionality of the class methods to ensure correct operation and communication with the hardware.
+- **`funcTest()`:** Tests the functionality of the class methods to ensure correct operation and communication with the hardware.
 
 ## Usage Example
 ```matlab
 Instantiate the NanoMax system
-nanoStage = MIC_NanoMax();
+nanoStage = mic.NanoMax();
 
 Move the piezo stage in the X direction
 nanoStage.Stage_Piezo_X.setPosition(10); % Moves to 10 microns

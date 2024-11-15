@@ -1,92 +1,158 @@
-# MIC_DCAM4Camera class
+# mic.camera.DCAM4Camera contains methods to control Hamamatsu cameras.
+This class is a modified version of mic.camera.HamamatsuCamera that uses the
+DCAM4 API.
+## Protected Properties
 
-## Description
-The `MIC_DCAM4Camera class` contains methods to control Hamamatsu cameras. This class is a modified version of MIC_HamamatsuCamera that uses the DCAM4 API.
+### `AbortNow`
+Flag for stopping the acquisition process.
 
-## Key Functions
+### `ErrorCode`
+Stores the error code.
 
-### Constructor
-- **Constructor `MIC_DCAM4Camera()`**: Initializes the camera object.
+### `FigurePos`
+Position of the figure window.
 
-### Camera Control
-- **getcamera(obj)**: Retrieves the camera object.
-- **abort(obj)**: Aborts the current capture.
-- **getlastimage(obj)**: Returns the last image taken by the camera.
-- **getoneframe(obj)**: Returns one frame.
-- **getdata(obj)**: Retrieves data from the camera based on the acquisition type.
-- **initialize(obj)**: Initializes the camera settings.
-- **setup_acquisition(obj)**: Sets up the acquisition process.
-- **setup_fast_acquisition(obj)**: Sets up fast acquisition for sequence mode.
-- **shutdown(obj)**: Shuts down the camera.
-- **prepareForCapture(obj, NImages)**: Prepares the camera for capturing a specified number of images.
-- **start_capture(obj)**: Starts the capture process for a single image.
-- **start_focus(obj)**: Starts the focus process.
-- **start_focusWithFeedback(obj)**: Starts the focus process with feedback.
-- **start_sequence(obj, CaptureMode)**: Starts the sequence capture process.
-- **start_scan(obj)**: Starts the scan process.
-- **getlastframebundle(obj, Nframe)**: Retrieves the last frame bundle.
-- **triggeredCapture(obj)**: Fires the trigger and captures an image.
-- **fireTrigger(obj)**: Fires the trigger.
-- **finishTriggeredCapture(obj, numFrames)**: Finishes the triggered capture.
-- **take_sequence(obj)**: Takes a sequence of images.
-- **reset(obj)**: Resets the camera.
+### `FigureHandle`
+Handle for the figure window.
 
-### Error Handling
-- **errorcheck(obj)**: Checks for errors.
+### `ImageHandle`
+Handle for the image display.
 
-### Camera Properties
+### `ReadyForAcq`
+Indicates if the camera is ready for acquisition. If not, `setup_acquisition` should be called.
+**Default:** `0`.
 
-- **HtsuGetStatus(obj)**: Retrieves the status of the camera.
-- **call_temperature(obj)**: Retrieves the temperature of the camera.
-- **get_propertiesDcam(obj)**: Retrieves the properties of the camera.
-- **get_propAttr(obj, idprop)**: Gets the attributes of a specific property.
-- **getProperty(obj, idprop)**: Gets the value of a specific property.
-- **setProperty(obj, idprop, value)**: Sets the value of a specific property.
-- **setgetProperty(obj, idprop, value)**: Sets and gets the value of a specific property.
-- **setCamProperties(obj, Infield)**: Sets multiple camera properties.
-- **build_guiDialog(obj, GuiCurSel)**: Builds the GUI dialog.
-- **apply_camSetting(obj)**: Applies camera settings from the GUI.
+### `TextHandle`
+Handle for text display.
 
-### State Export
-- **exportState(obj)**: Exports the state of the camera object.
+## Protected Properties (Set Access)
 
-### Set Methods
+### `CameraHandle`
+Handle for the camera object.
 
-- **set.ROI(obj, ROI)**: Sets the Region of Interest.
-- **set.ExpTime_Focus(obj, in)**: Sets the focus mode exposure time.
-- **set.ExpTime_Capture(obj, in)**: Sets the capture mode exposure time.
-- **set.ExpTime_Sequence(obj, in)**: Sets the sequence mode exposure time.
-- **set.Binning(obj, in)**: Sets the binning mode.
-- **set.SequenceLength(obj, in)**: Sets the sequence length.
+### `CameraIndex`
+Index used when more than one camera is present.
 
-### Protected Methods
+### `ImageSize`
+Size of the current ROI (Region of Interest).
 
-- **get_properties(obj)**: Retrieves properties (to be implemented).
-- **gettemperature(obj)**: Retrieves the temperature (to be implemented).
+### `LastError`
+Last error code encountered.
 
-### Static Methods
+### `Manufacturer`
+Camera manufacturer.
 
-- **unitTest()**: Runs unit tests for the class.
-- **camSet2GuiSel(CameraSetting)**: Translates current camera settings to GUI selections.
+### `Model`
+Camera model.
 
-## Usage Example
+### `CameraParameters`
+Camera-specific parameters.
 
-```matlab
-% Create an instance of the camera
-camera = MIC_DCAM4Camera();
+### `CameraCap`
+Capability (all options) of camera parameters.
 
-% Initialize the camera
-camera.initialize();
+### `CameraSetting`
+Camera-specific settings.
 
-% Set properties
-camera.ExpTime_Focus = 0.1;
-camera.ROI = [1, 512, 1, 512];
+### `Capabilities`
+Capabilities structure from the camera.
 
-% Start capturing an image
-image = camera.start_capture();
+### `XPixels`
+Number of pixels in the first dimension.
 
-% Display the image
-imshow(image, []);
-```
+### `YPixels`
+Number of pixels in the second dimension.
 
-### CITATION: Sheng Liu, Lidke Lab, 2023.
+### `InstrumentName`
+Name of the instrument.
+**Default:** `'HamamatsuCamera'`.
+
+### `TriggerPause`
+Pause duration (in seconds) after firing a trigger in `fireTrigger()`.
+
+### `IsRunning`
+Indicates if the camera is currently running.
+**Default:** `0`.
+
+### `CameraFrameIndex`
+Index for the camera frames.
+
+## Hidden Properties
+
+### `StartGUI`
+Defines whether the GUI starts automatically on object creation.
+**Default:** `false`.
+
+## Public Properties
+
+### `Binning`
+Binning mode, see `DCAM_IDPROP_BINNING`.
+
+### `Data`
+Last acquired data.
+**Default:** `[]`.
+
+### `ExpTime_Focus`
+Exposure time for focus mode.
+
+### `ExpTime_Capture`
+Exposure time for capture mode.
+
+### `ExpTime_Sequence`
+Exposure time for sequence mode.
+
+### `ROI`
+Region of interest specified as `[Xstart Xend Ystart Yend]`.
+
+### `SequenceLength`
+Length of the kinetic series.
+**Default:** `1`.
+
+### `SequenceCycleTime`
+Cycle time for the kinetic series (in seconds).
+
+### `FrameRate`
+Frame rate of the camera.
+
+### `TriggerMode`
+Trigger mode for the Hamamatsu sCMOS camera.
+
+### `GuiDialog`
+GUI dialog object.
+
+### `Timeout`
+Timeout duration for several DCAM functions (in milliseconds).
+**Default:** `10000`.
+
+### `Abortnow`
+Flag for stopping the acquisition process (duplicated with `AbortNow`).
+
+## Methods
+
+### `DCAM4Camera()`
+Constructor for creating an instance of `DCAM4Camera`.
+
+### `errorcheck()`
+Performs error checking.
+
+### `getcamera()`
+Method to retrieve camera settings (implementation not shown).
+
+### `abort()`
+Aborts the current capture.
+- Stops capture with `DCAM4StopCapture`.
+- Releases memory with `DCAM4ReleaseMemory`.
+
+### `getlastimage()`
+Returns the last image captured by the camera.
+- Reshapes and returns the image data.
+
+### `getoneframe()`
+Returns a specific frame from the camera.
+- Retrieves and reshapes a specified frame.
+
+### `getdata()`
+Grabs data from the camera based on acquisition type (`focus`, `capture`, `sequence`).
+
+### `initialize()`
+

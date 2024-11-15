@@ -1,4 +1,4 @@
-# MIC_ThorlabsLED Matlab Instrument Class for control of the Thorlabs LED
+# mic.lightsource.ThorlabsLED Matlab Instrument Class for control of the Thorlabs LED
 
 ## Description
 This class controls a LED lamp with different wavelength from Thorlabs.
@@ -9,14 +9,67 @@ Set Trig=MOD on control device for Lamp and turn on knob manually
 more than zero to control from computer.
 
 ## Requirements
-- `MIC_Abstract.m`
-- `MIC_LightSource_Abstract.m`
+- `mic.abstract.m`
+- `mic.lightsource.abstract.m`
 - MATLAB (R2016b or later)
 - Data Acquisition Toolbox
 - MATLAB NI-DAQmx driver (installed via the Support Package Installer)
 
 ## Installation
 Ensure all required files are in the MATLAB path and that the NI-DAQmx driver is correctly installed and configured on your system.
+
+## Protected Properties
+
+### `InstrumentName`
+Name of the instrument.
+**Default:** `'ThorlabsLED'`.
+
+### `Power`
+Currently set output power.
+**Default:** `0`.
+
+### `PowerUnit`
+Unit of power measurement.
+**Default:** `'Percent'`.
+
+### `MinPower`
+Minimum power setting.
+**Default:** `0`.
+
+### `MaxPower`
+Maximum power setting.
+**Default:** `100`.
+
+### `IsOn`
+On or off state of the device (`0` for OFF, `1` for ON).
+**Default:** `0`.
+
+### `NIDevice`
+NIDAQ device name (e.g., `Dev1`).
+
+### `AOChannel`
+Name of the analog output (AO) channel for the LED on the NIDAQ port (e.g., `ao1`).
+
+### `physicalChannel`
+Name of the NIDAQ port used for communication.
+
+### `V_100`
+Voltage at which the current begins to drop from 100%.
+**Default:** `5`.
+
+### `V_0`
+Voltage setting to completely turn off the device.
+**Default:** `0`.
+
+### `DAQ`
+NI DAQ session object.
+**Default:** `[]`.
+
+## Hidden Properties
+
+### `StartGUI`
+Indicates whether the GUI should start.
+**Default:** `false`.
 
 ## Functions:
 on(obj)
@@ -46,11 +99,11 @@ shutdown(obj)
 - Usage: obj.shutdown();
 
 ## Usage Example
-To create an instance of the `MIC_ThorlabsLED` class:
+To create an instance of the `mic.lightsource.ThorlabsLED` class:
 ```matlab
-obj = MIC_ThorlabsLED('Dev1', 'ao1');
+obj = mic.lightsource.ThorlabsLED('Dev1', 'ao1');
 Create an object
-led = MIC_ThorlabsLED('Dev1', 'ao1');
+led = mic.lightsource.ThorlabsLED('Dev1', 'ao1');
 Set power to maximum
 led.setPower(100);
 Turn the LED on
