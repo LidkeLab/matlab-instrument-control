@@ -68,20 +68,20 @@ classdef MIC_GalvoDigital < MIC_Abstract
                 error('NIDevice and DOChannel must be defined')
             end
             % Set up the NI Daq Object
-            obj.DAQsessionAngle = daq.createSession('ni');
-            obj.DAQsessionEnable= daq.createSession('ni');
+            obj.DAQsessionAngle = daq("ni");
+            obj.DAQsessionEnable= daq("ni");
                        
             % 16 channels to change the angles
-            obj.DAQsessionAngle.addDigitalChannel(NIDevice,'Port0/Line0:15','OutputOnly');
+            addoutput(obj.DAQsessionAngle,NIDevice,"Port0/Line0:15","Digital");
             % 4 channels to make the galvo mirror be enabled to move
-            obj.DAQsessionEnable.addDigitalChannel(NIDevice,'Port0/Line24:27','OutputOnly');
+            addoutput(obj.DAQsessionEnable,NIDevice,"Port0/Line24:27","Digital");
             
             obj.NIDevice=NIDevice;
             obj.Word = 2^16/2;
 
             % Turn off all channels 
-            outputSingleScan(obj.DAQsessionEnable,[0 0 0 0]);
-            outputSingleScan(obj.DAQsessionAngle,zeros(1,16));
+            write(obj.DAQsessionEnable,[0 0 0 0]);
+            write(obj.DAQsessionAngle,zeros(1,16));
         end
         
         function delete(obj)
@@ -97,31 +97,31 @@ classdef MIC_GalvoDigital < MIC_Abstract
             
             % to remove previous clock connections
             if ~isempty(obj.ClockConnection)
-                obj.DAQsessionAngle.removeConnection(obj.idxClockConnection);
+                removeclock(obj.DAQsessionAngle,obj.idxClockConnection);
                 obj.ClockConnection=[];
             end
             
             % set zeros to all channels to turn off LED lamps on the chip
-%             outputSingleScan(obj.DAQsessionAngle,ones(1,16));
-%             outputSingleScan(obj.DAQsessionEnable,[1 1 1 1]);
+%             write(obj.DAQsessionAngle,ones(1,16));
+%             write(obj.DAQsessionEnable,[1 1 1 1]);
             obj.Sequence=[];
         end
         
         function reset(obj)
             % Completely reset the DAQ device.  Use only in emergencies!
-            daqreset(obj.DAQsession);
+            daqreset(obj.DAQsessionAngle);
             daqreset(obj.DAQsessionEnable);
         end
         
         function enable(obj)
         % set CLRpin = 1 to be able to move the Galvo
-            outputSingleScan(obj.DAQsessionEnable,[0 0 0 1]);
+            write(obj.DAQsessionEnable,[0 0 0 1]);
             obj.IsEnable=1;
         end
         
         function disable(obj)
         % set CLRpin = 0 to be able not to move the Galvo
-            outputSingleScan(obj.DAQsessionEnable,[0 0 0 0]);
+            write(obj.DAQsessionEnable,[0 0 0 0]);
             obj.IsEnable=0;
         end
         
@@ -137,7 +137,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
             % Check to have all required input
             if isempty(obj.N_Step) || isempty(obj.StepSize) ||isempty(obj.N_Scan) ||isempty(obj.Offset)
              % make a default values for scanning parameters 
-                obj.StepSize=0
+                obj.StepSize=0;
                 obj.N_Step=0;
                 obj.N_Scan=0;
                 obj.Offset=0; 
@@ -190,14 +190,15 @@ classdef MIC_GalvoDigital < MIC_Abstract
             % % %set the session's rate to match the expected external clock frequency.
             % % obj.DAQsessionAngle=Frequency_External   % Frequency of ExternalDevice
             
-            % Create 16bit Words
-            queueOutputData(obj.DAQsessionAngle,obj.Sequence);
+            
             % define a clock connection to start moving Galvo Mirror
-            [C idxC]=addClockConnection(obj.DAQsessionAngle,'External','Dev1\PFI0','ScanClock');
+            [C, idxC]=addclock(obj.DAQsessionAngle,"ScanClock","External","Dev1\PFI0");
             obj.ClockConnection=C;
             obj.idxClockConnection=idxC;
+            % Create 16bit Words
+            preload(obj.DAQsessionAngle,obj.Sequence);
             % send the list of 16bit Words to the backgorund of MATLAB
-            startBackground(obj.DAQsessionAngle);
+            start(obj.DAQsessionAngle);
             % update gui from 
             %obj.updateGui();
         end
@@ -255,7 +256,7 @@ classdef MIC_GalvoDigital < MIC_Abstract
             flip(dec2bin(obj.Word, 16) - '0');
             obj.Sequence=flip(dec2bin(obj.Word, 16) - '0');
             obj.enable;
-            outputSingleScan(obj.DAQsessionAngle,obj.Sequence);
+            write(obj.DAQsessionAngle,obj.Sequence);
             obj.updateGui();
         end
         

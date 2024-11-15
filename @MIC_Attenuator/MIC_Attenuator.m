@@ -98,8 +98,8 @@ classdef MIC_Attenuator < MIC_Abstract
             end
             obj=obj@MIC_Abstract(~nargout);
             %Set up the NI Daq Object
-            obj.DAQ = daq.createSession('ni');
-            addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage');
+            obj.DAQ = daq("ni");
+            addoutput(obj.DAQ,NIDevice,AOChannel, "Voltage");
            
         end
         
@@ -119,8 +119,10 @@ classdef MIC_Attenuator < MIC_Abstract
         
         function delete(obj)
             % Destructor
+            
             delete(obj.GuiFigure);
             obj.shutdown();
+            clear obj.DAQ
         end
         function setVoltage(obj,Vin)
             %This function is called inside the callibration method to set
@@ -129,7 +131,7 @@ classdef MIC_Attenuator < MIC_Abstract
               error('Voltage out of range. It should be in the interval [0 5].'); 
            end
            if ~isempty(obj.DAQ) %daq not yet created
-              outputSingleScan(obj.DAQ,Vin);
+              write(obj.DAQ,Vin);
            end
         end
         
@@ -163,7 +165,7 @@ classdef MIC_Attenuator < MIC_Abstract
             end
                
             if ~isempty(obj.DAQ) %daq not yet created
-                outputSingleScan(obj.DAQ,V_out);
+                write(obj.DAQ,V_out);
             end
             obj.Transmission=Transmission_in;
         end
@@ -234,18 +236,18 @@ classdef MIC_Attenuator < MIC_Abstract
                     error('MIC_Transmission::NIDevice and AOChannel must be defined')
                 end
                 %Set up the NI Daq Object
-                DAQQ = daq.createSession('ni');
-                addAnalogOutputChannel(DAQQ,NIDevice,AOChannel, 'Voltage');
+                DAQQ = daq("ni");
+                addoutput(DAQQ,NIDevice,AOChannel, "Voltage");
                 Voltage = 0:0.5:5;
                 a = length(Voltage);
                 OutTransmission = zeros(1,a);
                 Pm = MIC_PM100D;
                 Pm.Ask = 'power';
                 for ii = 1:a
-                    outputSingleScan(DAQQ,Voltage(ii));
+                    write(DAQQ,Voltage(ii));
                     pause(1)
                     OutTransmission(ii) = Pm.measure;
-                    pause(0.1)
+                    pause(0.2)
                 end
                 NormTransmission = OutTransmission*100/BeforeAttenuator;
                 figure; plot(Voltage,NormTransmission,'o')

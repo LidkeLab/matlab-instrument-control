@@ -7,7 +7,12 @@ classdef MIC_MCLNanoDrive < MIC_3DStage_Abstract
     %   is attached via USB.
     %   The first time an object of this class is created, the user must
     %   direct the object to the 'madlib.h' header file.  This is usually
-    %   located here:  C:\Program Files\Mad City Labs\NanoDrive
+    %   located here:  C:\Program Files\Mad City Labs\NanoDrive. 
+    %   For Matlab later than 2017, user might need to edit the madlib.h
+    %   file to ensure successful loading of the library: comment lines 27
+    %   and 28 like this,
+    %   //#else
+	%       //typedef unsigned char bool;
     %
     % ## Features
     % - Direct control of Mad City Labs 3D Piezo stages via USB.

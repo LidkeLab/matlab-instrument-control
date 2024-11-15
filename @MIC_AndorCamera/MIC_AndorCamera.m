@@ -2,7 +2,9 @@ classdef MIC_AndorCamera < MIC_Camera_Abstract
  % MIC_AndorCamera class 
 % 
 % ## Description
-% The `MIC_AndorCamera` class in MATLAB is designed for controlling Andor cameras using the Andor SDK. This class handles camera operations such as initialization, capturing images, adjusting settings, and more.
+% The `MIC_AndorCamera` class in MATLAB is designed for controlling Andor
+% cameras using the Andor SDK. This class handles camera operations such as
+% initialization, capturing images, adjusting settings, and more.
 % 
 % ## Features
 % - Full control over Andor camera settings including exposure time, ROI, and binning.

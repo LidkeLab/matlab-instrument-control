@@ -63,14 +63,14 @@ classdef MIC_ShutterTTL < MIC_Abstract
            % obj.close; %closes the shutter as it first starts working
             
             %Set up the NI Daq Object
-            obj.DAQ = daq.createSession('ni');
-            addDigitalChannel(obj.DAQ,NIDevice,DOChannel,'OutputOnly');  % addDigitalChannel(s,deviceID,channelID,measurementType)
+            obj.DAQ = daq("ni");
+            addoutput(obj.DAQ,NIDevice,DOChannel,'Digital');  % addDigitalChannel(s,deviceID,channelID,measurementType)
             obj.close;
         end
         
         function delete(obj)
             delete(obj.GuiFigure);
-            delete(obj.DAQ);
+            clear obj.DAQ;
         end
         
         function close(obj)  %closes the shutter
@@ -78,14 +78,14 @@ classdef MIC_ShutterTTL < MIC_Abstract
             %release(obj)
            % obj.DAQ = daq.createSession('ni');
            % addDigitalChannel(obj.DAQ,NIDevice,DOChannel,'OutputOnly');
-            outputSingleScan(obj.DAQ,0)
+            write(obj.DAQ,0)
             obj.IsOpen=0;
             % obj.Position=0;
 
         end
         
         function open(obj) %opens the shutter
-            outputSingleScan(obj.DAQ,1)
+            write(obj.DAQ,1)
             obj.IsOpen=1;
             % obj.Position=1;
 
