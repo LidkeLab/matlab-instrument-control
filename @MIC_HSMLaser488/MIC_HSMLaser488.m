@@ -91,8 +91,8 @@ classdef MIC_HSMLaser488<MIC_LightSource_Abstract
         function delete(obj)
             % Object Destructor
             shutdown(obj);
-            delete(obj.MIC_ShutterTTL);
-            delete(obj.MIC_Attenuator);
+            delete(obj.Shutter);
+            delete(obj.Attenuator);
         end
         function on(obj)
             % Turns ON the laser

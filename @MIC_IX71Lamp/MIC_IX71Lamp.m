@@ -72,21 +72,22 @@ classdef MIC_IX71Lamp < MIC_LightSource_Abstract
                 error('MIC_IX71Lamp::NIDevice, AOChannel and DOChannel must be defined.')
             end
             %Set up the NI Daq Object
-            obj.DAQ_AC = daq.createSession('ni');
+            obj.DAQ_AC = daq("ni");
             %to control the lamp brightness
-            addAnalogOutputChannel(obj.DAQ_AC,NIDevice,AOChannel, 'Voltage');
+            addoutput(obj.DAQ_AC,NIDevice,AOChannel, 'Voltage');
             %to turn off/on completely {This is required as setting V_0=0 doesn't 
             %turn off the lamp completely}
-            obj.DAQ_DC = daq.createSession('ni');
-            addDigitalChannel(obj.DAQ_DC,NIDevice,DOChannel, 'OutputOnly');
+            obj.DAQ_DC = daq("ni");
+            addoutput(obj.DAQ_DC,NIDevice,DOChannel, 'Digital');
 
             %Set to minimum power
-            outputSingleScan(obj.DAQ_DC,[0]);
+            write(obj.DAQ_DC,[0]);
         end
         function delete(obj)
             % Destructor
             delete(obj.GuiFigure);
             obj.shutdown();
+            clear obj.DAQ_DC obj.DAQ_AC
         end
         function setPower(obj,Power_in)
             % Sets output power in percentage of maximum
@@ -100,21 +101,21 @@ classdef MIC_IX71Lamp < MIC_LightSource_Abstract
                 V_out=obj.V_0;  %turn off - should be redundant. 
             end    
             if ~isempty(obj.DAQ_AC) %daq not yet created
-                outputSingleScan(obj.DAQ_AC,V_out);
+                write(obj.DAQ_AC,V_out);
             end
             obj.updateGui;
         end
         function on(obj)
             % Turn on LED to currently set power. 
             obj.IsOn=1;
-            outputSingleScan(obj.DAQ_DC,[1]);
+            write(obj.DAQ_DC,[1]);
             obj.setPower(obj.Power);
             pause(obj.LampWait);
             obj.updateGui;
         end
         function off(obj)
             % Turn off LED. 
-            outputSingleScan(obj.DAQ_DC,[0]);
+            write(obj.DAQ_DC,[0]);
             obj.IsOn=0;
             obj.updateGui;
             pause(obj.LampWait);

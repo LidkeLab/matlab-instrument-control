@@ -2,7 +2,16 @@ classdef MIC_AndorCameraZyla < MIC_Camera_Abstract
 % MIC_AndorCameraZyla Class
 % 
 % ## Description
-% The `MIC_AndorCameraZyla` class interfaces with Andor Zyla cameras via the Andor SDK3, providing comprehensive control over camera operations in MATLAB. This class enables precise manipulation of camera settings and acquisition modes, tailored specifically for the Zyla model.
+% The `MIC_AndorCameraZyla` class interfaces with Andor Zyla cameras via
+% the Andor SDK3, providing comprehensive control over camera operations in
+% MATLAB. This class enables precise manipulation of camera settings and
+% acquisition modes, tailored specifically for the Zyla model. 
+%   Install Andor MATLAB SDK3 to the default directory, e.g. C:\Program
+%   Files\MATLAB\R2024b\. This will ensure the dependency files will be
+%   installed into the correct directories, otherwise, the SDK won't work.
+%   The first time an object of this class is created, the user must
+%   direct the object to the 'andorsdk3functions.mexw64' file.  This is usually
+%   located here:  C:\Program Files\MATLAB\R2024b\toolbox\AndorSDK3\
 % 
 % ## Features
 % - Direct integration with Andor SDK3.
