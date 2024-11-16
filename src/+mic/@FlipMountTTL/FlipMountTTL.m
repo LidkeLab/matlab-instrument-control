@@ -94,8 +94,8 @@ classdef FlipMountTTL < mic.abstract
             obj.DOChannel=DOChannel;
             obj.NIString=sprintf('%s/%s/%s',obj.NIDevice,obj.DOChannel);
             %Set up the NI Daq Object
-            obj.DAQ = daq.createSession('ni');
-            addDigitalChannel(obj.DAQ,NIDevice,DOChannel,'OutputOnly');  % addDigitalChannel(s,deviceID,channelID,measurementType)
+            obj.DAQ = daq("ni");
+            addoutput(obj.DAQ,NIDevice,DOChannel,"Digital");  % addDigitalChannel(s,deviceID,channelID,measurementType)
             obj.FilterIn;
         end
         
@@ -104,17 +104,22 @@ classdef FlipMountTTL < mic.abstract
             %release(obj)
            % obj.DAQ = daq.createSession('ni');
            % addDigitalChannel(obj.DAQ,NIDevice,DOChannel,'OutputOnly');
-            outputSingleScan(obj.DAQ,1)
+            write(obj.DAQ,1)
             obj.IsOpen=0;
             % obj.Position=0;
 
         end
         
         function FilterOut(obj) %puts out the filter
-            outputSingleScan(obj.DAQ,0)
+            write(obj.DAQ,0)
             obj.IsOpen=1;
             % obj.Position=1;
 
+        end
+
+        function delete(obj)
+            delete(obj.GuiFigure);
+            clear obj.DAQ;
         end
              
        

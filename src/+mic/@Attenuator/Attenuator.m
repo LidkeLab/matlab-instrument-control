@@ -19,7 +19,7 @@ classdef Attenuator < mic.abstract
 % - Protection against laser damage with a threshold of 1 W/cm2.
 % 
 % ## Requirements
-% - MATLAB 2014 or higher.
+% - MATLAB 2020a or higher.
 % - Data Acquisition Toolbox.
 % - MATLAB NI-DAQmx driver installed via the Support Package Installer.
 % - An NI DAQ device.
@@ -126,8 +126,8 @@ classdef Attenuator < mic.abstract
             end
             obj=obj@mic.abstract(~nargout);
             %Set up the NI Daq Object
-            obj.DAQ = daq.createSession('ni');
-            addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage');
+            obj.DAQ = daq("ni");
+            addoutput(obj.DAQ,NIDevice,AOChannel, "Voltage");
            
         end
         
@@ -135,7 +135,8 @@ classdef Attenuator < mic.abstract
             % Loading the calibration file.
             % The input is the name of the callibration file that you
             % wants to load.
-            load(Name);
+            [p,~]=fileparts(which('mic.Attenuator'));
+            load(fullfile(p,Name));
             obj.Input_Voltage = Voltage;
             obj.NormOutTransmission = NormTransmission;
             obj.MaxTransmission = obj.NormOutTransmission(1);
@@ -147,8 +148,10 @@ classdef Attenuator < mic.abstract
         
         function delete(obj)
             % Destructor
+            
             delete(obj.GuiFigure);
             obj.shutdown();
+            clear obj.DAQ
         end
         function setVoltage(obj,Vin)
             %This function is called inside the callibration method to set
@@ -157,7 +160,7 @@ classdef Attenuator < mic.abstract
               error('Voltage out of range. It should be in the interval [0 5].'); 
            end
            if ~isempty(obj.DAQ) %daq not yet created
-              outputSingleScan(obj.DAQ,Vin);
+              write(obj.DAQ,Vin);
            end
         end
         
@@ -191,45 +194,10 @@ classdef Attenuator < mic.abstract
             end
                
             if ~isempty(obj.DAQ) %daq not yet created
-                outputSingleScan(obj.DAQ,V_out);
+                write(obj.DAQ,V_out);
             end
             obj.Transmission=Transmission_in;
         end
-        
-%         function setTransmission(obj, Transmission_in)
-%             % Sets output attenuation in percentage of maximum
-%             if Transmission_in >= obj.MaxTransmission % directly checking the input
-%                 error('The input transmission is too large, setting to %d\n', obj.MaxTransmission);
-%             end
-%             if Transmission_in <= obj.MinTransmission
-%                 error('The input transmission is too small, setting to %d\n', obj.MinTransmission);
-%             end
-%             if isempty(obj.Input_Voltage)
-%                 error('The suitable calibration file should be loaded. Please call loadCalibration().');
-%             end
-%             
-%             obj.updateGui(Transmission_in);
-%             
-%             % Interpolation
-%             DiffTrans = obj.NormOutTransmission - Transmission_in;
-%             Ind2 = find(DiffTrans <= 0, 1);
-%             Ind1 = Ind2 - 1;
-%             
-%             % Voltage Calculation
-%             if Ind1 > 0
-%                 V_out = (obj.Input_Voltage(Ind1) * (Transmission_in - obj.NormOutTransmission(Ind2)) + ...
-%                     obj.Input_Voltage(Ind2) * (obj.NormOutTransmission(Ind1) - Transmission_in)) / ...
-%                     (obj.NormOutTransmission(Ind1) - obj.NormOutTransmission(Ind2));
-%             else
-%                 V_out = obj.V_100;
-%             end
-%             
-%             if ~isempty(obj.DAQ)
-%                 outputSingleScan(obj.DAQ, V_out);
-%             end
-%             obj.Transmission = Transmission_in;
-%         end
-
         function State=exportState(obj)
             % Export the object current state
             State.instrumentName=obj.InstrumentName;
@@ -297,18 +265,18 @@ classdef Attenuator < mic.abstract
                     error('mic.Transmission::NIDevice and AOChannel must be defined')
                 end
                 %Set up the NI Daq Object
-                DAQQ = daq.createSession('ni');
-                addAnalogOutputChannel(DAQQ,NIDevice,AOChannel, 'Voltage');
+                DAQQ = daq("ni");
+                addoutput(DAQQ,NIDevice,AOChannel, "Voltage");
                 Voltage = 0:0.5:5;
                 a = length(Voltage);
                 OutTransmission = zeros(1,a);
                 Pm = mic.PM100D;
                 Pm.Ask = 'power';
                 for ii = 1:a
-                    outputSingleScan(DAQQ,Voltage(ii));
+                    write(DAQQ,Voltage(ii));
                     pause(1)
                     OutTransmission(ii) = Pm.measure;
-                    pause(0.1)
+                    pause(0.2)
                 end
                 NormTransmission = OutTransmission*100/BeforeAttenuator;
                 figure; plot(Voltage,NormTransmission,'o')

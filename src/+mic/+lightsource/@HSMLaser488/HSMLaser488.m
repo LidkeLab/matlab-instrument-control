@@ -106,7 +106,7 @@ classdef HSMLaser488<mic.lightsource.abstract
         MaxPower;
         IsOn=0;             % On or Off State.  0,1 for off,on
         MaxPower_Laser=45;  %Maximum Power by LaserInstrument (without Attenuator and Filter)
-        MaxPower_LaserFilter=1.8;       % Maximum Power Setting after Filter 2 
+        MaxPower_LaserFilter=4.5;       % Maximum Power Setting after Filter 2 
         Max_Attenuator;
     end
     

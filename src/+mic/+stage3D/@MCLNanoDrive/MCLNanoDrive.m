@@ -5,10 +5,16 @@ classdef MCLNanoDrive < mic.stage3D.abstract
     %   This class controls a 3D Peizo stage from Mad City Labs.  The class
     %   uses 'calllib' to directly call funtions from the madlib.dll. The instument
     %   is attached via USB.
+    %
+    % ## Installation
     %   The first time an object of this class is created, the user must
     %   direct the object to the 'madlib.h' header file.  This is usually
     %   located here:  C:\Program Files\Mad City Labs\NanoDrive
-    %
+    %   For Matlab later than 2017, user might need to edit the madlib.h
+    %   file to ensure successful loading of the library: comment lines 27
+    %   and 28 as below,
+    %   //#else
+	%       //typedef unsigned char bool;
     % ## Features
     % - Direct control of Mad City Labs 3D Piezo stages via USB.
     % - Dynamic link library interaction using `madlib.dll` for stage control.
@@ -214,24 +220,24 @@ classdef MCLNanoDrive < mic.stage3D.abstract
             z=Position(3);
             % X
             if x < 0 || x > obj.Max_X
-                error('MCLNanoDrive:InvalidX','X position must be between 0 and %fµm.', obj.Max_X);
+                error('MCLNanoDrive:InvalidX','X position must be between 0 and %fï¿½m.', obj.Max_X);
             end
             obj.LastError = obj.callNano('MCL_SingleWriteN',x,1,obj.handle);
             obj.errorcheck('MCL_SingleWriteN',x,1)            
             % Y
             if y < 0 || y > obj.Max_Y
-                error('MCLNanoDrive:InvalidY','Y position must be between 0 and %fµm.', obj.Max_Y);
+                error('MCLNanoDrive:InvalidY','Y position must be between 0 and %fï¿½m.', obj.Max_Y);
             end
             obj.LastError = obj.callNano('MCL_SingleWriteN',y,2,obj.handle);
             obj.errorcheck('MCL_SingleWriteN',y,2);            
             % Z
             if z < 0 || z > obj.Max_Z
-                error('MCLNanoDrive:InvalidZ','Z position must be between 0 and %fµm.', obj.Max_Z);
+                error('MCLNanoDrive:InvalidZ','Z position must be between 0 and %fï¿½m.', obj.Max_Z);
             end
             obj.LastError = obj.callNano('MCL_SingleWriteN',z,3,obj.handle);
             obj.errorcheck('MCL_SingleWriteN',z,3);            
             %This updates the gui if it exists
-            h = findall(0,'tag','mic.powermeter.MCLNanoDrive_gui');
+            h = findall(0,'tag','mic.stage3D.MCLNanoDrive_gui');
             if ~(isempty(h))
                 handles=guidata(h);
                 X=obj.Position;
