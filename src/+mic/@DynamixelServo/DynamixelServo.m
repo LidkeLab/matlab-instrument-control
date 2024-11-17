@@ -433,10 +433,11 @@ classdef DynamixelServo < mic.abstract
                 Bps = mic.DynamixelServo.DEFAULT_BAUDNUM;
             end
             Port = 0;
-            comports = instrhwinfo('serial');
-            N=length(comports.SerialPorts);
+            %comports = instrhwinfo('serial');
+            comports = serialportlist;
+            N=length(comports);
             for nn=1:N
-                stext=comports.SerialPorts{nn};
+                stext=comports{nn};
                 Port = str2double(stext(4));
                 try
                 mic.DynamixelServo.initialize(Port,Bps);
