@@ -97,6 +97,10 @@ Similarly, the `MIC_MCLMicroDrive` class controls the Mad City Labs Micro Stage 
 - Pallikkuth S, Martin C, Farzam F, Edwards JS, Lakin MR, Lidke DS, et al. (2018) Sequential super-resolution imaging using DNA strand displacement. PLoS ONE 13(8): e0203291. https://doi.org/10.1371/journal.pone.0203291
 - Fazel, M., Wester, M.J., Schodt, D.J. et al. High-precision estimation of emitter positions using Bayesian grouping of localizations. Nat Commun 13, 7152 (2022). https://doi.org/10.1038/s41467-022-34894-2
 
+## Related software
+- `Micro-Manager` is a customizable platform for controlling microscopy systems, supporting a wide range of hardware devices, and is primarily built on Java. This software can be obtained from:https://micro-manager.org/
+- `PYME (PYthon Microscopy Environment)` which is Python based environment is designed to facilitate image acquisition and data analysis in microscopy, with a focus on super-resolution techniques like PALM, STORM, and PAINT. This software can be obtained from GitHub:https://github.com/python-microscopy/python-microscopy
+
 ## Documentation
 The detailed documentation of each MIC class can be found here: [MIC Classes](doc/MICclasses.md).
 
