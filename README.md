@@ -76,7 +76,7 @@ The current state of the individual instrument can be obtained using the functio
 
 Example: 
 ```
-[Attributes, Data, Children] = MIC_TIRFLaser488.exportState()
+[Attributes, Data, Children] = TIRFLaser488.exportState()
 ```
 `Attributes` is a structure with fields carrying information on the current state of the instrument. In the example, Attribute is a structure with fields `Power`, `IsOn` and `InstrumentName`. 
 
@@ -108,7 +108,7 @@ Each instrument will be controlled by its own drivers, which must be installed o
 
 Similarly, the `MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
 
-## projects using the MIC
+## Projects using the MIC
 - Pallikkuth S, Martin C, Farzam F, Edwards JS, Lakin MR, Lidke DS, et al. (2018) Sequential super-resolution imaging using DNA strand displacement. PLoS ONE 13(8): e0203291. https://doi.org/10.1371/journal.pone.0203291
 - Fazel, M., Wester, M.J., Schodt, D.J. et al. High-precision estimation of emitter positions using Bayesian grouping of localizations. Nat Commun 13, 7152 (2022). https://doi.org/10.1038/s41467-022-34894-2
 
