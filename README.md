@@ -10,7 +10,7 @@ The MIC software package uses object-oriented programming where a class defines 
 
  The structure of MIC is designed to ensure scalability and easy integration of new hardware.
 
-### @abstract
+### abstract
 - Defines basic functions and properties common across all classes.
   - `abstract`
 
@@ -52,17 +52,17 @@ The MIC software package uses object-oriented programming where a class defines 
   - `TCubePiezo`
   - `example`
 
+### powermeter
+- The powermeter creates an interface with the power meter.
+  - `abstract`
+  - `PM100D`
+  - `example`
+  
 ### stage3D
 - The stage3D is a class for 3D stages.
   - `abstract`
   - `MCLNanoDrive`
   - `NanoMaxPiezos`
-  - `example`
-  
-### powermeter
-- The powermeter creates an interface with the power meter.
-  - `abstract`
-  - `PM100D`
   - `example`
 
 This class structure is integral to the functioning and expansion of our imaging capabilities, facilitating easy maintenance and upgrading of the imaging system components.
