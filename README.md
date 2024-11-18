@@ -88,10 +88,14 @@ Example:
 MIC_DynamixelServo.gui
 ```
 
-## Installation Notes
+## Installation notes
 Each instrument will be controlled by its own drivers, which must be installed on the system. In many cases, the manufacturer's software development kit (SDK) is provided to create custom applications for controlling the instrument. When installing the drivers, either a header file or dynamic-link library is installed. For example, the `MIC_MCLNanoDrive` class controls the Mad City Labs 3D Piezo stage and requires the `madlib.h` header file. During the first initialization of this class on a system, users are prompted to set the location of the `madlib.h` header file, typically located in `C:\Program Files\Mad City Labs\NanoDrive`. 
 
 Similarly, the `MIC_MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
+
+## projects using the MIC
+- Pallikkuth S, Martin C, Farzam F, Edwards JS, Lakin MR, Lidke DS, et al. (2018) Sequential super-resolution imaging using DNA strand displacement. PLoS ONE 13(8): e0203291. https://doi.org/10.1371/journal.pone.0203291
+- Fazel, M., Wester, M.J., Schodt, D.J. et al. High-precision estimation of emitter positions using Bayesian grouping of localizations. Nat Commun 13, 7152 (2022). https://doi.org/10.1038/s41467-022-34894-2
 
 ## Documentation
 The detailed documentation of each MIC class can be found here: [MIC Classes](doc/MICclasses.md).
