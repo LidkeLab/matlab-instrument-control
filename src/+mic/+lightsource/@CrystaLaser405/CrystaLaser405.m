@@ -95,23 +95,23 @@ classdef CrystaLaser405 < mic.lightsource.abstract
                 error('NIDevice, AOChannel and DOChannel must be defined')
             end % checking for inputs
             obj = obj@mic.lightsource.abstract(~nargout); 
-            obj.DAQ = daq.createSession('ni');
-            addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage'); %Adds analog chennal for NI session
-            addDigitalChannel(obj.DAQ,NIDevice,DOChannel, 'OutputOnly'); % Adds digital channel for NI session
+            obj.DAQ = daq('ni');
+            addoutput(obj.DAQ,NIDevice,AOChannel, 'Voltage'); %Adds analog chennal for NI session
+            addoutput(obj.DAQ,NIDevice,DOChannel, 'Digital'); % Adds digital channel for NI session
             obj.Power=obj.MinPower; % sets laser power to min_Power
         end
         
         function on(obj)
             % Turns on Laser. 
             NIVolts = 5*(obj.Power/(obj.MaxPower-obj.MinPower)); % calculates voltage corresponding to Power_in
-            outputSingleScan(obj.DAQ,[NIVolts 1]);
+            write(obj.DAQ,[NIVolts 1]);
             obj.IsOn=1; % Sets laser state to 1
         end
        
         function off(obj)
             % Turns off Laser. 
             NIVolts = 5*(obj.Power/(obj.MaxPower-obj.MinPower)); % calculates voltage corresponding to Power_in
-            outputSingleScan(obj.DAQ,[0 0]);
+            write(obj.DAQ,[0 0]);
             obj.IsOn=0;   % Sets laser state to 0
         end
         
@@ -151,7 +151,7 @@ classdef CrystaLaser405 < mic.lightsource.abstract
                 obj.Power=Power;
                 NIVolts = 5*(obj.Power/(obj.MaxPower-obj.MinPower)); % calculates voltage corresponding to Power_in
                 if obj.IsOn==1
-                    outputSingleScan(obj.DAQ,[NIVolts 1]); % sets analog voltage at NI card for Power_in
+                    write(obj.DAQ,[NIVolts 1]); % sets analog voltage at NI card for Power_in
 %                    properties2gui();
                 end
         end

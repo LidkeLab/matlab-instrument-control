@@ -124,32 +124,37 @@ classdef CoherentLaser561 < mic.lightsource.abstract
             obj=obj@mic.lightsource.abstract(~nargout);
             
             % INPUT: SerialPort    COM port number like 'COM4'
-            s=instrfind('Type','serial','name',['Serial-',SerialPort]);
-            
+            %s=instrfind('Type','serial','name',['Serial-',SerialPort]);
+            s = serialportfind(Tag=SerialPort);
             if isempty(s)
-                s = serial(SerialPort);
+                %s = serial(SerialPort);
+                s = serialport(SerialPort,19200,Tag=SerialPort);
             else
-                fclose(s);
-                s = s(1);
+                clear(s);
+                %s = s(1);
             end
             
-            s.BaudRate=19200;
-            s.Terminator='CR/LF';
-            
+            %s.BaudRate=19200;
+            %s.Terminator='CR/LF';
+            configureTerminator(s,"CR/LF")
             % Connect to instrument
-            fopen(s);
+            %fopen(s);
             obj.Serial=s;
             
             % Turn off the command prompt and echo
-            fprintf(s,'>=0');
-            ClearBuffer(obj)
-            fprintf(s,'E=0');
-            ClearBuffer(obj)
+            %fprintf(s,'>=0');
+            %ClearBuffer(obj)
+            %fprintf(s,'E=0');
+            %ClearBuffer(obj)
             
+
+            obj.send('>=0')
+            obj.send('E=0')
+
             % Make sure laser is on
-            fprintf(obj.Serial,['L=1']);
-            ClearBuffer(obj)
-           
+            %fprintf(obj.Serial,['L=1']);
+            %ClearBuffer(obj)
+            obj.send('L=1')
             % Initialize FilterWheel
             % measured the power after the FilterWheel to calibrate
             % transmission Factor. For Laser561 is = [1 0.51 0.20 0.09 0.035 0.0125]
@@ -166,7 +171,7 @@ classdef CoherentLaser561 < mic.lightsource.abstract
         function delete(obj)
             % Destructor
             shutdown(obj)
-            fclose(obj.Serial);
+            delete(obj.Serial);
             
         end
         
@@ -174,19 +179,28 @@ classdef CoherentLaser561 < mic.lightsource.abstract
         function on(obj)
             obj.IsOn=1;
             obj.Shutter.open();
-            fprintf(obj.Serial,['L=', num2str(obj.IsOn)]);
-            ClearBuffer(obj)
-            
+            %fprintf(obj.Serial,['L=', num2str(obj.IsOn)]);
+            %ClearBuffer(obj)
+            obj.send(['L=', num2str(obj.IsOn)])
         end
         %Turn off Laser
         function off(obj)
             obj.Shutter.close();
-            fprintf(obj.Serial,['L=', num2str(obj.IsOn)]);
-            ClearBuffer(obj)
+            %fprintf(obj.Serial,['L=', num2str(obj.IsOn)]);
+            %ClearBuffer(obj)
+            obj.send(['L=', num2str(obj.IsOn)])
             obj.IsOn=0;
         end
         
-        
+        function send(obj,Message)
+            flush(obj.Serial)
+            writeline(obj.Serial,Message)
+        end
+
+        function out = read(obj)
+            Msg = readline(obj.Serial);
+            out = readline(obj.Serial);
+        end
         function setPower(obj,Power_in)
             % Check if the Laser is ready
             obj.GetStatus();
@@ -221,34 +235,37 @@ classdef CoherentLaser561 < mic.lightsource.abstract
             obj.FilterWheel.setFilter(FilterID);
            
             % Set the power on laser
-            fprintf(obj.Serial,['P=',num2str(Power_temp)]);
-            ClearBuffer(obj)
+            %fprintf(obj.Serial,['P=',num2str(Power_temp)]);
+            %ClearBuffer(obj)
+            obj.send(['P=',num2str(Power_temp)])
             %             warning('It takes a few seconds to change the power')
             obj.Power=Power_in;
         end
         
         % Clear buffer
-        function ClearBuffer(obj)
-            while obj.Serial.BytesAvailable
-                fscanf(obj.Serial);
-            end
-        end
+        %function ClearBuffer(obj)
+        %    while obj.Serial.BytesAvailable
+        %        fscanf(obj.Serial);
+        %    end
+        %end
         
         % Read buffer in a case to get info from instrument
-        function [out]=ReadBuffer(obj)
-            out=fscanf(obj.Serial);
-            while obj.Serial.BytesAvailable
-                [a,b]=fscanf(obj.Serial);
-                out=cat(2,out,a);
-            end
-        end
+        % function [out]=ReadBuffer(obj)
+        %    out=fscanf(obj.Serial);
+        %    while obj.Serial.BytesAvailable
+        %        [a,b]=fscanf(obj.Serial);
+        %        out=cat(2,out,a);
+        %    end
+        % end
         
         % Destructor
         function shutdown(obj)
             obj.off();
             obj.IsOn=0;
-            fprintf(obj.Serial,['L=', num2str(obj.IsOn)]);
-            ClearBuffer(obj)
+            %fprintf(obj.Serial,['L=', num2str(obj.IsOn)]);
+            %ClearBuffer(obj)
+            obj.send(['L=', num2str(obj.IsOn)]);
+            flush(obj.Serial)
         end
         
         function  [Attributes,Data,Children]=exportState(obj)
@@ -262,18 +279,22 @@ classdef CoherentLaser561 < mic.lightsource.abstract
         
         % Check the power on the screen
         function getCurrentPower(obj)
-            ClearBuffer(obj)
-            fprintf(obj.Serial,'L=1');
-            fprintf(obj.Serial,'?P');
-            [out]=ReadBuffer(obj);
+            obj.send('L=1')
+            obj.send('?P')
+            out = obj.read();
+            %fprintf(obj.Serial,'L=1');
+            %fprintf(obj.Serial,'?P');
+            %[out]=ReadBuffer(obj);
             obj.Power=str2double(out);
         end
         
         % Check the status of instrument
         function GetStatus(obj)
-            ClearBuffer(obj)
-            fprintf(obj.Serial,'?STA');
-            [out]=ReadBuffer(obj);
+            %ClearBuffer(obj)
+            %fprintf(obj.Serial,'?STA');
+            %[out]=ReadBuffer(obj);
+            obj.send('?STA')
+            out = obj.read();
             obj.LaserStatus=str2double(out);
         end
     end
@@ -321,7 +342,7 @@ classdef CoherentLaser561 < mic.lightsource.abstract
             fprintf('Setting to 1 mW Output\n')
             L561.setPower(50);
             fprintf('Delete Object\n')
-            State=L561.exportState()
+            State=L561.exportState();
             delete(L561);
             clear L561;
             

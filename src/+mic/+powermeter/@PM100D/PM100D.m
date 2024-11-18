@@ -18,7 +18,7 @@ classdef PM100D < mic.powermeter.abstract
     %
     % ## REQUIREMENTS:
     %    NI_DAQ  (VISA and ICP Interfaces) should be installed.
-    %    MATLAB 2014 or higher.
+    %    MATLAB 2021a or higher.
     %    mic.Abstract.m
     %    mic.powermeter.abstract.m
     %
@@ -34,19 +34,17 @@ classdef PM100D < mic.powermeter.abstract
             obj@mic.powermeter.abstract(~nargout);    
            
             % Find a VISA-USB object.
-            vendorinfo = instrhwinfo('visa','ni');
-            s=vendorinfo.ObjectConstructorName{1};
+            vendorinfo = visadevlist;
+            s=vendorinfo(1,1).ResourceName;
             
             if isempty(obj.VisaObj)
-                obj.VisaObj = eval(s);
+                obj.VisaObj = visadev(s);
             else
-                
-                fclose(obj.VisaObj);
-                clear obj.VisaObj;
-                obj.VisaObj = eval(s);
+                delete(obj.VisaObj);
+                obj.VisaObj = visadev(s);
             end
             % Connect to instrument object
-            fopen(obj.VisaObj);
+            %fopen(obj.VisaObj);
             % Measure the limits of the wavelength.
             obj.Limits=minMaxWavelength(obj);
         end 
@@ -85,8 +83,9 @@ classdef PM100D < mic.powermeter.abstract
         
         function Reply=send(obj,Message)
             %Sending a message to the power-meter and getting a feedback.
-            fprintf(obj.VisaObj,Message);
-            Reply=fscanf(obj.VisaObj,'%s');
+            %fprintf(obj.VisaObj,Message);
+            %Reply=fscanf(obj.VisaObj,'%s');
+            Reply = writeread(obj.VisaObj,Message);
         end
         
         function Limits=minMaxWavelength(obj)
@@ -119,11 +118,12 @@ classdef PM100D < mic.powermeter.abstract
          end
              
          s = sprintf('CORRECTION:WAVELENGTH %g nm',obj.Lambda);
-         fprintf(obj.VisaObj, s);
+         %fprintf(obj.VisaObj, s);
+         write(obj.VisaObj,s,"string");
      end
      function shutdown(obj)
             %This function is called in the destructor to delete the communication port.
-            fclose(obj.VisaObj);
+            delete(obj.VisaObj);
         end
      function delete(obj)
          %This function close the comunication port and close the gui.
