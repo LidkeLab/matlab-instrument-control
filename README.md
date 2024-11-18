@@ -10,45 +10,60 @@ The MIC software package uses object-oriented programming where a class defines 
 
  The structure of MIC is designed to ensure scalability and easy integration of new hardware.
 
-### MIC_Abstract
+### @abstract
 - Defines basic functions and properties common across all classes.
-  - `MIC_Abstract`
+  - `abstract`
 
-### MIC_LightSource_Abstract
-- MIC_LightSource_Abstract is the base class for all light sources (e.g., lasers), defining common functions and properties.
-  - `MIC_CoherentLaser561`
-  - `MIC_CrystaLaser561`
-  - `MIC_CrystaLaser405`
-  - `MIC_DHOMLaser532`
-  - `MIC_MPB_Laser`
-  - `MIC_RebelStarLED`
-  - `MIC_VortranLaser488`
-  - `MIC_TubeLaserDiode`
-  - `MIC_TIRFLaser488`
-  - `MIC_HSM_Laser488`
-  - `MIC_IX71_Lamp01`
+### lightSource
+- The lightSource is the base class for all light sources (e.g., lasers), defining common functions and properties.
+  - `abstract`
+  - `CoherentLaser561`
+  - `CrystaLaser561`
+  - `CrystaLaser405`
+  - `DHOMLaser532`
+  - `MPBLaser`
+  - `RebelStarLED`
+  - `VortranLaser488`
+  - `TubeLaserDiode`
+  - `TIRFLaser488`
+  - `HSMLaser488`
+  - `IX71Lamp01`
+  - `example`
 
-### MIC_Camera_Abstract
-- MIC_Camera_Abstract is the base class for all camera-related classes, defining common functions and properties.
-  - `MIC_AndorCamera`
-  - `MIC_HamamatsuCamera`
-  - `MIC_IMGSourceCamera`
-  - `MIC_ThorlabsIR`
+### camera
+- The camera is the base class for all camera-related classes, defining common functions and properties.
+  - `abstract`
+  - `AndorCamera`
+  - `AndorCameraZyla`
+  - `DCam4Camera`
+  - `HamamatsuCamera`
+  - `Imaq`
+  - `IMGSourceCamera`
+  - `ThorlabsIR`
+  - `ThorlabsSICamera`
+  - `PyDcam`
+  - `example`
 
-### MIC_LinearStage_Abstract
-- MIC_LinearStage_Abstract is the abstract class for linear stages.
-  - `MIC_MCLMicroDrive`
-  - `MIC_KCubePiezo`
-  - `MIC_TCubePiezo`
+### linearStage
+- The linearStage is the abstract class for linear stages.
+  - `abstract`
+  - `MCLMicroDrive`
+  - `KCubePiezo`
+  - `TCubePiezo`
+  - `example`
 
-### MIC_3DStage_Abstract
-- MIC_3DStage_Abstract is the abstract class for 3D stages.
-  - `MIC_MCLNanoDrive`
-  - `MIC_NanoMaxPiezos`
+### stage3D
+- The stage3D is a class for 3D stages.
+  - `abstract`
+  - `MCLNanoDrive`
+  - `NanoMaxPiezos`
+  - `example`
   
-### MIC_PowerMeter_Abstract
-- MIC_PowerMeter_Abstract creates an interface with the power meter.
-  - `MIC_PM100D`
+### powermeter
+- The powermeter creates an interface with the power meter.
+  - `abstract`
+  - `PM100D`
+  - `example`
 
 This class structure is integral to the functioning and expansion of our imaging capabilities, facilitating easy maintenance and upgrading of the imaging system components.
 
@@ -70,28 +85,28 @@ Example:
 `Children` contain exportState output from children instrument components (if any) called within the parent instrument class. 
 
 
-### Unit test method
-Each instrument component class in MIC comes equipped with a static method unit test. The `unitTest` function cycles through a series of pre-defined tests, uniquely selected for the corresponding instrument component, outputting success status. Common steps in the unit test method are creating the object, turning the instrument On/Off, change/modify state of the instrument, output exportState and deleting the object.  
+### Functional test (funcTest) method
+Each instrument component class in MIC comes equipped with a static method unit test. The `funcTest` function cycles through a series of pre-defined tests, uniquely selected for the corresponding instrument component, outputting success status. Common steps in the unit test method are creating the object, turning the instrument On/Off, change/modify state of the instrument, output exportState and deleting the object.  
 
 **It is important to know the input arguments needed for calling the class on a particular instrument component before calling the unitTest.** This information can be obtained by performing a `doc` function on the corresponding MIC class.
 
 Example: 
 ```
-Success=MIC_TCubeLaserDiode.unitTest('64864827','Power',10,100,1)
+Success=TCubeLaserDiode.funcTest('64864827','Power',10,100,1)
 ```
 
 ### Graphical user interface
-Instument component classes in MIC also come equipped with graphical user interfaces (gui). Classes inheriting from the same instrument abstract class (e.g., `MIC_LightSourceAbstract`) share a common gui, located in the abstract class folder. For all other instrument components, the corresponding gui scripts are stored in the local folder.
+Instument component classes in MIC also come equipped with graphical user interfaces (gui). Classes inheriting from the same instrument abstract class share a common gui, located in the abstract class folder. For all other instrument components, the corresponding gui scripts are stored in the local folder.
 
 Example: 
 ```
-MIC_DynamixelServo.gui
+DynamixelServo.gui
 ```
 
 ## Installation notes
-Each instrument will be controlled by its own drivers, which must be installed on the system. In many cases, the manufacturer's software development kit (SDK) is provided to create custom applications for controlling the instrument. When installing the drivers, either a header file or dynamic-link library is installed. For example, the `MIC_MCLNanoDrive` class controls the Mad City Labs 3D Piezo stage and requires the `madlib.h` header file. During the first initialization of this class on a system, users are prompted to set the location of the `madlib.h` header file, typically located in `C:\Program Files\Mad City Labs\NanoDrive`. 
+Each instrument will be controlled by its own drivers, which must be installed on the system. In many cases, the manufacturer's software development kit (SDK) is provided to create custom applications for controlling the instrument. When installing the drivers, either a header file or dynamic-link library is installed. For example, the `MCLNanoDrive` class controls the Mad City Labs 3D Piezo stage and requires the `madlib.h` header file. During the first initialization of this class on a system, users are prompted to set the location of the `madlib.h` header file, typically located in `C:\Program Files\Mad City Labs\NanoDrive`. 
 
-Similarly, the `MIC_MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
+Similarly, the `MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
 
 ## projects using the MIC
 - Pallikkuth S, Martin C, Farzam F, Edwards JS, Lakin MR, Lidke DS, et al. (2018) Sequential super-resolution imaging using DNA strand displacement. PLoS ONE 13(8): e0203291. https://doi.org/10.1371/journal.pone.0203291
