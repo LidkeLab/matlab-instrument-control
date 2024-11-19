@@ -14,6 +14,20 @@ The MIC software package uses object-oriented programming where a class defines 
 - Defines basic functions and properties common across all classes.
   - `abstract`
 
+### camera
+- The camera is the base class for all camera-related classes, defining common functions and properties.
+  - `abstract`
+  - `AndorCamera`
+  - `AndorCameraZyla`
+  - `DCam4Camera`
+  - `HamamatsuCamera`
+  - `Imaq`
+  - `IMGSourceCamera`
+  - `ThorlabsIR`
+  - `ThorlabsSICamera`
+  - `PyDcam`
+  - `example`
+
 ### lightSource
 - The lightSource is the base class for all light sources (e.g., lasers), defining common functions and properties.
   - `abstract`
@@ -28,20 +42,6 @@ The MIC software package uses object-oriented programming where a class defines 
   - `TIRFLaser488`
   - `HSMLaser488`
   - `IX71Lamp01`
-  - `example`
-
-### camera
-- The camera is the base class for all camera-related classes, defining common functions and properties.
-  - `abstract`
-  - `AndorCamera`
-  - `AndorCameraZyla`
-  - `DCam4Camera`
-  - `HamamatsuCamera`
-  - `Imaq`
-  - `IMGSourceCamera`
-  - `ThorlabsIR`
-  - `ThorlabsSICamera`
-  - `PyDcam`
   - `example`
 
 ### linearStage
