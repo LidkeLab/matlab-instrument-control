@@ -130,7 +130,7 @@ classdef CoherentLaser561 < mic.lightsource.abstract
                 %s = serial(SerialPort);
                 s = serialport(SerialPort,19200,Tag=SerialPort);
             else
-                clear(s);
+                delete(s);
                 %s = s(1);
             end
             

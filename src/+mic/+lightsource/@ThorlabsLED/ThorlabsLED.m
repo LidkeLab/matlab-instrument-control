@@ -150,8 +150,8 @@ classdef ThorlabsLED < mic.lightsource.abstract
                 error('mic.lightsource.ThorlabsLED::NIDevice and AOChannel must be defined')
             end
             %Set up the NI Daq Object
-            obj.DAQ = daq.createSession('ni');
-            addAnalogOutputChannel(obj.DAQ,NIDevice,AOChannel, 'Voltage');
+            obj.DAQ = daq('ni');
+            addoutput(obj.DAQ,NIDevice,AOChannel, 'Voltage');
             
             %Set to minimum power
             obj.setPower(obj.MinPower);
@@ -182,7 +182,7 @@ classdef ThorlabsLED < mic.lightsource.abstract
                 V_out=obj.V_0;  %turn off - should be redundant.
             end
             if ~isempty(obj.DAQ) %daq not yet created
-                outputSingleScan(obj.DAQ,V_out);
+                write(obj.DAQ,V_out);
             end
             obj.updateGui();  %update gui from current properties
             
@@ -198,7 +198,7 @@ classdef ThorlabsLED < mic.lightsource.abstract
             % Turn off LED lamp
             V_out=obj.V_0;
             if ~isempty(obj.DAQ) %daq not yet created
-                outputSingleScan(obj.DAQ,V_out);
+                write(obj.DAQ,V_out);
             end
             obj.IsOn=0;
         end
@@ -236,7 +236,7 @@ classdef ThorlabsLED < mic.lightsource.abstract
             fprintf('Turn On\n')
             T_LED.on();pause(1);
             fprintf('Turn Off\n')
-            T_LED.off();;pause(1);
+            T_LED.off();pause(1);
             fprintf('Turn On\n')
             T_LED.on();pause(1);
             fprintf('Setting to 50 Percent Output\n')

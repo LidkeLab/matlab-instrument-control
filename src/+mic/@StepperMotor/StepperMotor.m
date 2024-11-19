@@ -111,7 +111,7 @@ classdef StepperMotor < mic.abstract
         function closeSBC(obj)
             %called inside the delete function to close the communication ports for all the motors.
             Kinesis_SBC_Close(obj.SerialN);
-            Kinesis_LD_Close(obj.SerialN);
+            
         end
         function delete(obj)
             obj.closeSBC();
