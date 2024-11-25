@@ -54,6 +54,9 @@ classdef ShutterTTL < mic.abstract
     %   MATLAB NI-DAQmx driver in MATLAB installed via the Support Package Installer
     %   type "SupportPackageInstaller" on command line to install the 
     %   support package for NI-DAQmx use MATLAB 2014b and higher 
+    %   Data Acquisition Toolbox Support Package for National Instruments
+    %   NI-DAQmx Devices: This add-on can be installed from link:
+    %   https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
     %   
     % ### CITATION: Farzin Farzam, Lidkelab, 2017.
     

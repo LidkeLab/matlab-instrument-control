@@ -127,6 +127,9 @@ classdef GalvoDigital < mic.abstract
     %  MATLAB software version R2020a or later
     %  Data Acquisition Toolbox
     %  MATLAB NI-DAQmx driver installed via the Support Package Installer
+    %  Data Acquisition Toolbox Support Package for National Instruments
+    %  NI-DAQmx Devices: This add-on can be installed from link:
+    %  https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
     %
     % ### CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
     

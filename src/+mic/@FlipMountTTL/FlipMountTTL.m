@@ -62,6 +62,9 @@ classdef FlipMountTTL < mic.abstract
     %      Installer
     %   type "SupportPackageInstaller" on command line to install the support
     %      package for NI-DAQmx
+    %   Data Acquisition Toolbox Support Package for National Instruments
+    %   NI-DAQmx Devices: This add-on can be installed from link:
+    %   https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
     %
     % ### CITATION: Farzin Farzam, Lidkelab, 2017.
     
