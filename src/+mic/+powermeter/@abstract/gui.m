@@ -97,7 +97,8 @@ function guiFig=gui(obj)
     set(hedit1,'String',obj.Lambda);
 
     %measuring the current power.
-    OutPower=obj.measurePower;
+    obj.Ask = 'power';
+    OutPower=obj.measure();
     StrPow = sprintf('%0.5f',OutPower);
     set(hedit2,'String',StrPow);
 

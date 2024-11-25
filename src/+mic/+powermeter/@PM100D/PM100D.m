@@ -91,8 +91,7 @@ classdef PM100D < mic.powermeter.abstract
             %fprintf(obj.VisaObj,Message);
             %Reply=fscanf(obj.VisaObj,'%s');
             Reply = writeread(obj.VisaObj,Message);
-            fprintf(obj.VisaObj,Message);
-            Reply=fscanf(obj.VisaObj,'%s');
+
         end
         
         function devInfo = reportDeviceInfo(obj)
@@ -168,57 +167,14 @@ classdef PM100D < mic.powermeter.abstract
             %This function is called in the destructor to delete the communication port.
             delete(obj.VisaObj);
             
-            function out=measurePower(obj)
-                % Measure power
-                out=str2double(obj.send('MEASURE:POWER?'))*1000;
-            end
+        end
             
-            function out=measureTemperature(obj)
-                % Measure temperature
-                out=str2double(obj.send('MEASURE:TEMPERATURE?'));
-            end
-            
-            function setWavelength(obj,lambda)
-                % Setting the compensation wavelength
-                %
-                % serWavelength(lambda)
-                %
-                % Inputs
-                % lambda [optional] - scalar in nm between 400 and 1100
-                %      If lambda is not supplied, the value in the class Lambda
-                %      property is used instead. If it is supplied, the Lambda
-                %      property is assigned as lambda.
-                %
-                %
-                
-                if nargin>1
-                    if (lambda < obj.Limits(1) || lambda > obj.Limits(2))
-                        fprintf('The wavelength is out of the range [%dnm, %dnm]\n', ...
-                            obj.Limits);
-                        return
-                    else
-                        obj.Lambda = lambda;
-                    end
-                end
-                s = sprintf('SENS:CORR:WAV %g ',obj.Lambda);
-                fprintf(obj.VisaObj, s);
-            end % setWavelength
-            
-            function shutdown(obj)
-                %This function is called in the destructor to delete the communication port.
-                if isempty(obj.VisaObj)
-                    return
-                end
-                fclose(obj.VisaObj);
-            end % shutdown
-            
-            function delete(obj)
-                %This function closes the communication port and close the gui.
-                delete(obj.GuiFigure);
-                obj.shutdown();
-            end % delete
-            
-        end % methods
+        function delete(obj)
+            %This function closes the communication port and close the gui.
+            delete(obj.GuiFigure);
+            obj.shutdown();
+        end % delete
+        
         
     end
 end% classdef
