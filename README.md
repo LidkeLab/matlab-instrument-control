@@ -86,9 +86,9 @@ Example:
 
 
 ### Functional test (funcTest) method
-Each instrument component class in MIC comes equipped with a static method unit test. The `funcTest` function cycles through a series of pre-defined tests, uniquely selected for the corresponding instrument component, outputting success status. Common steps in the unit test method are creating the object, turning the instrument On/Off, change/modify state of the instrument, output exportState and deleting the object.  
+Each instrument component class in MIC comes equipped with a static method unit test. The `funcTest` function cycles through a series of pre-defined tests, uniquely selected for the corresponding instrument component, outputting success status. Common steps in the functional test method are creating the object, turning the instrument On/Off, change/modify state of the instrument, output exportState and deleting the object.  
 
-**It is important to know the input arguments needed for calling the class on a particular instrument component before calling the unitTest.** This information can be obtained by performing a `doc` function on the corresponding MIC class.
+**It is important to know the input arguments needed for calling the class on a particular instrument component before calling the funcTest.** This information can be obtained by performing a `doc` function on the corresponding MIC class.
 
 Example: 
 ```
