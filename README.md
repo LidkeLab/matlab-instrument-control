@@ -71,6 +71,21 @@ This class structure is integral to the functioning and expansion of our imaging
 ## Common Features
 Each of the instrument components in MIC have export methods, unit tests and graphical user interfaces with a common format.
 
+### Constructor method
+The constructor method of each instrument component class is used to create an object of the class. The constructor method is called when the class is initialized. The constructor method can take input arguments. One example of the constructor method is shown below.
+```
+attenuator = mic.Attenuator('Dev1', 'ao1');
+
+% Load calibration data
+attenuator.loadCalibration('CalibrationFile.mat');
+
+% Set transmission to 50%
+attenuator.setTransmission(50);
+
+% Shutdown the attenuator
+attenuator.shutdown();
+```
+
 ### Export state method
 The current state of the individual instrument can be obtained using the function `exportState`. The output of the `exportState` function is organized as Attributes, Data and Children.  
 
