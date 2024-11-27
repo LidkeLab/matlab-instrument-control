@@ -113,7 +113,7 @@ Success = TCubeLaserDiode.funcTest('64864827', 'Power', 10, 100, 1)
 ```
 
 ### Graphical user interface
-Instrument component classes in MIC also come equipped with graphical user interfaces (gui). Classes inheriting from the same instrument abstract class share a common gui, located in the abstract class folder. For all other instrument components, the corresponding gui scripts are stored in the local folder.
+Instrument component classes in MIC also come equipped with graphical user interfaces (gui). Classes inheriting from the same instrument abstract class share a common gui, located in the abstract class folder. For all other instrument components, the corresponding gui scripts are stored in the instrument's class folder.
 
 Example: 
 ```
