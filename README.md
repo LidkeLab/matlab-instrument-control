@@ -15,7 +15,7 @@ The MIC software package uses object-oriented programming where a class defines 
   - `abstract`
 
 ### camera
-- The camera is the base class for all camera-related classes, defining common functions and properties.
+- The camera namespace is the base for all camera-related classes, defining common functions and properties.
   - `abstract`
   - `AndorCamera`
   - `AndorCameraZyla`
@@ -23,43 +23,43 @@ The MIC software package uses object-oriented programming where a class defines 
   - `HamamatsuCamera`
   - `Imaq`
   - `IMGSourceCamera`
+  - `PyDcam`
   - `ThorlabsIR`
   - `ThorlabsSICamera`
-  - `PyDcam`
   - `example`
 
 ### lightSource
-- The lightSource is the base class for all light sources (e.g., lasers), defining common functions and properties.
+- The lightSource namespace is the base for all light sources (e.g., lasers), defining common functions and properties.
   - `abstract`
   - `CoherentLaser561`
-  - `CrystaLaser561`
   - `CrystaLaser405`
+  - `CrystaLaser561`
   - `DHOMLaser532`
-  - `MPBLaser`
-  - `RebelStarLED`
-  - `VortranLaser488`
-  - `TubeLaserDiode`
-  - `TIRFLaser488`
   - `HSMLaser488`
   - `IX71Lamp01`
+  - `MPBLaser`
+  - `RebelStarLED`
+  - `TIRFLaser488`
+  - `TubeLaserDiode`
+  - `VortranLaser488`
   - `example`
 
 ### linearStage
-- The linearStage is the abstract class for linear stages.
+- The linearStage abstract is the abstract class for linear stages.
   - `abstract`
-  - `MCLMicroDrive`
   - `KCubePiezo`
+  - `MCLMicroDrive`
   - `TCubePiezo`
   - `example`
 
 ### powermeter
-- The powermeter creates an interface with the power meter.
+- The powermeter namespace creates an interface with the power meter.
   - `abstract`
   - `PM100D`
   - `example`
   
 ### stage3D
-- The stage3D is a class for 3D stages.
+- The stage3D is the namespace for 3D stages.
   - `abstract`
   - `MCLNanoDrive`
   - `NanoMaxPiezos`
@@ -69,7 +69,7 @@ This class structure is integral to the functioning and expansion of our imaging
 
 
 ## Common Features
-Each of the instrument components in MIC have constructor, export methods, unit tests, and graphical user interfaces with a common format.
+Each of the instrument components in MIC have constructor, export methods, functional tests, and graphical user interfaces with a common format.
 
 ### Constructor method
 The constructor method of each instrument component class is used to create an object of the class. The constructor method is called when the class is initialized. The constructor method can take input arguments. One example of the constructor method is shown below.
@@ -91,6 +91,7 @@ The current state of the individual instrument can be obtained using the functio
 
 Example: 
 ```
+TIRFLaser488 = mic.lightsource.TIRFLaser488(...)
 [Attributes, Data, Children] = TIRFLaser488.exportState()
 ```
 `Attributes` is a structure with fields carrying information on the current state of the instrument. In the example, Attribute is a structure with fields `Power`, `IsOn` and `InstrumentName`. 
@@ -101,17 +102,18 @@ Example:
 
 
 ### Functional test (funcTest) method
-Each instrument component class in MIC comes equipped with a static method unit test. The `funcTest` function cycles through a series of pre-defined tests, uniquely selected for the corresponding instrument component, outputting success status. Common steps in the functional test method are creating the object, turning the instrument On/Off, change/modify state of the instrument, output exportState and deleting the object.  
+Each instrument component class in MIC comes equipped with a static method functional test. The `funcTest` cycles through a series of pre-defined tests, uniquely selected for the corresponding instrument component, outputting success status. Common steps in the functional test method are creating the object, turning the instrument On/Off, change/modify state of the instrument, output exportState and deleting the object.  
 
 **It is important to know the input arguments needed for calling the class on a particular instrument component before calling the funcTest.** This information can be obtained by performing a `doc` function on the corresponding MIC class.
 
 Example: 
 ```
-Success=TCubeLaserDiode.funcTest('64864827','Power',10,100,1)
+TCubeLaserDiode = mic.lightsource.TCubeLaserDiode(...)
+Success = TCubeLaserDiode.funcTest('64864827', 'Power', 10, 100, 1)
 ```
 
 ### Graphical user interface
-Instument component classes in MIC also come equipped with graphical user interfaces (gui). Classes inheriting from the same instrument abstract class share a common gui, located in the abstract class folder. For all other instrument components, the corresponding gui scripts are stored in the local folder.
+Instrument component classes in MIC also come equipped with graphical user interfaces (gui). Classes inheriting from the same instrument abstract class share a common gui, located in the abstract class folder. For all other instrument components, the corresponding gui scripts are stored in the local folder.
 
 Example: 
 ```
@@ -123,13 +125,26 @@ Each instrument will be controlled by its own drivers, which must be installed o
 
 Similarly, the `MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
 
+## Top-level files and directories
+    | description
+--- | ---
+doc | generate documentation and miscellaneous .md files
+LICENSE | MIT license
+mex64 | Windows executable mex files generated from those in mex_source
+mex_source | mex source files
+paper | JOSS paper
+README.md | this document
+run_tests.m | run all functional tests (best if hardware attached)
+src | MATLAB code source
+startup.m | sample lines to be added to startup.m to access MIC classes
+
 ## Projects using MIC
 - Pallikkuth S, Martin C, Farzam F, Edwards JS, Lakin MR, Lidke DS, et al. (2018) Sequential super-resolution imaging using DNA strand displacement. PLoS ONE 13(8): e0203291. https://doi.org/10.1371/journal.pone.0203291
 - Fazel, M., Wester, M.J., Schodt, D.J. et al. High-precision estimation of emitter positions using Bayesian grouping of localizations. Nat Commun 13, 7152 (2022). https://doi.org/10.1038/s41467-022-34894-2
 
 ## Related software
-- `Micro-Manager` is a customizable platform for controlling microscopy systems, supporting a wide range of hardware devices, and is primarily built on Java. This software can be obtained from:https://micro-manager.org/
-- `PYME (PYthon Microscopy Environment)` which is Python based environment is designed to facilitate image acquisition and data analysis in microscopy, with a focus on super-resolution techniques like PALM, STORM, and PAINT. This software can be obtained from GitHub:https://github.com/python-microscopy/python-microscopy
+- `Micro-Manager` is a customizable platform for controlling microscopy systems, supporting a wide range of hardware devices, and is primarily built on Java. This software can be obtained from: https://micro-manager.org/
+- `PYME (PYthon Microscopy Environment)` is a Python based environment designed to facilitate image acquisition and data analysis in microscopy, with a focus on super-resolution techniques like PALM, STORM, and PAINT. This software can be obtained from GitHub: https://github.com/python-microscopy/python-microscopy
 
 ## Documentation
 The detailed documentation of each MIC class can be found here: [MIC Classes](doc/MICclasses.md).

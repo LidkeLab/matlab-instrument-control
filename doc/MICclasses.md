@@ -58,7 +58,7 @@
 &nbsp;&nbsp;&nbsp;[mic..simulated_Stage3D](../src/+mic/@simulated_Stage3D/Readme.md) | template for implementing classes inheriting from mic_stage3D.abstract
 &nbsp;&nbsp;&nbsp;[mic.FlipMountLaser](../src/+mic/@FlipMountLaser/Readme.md) | control a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M controller
 &nbsp;&nbsp;&nbsp;[mic.FlipMountTTL](../src/+mic/@FlipMountTTL/Readme.md) | control a Thorlabs LMR1/M flipmount via a Thorlabs MFF101/M controller
-&nbsp;&nbsp;&nbsp;[mic.GalvoAnalog](../src/+mic/@GalvoAnalog/Readme.md) | control the Galvo mirror
+&nbsp;&nbsp;&nbsp;[mic.GalvoAnalog](../src/+mic/@GalvoAnalog/Readme.md) | set the Galvo mirror to a single, fixed position
 &nbsp;&nbsp;&nbsp;[mic.GalvoDigital](../src/+mic/@GalvoDigital/Readme.md) | control the Cambridge Technology galvo mirror on the HSM microscope
 &nbsp;&nbsp;&nbsp;[mic.HamamatsuLCOS](../src/+mic/@HamamatsuLCOS/Readme.md) | control a phase SLM connected through a DVI interface
 &nbsp;&nbsp;&nbsp;[mic.NanoMax](../src/+mic/@NanoMax/Readme.md) | control NanoMax stage
