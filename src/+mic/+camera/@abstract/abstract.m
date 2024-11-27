@@ -22,7 +22,7 @@ classdef abstract < mic.abstract
 % - `LUTScale`: Range for image display stretching.
 % - `RangeDisplay`: Enables display of the minimum and maximum values on the live image.
 % - `ReturnType`: Format of the returned image data ('matlab', 'dipimage').
-% - `SaveType`: Format for saving images ('mat', 'ics').
+% - `SaveType`: Format for saving images ('mat').
 % - `ShowLive`: Determines whether to show live data during acquisition.
 % 
 % ## Methods
@@ -48,7 +48,7 @@ classdef abstract < mic.abstract
         LUTScale=[0 16000];         %   [min max] live view stretch
         RangeDisplay=1;             %   display [min max] on live image
         ReturnType='dipimage';      %   'matlab','dipimage','none'
-        SaveType='mat';            
+        SaveType='mat';             %   'mat'
         ShowLive=1;                 %   show data on screen during acquisision
     end
     
@@ -124,18 +124,9 @@ classdef abstract < mic.abstract
                 case 'matlab'
                     %already in uint16
             end
+           
             
-            %             switch obj.SaveType
-            %                 case 'mat'
-            %                     eval([obj.AcquisitionType '=data';]);
-            %                     params=obj.exportparameters();
-            %                     params.FileName=filename;
-            %                     save(filename,obj.AcquisitionType,'params');
-            %                 case 'ics'
-            %                     writeim(obj.Data,filename,'ics');
-            %             end
-            
-            switch obj.SaveType  % preferred, default change for futrure expansion
+            switch obj.SaveType  % This is preferred save type and can be changed for future expansion
                 case 'mat'
                     eval([obj.AcquisitionType ' = data;']);
                     params = obj.exportparameters();
@@ -250,16 +241,6 @@ classdef abstract < mic.abstract
             end
         end
         
-%         function set.SaveType(obj,in)
-%             switch in
-%                 case 'mat'
-%                     obj.SaveType='mat';
-%                 case 'ics'
-%                     obj.SaveType='ics';
-%                 otherwise
-%                     warning('SaveType must be mat or ics. Not changed')
-%             end
-%         end
         
         function set.SaveType(obj, in)
             if strcmp(in, 'mat')

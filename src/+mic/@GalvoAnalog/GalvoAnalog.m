@@ -5,6 +5,7 @@ classdef GalvoAnalog < mic.abstract
     % The `GalvoAnalog` class controls a Galvo mirror by setting its position through
     % a fixed output voltage using an NI (National Instruments) DAQ device. The Galvo mirror
     % is positioned by adjusting the analog output voltage within a specified range (-10V to 10V).
+    % The class sets the galvo mirror to a fixed angle corresponding to the voltage specified by `setVoltage`.
     %
     % ## Class Properties
     %
