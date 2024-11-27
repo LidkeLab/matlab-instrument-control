@@ -36,6 +36,9 @@ classdef abstract < mic.abstract
 % - `start_focus()`: Starts capturing images in focus mode.
 % - `start_sequence()`: Starts capturing a sequence of images.
 % - `getlastimage()`: Retrieves the most recent image captured.
+% - `displaylastimage()`: Display the most recently captured image from the
+%    camera in a live view window. Further details about key features are
+%    in `displaylastimage()`method section.
 % - `getdata()`: Retrieves all data acquired in the current session.
 %
 % ### CITATION: Lidkelab, 2017.  
@@ -53,12 +56,12 @@ classdef abstract < mic.abstract
     end
     
     properties(Abstract,Access=protected)
-        AbortNow;           %stop acquisition flag
-        FigurePos;
-        FigureHandle;
-        ImageHandle;
-        ReadyForAcq;        %If not, call setup_acquisition
-        TextHandle;
+        AbortNow;  % stop acquisition flag
+        FigurePos; % stores the position or dimensions of a graphical figure
+        FigureHandle; % handle to the graphical figure object used for displaying
+        ImageHandle; % handle to an image object, enabling manipulation or updates of the displayed image data.
+        ReadyForAcq; % flag indicating whether the system is prepared for acquisition; If not, call setup_acquisition routine must be called
+        TextHandle; % handle to a text object, used for displaying or modifying textual information in the figure.
     end
     
     properties(Abstract,SetAccess=protected)
@@ -264,7 +267,25 @@ classdef abstract < mic.abstract
     end
     
     methods(Access=protected)
-        
+
+% The 'displaylastimage' method is responsible for displaying the most recently captured image from the camera in a live view window. 
+% It handles the initialization of the display window, image scaling, and visualization of the image's intensity range. 
+% 
+% Key Features include: 
+% Image Retrieval: Uses the getlastimage() method to fetch the most recent image captured by the camera.
+%
+% Display Window Management: If a display window does not already exist or has been closed, it initializes a new figure.
+% Configures the figure with appropriate rendering (OpenGL) and removes toolbars and menus for a clean visualization.
+%
+% Image Scaling and Display: Applies automatic or manual scaling based on the AutoScale property. Updates the color limits (CLim) 
+% of the display using either the image's minimum and maximum values or the pre-defined LUTScale.
+%
+% Range Display: Displays the range of pixel intensity values ([min max]) on the image when the RangeDisplay property is enabled.
+%
+% Dynamic Figure Positioning: Positions the figure based on screen dimensions and the zoom factor defined by DisplayZoom.
+%
+% Real-time Updates: Updates the display in real-time using drawnow limitrate.
+
         function Data=displaylastimage(obj)
             
             Data=obj.getlastimage();
