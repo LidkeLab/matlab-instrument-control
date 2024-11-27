@@ -69,7 +69,7 @@ This class structure is integral to the functioning and expansion of our imaging
 
 
 ## Common Features
-Each of the instrument components in MIC have export methods, unit tests and graphical user interfaces with a common format.
+Each of the instrument components in MIC have constructor, export methods, unit tests, and graphical user interfaces with a common format.
 
 ### Constructor method
 The constructor method of each instrument component class is used to create an object of the class. The constructor method is called when the class is initialized. The constructor method can take input arguments. One example of the constructor method is shown below.

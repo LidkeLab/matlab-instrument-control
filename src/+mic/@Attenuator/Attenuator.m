@@ -201,6 +201,7 @@ classdef Attenuator < mic.abstract
             end
             obj.Transmission=Transmission_in;
         end
+           
         function State=exportState(obj)
             % Export the object current state
             State.instrumentName=obj.InstrumentName;
