@@ -91,8 +91,9 @@ The current state of the individual instrument can be obtained using the functio
 
 Example: 
 ```
-TIRFLaser488 = mic.lightsource.TIRFLaser488(...)
-[Attributes, Data, Children] = TIRFLaser488.exportState()
+% obj = mic.lightsource.TCubeLaserDiode(SerialNo,Mode,MaxPower,WperA,TIARange);
+TIRFLaser642 = mic.lightsource.TCubeLaserDiode('64838719','Power',80,182.5,1);
+[Attributes, Data, Children] = TIRFLaser642.exportState()
 ```
 `Attributes` is a structure with fields carrying information on the current state of the instrument. In the example, Attribute is a structure with fields `Power`, `IsOn` and `InstrumentName`. 
 
@@ -108,8 +109,8 @@ Each instrument component class in MIC comes equipped with a static method funct
 
 Example: 
 ```
-TCubeLaserDiode = mic.lightsource.TCubeLaserDiode(...)
-Success = TCubeLaserDiode.funcTest('64864827', 'Power', 10, 100, 1)
+TCubeLaserDiode = mic.lightsource.TCubeLaserDiode('64838719','Power',80,182.5,1)
+Success = TCubeLaserDiode.funcTest()
 ```
 
 ### Graphical user interface
