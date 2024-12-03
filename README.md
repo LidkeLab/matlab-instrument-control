@@ -119,7 +119,7 @@ Instrument component classes in MIC also come equipped with graphical user inter
 Example: 
 ```
 DynamixelServo.gui
-
+```
 
 ### Full example
 
