@@ -140,7 +140,7 @@ src | MATLAB code source
 startup.m | sample lines to be added to startup.m to access MIC classes
 
 ## Projects using MIC
-- Pallikkuth S, Martin C, Farzam F, Edwards JS, Lakin MR, Lidke DS, et al. (2018) Sequential super-resolution imaging using DNA strand displacement. PLoS ONE 13(8): e0203291. https://doi.org/10.1371/journal.pone.0203291
+- David J. Schodt, Farzin Farzam, Sheng Liu, and Keith A. Lidke, "Automated multi-target super-resolution microscopy with trust regions," Biomed. Opt. Express 14, 429-440 (2023). https://doi.org/10.1364/BOE.477501
 - Fazel, M., Wester, M.J., Schodt, D.J. et al. High-precision estimation of emitter positions using Bayesian grouping of localizations. Nat Commun 13, 7152 (2022). https://doi.org/10.1038/s41467-022-34894-2
 
 ## Related software
