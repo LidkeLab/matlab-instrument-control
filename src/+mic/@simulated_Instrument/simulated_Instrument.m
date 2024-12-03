@@ -100,14 +100,24 @@ classdef simulated_Instrument<mic.abstract
     end 
         
     methods (Static=true)
-        function funcTest()
+        function Success = funcTest()
         % Tests all functionality of your methods and the ability to 
         % delete the object. You need to put code here based on the 
         % instrument and it's specific functions 
-            fprintf('Creating Object\n')
-            ExInst=mic.simulated_Instrument();
-            fprintf('Export State\n')
-            A=ExInst.exportState(); disp(A); pause(1);
+            disp('Starting funcTest ...');
+            Success = true;
+            try
+                fprintf('Creating Object\n')
+                ExInst=mic.simulated_Instrument();
+                fprintf('Export State\n')
+                A=ExInst.exportState(); disp(A); pause(1);
+                disp('funcTest completed successfully.');
+            catch ME
+                fprintf('Caught following error during mic.simulated_Instrument.funcTest')
+                disp(ME.identifier);
+                disp(ME.message);
+                Success = false;
+            end
         end
     end
         

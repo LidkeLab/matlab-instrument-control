@@ -333,13 +333,21 @@ classdef simulated_LinearStage < mic.linearstage.abstract
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they
             % work properly
-            obj = mic.simulated_LinearStage();
-            obj.center();
-            obj.setPosition([15]);
-            Success = true; % Assume success for simplicity
-            delete(obj); % Clean up object
+            disp('Starting funcTest ...');
+            Success = true;
+            try
+                obj = mic.simulated_LinearStage();
+                obj.center();
+                obj.setPosition([15]);
+                delete(obj); % Clean up object
+                disp('funcTest completed successfully.');
+            catch ME
+                fprintf('Caught following error during mic.simulated_LinearStage.funcTest')
+                disp(ME.identifier);
+                disp(ME.message);
+                Success = false;
+            end
         end
     end
-    
     
 end
