@@ -119,7 +119,11 @@ Instrument component classes in MIC also come equipped with graphical user inter
 Example: 
 ```
 DynamixelServo.gui
-```
+
+
+### Full example
+
+See [mic_example.m](doc/mic_example.m) for an example of z-stack acquisition using various MIC low-level routines for a laser, camera and 3D stage.  (Note: this won't run properly without the appropriate hardware and Kinesis software installed!)  See also "Projects using MIC" below.
 
 ## Installation notes
 Each instrument will be controlled by its own drivers, which must be installed on the system. In many cases, the manufacturer's software development kit (SDK) is provided to create custom applications for controlling the instrument. When installing the drivers, either a header file or dynamic-link library is installed. For example, the `MCLNanoDrive` class controls the Mad City Labs 3D Piezo stage and requires the `madlib.h` header file. During the first initialization of this class on a system, users are prompted to set the location of the `madlib.h` header file, typically located in `C:\Program Files\Mad City Labs\NanoDrive`. 
@@ -127,7 +131,7 @@ Each instrument will be controlled by its own drivers, which must be installed o
 Similarly, the `MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
 
 ## Testing
-[`mic.test_core`](src/+mic/test_core.m) tests the functionality of the
+[mic.test_core](src/+mic/test_core.m) tests the functionality of the
 simulated classes, which in turn tests the various abstract classes the
 simulated classes are based on.
 
@@ -155,5 +159,5 @@ startup.m | sample lines to be added to startup.m to access MIC classes
 ## Documentation
 The detailed documentation of each MIC class can be found here: [MIC Classes](doc/MICclasses.md).
 
-## Contribution
+## Contributions
 We welcome contributions to the MIC project. Please see [CONTRIBUTING](doc/CONTRIBUTING.md) for more information.
