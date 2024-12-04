@@ -4,7 +4,7 @@ name: MATLAB Tests
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [ code_reorg_clean ] # main
   pull_request:
     branches: [ main ]
 
@@ -28,4 +28,4 @@ jobs:
     # Step 3: Run the MATLAB test script
     - name: Run MATLAB tests
       run: |
-        matlab -batch "run('run_tests.m');"
+        matlab -batch "run('mic.test_core.m');"
