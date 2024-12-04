@@ -28,4 +28,4 @@ jobs:
     # Step 3: Run the MATLAB test script
     - name: Run MATLAB tests
       run: |
-        matlab -batch "run('mic.test_core.m');"
+        matlab -batch "run('test_core.m');"
