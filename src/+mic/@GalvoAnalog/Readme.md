@@ -1,9 +1,13 @@
 # miC_GalvoAnalog: Matlab Instrument Class for controlling Galvo Mirror
 
 ## Description
-The `GalvoAnalog` class controls a Galvo mirror by setting its position through
-a fixed output voltage using an NI (National Instruments) DAQ device. The Galvo mirror
-is positioned by adjusting the analog output voltage within a specified range (-10V to 10V).
+The `GalvoAnalog` class controls a Galvo mirror by setting its
+position through a fixed output voltage using an NI (National
+Instruments) DAQ device. The Galvo mirror is positioned by adjusting
+the analog output voltage within a specified range (-10V to 10V).
+The class sets the galvo mirror to a fixed angle corresponding to
+the voltage specified by `setVoltage`.  See also the GalvoDigital
+class which does dynamic or continuous scanning.
 
 ## Class Properties
 

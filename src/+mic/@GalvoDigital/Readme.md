@@ -1,11 +1,17 @@
 # mic.GalvoDigital: Matlab instrument class to control Galvo Mirror using digital input
 
 ## Description
-This class controls the galvo mirror (Cambridge Technology)on the
-HSM microscope.It changes the angle of galvo mirror to scan the
-sample. Input voltage [-10,10] to change the angle in [-15,15],
-is sent by 16 channels on NI card. There are 4 more
-channels to make the galvo enable to move.
+This class controls the galvo mirror (Cambridge Technology) on
+the HSM microscope by using digital signals.  This utilizes a
+National Instruments (NI) data acquisition (DAQ) device to adjust
+the galvo mirror's angle (Range:[-15, 15])for scanning purposes. It
+changes the angle of the galvo mirror to scan the sample. The position
+of the galvo mirror is determined by a 16-bit digital signal
+(Word property). This signal can represent integer values ranging
+from 0 to 65535, corresponding to the full range of movement of
+the mirror.  The galvo mirror is driven by 16 digital channels
+configured on the NI DAQ device. These channels send the digital
+word to control the mirror's position.
 
 ## Class Properties
 
@@ -123,9 +129,12 @@ delete, clearSession, enable, disable, reset, setSequence, angle2word, word2angl
 
 ## REQUIREMENTS:
 mic.abstract.m
-MATLAB software version R2016b or later
+MATLAB software version R2020a or later
 Data Acquisition Toolbox
 MATLAB NI-DAQmx driver installed via the Support Package Installer
+Data Acquisition Toolbox Support Package for National Instruments
+NI-DAQmx Devices: This add-on can be installed from link:
+https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
 
 ### CITATION: Hanieh Mazloom-Farsibaf, Lidkelab, 2017.
 

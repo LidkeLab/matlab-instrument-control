@@ -21,7 +21,7 @@ The `mic.camera.abstract` class serves as a base class for creating specific cam
 - `LUTScale`: Range for image display stretching.
 - `RangeDisplay`: Enables display of the minimum and maximum values on the live image.
 - `ReturnType`: Format of the returned image data ('matlab', 'dipimage').
-- `SaveType`: Format for saving images ('mat', 'ics').
+- `SaveType`: Format for saving images ('mat').
 - `ShowLive`: Determines whether to show live data during acquisition.
 
 ## Methods
@@ -35,6 +35,9 @@ These methods must be implemented by subclasses to handle specific camera functi
 - `start_focus()`: Starts capturing images in focus mode.
 - `start_sequence()`: Starts capturing a sequence of images.
 - `getlastimage()`: Retrieves the most recent image captured.
+- `displaylastimage()`: Display the most recently captured image from the
+camera in a live view window. Further details about key features are
+in `displaylastimage()`method section.
 - `getdata()`: Retrieves all data acquired in the current session.
 
 ### CITATION: Lidkelab, 2017.

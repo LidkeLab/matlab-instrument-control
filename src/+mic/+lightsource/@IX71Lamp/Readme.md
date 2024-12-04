@@ -11,6 +11,9 @@ and is particularly useful for applications requiring precise light control.
 - MATLAB NI-DAQmx driver installed via the Support Package Installer
 - mic.Abstract.m
 - mic.lightsource.abstract.m
+- Data Acquisition Toolbox Support Package for National Instruments
+NI-DAQmx Devices: This add-on can be installed from link:
+https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
 
 ## Protected Properties
 

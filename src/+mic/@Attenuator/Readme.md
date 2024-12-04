@@ -18,10 +18,13 @@ is regulated by the analog voltage output (0 to 5 V) of a NI DAQ card. The Const
 - Protection against laser damage with a threshold of 1 W/cm2.
 
 ## Requirements
-- MATLAB 2014 or higher.
+- MATLAB 2020a or higher.
 - Data Acquisition Toolbox.
 - MATLAB NI-DAQmx driver installed via the Support Package Installer.
 - An NI DAQ device.
+- Data Acquisition Toolbox Support Package for National Instruments
+NI-DAQmx Devices: This add-on can be installed from link:
+https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
 
 ## Class Properties
 - `Transmission`: The current transmission setting (% of maximum).

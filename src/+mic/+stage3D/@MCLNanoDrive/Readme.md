@@ -4,10 +4,16 @@
 This class controls a 3D Peizo stage from Mad City Labs.  The class
 uses 'calllib' to directly call funtions from the madlib.dll. The instument
 is attached via USB.
+
+## Installation
 The first time an object of this class is created, the user must
 direct the object to the 'madlib.h' header file.  This is usually
 located here:  C:\Program Files\Mad City Labs\NanoDrive
-
+For Matlab later than 2017, user might need to edit the madlib.h
+file to ensure successful loading of the library: comment lines 27
+and 28 as below,
+//#else
+//typedef unsigned char bool;
 ## Features
 - Direct control of Mad City Labs 3D Piezo stages via USB.
 - Dynamic link library interaction using `madlib.dll` for stage control.

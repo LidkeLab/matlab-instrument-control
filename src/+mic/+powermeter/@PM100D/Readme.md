@@ -1,32 +1,28 @@
 # mic.powermeter.PM100D: Matlab Instrument class to control power meter PM100D.
 
 ## Description
-Controls the [ThorLabs PM100D](https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=3341&pn=PM100D) light power meter.
-The class can retrieve the current power and current temperature. 
-The wavelength of the light can be set programatically, as can the wavelength (within the sensor limits).
-The gui shows a movie of the plot of the
+Controls power meter PM100D, gets the current power. It can also gets
+the current temperature. The wavelengtj of the light can also be
+set for power measurement (within the sensor limits). The gui shows
+a movie of the plot of the
 measured power where the shown period can be modified. It also shows
 the current power and the maximum measured power. To run this code
 you need the power meter to be connected to the machine.
 
 ## Constructor
-Example: 
-
-```matlab
-P = mic.powermeter.PM100D; 
-P.gui
-P.measurePower
-P.setWavelength(900)
-```
+Example: P = mic.powermeter.PM100D; P.gui
 
 ## Key Functions:
-constructor(), exportState(), send(), minMaxWavelength(), getWavelength(), measurePower(), measureTemperature; setWavelength(), shutdown()
+constructor(), exportState(), send(), minMaxWavelength(), getWavelength(), measure(), setWavelength(), shutdown()
 
 ## REQUIREMENTS:
-* NI_DAQ  (VISA and ICP Interfaces) should be installed.
-* MATLAB 2014 or higher.
-* MIC_Abstract.m
-* MIC_PowerMeter_Abstract.m
+NI_DAQ  (VISA and ICP Interfaces) should be installed.
+Data Acquisition Toolbox Support Package for National Instruments
+NI-DAQmx Devices: This add-on can be installed from link:
+https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
+MATLAB 2021a or higher.
+mic.Abstract.m
+mic.powermeter.abstract.m
 
 ### CITATION: Mohamadreza Fazel, Lidkelab, 2017.
 
