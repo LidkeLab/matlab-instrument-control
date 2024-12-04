@@ -28,7 +28,7 @@ jobs:
       # Step 3: Run the MATLAB test script
       - name: Run MATLAB tests
         run: |
-          matlab -batch "run('doc/genDoc.m');"
+          matlab -batch "genDoc;"
 
       # Runs a set of commands using the runners shell
       # - name: Run all tests
