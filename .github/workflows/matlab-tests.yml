@@ -23,7 +23,7 @@ jobs:
 
     # Step 2: Set up MATLAB
     - name: Set up MATLAB
-      uses: matlab-actions/setup-matlab@v2
+      uses: matlab-actions/setup-matlab@v1
 
     # Step 3: Run the MATLAB test script
     - name: Run MATLAB tests
