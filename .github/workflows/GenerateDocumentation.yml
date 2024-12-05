@@ -26,12 +26,15 @@ jobs:
         uses: matlab-actions/setup-matlab@v1
 
       # Step 3: Run the MATLAB test script
-      - name: Run MATLAB tests
+      - name: Generate documentation
         run: |
           matlab -batch "genDoc;"
 
-      # Runs a set of commands using the runners shell
-      # - name: Run all tests
-      #   uses: matlab-actions/run-tests@v1
-      #   with:
-      #     source-folder: src
+      # Step 4; Commit and push changes
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/+mic/*/Readme.md src/+mic/*/*/Readme.md
+          git commit -m "Update Readme.md via GitHub Actions" || echo "No changes to commit"
+          git push

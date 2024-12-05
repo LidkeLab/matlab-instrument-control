@@ -131,14 +131,16 @@ Each instrument will be controlled by its own drivers, which must be installed o
 Similarly, the `MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
 
 ## Testing
-[mic.test_core](src/+mic/test_core.m) tests the functionality of the
+[runtests](src/runtests.m) tests the functionality of the
 simulated classes, which in turn tests the various abstract classes the
-simulated classes are based on.
+simulated classes are based on.  This is done automatically on a push or
+pull request to main.
 
 ## Top-level files and directories
 name | description
 ---|---
 doc | generate documentation and miscellaneous .md files
+genDoc.m | generates Readme.md files for each MIC class
 LICENSE | MIT license
 mex64 | Windows executable mex files generated from those in mex_source
 mex_source | mex source files
