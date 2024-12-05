@@ -35,6 +35,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git status
           git add src/+mic/*/Readme.md src/+mic/*/*/Readme.md
-          git commit -m "Update Readme.md via GitHub Actions" || echo "No changes to commit"
+          git commit -a -m "Update Readme.md via GitHub Actions" || echo "No changes to commit"
           git push
