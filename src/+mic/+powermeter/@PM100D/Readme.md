@@ -1,6 +1,6 @@
 # mic.powermeter.PM100D: Matlab Instrument class to control power meter PM100D.
 
-## Description q
+## Description
 Controls power meter PM100D, gets the current power. It can also gets
 the current temperature. The wavelengtj of the light can also be
 set for power measurement (within the sensor limits). The gui shows
