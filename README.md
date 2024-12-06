@@ -139,7 +139,7 @@ pull request to main.
 ## Top-level files and directories
 name | description
 ---|---
-doc | generate documentation and miscellaneous .md files
+doc | miscellaneous documentation
 genDoc.m | generates Readme.md files for each MIC class
 LICENSE | MIT license
 mex64 | Windows executable mex files generated from those in mex_source
