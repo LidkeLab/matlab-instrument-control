@@ -150,6 +150,12 @@ src | MATLAB code source
 src/runtests.m | run all simulated functional tests
 startup.m | sample lines to be added to startup.m to access MIC classes
 
+## High-level implementation of MIC classes
+
+High-level implementations of MIC classes are demonstrated through:
+- Custom-built Sequential microscope available on [Sequential SR Microscope](https://github.com/LidkeLab/microscopes-seqsr) specifically designed for dSTORM and DNA-PAINT based super-resolution imaging.
+- TIRF based super-resolution microscope available on [TIRF SR Microscope](https://github.com/LidkeLab/microscope-tirf). 
+
 ## Projects using MIC
 - David J. Schodt, Farzin Farzam, Sheng Liu, and Keith A. Lidke, "Automated multi-target super-resolution microscopy with trust regions," Biomed. Opt. Express 14, 429-440 (2023). https://doi.org/10.1364/BOE.477501
 - Fazel, M., Wester, M.J., Schodt, D.J. et al. High-precision estimation of emitter positions using Bayesian grouping of localizations. Nat Commun 13, 7152 (2022). https://doi.org/10.1038/s41467-022-34894-2
