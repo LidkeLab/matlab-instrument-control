@@ -146,8 +146,8 @@ mex64 | Windows executable mex files generated from those in mex_source
 mex_source | mex source files
 paper | JOSS paper
 README.md | this document
-run_tests.m | run all functional tests (best if hardware attached)
 src | MATLAB code source
+src/runtests.m | run all simulated functional tests
 startup.m | sample lines to be added to startup.m to access MIC classes
 
 ## Projects using MIC
