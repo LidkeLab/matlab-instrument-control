@@ -1,6 +1,6 @@
 on: 
   push:
-    branches: [ code_reorg_clean ] 
+    branches: [ main ] 
 
 jobs:
   paper:
