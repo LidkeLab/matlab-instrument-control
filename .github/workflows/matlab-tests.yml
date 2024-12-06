@@ -4,7 +4,7 @@ name: MATLAB Tests
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [ main ] 
   pull_request:
     branches: [ main ]
 
@@ -17,15 +17,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # Step 2: Set up MATLAB
-    - name: Set up MATLAB
-      uses: matlab-actions/setup-matlab@v1
+      # Step 2: Set up MATLAB
+      - name: Setup MATLAB
+        uses: matlab-actions/setup-matlab@v1
 
-    # Step 3: Run the MATLAB test script
-    - name: Run MATLAB tests
-      run: |
-        matlab -batch "run('run_tests.m');"
+      # Step 3: Run the MATLAB test script
+      #- name: Run MATLAB tests
+      # run: |
+      #  matlab -batch "run('runtests.m');"
+
+      # Runs a set of commands using the runners shell
+      - name: Run all tests
+        uses: matlab-actions/run-tests@v1
+        with:
+          source-folder: src
