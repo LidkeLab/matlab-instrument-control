@@ -1,8 +1,8 @@
 classdef CoherentLaser561 < mic.lightsource.abstract
-%  mic.lightsource.oherentLaser561 Class 
+%  mic.lightsource.CoherentLaser561 Class 
 % 
 % ## Description
-% The `mic.lightsource.oherentLaser561` class is a MATLAB Instrument Class for controlling the Coherent Sapphire Laser 561 via a USB connection. It integrates with additional classes like `NDFilterWheel` and `Shutter` to manage laser power output continuously from 0 to 100 mW, despite the laser controller's minimum power setting of 10 mW.
+% The `mic.lightsource.CoherentLaser561` class is a MATLAB Instrument Class for controlling the Coherent Sapphire Laser 561 via a USB connection. It integrates with additional classes like `NDFilterWheel` and `Shutter` to manage laser power output continuously from 0 to 100 mW, despite the laser controller's minimum power setting of 10 mW.
 % 
 % ## Requirements
 % - MATLAB 2016b or later
