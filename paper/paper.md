@@ -20,15 +20,15 @@ authors:
   - name: Hanieh Mazloom-Farsibaf
     orcid: 0000-0002-2571-0418
     affiliation: 1
+  - name: Michael J. Wester
+    orcid: 0000-0002-3520-7605
+    affiliation: "1, 3" 
   - name: Sheng Liu
     orcid: 0000-0003-1225-0763
     affiliation: 1
   - name: Ellyse Taylor
     orcid: 0009-0006-7269-2271
     affiliation: 1
-  - name: Michael J. Wester
-    orcid: 0000-0002-3520-7605
-    affiliation: "1, 3" 
   - name: Mohamadreza Fazel
     orcid: 0000-0002-6215-1336
     affiliation: 1 
