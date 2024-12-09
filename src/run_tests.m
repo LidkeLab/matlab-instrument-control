@@ -1,9 +1,9 @@
-classdef runtests < matlab.unittest.TestCase
+classdef run_tests < matlab.unittest.TestCase
 
 % Run various tests on the core abstract functionality of MIC.
 
 % In the MATLAB unittest context, run in the following manner:
-%    testCase = runtests
+%    testCase = run_tests
 %    results = testCase.run
 
 methods (Test)
