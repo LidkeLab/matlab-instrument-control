@@ -4,7 +4,7 @@ name: MATLAB Tests
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ] 
+    branches: [ main JOSSrev1changes ]
   pull_request:
     branches: [ main ]
 
@@ -34,4 +34,4 @@ jobs:
       - name: Run all tests
         uses: matlab-actions/run-tests@v1
         with:
-          source-folder: src
+          source-folder: tests

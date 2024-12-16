@@ -130,6 +130,12 @@ Each instrument will be controlled by its own drivers, which must be installed o
 
 Similarly, the `MCLMicroDrive` class controls the Mad City Labs Micro Stage and requires the `MicroDrive.dll` dynamic-link library. The first time this class is used on a given computer, the user will be prompted to select the location of `MicroDrive.dll`. On a Windows machine, this is typically placed by default in `C:\Program Files\Mad City Labs\MicroDrive\MicroDrive.dll` during the installation process (installation files provided by MCL).
 
+To set up the correct MATLAB path in startup.m (typically located in the Documents\MATLAB folder of the user's home directory), add the line
+```matlab
+run(fullfile(userpath, 'matlab-instrument-control', 'setupMIC'))
+```
+(for MATLAB 2017a or more recent versions)
+
 ## Testing
 See [tests](tests) folder for unit tests of simulated classes, which in turn tests the various abstract classes the
 simulated classes are based on.  This is done automatically on a push or pull request to main.
@@ -144,9 +150,9 @@ mex64 | Windows executable mex files generated from those in mex_source
 mex_source | mex source files
 paper | JOSS paper
 README.md | this document
+setupMIC.m | set the MATLAB path correctly for MIC
 src | MATLAB code source
-src/runtests.m | run all simulated functional tests
-startup.m | sample lines to be added to startup.m to access MIC classes
+tests | simulated functional tests
 
 ## High-level implementation of MIC classes
 
