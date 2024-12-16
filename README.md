@@ -161,6 +161,7 @@ High-level implementations of MIC classes are demonstrated through:
 ## Related software
 - `Micro-Manager` is a customizable platform for controlling microscopy systems, supporting a wide range of hardware devices, and is primarily built on Java. This software can be obtained from: https://micro-manager.org/
 - `PYME (PYthon Microscopy Environment)` is a Python based environment designed to facilitate image acquisition and data analysis in microscopy, with a focus on super-resolution techniques like PALM, STORM, and PAINT. This software can be obtained from GitHub: https://github.com/python-microscopy/python-microscopy
+- `LSMAQ` is a lightweight and flexible laser scanning microscope acquisition software written in MATLAB. It supports National Instruments hardware for galvo-based scanning. This software can be obtained from GitHub: https://github.com/danionella/lsmaq
 
 ## Documentation
 The detailed documentation of each MIC class can be found here: [MIC Classes](doc/MICclasses.md).
