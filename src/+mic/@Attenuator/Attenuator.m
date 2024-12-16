@@ -170,11 +170,11 @@ classdef Attenuator < mic.abstract
         function setTransmission(obj,Transmission_in)
             % Sets output attenuation in percentage of maximum
             if Transmission_in > obj.MaxTransmission
-               warning('The input transmission is too large, setting to %d\n',obj.MaxTransmission); 
+               warning('The input transmission is too large, setting to %f\n',obj.MaxTransmission); 
                return; % return statement serves to terminate the function early when specific conditions are met
             end
             if Transmission_in < obj.MinTransmission
-               warning('The input transmission is too small, setting to %d\n',obj.MinTransmission); 
+               warning('The input transmission is too small, setting to %f\n',obj.MinTransmission); 
                return
             end
             if isempty(obj.Input_Voltage)
