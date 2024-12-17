@@ -1,15 +1,16 @@
-# mic.GalvoDigital: Matlab instrument class to control Galvo Mirror using digital input
+# mic.GalvoDigital: Matlab instrument class to control Galvo Mirror using digital input.
 
 ## Description
 This class controls the galvo mirror (Cambridge Technology) on
-the HSM microscope by using digital signals.  This utilizes a
-National Instruments (NI) data acquisition (DAQ) device to adjust
-the galvo mirror's angle (Range:[-15, 15])for scanning purposes. It
+the Hyper spectral line-scanning microscope (HSM) by using digital signals. This utilizes a
+National Instruments (NI) data acquisition (DAQ) device to send a 16-bit digital signal to
+the galvo controller. The galvo controller then converts the 16-bit digital signal to an analog voltage that adjusts
+the galvo mirror's angle (Range:[-15, 15]) for scanning purposes. It
 changes the angle of the galvo mirror to scan the sample. The position
 of the galvo mirror is determined by a 16-bit digital signal
 (Word property). This signal can represent integer values ranging
 from 0 to 65535, corresponding to the full range of movement of
-the mirror.  The galvo mirror is driven by 16 digital channels
+the mirror. The galvo mirror is driven by 16 digital channels
 configured on the NI DAQ device. These channels send the digital
 word to control the mirror's position.
 
