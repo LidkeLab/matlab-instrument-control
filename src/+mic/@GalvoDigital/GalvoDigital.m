@@ -2,7 +2,7 @@ classdef GalvoDigital < mic.abstract
     % mic.GalvoDigital: Matlab instrument class to control Galvo Mirror using digital input.
     %
     % ## Description
-    % This class controls the galvo mirror (Cambridge Technology) on
+    % This class controls the galvo mirror (control board: Cambridge Technology 67121HHJ-1 with digital input module 6757) on
     % the Hyper spectral line-scanning microscope (HSM) by using digital signals. This utilizes a
     % National Instruments (NI) data acquisition (DAQ) device to send a 16-bit digital signal to
     % the galvo controller. The galvo controller then converts the 16-bit digital signal to an analog voltage that adjusts
