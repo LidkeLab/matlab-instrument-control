@@ -6,14 +6,14 @@ classdef GalvoDigital < mic.abstract
     % the Hyper spectral line-scanning microscope (HSM) by using digital signals. This utilizes a
     % National Instruments (NI) data acquisition (DAQ) device to send a 16-bit digital signal to
     % the galvo controller. The galvo controller then converts the 16-bit digital signal to an analog voltage that adjusts
-    % the galvo mirror's angle (Range:[-15, 15]) for scanning purposes. It
-    % changes the angle of the galvo mirror to scan the sample. The position
-    % of the galvo mirror is determined by a 16-bit digital signal
-    % (Word property). This signal can represent integer values ranging
-    % from 0 to 65535, corresponding to the full range of movement of
-    % the mirror. The galvo mirror is driven by 16 digital channels
-    % configured on the NI DAQ device. These channels send the digital
-    % word to control the mirror's position.
+    % the galvo mirror's angle (Range:[-15, 15]) from the center position with a linear response to analog voltage from 
+    % -10 to 10 Volts. The NI-DAQ card (PCIe-6343) sends a 16-bit binary signal to the control board to set the mirror angle. 
+    % This galvo mirror can be also controlled with an analogy servo driver (e.g. Cambridge Technology 673XX). 
+    % However, the NI-DAQ card we used can only output an analog voltage with an Absolute Accuracy at Full Scale of 3 mV, 
+    % which is larger than the required scanning step of 1 mV for our application. Therefore, we selected the digital servo 
+    % driver for this application. Furthermore, the scanning step size is determined by the magnification of the imaging system, 
+    % from our optical design, moving the beam by 100 nm at the sample plane requires galvo to rotate by 0.00184 degree, 
+    % which corresponds to applying 1mV if using an analog driver.
     %
     % ## Class Properties
     %
