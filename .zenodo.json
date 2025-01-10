@@ -1,5 +1,5 @@
 {
-	"version": "v0.1.2",
+	"version": "v1.0.0",
 	"title": "A MATLAB-based Instrument Control (MIC) package for fluorescence imaging",
 	"description": "This MATLAB-based Instrument Control (MIC) is a software package designed to facilitate data collection for custom-built microscopes with an emphasis on single molecule localization microscopy (SMLM) and single particle tracking (SPT).",
 	"keywords": [
