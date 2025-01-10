@@ -1,0 +1,61 @@
+cff-version: 1.0.0
+message: If you use this software, please cite it as below.
+references:
+  - type: software
+    authors:
+      - family-names: Khan
+        given-names: Sajjad A.
+        orcid: 0000-0002-6910-5199
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA; Nanoscience and Microsystems Engineering, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Pallikkuth 
+        given-names: Sandeep
+        orcid: 0009-0003-0400-6389
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Schodt 
+        given-names: David J.
+        orcid: 0000-0002-8986-2736
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Meddens
+        given-names: Marjolein B. M.
+        orcid: 0000-0002-9965-1342
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Mazloom-Farsibaf
+        given-names: Hanieh
+        orcid: 0000-0002-2571-0418
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Wester
+        given-names: Michael J.
+        orcid: 0000-0002-3520-7605
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA; Department of Mathematics and Statistics, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Liu
+        given-names: Sheng
+        orcid: 0000-0003-1225-0763
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Taylor
+        given-names: Ellyse
+        orcid: 0009-0006-7269-2271
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Fazel
+        given-names: Mohamadreza
+        orcid: 0000-0002-6215-1336
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Farzam 
+        given-names: Farzin
+        orcid: 0000-0002-9939-1923
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+      - family-names: Lidke
+        given-names: Keith A.
+        orcid: 0000-0002-9328-4318
+        affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+  title: "A MATLAB-based Instrument Control (MIC) package for fluorescence imaging"
+  version: 1.0.0
+  doi: 
+  date-released: 
+  keywords:
+    - "MATLAB"
+    - "instrument control"
+    - "single molecule localization microscopy (SMLM)"
+    - "single particle tracking (SPT)"
+    - "super resolution"
+  license: MIT
+  url: "https://github.com/LidkeLab/matlab-instrument-control"

@@ -4,6 +4,7 @@
 	"description": "This MATLAB-based Instrument Control (MIC) is a software package designed to facilitate data collection for custom-built microscopes with an emphasis on single molecule localization microscopy (SMLM) and single particle tracking (SPT).",
 	"keywords": [
 		"MATLAB",
+        "instrument control",
 		"single molecule localization microscopy (SMLM)",
 		"single particle tracking (SPT)",
 		"super resolution"
