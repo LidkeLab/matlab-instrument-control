@@ -76,7 +76,7 @@ SAK added the example classes with their GUIs, and added functional tests.
 KAL added AndorCamera and KCubePiezo. 
 SP added AndorCameraZyla and various laser classes. SAK tested the laser classes.
 SL added DCAM4Camera to control Hamamatsu cameras using the DCAM4 API.
-MBMM added DynamixelServo, GalvoAnalog, and HamamatsuLCOS class.
+MBMM added DynamixelServo, GalvoAnalog, and HamamatsuLCOS classes.
 DJS added 3D registration, BiochemValve, CavroSyringePump, H5, and MCLMicroDrive.
 MF added Attenuator and StepperMotor. 
 HMF added stage3D.abstract, CoherentLaser561, GalvoDigital, IRSyringPump, and MCLNanoDrive.
