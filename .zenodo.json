@@ -17,12 +17,12 @@
 		{
 		"name": "Pallikkuth, Sandeep",  
 		"orcid": "0009-0003-0400-6389",
-		"affiliation": "Department of Physics and Astronomy, Albuquerque, New Mexico, USA"
+		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
 		"name": "Schodt, David J.",
 		"orcid": "0000-0002-8986-2736",
-		"affiliation": "Department of Physics and Astronomy, Albuquerque, New Mexico, USA"
+		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
 		"name": "Meddens, Marjolein B. M.",
@@ -74,17 +74,17 @@
 		 "type": "HostingInstitution"},
 		{"name": "National Institutes of Health",
 		 "type": "Sponsor"},
-        {"name": "National Cancer Institute",
+		{"name": "National Cancer Institute",
 		 "type": "Sponsor"},
-        {"name": "National Institute of General Medical Sciences",
+	        {"name": "National Institute of General Medical Sciences",
 		 "type": "Sponsor"},
 		{"name": "National Science Foundation",
 		 "type": "Sponsor"},
-        {"name": "National Institute of Biomedical Imaging and Bioengineering",
+		{"name": "National Institute of Biomedical Imaging and Bioengineering",
 		 "type": "Sponsor"},
-        {"name": "Department of Energy",
+		{"name": "Department of Energy",
 		 "type": "Sponsor"},
-        {"name": "National Center for Research Resources",
+		{"name": "National Center for Research Resources",
 		 "type": "Sponsor"},
 		{"name": "University of New Mexico Office of the Vice President for Research",
 		 "type": "Sponsor"},
@@ -92,5 +92,3 @@
 		 "type": "Sponsor"}
 		]
 }
-
-
