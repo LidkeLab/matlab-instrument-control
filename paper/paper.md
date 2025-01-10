@@ -40,11 +40,11 @@ authors:
     affiliation: 1
     corresponding: true
 affiliations:
- - name: Department of Physics and Astronomy, University of New Mexico
+ - name: Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA
    index: 1
- - name: Nanoscience and Microsystems Engineering, University of New Mexico
+ - name: Nanoscience and Microsystems Engineering, University of New Mexico, Albuquerque, New Mexico, USA
    index: 2
- - name: Department of Mathematics and Statistics, University of New Mexico
+ - name: Department of Mathematics and Statistics, University of New Mexico, Albuquerque, New Mexico, USA
    index: 3
 date: July 2024
 bibliography: paper.bib
@@ -57,24 +57,24 @@ MATLAB Instrument Control (MIC) is a software package designed to facilitate dat
 # Statement of need
 Development of new microscopy methods often require integration of novel components and/or novel workflows between low-level hardware. Creating such software solutions for each new instrument or for prototyping can significantly slow down the development cycle.  It is also often desirable to be able to quickly analyze incoming data during development.  To address this critical need, we have developed the MATLAB Instrument Control (MIC) software package, freely available and specifically tailored for the customization and automation of complex, multi-component microscopy systems [@Pallikkuth_article:2018]. MIC leverages MATLAB's (MathWorks Inc.) robust environment for object-oriented programming, allowing users to control diverse instrumentation through a unified interface. Each instrument class within MIC inherits from a common abstract class, ensuring consistency while enabling flexibility to accommodate a variety of components like lasers, stages, and cameras. The source code for MIC has been archived to GitHub: [https://github.com/LidkeLab/matlab-instrument-control](https://github.com/LidkeLab/matlab-instrument-control).
 
-MIC not only supports the development and control of new instruments but also integrates seamlessly with MATLAB's comprehensive data and image analysis tools, as well as with SMITE [@SchodtWester2023] allowing researchers to process data in real-time during experiments. This capability is crucial for iterative testing and development in experimental setups. For example, the SMLM/SPT analysis software suite SMITE was developed in sync with MIC, so acquiring data and performing analyses flow smoothly. Additionally, MIC is designed to be user-friendly for those familiar with MATLAB, offering customizable control classes, extensive export methods, functional tests, and graphical user interfaces for each instrument component.
+MIC not only supports the development and control of new instruments but also integrates seamlessly with MATLAB's comprehensive data and image analysis tools, as well as with Single Molecule Imaging Toolbox Extraordinaire (SMITE) [@SchodtWester2023] allowing researchers to process data in real-time during experiments. This capability is crucial for iterative testing and development in experimental setups. For example, the single molecule localization microscopy/single particle tracking (SMLM/SPT) analysis software suite SMITE was developed in sync with MIC, so acquiring data and performing analyses flow smoothly. Additionally, MIC is designed to be user-friendly for those familiar with MATLAB, offering customizable control classes, extensive export methods, functional tests, and graphical user interfaces for each instrument component.
 
-An example of MIC’s utility is demonstrated through a custom-built Sequential microscope available on [Sequential SR Microscope](https://github.com/LidkeLab/microscopes-seqsr) [@Schodt:23] specifically designed for dSTORM and DNA-PAINT based super-resolution. Another usage of MIC is demonstrated through a class designed for TIRF based super-resolution imaging [TIRF SR Microscope](https://github.com/LidkeLab/microscope-tirf) [@Fazel2022]. Each of these classes includes an intuitive graphical user interface that manages multiple excitation lasers and camera settings, simplifying complex data collection tasks. Several MIC GUIs are presented in Figure-1. ![MIC GUIs](MIC_overview2.png) *Figure-1: MIC Graphical User Interfaces(GUIs); (a) Camera control GUI (b) Light source (TIRF Laser488) GUI (c) Linear stage (TCubePiezo X) GUI (d) 3D stage (NanoMax Stage Control) GUI (e) Power meter GUI*.
+An example of MIC’s utility is demonstrated through a custom-built Sequential microscope available on [Sequential SR Microscope](https://github.com/LidkeLab/microscopes-seqsr) [@Schodt:23] specifically designed for direct STochastic Optical Reconstruction Microscopy (dSTORM) and DNA Point Accumulation for Imaging in Nanoscale Topography (DNA-PAINT) based super-resolution. Another usage of MIC is demonstrated through a class designed for Total Internal Reflection Fluorescence (TIRF) based super-resolution imaging [TIRF SR Microscope](https://github.com/LidkeLab/microscope-tirf) [@Fazel2022]. Each of these classes includes an intuitive graphical user interface that manages multiple excitation lasers and camera settings, simplifying complex data collection tasks. Several MIC GUIs are presented in Figure-1. ![MIC GUIs](MIC_overview2.png) *Figure-1: MIC Graphical User Interfaces (GUIs); (a) Camera control GUI (b) Light source (TIRF Laser488) GUI (c) Linear stage (TCubePiezo X) GUI (d) 3D stage (NanoMax Stage Control) GUI (e) Power meter GUI*.
 
-MIC is designed to operate with HDF5 (Hierarchical Data Format) files which efficiently store very large datasets. The HDF5 format is particularly useful for storing large datasets, as it allows for efficient data storage and retrieval. This is especially important for single molecule fluorescence imaging, where large amounts of data are generated during experiments. The HDF5 format is also supported by MATLAB, which makes it easy to import and analyze data stored in this format. 
+MIC is designed to operate with Hierarchical Data Format (HDF5) files which efficiently store very large datasets. The HDF5 format is particularly useful for storing large datasets, as it allows for efficient data storage and retrieval. This is especially important for single molecule fluorescence imaging, where large amounts of data are generated during experiments. The HDF5 format is also supported by MATLAB, which makes it easy to import and analyze data stored in this format. 
 
-There are a few other software packages that allow users to control and synchronize multiple hardware components for microscopy applications. Notable examples include Micro-Manager [@Edelstein2010], based in Java, PYME (the PYthon Microscopy Environment) [@PYME2020], based in the Python environment, and [LSMAQ](https://github.com/danionella/lsmaq) which is a lightweight and flexible laser scanning microscope acquisition software written in MATLAB. It supports National Instruments hardware for galvo-based scanning.  Potential users of MIC are encouraged to compare and contrast MIC with these packages to assess what might be best for their particular development environment. Micro-Manager is a customizable platform for controlling microscopy systems, supporting a wide range of hardware devices, and is primarily built on Java. Micro-Manager comes with its own GUI. Micro-Manager can save files in three formats: separate image files, Image file stack (OME-Tiffs) and NDTiff. Micro-Manager may be a good choice for those who primarily use ImageJ/Fiji for image analysis. PYME is designed to facilitate image acquisition and data analysis in microscopy, with a focus on super-resolution techniques like PALM, STORM, and PAINT. It runs on multiple platforms, including Windows, Linux, and OSX. PYME comprises several key components: PYMEAcquire for microscope and camera control, PYMEVisualize for visualizing localization data sets, and PYMEImage for viewing and processing raster images. PYME is compatible with a variety of data formats, including its proprietary .pzf format as well as standard formats such as .tif. Additionally, PYME supports metadata in multiple formats, including .json, .md, and .xml.
+There are a few other software packages that allow users to control and synchronize multiple hardware components for microscopy applications. Notable examples include Micro-Manager [@Edelstein2010], based in Java, PYME (the PYthon Microscopy Environment) [@PYME2020], based in the Python environment, and [LSMAQ](https://github.com/danionella/lsmaq) which is a lightweight and flexible laser scanning microscope acquisition software written in MATLAB. It supports National Instruments hardware for galvo-based scanning.  Potential users of MIC are encouraged to compare and contrast MIC with these packages to assess what might be best for their particular development environment. Micro-Manager is a customizable platform for controlling microscopy systems, supporting a wide range of hardware devices, and is primarily built on Java. Micro-Manager comes with its own GUI. Micro-Manager can save files in three formats: separate image files, Image file stack (OME-Tiffs) and NDTiff. Micro-Manager may be a good choice for those who primarily use ImageJ/Fiji for image analysis. PYME is designed to facilitate image acquisition and data analysis in microscopy, with a focus on super-resolution techniques like PhotoActivated Localization Microscopy (PALM), STORM, and PAINT. It runs on multiple platforms, including Windows, Linux, and OSX. PYME comprises several key components: PYMEAcquire for microscope and camera control, PYMEVisualize for visualizing localization data sets, and PYMEImage for viewing and processing raster images. PYME is compatible with a variety of data formats, including its proprietary .pzf format as well as standard formats such as .tif. Additionally, PYME supports metadata in multiple formats, including .json, .md, and .xml.
 
 
 
 # Author Contributions
 
 KAL conceived and supervised the development of MIC.
-SK wrote the manuscript.
-SK & MJW added GitHub documentation and converted MIC to a hierarchical organization.
-SK added the example classes with their GUIs, and added functional tests. 
+SAK wrote the manuscript.
+SAK & MJW added GitHub documentation and converted MIC to a hierarchical organization.
+SAK added the example classes with their GUIs, and added functional tests. 
 KAL added AndorCamera and KCubePiezo. 
-SP added AndorCameraZyla and various laser classes. SK tested the laser classes.
+SP added AndorCameraZyla and various laser classes. SAK tested the laser classes.
 SL added DCAM4Camera to control Hamamatsu cameras using the DCAM4 API.
 MBMM added DynamixelServo, GalvoAnalog, and HamamatsuLCOS class.
 DJS added 3D registration, BiochemValve, CavroSyringePump, H5, and MCLMicroDrive.
@@ -82,7 +82,7 @@ MF added Attenuator and StepperMotor.
 HMF added stage3D.abstract, CoherentLaser561, GalvoDigital, IRSyringPump, and MCLNanoDrive.
 ET added DMP40 and updated Triggerscope.
 FF added FlipMountTTL, ShutterTTL. 
-SP & SK added NanoMax.
+SP & SAK added NanoMax.
 All authors reviewed the manuscript.
 
 # Acknowledgements
