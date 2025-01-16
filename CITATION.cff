@@ -48,7 +48,7 @@ references:
         orcid: 0000-0002-9328-4318
         affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
   title: "A MATLAB-based Instrument Control (MIC) package for fluorescence imaging"
-  version: 0.9.9
+  version: 1.0.0
   doi: 10.5281/zenodo.14675632
   date-released: 2025-01-16
   keywords:
