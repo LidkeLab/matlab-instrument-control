@@ -1,4 +1,4 @@
-cff-version: 1.0.0
+cff-version: 0.9.9
 message: If you use this software, please cite it as below.
 references:
   - type: software
@@ -48,9 +48,9 @@ references:
         orcid: 0000-0002-9328-4318
         affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
   title: "A MATLAB-based Instrument Control (MIC) package for fluorescence imaging"
-  version: 1.0.0
-  doi: 
-  date-released: 
+  version: 0.9.9
+  doi: 10.5281/zenodo.14675632
+  date-released: 2025-01-16
   keywords:
     - "MATLAB"
     - "instrument control"
