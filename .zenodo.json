@@ -4,66 +4,66 @@
 	"description": "This MATLAB-based Instrument Control (MIC) is a software package designed to facilitate data collection for custom-built microscopes with an emphasis on single molecule localization microscopy (SMLM) and single particle tracking (SPT).",
 	"keywords": [
 		"MATLAB",
-        "instrument control",
+		"instrument control",
 		"single molecule localization microscopy (SMLM)",
 		"single particle tracking (SPT)",
 		"super resolution"
 	],
 	"creators": [
 		{
-		"name": "Khan, Sajjad A.",
-		"orcid": "0000-0002-6910-5199",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA; Nanoscience and Microsystems Engineering, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Khan, Sajjad A.",
+			"orcid": "0000-0002-6910-5199",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA; Nanoscience and Microsystems Engineering, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Pallikkuth, Sandeep",  
-		"orcid": "0009-0003-0400-6389",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Pallikkuth, Sandeep",
+			"orcid": "0009-0003-0400-6389",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Schodt, David J.",
-		"orcid": "0000-0002-8986-2736",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Schodt, David J.",
+			"orcid": "0000-0002-8986-2736",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Meddens, Marjolein B. M.",
-		"orcid": "0000-0002-9965-1342",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Meddens, Marjolein B. M.",
+			"orcid": "0000-0002-9965-1342",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Mazloom-Farsibaf, Hanieh",
-		"orcid": "0000-0002-2571-0418",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Mazloom-Farsibaf, Hanieh",
+			"orcid": "0000-0002-2571-0418",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Wester, Michael J.",
-		"orcid": "0000-0002-3520-7605",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA; Department of Mathematics and Statistics, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Wester, Michael J.",
+			"orcid": "0000-0002-3520-7605",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA; Department of Mathematics and Statistics, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Liu, Sheng",
-		"orcid": "0000-0003-1225-0763",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Liu, Sheng",
+			"orcid": "0000-0003-1225-0763",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Taylor, Ellyse",
-		"orcid": "0009-0006-7269-2271",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Taylor, Ellyse",
+			"orcid": "0009-0006-7269-2271",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Fazel, Mohamadreza",
-		"orcid": "0000-0002-6215-1336",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Fazel, Mohamadreza",
+			"orcid": "0000-0002-6215-1336",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Farzam, Farzin",
-		"orcid": "0000-0002-9939-1923",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Farzam, Farzin",
+			"orcid": "0000-0002-9939-1923",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		},
 		{
-		"name": "Lidke, Keith A.",
-		"orcid": "0000-0002-9328-4318",
-		"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
+			"name": "Lidke, Keith A.",
+			"orcid": "0000-0002-9328-4318",
+			"affiliation": "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
 		}
 	],
 	"upload_type": "software",
@@ -71,25 +71,45 @@
 	"license": "MIT",
 	"notes": "The last author is the main contact.",
 	"contributors": [
-		{"name": "University of New Mexico, Albuquerque, New Mexico, USA",
-		 "type": "HostingInstitution"},
-		{"name": "National Institutes of Health",
-		 "type": "Sponsor"},
-		{"name": "National Cancer Institute",
-		 "type": "Sponsor"},
-	        {"name": "National Institute of General Medical Sciences",
-		 "type": "Sponsor"},
-		{"name": "National Science Foundation",
-		 "type": "Sponsor"},
-		{"name": "National Institute of Biomedical Imaging and Bioengineering",
-		 "type": "Sponsor"},
-		{"name": "Department of Energy",
-		 "type": "Sponsor"},
-		{"name": "National Center for Research Resources",
-		 "type": "Sponsor"},
-		{"name": "University of New Mexico Office of the Vice President for Research",
-		 "type": "Sponsor"},
-		{"name": "NVIDIA",
-		 "type": "Sponsor"}
-		]
+		{
+			"name": "University of New Mexico, Albuquerque, New Mexico, USA",
+			"type": "HostingInstitution"
+		},
+		{
+			"name": "National Institutes of Health",
+			"type": "Sponsor"
+		},
+		{
+			"name": "National Cancer Institute",
+			"type": "Sponsor"
+		},
+		{
+			"name": "National Institute of General Medical Sciences",
+			"type": "Sponsor"
+		},
+		{
+			"name": "National Science Foundation",
+			"type": "Sponsor"
+		},
+		{
+			"name": "National Institute of Biomedical Imaging and Bioengineering",
+			"type": "Sponsor"
+		},
+		{
+			"name": "Department of Energy",
+			"type": "Sponsor"
+		},
+		{
+			"name": "National Center for Research Resources",
+			"type": "Sponsor"
+		},
+		{
+			"name": "University of New Mexico Office of the Vice President for Research",
+			"type": "Sponsor"
+		},
+		{
+			"name": "NVIDIA",
+			"type": "Sponsor"
+		}
+	]
 }
