@@ -49,7 +49,7 @@ references:
         affiliation: "Department of Physics and Astronomy, University of New Mexico, Albuquerque, New Mexico, USA"
   title: "A MATLAB-based Instrument Control (MIC) package for fluorescence imaging"
   version: 1.0.0
-  doi: 
+  doi: 10.5281/zenodo.14680987
   date-released: 2025-01-17
   keywords:
     - "MATLAB"
