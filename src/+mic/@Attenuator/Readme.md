@@ -2,7 +2,7 @@
 
 ## Description
 The `mic.Attenuator` class in MATLAB is designed for controlling Liquid Crystal Optical Beam Shutters / Variable Attenuators
-optical attenuators (example: Thorlabs LCC1620A, Liquid Crystal Optical Shutter, 420 - 700 nm ) through a
+optical attenuators (example: Thorlabs LCC1620A, Liquid Crystal Optical Shutter, 420 - 700 nm ) through an
 NI DAQ card, providing precise adjustments to the attenuation level. This class integrates
 seamlessly with MATLAB's Data Acquisition Toolbox and is part of a broader suite of instrument control classes.
 The power meter can be used to callibrate the attenuator.
