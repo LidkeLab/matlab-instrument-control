@@ -120,8 +120,8 @@ classdef MIC_RAMANLaser785 < MIC_LightSource_Abstract
         end
         %Turn off Laser
         function off(obj)
-            obj.setPower(0.000);
-            obj.IsOn=0;
+            obj.setPower(0.1);
+            %obj.IsOn=0;
         end
         
         function calibrate(obj)
