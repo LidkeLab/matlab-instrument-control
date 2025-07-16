@@ -24,6 +24,7 @@ classdef KuriosFilter < mic.abstract
                 s = serialport(SerialPort,115200,Tag=SerialPort);
             else
                 delete(s);
+                s = serialport(SerialPort,115200,Tag=SerialPort);
             end
             
             configureTerminator(s,"CR")
@@ -88,15 +89,16 @@ classdef KuriosFilter < mic.abstract
 
             %get wavelength range
             obj.send("SP?")
-            pause(0.1)
+            %pause(1)
             eval(readline(s)+';');
+            %pause(2)
             eval(readline(s)+';');
             obj.MaxWavelength=WLmax;
             obj.MinWavelength=WLmin;
 
             %get current wavelength
             obj.send("WL?")
-            pause(0.1)
+            %pause(0.1)
             eval(readline(s)+';')
             obj.Wavelength = WL;
 
@@ -106,6 +108,7 @@ classdef KuriosFilter < mic.abstract
         function send(obj,Message)
             flush(obj.Serial)
             writeline(obj.Serial,Message)
+            pause(0.1)
         end
 
         function setWavelength(obj,Wavelength)
