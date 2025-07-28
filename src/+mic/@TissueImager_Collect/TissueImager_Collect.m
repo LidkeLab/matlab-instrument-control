@@ -1,4 +1,4 @@
-classdef TissueImager_Collect < MIC_Abstract
+classdef TissueImager_Collect < mic.abstract
 
 properties
 
@@ -24,11 +24,11 @@ methods
         %   Constructs object and initializes all hardware
 
         % Enable autonaming feature of MIC_Abstract
-        obj = obj@MIC_Abstract(~nargout);
+        obj = obj@mic.abstract(~nargout);
 
         % Initialize hardware objects
         %         try
-        obj.Tiss=TissueImager();
+        obj.Tiss=mic.TissueImager();
 
         %Set save directory
         user_name = java.lang.System.getProperty('user.name');
@@ -58,4 +58,20 @@ methods
     end
 
 end
+
+methods (Static)
+    function Success = funcTest()
+        try
+            obj = mic.TissueImager_Collect();
+            disp('TissueImager_Collect initialized successfully.');
+            delete(obj);
+            Success = true;
+        catch ME
+            warning('funcTest failed: %s', ME.message);
+            Success = false;
+        end
+    end
+end
+
+
 end

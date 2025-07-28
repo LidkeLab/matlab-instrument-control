@@ -12,6 +12,8 @@ classdef TissueImager < mic.abstract
         CameraVis;
         IRCamera;
         Flip;
+        LCTF;
+        LED;
     end
 
     methods
@@ -30,6 +32,14 @@ classdef TissueImager < mic.abstract
             fprintf('Initializing Flip Mount\n')
             obj.Flip=mic.FlipMountTTL('Dev1', 'port0/line0');
 
+            % LCTF
+            fprintf('Initializing Liquid Crystal Tunable Filter\n')
+            obj.LCTF=mic.KuriosFilter('COM3');
+
+            % LEDs
+            fprintf('Initializing LEDs\n')
+            obj.LED=mic.lightsource.ThorlabsLED('Dev1','ao1');
+
             obj.gui();
         end
 
@@ -37,21 +47,16 @@ classdef TissueImager < mic.abstract
 
         end
 
-        %function delete(obj)
+        function delete(obj)
+            %try delete(obj.GuiFigure); end
+            try delete(obj.CameraVis); end
+            try delete(obj.IRCamera); end
+            try delete(obj.Flip); end
+            try delete(obj.LCTF); end
+            try delete(obj.LED); end
+            close all force;
+        end
 
-            % superclass delete
-         %   delete@mic.abstract(obj);
-
-            %delete all objects
-          %  delete(obj.GuiFigure);
-           % close all force;
-            %clear;
-            %delete all equipment objects
-            %obj.CameraVis = [];
-            %obj.IRCamera = [];
-            %obj.Flip = [];
-
-        %end
 
 
 
@@ -65,6 +70,12 @@ classdef TissueImager < mic.abstract
 
              [Children.Flip.Attributes,Children.Flip.Data,Children.Flip.Children]=...
                     obj.Flip.exportState();
+
+             [Children.LCTF.Attributes,Children.LCTF.Data,Children.LCTF.Children]=...
+                    obj.LCTF.exportState();
+
+             [Children.LED.Attributes,Children.LED.Data,Children.LED.Children]=...
+                    obj.LED.exportState();
 
              Data=[];
             
