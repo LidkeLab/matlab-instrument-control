@@ -19,7 +19,22 @@ classdef TissueImager < mic.abstract
             % Visible Camera
             fprintf('Initializing Thorcam\n')
             obj.CameraVis=mic.camera.ThorlabsSICamera();
+
+            % IR Camera
+            %fprintf('Initializing IRCam\n')
+            %obj.CameraVis=mic.camera.IMGSourceCamera();
         end
+
+
+        function delete(obj)
+
+            %delete all equipment objects
+            obj.CameraVis = [];
+
+            % superclass delete
+            delete@mic.abstract(obj);
+        end
+
 
         function [Attributes, Data, Children] = exportState(obj)
             % Dummy implementation for testing
