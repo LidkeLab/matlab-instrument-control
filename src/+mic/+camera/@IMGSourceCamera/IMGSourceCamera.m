@@ -273,6 +273,7 @@ classdef IMGSourceCamera <  mic.camera.abstract
         TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
         DefectCorrection;   %   defect correction  for Hamamatsu sCMOS camera
         GuiDialog;
+        AquisitionType = 'capture';
     end
     
     methods
@@ -584,6 +585,10 @@ classdef IMGSourceCamera <  mic.camera.abstract
             % Sets sequence length
                 obj.ReadyForAcq=0;
                 obj.SequenceLength=in;
+        end
+
+        function fireTrigger(obj)
+            trigger(obj.CameraHandle);
         end
         
     end
