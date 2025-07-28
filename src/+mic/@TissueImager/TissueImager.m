@@ -10,37 +10,65 @@ classdef TissueImager < mic.abstract
 
     properties
         CameraVis;
+        IRCamera;
+        Flip;
     end
 
     methods
         function obj = TissueImager()
-            obj = obj@mic.abstract(~nargout);  % Call superclass constructor
+            %obj = obj@mic.abstract(~nargout);  % Call superclass constructor
 
             % Visible Camera
             fprintf('Initializing Thorcam\n')
             obj.CameraVis=mic.camera.ThorlabsSICamera();
 
             % IR Camera
-            %fprintf('Initializing IRCam\n')
-            %obj.CameraVis=mic.camera.IMGSourceCamera();
+            fprintf('Initializing IRCam\n')
+            obj.IRCamera=mic.camera.IMGSourceCamera();
+
+            % Flip Mount
+            fprintf('Initializing Flip Mount\n')
+            obj.Flip=mic.FlipMountTTL('Dev1', 'port0/line0');
+
+            obj.gui();
         end
 
+        function gui(obj)
 
-        function delete(obj)
+        end
 
-            %delete all equipment objects
-            obj.CameraVis = [];
+        %function delete(obj)
 
             % superclass delete
-            delete@mic.abstract(obj);
-        end
+         %   delete@mic.abstract(obj);
+
+            %delete all objects
+          %  delete(obj.GuiFigure);
+           % close all force;
+            %clear;
+            %delete all equipment objects
+            %obj.CameraVis = [];
+            %obj.IRCamera = [];
+            %obj.Flip = [];
+
+        %end
+
+
 
 
         function [Attributes, Data, Children] = exportState(obj)
-            % Dummy implementation for testing
-            Attributes = struct();
-            Data = struct();
-            Children = struct();
+            [Children.CameraVis.Attributes,Children.CameraVis.Data,Children.CameraVis.Children]=...
+                    obj.CameraVis.exportState();
+
+             [Children.IRCamera.Attributes,Children.IRCamera.Data,Children.IRCamera.Children]=...
+                    obj.IRCamera.exportState();
+
+             [Children.Flip.Attributes,Children.Flip.Data,Children.Flip.Children]=...
+                    obj.Flip.exportState();
+
+             Data=[];
+            
+             Attributes=[];
         end
     end
 
