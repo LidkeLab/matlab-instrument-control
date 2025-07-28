@@ -7,6 +7,8 @@ properties
 
     % Other things
     SaveDir='C:\';  % Save Directory
+    BaseFileName = 'Sample1'; % Base file name
+    SaveFileType = 'mat';     % Either 'h5' or 'mat'
 
 end
 
@@ -47,6 +49,52 @@ methods
         close all force;
         clear;
     end
+
+
+    function saveData(obj, Stack)
+        % Set fixed save directory
+        saveDir = 'C:\Users\unmla\Documents\TissueImager\Data';
+
+        % Create folder if it doesn't exist
+        if ~isfolder(saveDir)
+            mkdir(saveDir);
+        end
+
+        % Construct the full filename
+        filename = fullfile(obj.SaveDir, [obj.BaseFileName '.' obj.SaveFileType]);
+
+        % Save based on the selected file type
+        switch lower(obj.SaveFileType)
+            case 'mat'
+                save(filename, 'Stack', '-v7.3');
+            case 'h5'
+                h5create(filename, '/Stack', size(Stack), 'Datatype', class(Stack));
+                h5write(filename, '/Stack', Stack);
+            otherwise
+                warning('Unsupported file type: %s', obj.SaveFileType);
+                return;
+        end
+
+        fprintf('Data saved to: %s\n', filename);
+    end
+
+    function focusThorcam(obj, isOnDuringFocus, focusPower)
+        %setup LEDs and turn them on when focus button is clicked
+        if ~isOnDuringFocus
+            disp('LED not enabled for focus (checkbox off)');
+            return;
+        end
+
+        try
+            obj.LED.setPower(focusPower);  % set power
+            obj.LED.on();                  % turn on
+            disp(['LED turned on at ' num2str(focusPower) '%']);
+        catch ME
+            warning('Could not turn on LED: %s', ME.message);
+        end
+    end
+
+
 
     function [Attributes,Data,Children] = exportState(obj)
         % exportState Exports current state of all hardware objects
