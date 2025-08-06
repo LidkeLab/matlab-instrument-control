@@ -21,7 +21,7 @@ configureTerminator(obj.TriggerscopeSerialPortDev, obj.Terminator);
 
 % Flush the input and output buffers (maybe not necessary but always seems
 % to be a good idea).
-flush(obj.TriggerscopeSerialPortDe;
+flush(obj.TriggerscopeSerialPortDev);
 
 % Update obj.ActivityMessage and obj.IsConnected (we'll assume the
 % connection was successful).

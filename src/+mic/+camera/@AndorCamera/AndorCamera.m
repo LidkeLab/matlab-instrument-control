@@ -111,9 +111,9 @@ classdef AndorCamera < mic.camera.abstract
     properties 
         Binning=[1 1];              %   [binX binY]
         Data=[];                    %   last acquired data
-        ExpTime_Focus=0;            %   focus mode exposure time
-        ExpTime_Capture=0;          %   capture mode exposure time
-        ExpTime_Sequence=0;         %   sequence mode expsoure time
+        ExpTime_Focus=0.1;            %   focus mode exposure time
+        ExpTime_Capture=0.1;          %   capture mode exposure time
+        ExpTime_Sequence=0.1;         %   sequence mode expsoure time
         ROI;                        %   [Xstart Xend Ystart Yend]
         SequenceLength=1;           %   Kinetic Series length
         SequenceCycleTime;          %   Kinetic Series cycle time (1/frame rate)
