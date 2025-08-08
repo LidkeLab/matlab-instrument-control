@@ -379,6 +379,7 @@ classdef DCAM4Camera < mic.camera.abstract
                 case 'capture'
                     Data = obj.getlastimage();
                 case 'sequence'
+                    obj.IsRunning = 0;
                     Data = DCAM4CopyFrames(obj.CameraHandle, ...
                         obj.SequenceLength, obj.Timeout);
                     Data = reshape(Data, ...
@@ -416,6 +417,10 @@ classdef DCAM4Camera < mic.camera.abstract
             obj.build_guiDialog(GuiCurSel);
             %obj.gui();
             obj.abort();
+
+
+
+
         end
         
         function setup_acquisition(obj)
@@ -697,7 +702,7 @@ classdef DCAM4Camera < mic.camera.abstract
             obj.AcquisitionType='sequence';
 
             obj.setup_acquisition();
-            CaptureMode = 0;
+            CaptureMode = -1;
             obj.AbortNow=0;
             obj.Abortnow=0;
             obj.IsRunning=1;
@@ -710,8 +715,9 @@ classdef DCAM4Camera < mic.camera.abstract
 
         function out = getlastframebundle(obj,Nframe)
             Camstatus=obj.HtsuGetStatus;
-
-            while strcmp(Camstatus,'Busy')
+            [Frameindex, Framenumber] = DCAM4CapTransferinfo(obj.CameraHandle);
+            %while strcmp(Camstatus,'Busy')
+            while (Framenumber<obj.SequenceLength)&&strcmp(Camstatus,'Busy')
                 if obj.AbortNow
                     obj.abort()
                     obj.AbortNow=0;
@@ -719,20 +725,23 @@ classdef DCAM4Camera < mic.camera.abstract
                     obj.Abortnow=1;
                     break
                 end
-
+                
                 out = getoneframe(obj);
                 obj.CameraFrameIndex=obj.CameraFrameIndex+1;
                 obj.Data(:,:,obj.CameraFrameIndex)=out;
                 Camstatus=obj.HtsuGetStatus;
-                
+                [Frameindex, Framenumber] = DCAM4CapTransferinfo(obj.CameraHandle);
                 if mod(obj.CameraFrameIndex,Nframe)==0
                     break;
                 end
             end
-            if ~strcmp(Camstatus,'Busy')
+            %if ~strcmp(Camstatus,'Busy')
+            if (Framenumber>=obj.SequenceLength)||(~strcmp(Camstatus,'Busy'))
                 %obj.abort;
+                DCAM4StopCapture(obj.CameraHandle);
                 obj.IsRunning = 0;
             end
+            obj.CameraFrameIndex
             out = obj.Data(:,:,obj.CameraFrameIndex-Nframe+1:obj.CameraFrameIndex);
             out = permute(out,[2,3,1]); % [y,x_scan,wave]
         end
