@@ -81,8 +81,9 @@ classdef abstract < handle
             % rewritten in the workspace and cause many problems. Technically speaking:  
             % Automatically names this object to a top-level workspace variable with a new unused name based on the
             % obects InstrumentName.
-            curVars = evalin('base',sprintf('who(''%s*'');',obj.InstrumentName));
-            varPattern = sprintf('%s%%i',obj.InstrumentName);
+            tInstrumentName = regexprep(obj.InstrumentName,'[\W]+','');
+            curVars = evalin('base',sprintf('who(''%s*'');',tInstrumentName));
+            varPattern = sprintf('%s%%i', tInstrumentName);
             varName = mic.abstract.nextUnusedName(curVars,varPattern);
             assignin('base',varName,obj);
             fprintf('Assigned new %s object as variable "%s"\n',obj.InstrumentName, varName);
@@ -190,8 +191,8 @@ classdef abstract < handle
             if isempty(Data)
                 %h5create(File,['/' Group],1);
             else
-                Data_Names = fieldnames(Data)
-                NData=length(Data_Names)
+                Data_Names = fieldnames(Data);
+                NData=length(Data_Names);
                 
                 for nn=1:NData
                     h5create(File,['/' Group '/' Data_Names{nn}],size(Data.(Data_Names{nn})));

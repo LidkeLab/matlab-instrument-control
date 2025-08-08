@@ -325,11 +325,13 @@ classdef simulated_PowerMeter < mic.powermeter.abstract
                 testMode = true;  % Default to test mode
             end
             
-            fprintf('Creating instance of simulated_PowerMeter...\n');
-            pm = mic.simulated__PowerMeter();  % Create instance
+            disp('Starting funcTest ...');
             Success = true;
             
             try
+                fprintf('Creating instance of simulated_PowerMeter...\n');
+                pm = mic.simulated_PowerMeter();  % Create instance
+
                 fprintf('Connecting to the simulated power meter...\n');
                 pm.connect(testMode);
                 fprintf('Connection successful.\n');
@@ -352,12 +354,15 @@ classdef simulated_PowerMeter < mic.powermeter.abstract
                 fprintf('Shutting down the power meter...\n');
                 pm.Shutdown();
                 fprintf('Shutdown successful.\n');
+            
+                delete(pm);
+                disp('funcTest completed successfully.');
             catch ME
+                fprintf('Caught following error during mic.simulated_PowerMeter.funcTest')
+                disp(ME.identifier);
                 disp(ME.message);
                 Success = false;
             end
-            
-            delete(pm);
         end
         
     end

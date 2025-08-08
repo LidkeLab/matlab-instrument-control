@@ -42,7 +42,9 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	short Err = SBC_Open(input_buf); //opening the device
 	plhs[0] = mxCreateDoubleScalar(Err); //output.
 	if (!Err){ //If errror opening, send back error code. 
-		SBC_Identify(input_buf);
+		SBC_Identify(input_buf, 1);
+		SBC_Identify(input_buf, 2);
+		SBC_Identify(input_buf, 3);
 		SBC_StartPolling(input_buf, 1, 200);
 		SBC_StartPolling(input_buf, 2, 200);
 		SBC_StartPolling(input_buf, 3, 200);

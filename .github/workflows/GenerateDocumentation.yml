@@ -1,0 +1,40 @@
+name: Generate documentation
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ] 
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test:
+    # Use a Linux-based runner for the job
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up MATLAB
+      - name: Setup MATLAB
+        uses: matlab-actions/setup-matlab@v1
+
+      # Step 3: Run the MATLAB test script
+      - name: Generate documentation
+        run: |
+          matlab -batch "genDoc;"
+
+      # Step 4; Commit and push changes
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/+mic/*/Readme.md src/+mic/*/*/Readme.md
+          git commit -a -m "Update Readme.md via GitHub Actions" || echo "No changes to commit"
+          git push

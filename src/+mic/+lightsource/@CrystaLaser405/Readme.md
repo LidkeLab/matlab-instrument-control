@@ -67,6 +67,9 @@ mic.lightsource.abstract.m
 MATLAB software version R2016b or later
 Data Acquisition Toolbox
 MATLAB NI-DAQmx driver installed via the Support Package Installer
+Data Acquisition Toolbox Support Package for National Instruments
+NI-DAQmx Devices: This add-on can be installed from link:
+https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
 
 ### CITATION: Sandeep Pallikkuth, Lidkelab, 2017.
 

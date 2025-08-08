@@ -202,7 +202,7 @@ classdef BiochemValve < mic.abstract
     methods (Static)
         function funcTest(SerialPort)
             
-            % funcTest - Performs a unit test of the BiochemValve controller using the specified SerialPort.
+            % funcTest - Performs a func test of the BiochemValve controller using the specified SerialPort.
             % INPUT: SerialPort (string) - The serial port to connect to the Arduino (e.g., 'COM3' on Windows).
             % This function will:
             % - Create a connection to the specified Arduino port

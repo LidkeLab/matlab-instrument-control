@@ -140,26 +140,35 @@ classdef MPBLaser < mic.lightsource.abstract
                 %back. The port that gives a feedback is the one that this
                 %laser is connected to.
                 s=sprintf('COM%d',ii);
-                Ac = serial(s);
-                Ac.Terminator='CR';
+                %Ac = serial(s);
+                
+
+                %Ac.Terminator='CR';
                 try 
-                    fopen(Ac);
-                    fprintf(Ac,'GETPOWERSETPTLIM 0');
-                    Limits=fscanf(Ac);
+                    Ac = serialport(s,9600);
+                    configureTerminator(Ac,'CR');
+                    %fopen(Ac);
+                    %fprintf(Ac,'GETPOWERSETPTLIM 0');
+                    %Limits=fscanf(Ac);
+                    flush(Ac)
+                    writeline(Ac,'GETPOWERSETPTLIM 0');
+                    Ac.Timeout=1;
+                    Limits = readline(Ac);
                      if ~isempty(Limits)
                          obj.Port=s;
                         break;
                      else
-                         fclose(Ac);
+                         
                          delete(Ac);
                      end
                 catch
-                    fclose(Ac);
-                    delete(Ac);
+                    
                 end
                 
                 
             end
+
+            Ac.Timeout=10;
             obj.SerialObj=Ac;
             obj.WaveLength=647; 
             Limits = sscanf(Limits,'%f');
@@ -200,9 +209,13 @@ classdef MPBLaser < mic.lightsource.abstract
         function Reply=send(obj,Message)
             %This method is being called inside other methods to send a
             %message and reading the feedback of the instrument.
-            fprintf(obj.SerialObj,Message);
-            Reply=fscanf(obj.SerialObj);
-            Reply=Reply(4:end);
+            %fprintf(obj.SerialObj,Message);
+            %Reply=fscanf(obj.SerialObj);
+            %Reply=Reply(4:end);
+            flush(obj.SerialObj)
+            writeline(obj.SerialObj,Message)
+            Reply =  readline(obj.SerialObj);
+
         end
         
         
@@ -254,10 +267,10 @@ classdef MPBLaser < mic.lightsource.abstract
         
         function shutdown(obj)
             %This function is called in the destructor to delete the communication port.
-            Aa=instrfind('port',obj.Port);
-            for ii=1:length(Aa)
-               delete(Aa(ii)); 
-            end
+            %Aa=instrfind('port',obj.Port);
+            obj.off()
+            flush(obj.SerialObj)
+            delete(obj.SerialObj)
         end
         
         function delete(obj)

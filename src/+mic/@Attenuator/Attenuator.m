@@ -23,6 +23,9 @@ classdef Attenuator < mic.abstract
 % - Data Acquisition Toolbox.
 % - MATLAB NI-DAQmx driver installed via the Support Package Installer.
 % - An NI DAQ device.
+% - Data Acquisition Toolbox Support Package for National Instruments
+%   NI-DAQmx Devices: This add-on can be installed from link:
+%   https://www.mathworks.com/matlabcentral/fileexchange/45086-data-acquisition-toolbox-support-package-for-national-instruments-ni-daqmx-devices
 % 
 % ## Class Properties
 % - `Transmission`: The current transmission setting (% of maximum).
@@ -166,11 +169,13 @@ classdef Attenuator < mic.abstract
         
         function setTransmission(obj,Transmission_in)
             % Sets output attenuation in percentage of maximum
-            if Transmission_in >obj.MaxTransmission+0.001 % to introduce a margin of tolerance for comparisons
-               error('The input transmission is too large, setting to %d\n',obj.MaxTransmission); 
+            if Transmission_in > obj.MaxTransmission
+               warning('The input transmission is too large, setting to %f\n',obj.MaxTransmission); 
+               return; % return statement serves to terminate the function early when specific conditions are met
             end
-            if Transmission_in<obj.MinTransmission-0.001
-               error('The input transmission is too small, setting to %d\n',obj.MinTransmission); 
+            if Transmission_in < obj.MinTransmission
+               warning('The input transmission is too small, setting to %f\n',obj.MinTransmission); 
+               return
             end
             if isempty(obj.Input_Voltage)
                error('The suitable calibration file should be loaded. Please call loadCalibration().'); 
@@ -198,6 +203,7 @@ classdef Attenuator < mic.abstract
             end
             obj.Transmission=Transmission_in;
         end
+           
         function State=exportState(obj)
             % Export the object current state
             State.instrumentName=obj.InstrumentName;

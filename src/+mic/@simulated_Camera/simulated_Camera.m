@@ -439,17 +439,25 @@ classdef simulated_Camera < mic.camera.abstract
     
     methods(Static=true)
         function Success = funcTest()
-            disp('Starting unit test...');
-            obj = mic.simulated_Camera();
-            obj.initialize();
-            obj.setup_acquisition();
-            obj.start_focus();
-            pause(1);
-            Success = true; % Assume success for simplicity
-            obj.abort();
-            disp('Unit test completed successfully.');
+            disp('Starting funcTest ...');
+            Success = true;
+            try
+                obj = mic.simulated_Camera();
+                obj.initialize();
+                obj.setup_acquisition();
+                obj.start_focus();
+                pause(1);
+                obj.abort();
+                disp('funcTest completed successfully.');
+            catch ME
+                fprintf('Caught following error during mic.simulated_Camera.funcTest')
+                disp(ME.identifier);
+                disp(ME.message);
+                Success = false;
+            end
         end
     end
+
 end
 % To open GUI, create obj = simulated_Camera() then call obj.gui()
 % To close GUI properly, press Abort -> Exit -> Confirm.

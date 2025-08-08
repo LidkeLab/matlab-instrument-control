@@ -417,11 +417,20 @@ classdef simulated_Stage3D < mic.stage3D.abstract
         function Success = funcTest()
             % Method to test the functionality of the class
             % Here you would typically test each method to ensure they work properly
-            obj = mic.simulated_Stage3D();
-            obj.center();
-            obj.setPosition([1, 2, 3]);
-            Success = true; % Assume success for simplicity
-            delete(obj); % Clean up object
+            disp('Starting funcTest ...');
+            Success = true;
+            try
+                obj = mic.simulated_Stage3D();
+                obj.center();
+                obj.setPosition([1, 2, 3]);
+                delete(obj); % Clean up object
+                disp('funcTest completed successfully.');
+            catch ME
+                fprintf('Caught following error during mic.simulated_Stage3D.funcTest')
+                disp(ME.identifier);
+                disp(ME.message);
+                Success = false;
+            end
         end
     end
 end

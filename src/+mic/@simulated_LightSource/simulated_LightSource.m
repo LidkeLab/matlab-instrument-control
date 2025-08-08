@@ -270,13 +270,23 @@ classdef simulated_LightSource < mic.lightsource.abstract
     
     methods (Static=true)
         function Success = funcTest()
-            obj = mic.simulated_LightSource();
-            fprintf('Starting unit test for %s\n', class(obj));
-            obj.setPower(50);
-            obj.on();
-            obj.off();
-            Success = true; % Assume success for simplicity
-            delete(obj); % Clean up object
+            disp('Starting funcTest ...');
+            Success = true;
+            try
+                obj = mic.simulated_LightSource();
+                fprintf('Starting funcTest for %s\n', class(obj));
+                obj.setPower(50);
+                obj.on();
+                obj.off();
+                delete(obj); % Clean up object
+                disp('funcTest completed successfully.');
+            catch ME
+                fprintf('Caught following error during mic.simulated_LightSource.funcTest')
+                disp(ME.identifier);
+                disp(ME.message);
+                Success = false;
+            end
+
         end
         
     end
