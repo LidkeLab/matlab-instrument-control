@@ -327,7 +327,7 @@ classdef DCAM4Camera < mic.camera.abstract
         FrameRate;
         TriggerMode;        %   trigger mode for Hamamatsu sCMOS camera
         GuiDialog;
-        Timeout = 10000;        % timeout sent to several DCAM functions (milliseconds)
+        Timeout = 100000;        % timeout sent to several DCAM functions (milliseconds)
         %EventMaskString = 'DCAMWAIT_CAPEVENT_CYCLEEND'; % wait event mask used in DCAM functions (see dcamprop.h DCAMWAIT_EVENT)
         Abortnow;
     end
@@ -359,7 +359,7 @@ classdef DCAM4Camera < mic.camera.abstract
         end
         
         function Image = getlastimage(obj)
-            % Return the last image taken by the camera.
+            % Return the last image taken by the camera
             Image = DCAM4CopyLastFrame(obj.CameraHandle, obj.Timeout);
             Image = reshape(Image, obj.ImageSize(1), obj.ImageSize(2));
         end
@@ -443,7 +443,7 @@ classdef DCAM4Camera < mic.camera.abstract
             % readout.
 
             obj.SequenceCycleTime = obj.getProperty(obj.CameraSetting.INTERNAL_FRAME_INTERVAL.idprop);
-            obj.Timeout = 10000+obj.SequenceCycleTime*1e3;
+            obj.Timeout = 100000+obj.SequenceCycleTime*1e3;
             obj.FrameRate = 1/obj.SequenceCycleTime;
             status=obj.HtsuGetStatus;
             if strcmp(status,'Ready')
@@ -752,7 +752,7 @@ classdef DCAM4Camera < mic.camera.abstract
         function out=finishTriggeredCapture(obj,numFrames)
 %             obj.abort();
             imgall = DCAM4CopyFrames(obj.CameraHandle, numFrames, ...
-                obj.SequenceCycleTime*numFrames);
+                obj.Timeout);
             out=reshape(imgall,obj.ImageSize(1),obj.ImageSize(2),numFrames);
             
             % set Trigger mode back to Internal so data can be captured
