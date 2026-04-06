@@ -31,10 +31,10 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	char * input_buf = mxArrayToString(prhs[0]);
 	int Channel = (int)mxGetScalar(prhs[1]);
 	
-	plhs[0] = mxCreateDoubleScalar(0);
+	SBC_RequestStatusBits(input_buf, Channel);
+	Sleep(100);
 	DWORD Out = SBC_GetStatusBits(input_buf, Channel);
-	DWORD p = (DWORD)mxGetScalar(plhs[0]);
-	p = Out;
+	plhs[0] = mxCreateDoubleScalar((double)Out);
 
 	return;
 }
