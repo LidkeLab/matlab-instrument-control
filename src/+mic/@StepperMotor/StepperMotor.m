@@ -92,8 +92,18 @@ classdef StepperMotor < mic.abstract
             Kinesis_SBC_MoveJog(obj.SerialN,Channel,Direction);
         end
         function moveToPosition(obj,Channel,Pos)
-           %move to the given position. Note that the range of position is [-4 mm, 4 mm]. 
-           Kinesis_SBC_MoveToPosition(obj.SerialN,Channel,Pos); 
+           %move to the given position. Note that the range of position is [-4 mm, 4 mm].
+           Kinesis_SBC_MoveToPosition(obj.SerialN,Channel,Pos);
+        end
+        function stopImmediate(obj,Channel)
+            %immediately stop the given channel.
+            Kinesis_SBC_StopImmediate(obj.SerialN,Channel);
+        end
+        function stopAll(obj)
+            %immediately stop all three channels.
+            Kinesis_SBC_StopImmediate(obj.SerialN,1);
+            Kinesis_SBC_StopImmediate(obj.SerialN,2);
+            Kinesis_SBC_StopImmediate(obj.SerialN,3);
         end
         function setJogStep(obj,Channel,Step)
             %setting the step size that you wish to have when you call
