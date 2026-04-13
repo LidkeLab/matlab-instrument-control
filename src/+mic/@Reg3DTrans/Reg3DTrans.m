@@ -334,7 +334,7 @@ classdef Reg3DTrans < mic.abstract
 %             end            
            % set stage back to initial position
             obj.StageObj.setPosition(Xstart);
-            dipshow(ImageStack_X(10:end-10,10:end-10,:));
+            figure; imagesc(squeeze(ImageStack_X(10:end-10,10:end-10,1))); axis image; title('X calibration');
             % find shifts for Change in X
             svec_X=zeros(N,2);
             refim=squeeze(ImageStack_X(10:end-10,10:end-10,1));
@@ -345,7 +345,7 @@ classdef Reg3DTrans < mic.abstract
             
             % set stage back to initial position
             obj.StageObj.setPosition(Xstart);
-            dipshow(ImageStack_Y(10:end-10,10:end-10,:));
+            figure; imagesc(squeeze(ImageStack_Y(10:end-10,10:end-10,1))); axis image; title('Y calibration');
             % find shifts for Change in Y
             svec_Y=zeros(N,2);
             refim=squeeze(ImageStack_Y(10:end-10,10:end-10,1));
@@ -425,7 +425,7 @@ classdef Reg3DTrans < mic.abstract
 %             obj.LampObj.on;
 %             
             obj.Image_Reference=obj.capture;
-            dipshow(obj.Image_Reference);
+            figure; imagesc(obj.Image_Reference); axis image; title('Reference');
             % turn lamp off
 %             obj.LampObj.off;
             
@@ -502,11 +502,11 @@ classdef Reg3DTrans < mic.abstract
                 warning('mic.Reg3DTrans:showoverlay:NoCur','No current image saved, not making overlay');
                 return
             end
-            a=stretch(obj.Image_Reference(10:end-10,10:end-10));
-            b=stretch(obj.Image_Current(10:end-10,10:end-10));
-            c=joinchannels('RGB',a,b);
-            h=dipshow(c);
-            diptruesize(h,'tight');
+            imn = @(x) (x - min(x(:))) / max(1, max(x(:)) - min(x(:)));
+            a = imn(double(obj.Image_Reference(10:end-10,10:end-10)));
+            b = imn(double(obj.Image_Current(10:end-10,10:end-10)));
+            overlay = cat(3, a, b, zeros(size(a)));
+            figure; imshow(overlay, 'Border', 'tight'); title('Overlay');
         end
         
         function getcurrentimage(obj)
@@ -531,7 +531,7 @@ classdef Reg3DTrans < mic.abstract
 %             obj.LampObj.on;
             obj.Image_Current=obj.capture;
             im=obj.Image_Current;
-            dipshow(im);
+            figure; imagesc(im); axis image; title('Current');
 %             % turn lamp off
 %             obj.LampObj.off;
 %             
@@ -737,9 +737,10 @@ classdef Reg3DTrans < mic.abstract
                 zs=obj.Image_Current(...
                     obj.XYBorderPx:end-obj.XYBorderPx, ...
                     obj.XYBorderPx:end-obj.XYBorderPx);
-                o=joinchannels('RGB',stretch(im),stretch(zs));
-                h=dipshow(1234,o);
-                diptruesize(h,'tight');
+                % Display alignment overlay (red=reference, green=current)
+                imn = @(x) (x - min(x(:))) / max(1, max(x(:)) - min(x(:)));
+                overlay = cat(3, imn(im), imn(zs), zeros(size(im)));
+                figure(1234); imshow(overlay, 'Border', 'tight');
                 drawnow;
                 
                 % Increment the iteration counter.
