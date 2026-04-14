@@ -319,7 +319,7 @@ classdef abstract < mic.abstract
             end
 
             %scaling
-            mx=double(max(max(im)));
+            mx=double(max(max(im)))+1;
             mn=double(min(min(im)));
             if obj.AutoScale
                 %im = single(im-mn)/(mx-mn);

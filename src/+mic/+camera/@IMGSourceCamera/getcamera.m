@@ -1,5 +1,8 @@
 function getcamera(obj)
 H=imaqhwinfo;
+if isempty(H.InstalledAdaptors)
+    error('No image acquisition adaptors found. Please install hardware support packages.');
+end
 ADname=H.InstalledAdaptors{1};
 info=imaqhwinfo(ADname);
 
