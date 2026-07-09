@@ -31,7 +31,11 @@ jobs:
           matlab -batch "genDoc;"
 
       # Step 4; Commit and push changes
+      # Only on push to main: pull_request runs check out a detached HEAD,
+      # so git push always fails there. On PRs this workflow just validates
+      # that genDoc runs.
       - name: Commit and push changes
+        if: github.event_name == 'push'
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
