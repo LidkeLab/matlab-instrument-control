@@ -129,8 +129,23 @@ classdef KCubePiezoStrainGauge < mic.linearstage.abstract
                 %Open Device (This may crash)
                 obj.openDevices();
 
-                %Read the maximum travel from the device (100 nm steps -> um)
-                Travel=Kinesis_KPC_GetMaximumTravel(obj.SerialNoKPC101);
+                %Set closed loop mode (position commands are ignored in open loop)
+                Kinesis_KPC_SetPositionControlMode(obj.SerialNoKPC101,2);
+
+                %Zero the Strain Gauge (takes ~30 s)
+                obj.zeroStrainGauge();
+
+                %Read the maximum travel from the device (100 nm steps -> um).
+                %The underlying request is asynchronous and the device may
+                %not report the travel immediately, so retry a few times.
+                Travel=0;
+                for nn=1:5
+                    Travel=Kinesis_KPC_GetMaximumTravel(obj.SerialNoKPC101);
+                    if Travel>0
+                        break
+                    end
+                    pause(0.5);
+                end
                 if Travel>0
                     obj.MaxPosition=Travel*0.1;
                 else
@@ -138,12 +153,6 @@ classdef KCubePiezoStrainGauge < mic.linearstage.abstract
                         'maximum travel, keeping default MaxPosition=%g um. ', ...
                         'Check actuator settings in Kinesis.'],obj.MaxPosition)
                 end
-
-                %Set closed loop mode (position commands are ignored in open loop)
-                Kinesis_KPC_SetPositionControlMode(obj.SerialNoKPC101,2);
-
-                %Zero the Strain Gauge (takes ~30 s)
-                obj.zeroStrainGauge();
 
             catch ME
                 obj.closeDevices();
