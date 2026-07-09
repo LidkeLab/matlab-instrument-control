@@ -114,13 +114,19 @@ classdef KCubePiezoStrainGauge < mic.linearstage.abstract
     end
 
     methods
-        function obj=KCubePiezoStrainGauge(SerialNoKPC101,AxisLabel)
+        function obj=KCubePiezoStrainGauge(SerialNoKPC101,AxisLabel,MaxPosition)
             % Creates a KCubePiezoStrainGauge object and centers the stage.
+            % MaxPosition (optional) is the actuator travel in microns;
+            % it must match the Maximum Travel configured in Kinesis.
             % Example: PZ=mic.linearstage.KCubePiezoStrainGauge('113251934','Z')
+            % Example: PZ=mic.linearstage.KCubePiezoStrainGauge('113251934','Z',20)
             obj=obj@mic.linearstage.abstract(~nargout);
 
             if nargin<2
                 error('mic.linearstage.KCubePiezoStrainGauge::SerialNoKPC101,AxisLabel must be defined')
+            end
+            if nargin>2
+                obj.MaxPosition=MaxPosition;
             end
 
             obj.SerialNoKPC101=SerialNoKPC101;
@@ -135,23 +141,17 @@ classdef KCubePiezoStrainGauge < mic.linearstage.abstract
                 %Zero the Strain Gauge (takes ~30 s)
                 obj.zeroStrainGauge();
 
-                %Read the maximum travel from the device (100 nm steps -> um).
-                %The underlying request is asynchronous and the device may
-                %not report the travel immediately, so retry a few times.
-                Travel=0;
-                for nn=1:5
-                    Travel=Kinesis_KPC_GetMaximumTravel(obj.SerialNoKPC101);
-                    if Travel>0
-                        break
-                    end
-                    pause(0.5);
-                end
-                if Travel>0
+                %Best-effort read of the maximum travel from the device
+                %(100 nm steps -> um).  KPC101 firmware has been observed
+                %to return 0 here even after zeroing, in which case
+                %MaxPosition keeps its constructor/default value, which
+                %must match the Maximum Travel configured in Kinesis.
+                Travel=Kinesis_KPC_GetMaximumTravel(obj.SerialNoKPC101);
+                if Travel>0&&abs(Travel*0.1-obj.MaxPosition)>0.01
+                    warning(['KCubePiezoStrainGauge:: Device reports max ', ...
+                        'travel %g um but MaxPosition is %g um; using the ', ...
+                        'device value.'],Travel*0.1,obj.MaxPosition)
                     obj.MaxPosition=Travel*0.1;
-                else
-                    warning(['KCubePiezoStrainGauge:: Device reported zero ', ...
-                        'maximum travel, keeping default MaxPosition=%g um. ', ...
-                        'Check actuator settings in Kinesis.'],obj.MaxPosition)
                 end
 
             catch ME
