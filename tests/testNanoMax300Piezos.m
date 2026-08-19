@@ -4,7 +4,7 @@
 % of piezo controllers / strain gauge readers:
 %
 %   X: TPZ001 ('81843229')  + TSG001 ('84842506')  -> mic.linearstage.TCubePiezo
-%   Y: KPZ101 ('29501303')  + KSG101 ('59000140')  -> mic.linearstage.KCubePiezo
+%   Y: KPZ101 ('29501305')  + KSG101 ('59000580')  -> mic.linearstage.KCubePiezo
 %   Z: KPC101 ('113251934') (integrated controller + strain gauge)
 %                                                  -> mic.linearstage.KCubePiezoStrainGauge
 %
@@ -24,8 +24,8 @@
 %% Setup: serial numbers and test parameters
 SerialNoTPZ001 = '81843229';   % X piezo controller (TCube)
 SerialNoTSG001 = '84842506';   % X strain gauge reader (TCube)
-SerialNoKPZ101 = '29501303';   % Y piezo controller (KCube)
-SerialNoKSG101 = '59000140';   % Y strain gauge reader (KCube)
+SerialNoKPZ101 = '29501305';   % Y piezo controller (KCube)
+SerialNoKSG101 = '59000580';   % Y strain gauge reader (KCube)
 SerialNoKPC101 = '113251934';  % Z piezo + strain gauge (single KCube)
 
 Tolerance = 0.25;              % max |commanded - measured| allowed (um)
